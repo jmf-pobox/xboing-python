@@ -1,3 +1,0 @@
-pygame>=2.1.0
-pytest>=7.0.0
-# numpy is not required with the new audio implementation
