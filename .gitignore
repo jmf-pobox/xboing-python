@@ -31,3 +31,6 @@ htmlcov/
 
 # Logs
 *.log
+
+.ruff_cache/
+.mypy_cache/
