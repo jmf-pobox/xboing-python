@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xboing"
+version = "2.0.0"
+description = "XBoing - A classic breakout-style game modernized with Python and SDL2"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "X Consortium License"}
+authors = [
+    {name = "Original: Justin C. Kibell"},
+    {name = "Python port: XBoing Team"}
+]
+
+[project.urls]
+"Homepage" = "https://github.com/jmf-pobox/xboing-python"
+"Bug Tracker" = "https://github.com/jmf-pobox/xboing-python/issues"
+
+[tool.setuptools]
+packages = ["src"]
+
+[project.scripts]
+xboing = "src.main:main"
