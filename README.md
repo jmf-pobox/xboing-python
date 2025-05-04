@@ -123,6 +123,17 @@ Contributions are welcome! Areas that need work:
 5. Additional sound effects
 6. Level editor
 
+### Testing & Quality
+
+- **Unit tests** are in `tests/unit/` and run by default (see `pyproject.toml` and `pytest.ini`).
+- **Integration tests** are in `tests/integration/` and can be run manually with `pytest tests/integration`.
+- The audio system is fully unit tested, supports only `.wav` files, and uses a thread-safe, cached audio player.
+- The lives display is fixed-width, always shows 3 slots, and invisible balls are on the left (matching the original game). This is also fully unit tested.
+- Unused or legacy code (e.g., background pattern generator) has been removed for clarity and maintainability.
+- Logging is used throughout for warnings and errors (no print statements in production code).
+- Type hints and docstrings are used for clarity and static analysis.
+- Caching is used where appropriate for performance (audio, lives display, etc.).
+
 ## License
 
 This project is licensed under the same terms as the original XBoing - see the LICENSE file for details.

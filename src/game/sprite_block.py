@@ -149,7 +149,7 @@ class SpriteBlock:
         print(f"\nLoading block images from {blocks_dir}")
 
         # Load regular block images
-        for block_type, block_info in cls.BLOCK_IMAGES.items():
+        for _, block_info in cls.BLOCK_IMAGES.items():
             # Unpack the image file from block info (now a 3-tuple)
             image_file = block_info[0]
 
@@ -171,7 +171,7 @@ class SpriteBlock:
                 failed_count += 1
 
         # Load animation frames
-        for block_type, frames in cls.ANIMATION_FRAMES.items():
+        for _, frames in cls.ANIMATION_FRAMES.items():
             if isinstance(frames, list):
                 for frame in frames:
                     image_path = os.path.join(blocks_dir, frame)
@@ -786,7 +786,7 @@ class SpriteBlockManager:
         ball_radius = ball.radius
 
         # Check each block
-        for i, block in enumerate(self.blocks[:]):
+        for _, block in enumerate(self.blocks[:]):
             # Check collision with the block
             if block.rect.colliderect(ball_rect):
                 # Calculate collision normal using the block's edges

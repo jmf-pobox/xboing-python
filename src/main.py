@@ -8,11 +8,9 @@ engine and runs the main game loop.
 
 import logging
 import os
-import sys
 import time
 
 import pygame
-
 from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window

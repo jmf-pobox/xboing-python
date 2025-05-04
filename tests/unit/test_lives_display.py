@@ -1,7 +1,9 @@
-import pytest
-from unittest import mock
-from utils.lives_display import LivesDisplay
 import logging
+from unittest import mock
+
+import pytest
+from utils.lives_display import LivesDisplay
+
 
 @pytest.fixture(autouse=True)
 def patch_pygame(monkeypatch):

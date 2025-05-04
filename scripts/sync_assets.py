@@ -14,17 +14,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Add project root directory to Python path (parent of scripts directory)
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
-
-# Now we can import from src
 from utils.asset_paths import (
     ASSETS_DIR,
     get_backgrounds_dir,
     get_blocks_dir,
     get_sounds_dir,
 )
+
+# Add project root directory to Python path (parent of scripts directory)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
 
 # Define paths
 # Original XBoing directory is one level up from the Python port directory

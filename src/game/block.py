@@ -420,7 +420,7 @@ class BlockManager:
         ball_radius = ball.radius
 
         # Check each block
-        for i, block in enumerate(self.blocks[:]):
+        for _, block in enumerate(self.blocks[:]):
             # Check collision with the block
             if block.rect.colliderect(ball_rect):
                 # Calculate collision normal using the block's edges

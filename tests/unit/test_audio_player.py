@@ -1,8 +1,9 @@
-import os
 import threading
-import pytest
 from unittest import mock
+
+import pytest
 from utils.audio_player import DirectAudioPlayer
+
 
 @pytest.fixture(autouse=True)
 def patch_pygame_mixer(monkeypatch):

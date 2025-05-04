@@ -5,8 +5,8 @@ This module provides a class for displaying the number of remaining lives
 using the ball images, reproducing the original XBoing UI.
 """
 
-import os
 import logging
+import os
 
 import pygame
 

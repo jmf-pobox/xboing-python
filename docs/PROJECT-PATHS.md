@@ -84,3 +84,13 @@ This structure follows modern Python project organization principles while addre
    - Follows Python naming conventions
 
 This structure facilitates incremental development, allowing individual components to be implemented and tested in isolation while maintaining a clear path for the overall migration.
+
+## Discrepancies with Recommended Structure
+
+- The `src/ui/` directory does not exist; UI-related code is in `src/utils/`.
+- The `src/game/` directory contains files with different names than recommended (e.g., `sprite_block.py`, `level_manager.py`, `block.py` instead of `blocks.py`, `levels.py`).
+- The `assets/levels/` directory is at the project root, not under `src/assets/levels/`.
+- No `legacy/` directory is present for the original C codebase.
+- No `tools/` directory; migration and asset scripts are in `scripts/`.
+- The `tests/` directory is organized into `unit/` and `integration/` subdirectories, rather than a flat structure.
+- Additional development and tooling directories/files are present (e.g., `.venv/`, `.mypy_cache/`, `.ruff_cache/`, `.vscode/`), which are not shown in the recommended structure but are standard for modern Python projects.

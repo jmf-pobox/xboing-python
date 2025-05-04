@@ -7,12 +7,12 @@ and verifies that the LevelManager correctly parses them.
 """
 
 import os
-import sys
-import pytest
-import pygame
 
+import pygame
+import pytest
 from game.level_manager import LevelManager
 from game.sprite_block import SpriteBlockManager
+
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_pygame():
