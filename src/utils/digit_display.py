@@ -6,8 +6,10 @@ LED-style digit sprites from the original XBoing game.
 """
 
 import os
+
 import pygame
-from src.utils.asset_paths import get_asset_path
+
+from utils.asset_paths import get_asset_path
 
 
 def get_digits_dir():

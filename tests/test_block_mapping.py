@@ -12,9 +12,9 @@ import pygame
 # Add the src directory to the path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.game.level_manager import LevelManager
-from src.game.sprite_block import SpriteBlock, SpriteBlockManager
-from src.utils.asset_paths import get_levels_dir
+from game.level_manager import LevelManager
+from game.sprite_block import SpriteBlock, SpriteBlockManager
+from utils.asset_paths import get_levels_dir
 
 
 def main():

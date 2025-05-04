@@ -9,8 +9,7 @@ import os
 import random
 
 import pygame
-
-from src.utils.asset_paths import get_blocks_dir
+from utils.asset_paths import get_blocks_dir
 
 
 class SpriteBlock:
@@ -378,7 +377,7 @@ class SpriteBlock:
                 self.is_hit = False
 
         # Update animations for special blocks
-        if self.animation_frames and not (
+        if self.animation_frames and isinstance(self.animation_frames, list) and not (
             self.type == self.TYPE_COUNTER
             and hasattr(self, "counter_value")
             and self.counter_value == 0

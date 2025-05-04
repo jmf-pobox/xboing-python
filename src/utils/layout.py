@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import pygame
 
-from src.utils.asset_paths import get_backgrounds_dir
+from utils.asset_paths import get_backgrounds_dir
 
 
 @dataclass

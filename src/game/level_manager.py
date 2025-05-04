@@ -7,8 +7,9 @@ It interfaces with the SpriteBlockManager to create the appropriate block layout
 
 import os
 
-from src.game.sprite_block import SpriteBlock
-from src.utils.asset_paths import get_levels_dir
+from utils.asset_paths import get_levels_dir
+
+from game.sprite_block import SpriteBlock
 
 
 class LevelManager:

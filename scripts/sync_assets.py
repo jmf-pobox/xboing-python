@@ -19,7 +19,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
 # Now we can import from src
-from src.utils.asset_paths import (
+from utils.asset_paths import (
     ASSETS_DIR,
     get_backgrounds_dir,
     get_blocks_dir,

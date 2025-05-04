@@ -5,7 +5,7 @@ Test the asset path utilities to ensure they correctly locate game assets.
 
 import os
 
-from src.utils.asset_paths import (
+from utils.asset_paths import (
     ASSETS_DIR,  # Use the constant instead of a function
     get_backgrounds_dir,
     get_blocks_dir,

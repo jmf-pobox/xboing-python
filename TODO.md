@@ -1,0 +1,9 @@
+- [x] Add debug feature: Pressing X key during gameplay blows up all blocks and advances to the next level.
+- [ ] Refactor SpriteBlock animation system to ensure type safety between list and dict animation_frames (already patched, but consider a more robust design).
+- [ ] Fix test suite import errors (pygame and src import issues).
+- [ ] Add `pillow` to `[tool.hatch.envs.default.dependencies]` in `pyproject.toml` for dev/scripts use.
+- [ ] Recreate the dev environment using Hatch (`hatch shell` or `hatch env create`).
+- [ ] Ensure VS Code is using the Hatch-managed environment as its Python interpreter.
+- [ ] Remove any unused direct dependencies from `pyproject.toml` if found.
+- [ ] (Optional) Use `pip-tools` to generate a `requirements.txt` for runtime dependencies from `pyproject.toml`.
+- [ ] Use `pyproject.toml` as the single source of truth for both runtime and dev dependencies. 

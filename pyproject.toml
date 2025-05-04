@@ -35,7 +35,7 @@ classifiers = [
 "Bug Tracker" = "https://github.com/jmf-pobox/xboing-python/issues"
 
 [project.scripts]
-xboing = "src.main:main"
+xboing = "main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
@@ -63,7 +63,10 @@ dependencies = [
     "mypy",
     "ruff",
     "black",
+    # Dev tools
+    "pillow",
 ]
+path = ".venv"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests/}"

@@ -1,0 +1,7 @@
+{
+    "typeCheckingMode": "basic",
+    "pythonVersion": "3.13",
+    "include": ["src", "tests", "scripts"],
+    "exclude": ["**/node_modules", "**/__pycache__"],
+    "extraPaths": ["src", ".venv/lib/python3.13/site-packages"]
+  }

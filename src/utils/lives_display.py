@@ -6,8 +6,10 @@ using the ball images, reproducing the original XBoing UI.
 """
 
 import os
+
 import pygame
-from src.utils.asset_paths import get_balls_dir
+
+from utils.asset_paths import get_balls_dir
 
 
 class LivesDisplay:

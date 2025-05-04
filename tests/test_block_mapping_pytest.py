@@ -5,9 +5,8 @@ Test the mapping between level file characters and block types.
 
 import pygame
 import pytest
-
-from src.game.level_manager import LevelManager
-from src.game.sprite_block import SpriteBlock, SpriteBlockManager
+from game.level_manager import LevelManager
+from game.sprite_block import SpriteBlock, SpriteBlockManager
 
 
 @pytest.fixture

@@ -9,8 +9,7 @@ import logging
 import os
 
 import pygame
-
-from src.utils.asset_paths import get_paddles_dir
+from utils.asset_paths import get_paddles_dir
 
 # Setup logging
 logger = logging.getLogger("xboing.paddle")

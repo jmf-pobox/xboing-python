@@ -13,6 +13,20 @@ import time
 
 import pygame
 
+from engine.graphics import Renderer
+from engine.input import InputManager
+from engine.window import Window
+from game.ball import Ball
+from game.collision import CollisionSystem
+from game.level_manager import LevelManager
+from game.paddle import Paddle
+from game.sprite_block import SpriteBlock, SpriteBlockManager
+from utils.asset_loader import create_font
+from utils.asset_paths import get_sounds_dir
+from utils.digit_display import DigitDisplay
+from utils.layout import GameLayout
+from utils.lives_display import LivesDisplay
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
@@ -20,23 +34,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("xboing")
-
-# Add the src directory to the path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from src.engine.graphics import Renderer
-from src.engine.input import InputManager
-from src.engine.window import Window
-from src.game.ball import Ball
-from src.game.collision import CollisionSystem
-from src.game.level_manager import LevelManager
-from src.game.paddle import Paddle
-from src.game.sprite_block import SpriteBlock, SpriteBlockManager
-from src.utils.asset_loader import create_font
-from src.utils.asset_paths import get_sounds_dir
-from src.utils.layout import GameLayout
-from src.utils.digit_display import DigitDisplay
-from src.utils.lives_display import LivesDisplay
 
 # Game constants - matching the original XBoing dimensions
 PLAY_WIDTH = 495  # Original game's play area width
@@ -501,6 +498,13 @@ def main():
             level_complete = True
             # Play level complete sound
             play_sound("applause")
+
+        # === DEBUG: Blow up all blocks and advance level with X key ===
+        if input_manager.is_key_down(pygame.K_x) and not game_over and not level_complete:
+            block_manager.blocks.clear()
+            level_complete = True
+            play_sound("bomb")
+        # === END DEBUG ===
 
         # Clear the screen and draw window layout
         renderer.clear(bg_color)
