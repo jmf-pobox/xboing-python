@@ -71,3 +71,13 @@ def get_backgrounds_dir():
 def get_paddles_dir():
     """Get the path to the paddle graphics directory."""
     return get_asset_path("images/paddle", create_dirs=True)
+
+
+def get_digits_dir():
+    """Get the path to the digit images directory."""
+    return get_asset_path("images/digits", create_dirs=True)
+
+
+def get_balls_dir():
+    """Get the path to the ball images directory."""
+    return get_asset_path("images/balls", create_dirs=True)

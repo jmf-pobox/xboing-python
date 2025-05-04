@@ -12,7 +12,7 @@ class Window:
     """Window management for the game, abstracting pygame's display system."""
 
     def __init__(
-        self, width, height, title="XBoing", fullscreen=False, resizable=False
+        self, width, height, title="- XBoing II -", fullscreen=False, resizable=False
     ):
         """
         Initialize the game window.

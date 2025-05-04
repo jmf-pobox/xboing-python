@@ -35,6 +35,8 @@ from src.game.sprite_block import SpriteBlock, SpriteBlockManager
 from src.utils.asset_loader import create_font
 from src.utils.asset_paths import get_sounds_dir
 from src.utils.layout import GameLayout
+from src.utils.digit_display import DigitDisplay
+from src.utils.lives_display import LivesDisplay
 
 # Game constants - matching the original XBoing dimensions
 PLAY_WIDTH = 495  # Original game's play area width
@@ -55,7 +57,7 @@ MAX_BALLS = 3
 BLOCK_WIDTH = 40  # Original block width
 BLOCK_HEIGHT = 20  # Original block height
 BLOCK_MARGIN = 7  # Original spacing (SPACE constant)
-GAME_TITLE = "XBoing"
+GAME_TITLE = "- XBoing II -"
 
 
 def main():
@@ -153,6 +155,10 @@ def main():
     # Create fonts
     font = create_font(None, 24)
     small_font = create_font(None, 18)
+    
+    # Create UI display objects
+    digit_display = DigitDisplay()
+    lives_display = LivesDisplay()
 
     # Game state variables
     lives = 3
@@ -243,23 +249,34 @@ def main():
                 font,
                 (255, 50, 50),
                 play_rect.centerx,
-                play_rect.centery - 30,
+                play_rect.centery - 60,
                 centered=True,
             )
+            
+            # Draw "FINAL SCORE" text
             renderer.draw_text(
-                f"Final Score: {score}",
-                font,
+                "FINAL SCORE",
+                small_font,
                 (255, 255, 255),
                 play_rect.centerx,
-                play_rect.centery + 10,
+                play_rect.centery - 20,
                 centered=True,
             )
+            
+            # Render final score with LED digits
+            score_display = digit_display.render_number(score, spacing=2, scale=1.0)
+            
+            # Center the score in the play area
+            score_x = play_rect.centerx - (score_display.get_width() // 2)
+            score_y = play_rect.centery + 10
+            window.surface.blit(score_display, (score_x, score_y))
+            
             renderer.draw_text(
                 "Press R to restart",
                 small_font,
                 (200, 200, 200),
                 play_rect.centerx,
-                play_rect.centery + 50,
+                play_rect.centery + 70,
                 centered=True,
             )
 
@@ -521,63 +538,149 @@ def main():
             ),
         )  # Right
 
-        # Draw UI elements in their respective windows
+        # Get UI rectangles for drawing elements
         score_rect = layout.get_score_rect()
         level_rect = layout.get_level_rect()
         message_rect = layout.get_message_rect()
-
-        # Score area
-        renderer.draw_text(
-            f"Lives: {lives}",
-            font,
-            (255, 255, 255),
-            score_rect.x + 20,
-            score_rect.y + 15,
-        )
-        renderer.draw_text(
-            f"Score: {score}",
-            font,
-            (255, 255, 255),
-            score_rect.x + score_rect.width - 80,
-            score_rect.y + 15,
-        )
-
-        # Level info
+        
+        # Define the UI layout based on the original XBoing-C.png screenshot
+        # Element ordering in top bar (from right to left):
+        # 1. Level (LED digits) at far right
+        # 2. Lives (ball images) to the left of level
+        # 3. Score (LED digits) at left
+        # 4. Level name ("Genesis") in bottom left
+        # 5. Timer in bottom right with normal yellow font
+        
+        # Get the level info and render displays
         level_info = level_manager.get_level_info()
+        level_num = level_info['level_num']
+        level_title = level_info['title']
+        
+        # Simple approach - render the numbers directly
+        score_display = digit_display.render_number(score, spacing=2, scale=1.0)
+        level_display = digit_display.render_number(level_num, spacing=2, scale=1.0)
+        
+        # Render lives using ball images
+        lives_surf = lives_display.render(lives, spacing=10, scale=1.0)
+        
+        # Calculate vertical position - center in top bar
+        top_bar_y = score_rect.y + (score_rect.height - score_display.get_height()) // 2
+        
+        # ********* SIMPLER DIRECT APPROACH ***********
+        # We'll directly set hard-coded positions to match original
+        
+        # From the debug log, we have:
+        # Score rect: x=35, y=10, width=224, height=42
+        
+        level_x = 510
+        lives_x = 525 - 100 - 60 
+        score_x = 220
+        
+        # Create debug log file
+        debug_log = open("/tmp/xboing_ui_debug.log", "w")
+        
+        # Log detailed UI information
+        debug_log.write("=== XBOING UI DEBUG LOG ===\n\n")
+        
+        # Log window dimensions
+        debug_log.write("WINDOW DIMENSIONS:\n")
+        debug_log.write(f"Window size: {WINDOW_WIDTH}x{WINDOW_HEIGHT}\n")
+        debug_log.write(f"Score rect: x={score_rect.x}, y={score_rect.y}, width={score_rect.width}, height={score_rect.height}\n")
+        debug_log.write(f"Level rect: x={level_rect.x}, y={level_rect.y}, width={level_rect.width}, height={level_rect.height}\n")
+        debug_log.write(f"Play rect: x={play_rect.x}, y={play_rect.y}, width={play_rect.width}, height={play_rect.height}\n\n")
+        
+        # Log element details 
+        debug_log.write("DISPLAY ELEMENTS:\n")
+        debug_log.write(f"Score value: {score}\n")
+        debug_log.write(f"Level value: {level_num}\n")
+        debug_log.write(f"Lives count: {lives}\n\n")
+        
+        # Log element dimensions
+        debug_log.write("ELEMENT DIMENSIONS:\n")
+        debug_log.write(f"Score display: width={score_display.get_width()}, height={score_display.get_height()}\n")
+        debug_log.write(f"Lives display: width={lives_surf.get_width()}, height={lives_surf.get_height()}\n")
+        debug_log.write(f"Level display: width={level_display.get_width()}, height={level_display.get_height()}\n\n")
+        
+        # Log positioning details
+        debug_log.write("ELEMENT POSITIONS:\n")
+        debug_log.write(f"Score position: x={score_x}, y={top_bar_y}\n")
+        debug_log.write(f"Lives position: x={lives_x}, y={top_bar_y}\n")
+        debug_log.write(f"Level position: x={level_x}, y={top_bar_y}\n\n")
+        
+        # Log right-alignment details
+        debug_log.write("RIGHT EDGE POSITIONS:\n")
+        debug_log.write(f"Score right edge: {score_x + score_display.get_width()}\n")
+        debug_log.write(f"Lives right edge: {lives_x + lives_surf.get_width()}\n")
+        debug_log.write(f"Level right edge: {level_x + level_display.get_width()}\n\n")
+        
+        # Close debug log
+        debug_log.close()
+        
+        # Draw all elements in the top bar
+        window.surface.blit(score_display, (score_x, top_bar_y))
+        window.surface.blit(lives_surf, (lives_x, top_bar_y))
+        window.surface.blit(level_display, (level_x, top_bar_y))
+        
+        # Move level title to bottom bar (left-justified in message window)
+        # Get message window rect
+        message_rect = layout.get_message_rect()
         renderer.draw_text(
-            f"Level: {level_info['level_num']}",
-            font,
-            (255, 255, 255),
-            level_rect.centerx,
-            level_rect.y + 15,
-            centered=True,
-        )
-        renderer.draw_text(
-            f"{level_info['title']}",
+            level_title,
             small_font,
-            (200, 200, 255),
-            level_rect.centerx,
-            level_rect.y + 40,
-            centered=True,
+            (0, 255, 0),  # Green color like "Balls Terminated!" in original
+            message_rect.x + 10,  # Left margin
+            message_rect.y + (message_rect.height // 2),  # Vertically centered
+            centered=False,  # Left-aligned
         )
-
-        # Time bonus if active
+        
+        # Get a reference to the time window in the bottom right
+        time_rect = layout.time_window.rect.rect
+        
+        # Time bonus display if active - use regular font with yellow color
         if not waiting_for_launch and not game_over and not level_complete:
-            time_color = (255, 255, 0)  # Yellow by default
             time_remaining = level_manager.get_time_remaining()
-
-            # Make time red if running low
-            if time_remaining < 10:
-                time_color = (255, 50, 50)
-
+            
+            # Format time as MM:SS
+            minutes = time_remaining // 60
+            seconds = time_remaining % 60
+            time_str = f"{minutes:02d}:{seconds:02d}"
+            
+            # Create a large font for the timer
+            timer_font = create_font(None, 32)  # Larger font for timer
+            timer_color = (255, 255, 0)  # Bright yellow
+            
+            # Render and position in the bottom right corner
             renderer.draw_text(
-                f"Time: {time_remaining}",
-                small_font,
-                time_color,
-                level_rect.centerx,
-                level_rect.y + 60,
-                centered=True,
+                time_str,
+                timer_font,
+                timer_color,
+                time_rect.x + (time_rect.width // 2),
+                time_rect.y + (time_rect.height // 2),
+                centered=True,  # Center in the time window
             )
+            
+            # Add a colored background when time is running low
+            if time_remaining < 10:
+                # Create a rectangle behind the timer text
+                time_text_width = timer_font.size(time_str)[0]
+                time_text_height = timer_font.size(time_str)[1]
+                time_bg_rect = pygame.Rect(
+                    time_rect.x + (time_rect.width // 2) - (time_text_width // 2) - 5,
+                    time_rect.y + (time_rect.height // 2) - (time_text_height // 2) - 5,
+                    time_text_width + 10,
+                    time_text_height + 10
+                )
+                pygame.draw.rect(window.surface, (255, 50, 50), time_bg_rect)  # Red background
+                
+                # Re-render text on top of red background
+                renderer.draw_text(
+                    time_str,
+                    timer_font,
+                    timer_color,
+                    time_rect.x + (time_rect.width // 2),
+                    time_rect.y + (time_rect.height // 2),
+                    centered=True,
+                )
 
         # Original XBoing doesn't show these helper messages, so we've removed:
         # - Sound status
