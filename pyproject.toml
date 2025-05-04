@@ -69,7 +69,7 @@ dependencies = [
 path = ".venv"
 
 [tool.hatch.envs.default.scripts]
-test = "pytest {args:tests/}"
+test = "pytest tests/unit"
 cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m src.main"
 # Code quality commands
@@ -89,6 +89,7 @@ fix = [
     "format",
     "lint-fix"
 ]
+count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

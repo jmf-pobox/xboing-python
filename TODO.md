@@ -6,4 +6,5 @@
 - [ ] Ensure VS Code is using the Hatch-managed environment as its Python interpreter.
 - [ ] Remove any unused direct dependencies from `pyproject.toml` if found.
 - [ ] (Optional) Use `pip-tools` to generate a `requirements.txt` for runtime dependencies from `pyproject.toml`.
-- [ ] Use `pyproject.toml` as the single source of truth for both runtime and dev dependencies. 
+- [ ] Use `pyproject.toml` as the single source of truth for both runtime and dev dependencies.
+- [ ] Refactor the audio player module (src/utils/audio_player.py) to remove .au file support, simplify code, and ensure it follows modern Python and project coding standards as per the refactor proposal in docs/AUDIO_PLAYER-refactor.md. 
