@@ -3,18 +3,31 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "xboing"
-version = "2.0.0"
+name = "Xboing"
+version = "0.1.0"
 description = "XBoing - A classic breakout-style game modernized with Python and Pygame"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "X Consortium License"}
 authors = [
     {name = "Original: Justin C. Kibell"},
-    {name = "Python port: XBoing Team"}
+    {name = "Python port: XBoing-py Team"}
 ]
 dependencies = [
     "pygame",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Games/Entertainment :: Arcade",
+    "Intended Audience :: End Users/Desktop",
+    "Environment :: X11 Applications",
 ]
 
 [project.urls]
@@ -22,10 +35,11 @@ dependencies = [
 "Bug Tracker" = "https://github.com/jmf-pobox/xboing-python/issues"
 
 [project.scripts]
-xboing = "xboing.main:main"
+xboing = "src.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+include-package-data = true
 
 [tool.hatch.build]
 exclude = [
@@ -35,17 +49,114 @@ exclude = [
     "docs/",
 ]
 
+# Asset inclusion is handled automatically by include-package-data in wheel target
+
+[tool.hatch.version]
+path = "src/__version__.py"
+
 [tool.hatch.envs.default]
 dependencies = [
+    # Testing
     "pytest",
     "pytest-cov",
+    # Code quality
+    "mypy",
+    "ruff",
+    "black",
 ]
 
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests/}"
 cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m src.main"
+# Code quality commands
+lint = "ruff check src/ tests/"
+lint-fix = "ruff check --fix src/ tests/"
+format = "black src/ tests/ scripts/"
+format-check = "black --check src/ tests/ scripts/"
+typecheck = "mypy src/"
+# Combined quality check
+check = [
+    "format-check",
+    "lint",
+    "typecheck"
+]
+# Combined fixing command
+fix = [
+    "format",
+    "lint-fix"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+
+# Black configuration
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+# Ruff configuration
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "I",    # isort
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E203",  # Whitespace before ':' (black compatibility)
+    "E501",  # Line too long (handled by black)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"] # Unused imports in __init__.py
+
+# MyPy configuration 
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = false
+warn_unused_configs = true
+disallow_untyped_defs = false     # Don't require all functions to have type hints
+disallow_incomplete_defs = false  # Don't require all function params to have type hints
+check_untyped_defs = true         # Check the body of functions without type hints
+disallow_untyped_decorators = false
+ignore_missing_imports = true     # Ignore missing imports 
+
+# Ignore specific modules
+[[tool.mypy.overrides]]
+module = [
+    "pygame.*",
+    "tests.*"
+]
+ignore_errors = true
+
+[tool.hatch.envs.publish]
+dependencies = [
+    "build",
+    "twine",
+]
+
+[tool.hatch.envs.publish.scripts]
+build = "python -m build"
+upload = "twine upload dist/*"
+check = "twine check dist/*"
