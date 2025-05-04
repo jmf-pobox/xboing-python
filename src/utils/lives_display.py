@@ -6,10 +6,13 @@ using the ball images, reproducing the original XBoing UI.
 """
 
 import os
+import logging
 
 import pygame
 
 from utils.asset_paths import get_balls_dir
+
+logger = logging.getLogger("xboing.lives_display")
 
 
 class LivesDisplay:
@@ -48,24 +51,25 @@ class LivesDisplay:
         ball_path = os.path.join(balls_dir, "ball1.png")
         if os.path.exists(ball_path):
             return pygame.image.load(ball_path).convert_alpha()
-            
-        print("Warning: Could not load ball image for lives display")
+        
+        logger.warning("Could not load ball image for lives display")
         return None
 
-    def render(self, num_lives, spacing=4, scale=1.0):
+    def render(self, num_lives, spacing=4, scale=1.0, max_lives=3):
         """
         Render the lives display with ball images.
         
         Args:
-            num_lives (int): Number of lives to display
+            num_lives (int): Number of lives to display (visible balls)
             spacing (int): Pixels between ball images
             scale (float): Scale factor for the rendered balls
-            
+            max_lives (int): Total number of balls to render (default: 3)
+        
         Returns:
             pygame.Surface: A surface containing the rendered lives display
         """
         # Check cache first
-        cache_key = (num_lives, spacing, scale)
+        cache_key = (num_lives, spacing, scale, max_lives)
         if cache_key in self._surface_cache:
             return self._surface_cache[cache_key]
             
@@ -77,7 +81,7 @@ class LivesDisplay:
         # Calculate the dimensions for the lives display
         scaled_width = int(self.ball_width * scale)
         scaled_height = int(self.ball_height * scale)
-        total_width = (scaled_width * num_lives) + (spacing * (num_lives - 1)) if num_lives > 0 else 0
+        total_width = (scaled_width * max_lives) + (spacing * (max_lives - 1)) if max_lives > 0 else 0
         
         # Create a surface for the rendered lives
         surface = pygame.Surface((max(1, total_width), scaled_height), pygame.SRCALPHA)
@@ -90,12 +94,18 @@ class LivesDisplay:
             )
         else:
             ball_surface = self.ball_image
-            
-        # Render each life
-        for i in range(num_lives):
+        
+        # Render each life (invisible balls on the left, visible on the right)
+        for i in range(max_lives):
             x = i * (scaled_width + spacing)
-            surface.blit(ball_surface, (x, 0))
-            
+            # Balls to the left are invisible, balls to the right are visible
+            if i >= (max_lives - num_lives):
+                # Visible ball
+                surface.blit(ball_surface, (x, 0))
+            else:
+                # Invisible (do not blit anything)
+                pass
+        
         # Cache the rendered surface
         self._surface_cache[cache_key] = surface
         

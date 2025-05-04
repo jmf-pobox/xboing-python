@@ -431,13 +431,13 @@ def main():
                     ]:
                         # Change paddle size
                         if effect == SpriteBlock.TYPE_PAD_EXPAND:
-                            paddle.width = min(
+                            paddle.width = int(min(
                                 PADDLE_WIDTH * 1.5, PADDLE_WIDTH * 2
-                            )  # Expand by 50%
+                            ))  # Expand by 50%
                         else:
-                            paddle.width = max(
+                            paddle.width = int(max(
                                 PADDLE_WIDTH * 0.5, PADDLE_WIDTH / 2
-                            )  # Shrink by 50%
+                            ))  # Shrink by 50%
                         # Update paddle rectangle
                         paddle.rect.width = paddle.width
                         play_sound("powerup")
@@ -565,7 +565,7 @@ def main():
         level_display = digit_display.render_number(level_num, spacing=2, scale=1.0)
         
         # Render lives using ball images
-        lives_surf = lives_display.render(lives, spacing=10, scale=1.0)
+        lives_surf = lives_display.render(lives, spacing=10, scale=1.0, max_lives=3)
         
         # Calculate vertical position - center in top bar
         top_bar_y = score_rect.y + (score_rect.height - score_display.get_height()) // 2
