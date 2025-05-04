@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "xboing"
 version = "2.0.0"
-description = "XBoing - A classic breakout-style game modernized with Python and SDL2"
+description = "XBoing - A classic breakout-style game modernized with Python and Pygame"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "X Consortium License"}
@@ -13,13 +13,39 @@ authors = [
     {name = "Original: Justin C. Kibell"},
     {name = "Python port: XBoing Team"}
 ]
+dependencies = [
+    "pygame",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/jmf-pobox/xboing-python"
 "Bug Tracker" = "https://github.com/jmf-pobox/xboing-python/issues"
 
-[tool.setuptools]
+[project.scripts]
+xboing = "xboing.main:main"
+
+[tool.hatch.build.targets.wheel]
 packages = ["src"]
 
-[project.scripts]
-xboing = "src.main:main"
+[tool.hatch.build]
+exclude = [
+    ".gitignore",
+    "tests/",
+    "scripts/",
+    "docs/",
+]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests/}"
+cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
+game = "python -m src.main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
