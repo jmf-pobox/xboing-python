@@ -25,9 +25,9 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Topic :: Games/Entertainment :: Arcade",
     "Intended Audience :: End Users/Desktop",
-    "Environment :: X11 Applications",
 ]
 
 [project.urls]
@@ -163,3 +163,8 @@ dependencies = [
 build = "python -m build"
 upload = "twine upload dist/*"
 check = "twine check dist/*"
+test-publish = [
+    "python -m build",
+    "twine check dist/*",
+    "twine upload --repository testpypi dist/*"
+]
