@@ -7,4 +7,10 @@
 - [ ] Remove any unused direct dependencies from `pyproject.toml` if found.
 - [ ] (Optional) Use `pip-tools` to generate a `requirements.txt` for runtime dependencies from `pyproject.toml`.
 - [ ] Use `pyproject.toml` as the single source of truth for both runtime and dev dependencies.
-- [ ] Refactor the audio player module (src/utils/audio_player.py) to remove .au file support, simplify code, and ensure it follows modern Python and project coding standards as per the refactor proposal in docs/AUDIO_PLAYER-refactor.md. 
+- [x] Refactor the audio player module (src/utils/audio_player.py) to remove .au file support, simplify code, and ensure it follows modern Python and project coding standards as per the refactor proposal in docs/AUDIO_PLAYER-refactor.md.
+- [x] Implement a simple EventBus in src/utils/event_bus.py
+- [x] Refactor AudioManager to subscribe to events and manage sound playback
+- [x] Update game objects to fire events instead of playing sounds directly
+- [x] Extend the event system for GUI updates if desired (audio system complete; GUI events can be added in future)
+- [x] Write unit tests for the event bus and audio manager
+- [x] Remove unused src/utils/audio_player.py and src/engine/audio.py modules 

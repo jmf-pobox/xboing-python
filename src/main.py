@@ -7,10 +7,23 @@ engine and runs the main game loop.
 """
 
 import logging
-import os
 import time
 
 import pygame
+from engine.audio_manager import AudioManager
+from engine.events import (
+    ApplauseEvent,
+    BallLostEvent,
+    BallShotEvent,
+    BlockHitEvent,
+    BombExplodedEvent,
+    BonusCollectedEvent,
+    GameOverEvent,
+    PaddleHitEvent,
+    PowerUpCollectedEvent,
+    UIButtonClickEvent,
+    WallHitEvent,
+)
 from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
@@ -22,6 +35,7 @@ from game.sprite_block import SpriteBlock, SpriteBlockManager
 from utils.asset_loader import create_font
 from utils.asset_paths import get_sounds_dir
 from utils.digit_display import DigitDisplay
+from utils.event_bus import EventBus
 from utils.layout import GameLayout
 from utils.lives_display import LivesDisplay
 
@@ -54,10 +68,32 @@ BLOCK_HEIGHT = 20  # Original block height
 BLOCK_MARGIN = 7  # Original spacing (SPACE constant)
 GAME_TITLE = "- XBoing II -"
 
+# Definition of event to sound mapping
+event_sound_map = {
+    BlockHitEvent: "boing",
+    UIButtonClickEvent: "click",
+    PowerUpCollectedEvent: "powerup",
+    GameOverEvent: "game_over",
+    BallShotEvent: "ballshot",
+    BallLostEvent: "balllost",
+    BombExplodedEvent: "bomb",
+    ApplauseEvent: "applause",
+    BonusCollectedEvent: "bonus",
+    PaddleHitEvent: "paddle",
+    WallHitEvent: "boing",  # Wall hit uses boing sound, can be handled specially if needed
+}
 
 def main():
     """Main entry point for the game."""
     print("Starting XBoing initialization...")
+
+    # Initialize the event bus
+    event_bus = EventBus()
+
+    # Initialize the audio manager
+    pygame.mixer.init()
+    audio_manager = AudioManager(event_bus, sound_dir=get_sounds_dir(), event_sound_map=event_sound_map)
+    audio_manager.load_sounds_from_map()
 
     # Initialize the game window
     print("Creating window...")
@@ -68,50 +104,6 @@ def main():
 
     # Initialize input and managers
     input_manager = InputManager()
-
-    # Initialize audio
-    pygame.mixer.init()
-    sounds = {}
-    sound_volume = 0.7
-    sound_enabled = True
-
-    # Load available sound files from the sounds directory
-    sounds_dir = get_sounds_dir()
-    sound_files = {
-        "boing": 0.7,  # Ball collision with blocks - signature sound
-        "click": 0.5,  # UI actions
-        "powerup": 0.6,  # Power-up collection
-        "game_over": 0.8,  # Game over
-        "ballshot": 0.6,  # Ball launch
-        "balllost": 0.7,  # Ball lost
-        "bomb": 0.8,  # Explosion
-        "applause": 0.8,  # Level complete
-        "bonus": 0.6,  # Bonus collected
-        "paddle": 0.6,  # Ball hitting paddle - from original game
-    }
-
-    print(f"Loading sounds from: {sounds_dir}")
-
-    # Load all sound files that exist
-    for sound_name, volume in sound_files.items():
-        sound_path = os.path.join(sounds_dir, f"{sound_name}.wav")
-        if os.path.exists(sound_path):
-            try:
-                sound = pygame.mixer.Sound(sound_path)
-                sound.set_volume(volume * sound_volume)
-                sounds[sound_name] = sound
-                print(f"Loaded sound: {sound_name}")
-            except Exception as e:
-                print(f"Failed to load sound {sound_name}: {e}")
-
-    # Create a simplified sound playback function
-    def play_sound(name):
-        """Play a sound if it exists and sound is enabled"""
-        if sound_enabled and name in sounds:
-            sounds[name].play()
-
-    # Print status
-    print(f"XBoing: Audio system initialized with {len(sounds)} sounds")
 
     # Create the game layout
     layout = GameLayout(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -125,7 +117,10 @@ def main():
     # Initialize collision system with play area dimensions
     collision_system = CollisionSystem(play_rect.width, play_rect.height)
 
+    #
     # Create game objects
+    #
+
     # Position the paddle using the same DIST_BASE value as the original game (30px from bottom)
     paddle_x = play_rect.x + (play_rect.width // 2) - (PADDLE_WIDTH // 2)
     paddle_y = play_rect.y + play_rect.height - Paddle.DIST_BASE
@@ -159,7 +154,7 @@ def main():
     lives = 3
     score = 0
     level = 1
-    sound_volume = 0.7  # Volume level (0.0 to 1.0)
+    sound_volume = 1.0  # Volume level (0.0 to 1.0)
     sound_enabled = True  # Sound on/off toggle
     game_over = False
     level_complete = False
@@ -167,8 +162,6 @@ def main():
 
     # Load the first level
     level_manager.load_level(level)
-
-    # Sound volume is already set when loading the sounds
 
     # Function to create a new ball
     def create_new_ball():
@@ -191,9 +184,10 @@ def main():
     # Create initial ball
     balls.append(create_new_ball())
 
-    # Level is already loaded via level_manager above
-
+    #
     # Main game loop
+    #
+
     running = True
     last_time = time.time()
 
@@ -286,7 +280,7 @@ def main():
             level_complete = False
             waiting_for_launch = True
             # Play sound for new level
-            play_sound("click")
+            event_bus.fire(UIButtonClickEvent())
 
             # Create a new ball if needed
             if not balls:
@@ -300,7 +294,7 @@ def main():
             # Start the level timer when ball is launched
             level_manager.start_timer()
             # Play launch sound
-            play_sound("ballshot")
+            event_bus.fire(BallShotEvent())
 
         # Handle volume control
         if (
@@ -311,12 +305,8 @@ def main():
             # Increase volume
             sound_volume = min(1.0, sound_volume + 0.1)
             # Update volume for all sounds
-            for sound_name, base_volume in sound_files.items():
-                if sound_name in sounds:
-                    sounds[sound_name].set_volume(
-                        base_volume * (sound_volume if sound_enabled else 0)
-                    )
-            play_sound("click")
+            audio_manager.set_volume(sound_volume)
+            event_bus.fire(UIButtonClickEvent())
 
         if input_manager.is_key_down(pygame.K_MINUS) or input_manager.is_key_down(
             pygame.K_KP_MINUS
@@ -324,25 +314,19 @@ def main():
             # Decrease volume
             sound_volume = max(0.0, sound_volume - 0.1)
             # Update volume for all sounds
-            for sound_name, base_volume in sound_files.items():
-                if sound_name in sounds:
-                    sounds[sound_name].set_volume(
-                        base_volume * (sound_volume if sound_enabled else 0)
-                    )
-            play_sound("click")
+            audio_manager.set_volume(sound_volume)
+            event_bus.fire(UIButtonClickEvent())
 
         if input_manager.is_key_down(pygame.K_m):
             # Toggle sound on/off
             sound_enabled = not sound_enabled
-            # Update volume for all sounds
-            for sound_name, base_volume in sound_files.items():
-                if sound_name in sounds:
-                    sounds[sound_name].set_volume(
-                        base_volume * (sound_volume if sound_enabled else 0)
-                    )
+            if sound_enabled:
+                audio_manager.unmute()
+            else:
+                audio_manager.mute()
             # Always play a click when enabling sound
             if sound_enabled:
-                play_sound("click")
+                event_bus.fire(UIButtonClickEvent())
 
         # Update paddle movement based on input
         paddle_direction = 0
@@ -392,7 +376,7 @@ def main():
                 # Play sounds for collisions
                 if broken > 0:
                     # Play boing sound for block hits at normal volume
-                    play_sound("boing")
+                    event_bus.fire(BlockHitEvent())
 
                 # Handle special block effects
                 for effect in effects:
@@ -403,7 +387,7 @@ def main():
                         new_ball.vx = -ball.vx
                         new_ball.vy = ball.vy
                         balls.append(new_ball)
-                        play_sound("powerup")
+                        event_bus.fire(PowerUpCollectedEvent())
 
                     elif effect == SpriteBlock.TYPE_MULTIBALL:
                         # Add multiple balls
@@ -417,11 +401,11 @@ def main():
                             new_ball.vx = speed * (ball.vx / speed) * 0.8
                             new_ball.vy = speed * (ball.vy / speed) * 0.8
                             balls.append(new_ball)
-                        play_sound("powerup")
+                        event_bus.fire(PowerUpCollectedEvent())
 
                     elif effect == SpriteBlock.TYPE_BOMB:
                         # Explosion effect - would destroy neighboring blocks
-                        play_sound("bomb")
+                        event_bus.fire(BombExplodedEvent())
 
                     elif effect in [
                         SpriteBlock.TYPE_PAD_EXPAND,
@@ -438,37 +422,37 @@ def main():
                             ))  # Shrink by 50%
                         # Update paddle rectangle
                         paddle.rect.width = paddle.width
-                        play_sound("powerup")
+                        event_bus.fire(PowerUpCollectedEvent())
 
                     elif effect == SpriteBlock.TYPE_TIMER:
                         # Add time to the level timer
                         level_manager.add_time(20)  # Add 20 seconds
-                        play_sound("powerup")
+                        event_bus.fire(PowerUpCollectedEvent())
 
                 # Play paddle hit sound if paddle was hit
                 if hit_paddle:
                     # Play the original paddle hit sound
-                    play_sound("paddle")
+                    event_bus.fire(PaddleHitEvent())
 
                 # Play wall hit sound if wall was hit (at lower volume)
                 if hit_wall:
                     # In the original game, the wall collision used the boing sound
                     # but at a much lower volume (10 compared to normal 50-100)
                     # We'll use a reduced volume boing sound for wall collisions
-                    if "boing" in sounds:
+                    if "boing" in event_sound_map:
                         # Play at reduced volume (original used 10% of normal)
-                        temp_vol = sounds["boing"].get_volume()
-                        sounds["boing"].set_volume(
+                        temp_vol = audio_manager.get_volume()
+                        audio_manager.set_volume(
                             temp_vol * 0.2
                         )  # ~20% of normal volume
-                        sounds["boing"].play()
+                        event_bus.fire(WallHitEvent())
                         # Restore normal volume after playing
-                        sounds["boing"].set_volume(temp_vol)
+                        audio_manager.set_volume(temp_vol)
 
                 active_balls.append(ball)
             else:
                 # Ball lost sound
-                play_sound("balllost")
+                event_bus.fire(BallLostEvent())
 
         # Update active balls list
         balls = active_balls
@@ -489,19 +473,19 @@ def main():
                 # Stop the timer
                 level_manager.stop_timer()
                 # Play game over sound
-                play_sound("game_over")
+                event_bus.fire(GameOverEvent())
 
         # Check if level is complete (all breakable blocks destroyed)
         if level_manager.is_level_complete() and not level_complete:
             level_complete = True
             # Play level complete sound
-            play_sound("applause")
+            event_bus.fire(ApplauseEvent())
 
         # === DEBUG: Blow up all blocks and advance level with X key ===
         if input_manager.is_key_down(pygame.K_x) and not game_over and not level_complete:
             block_manager.blocks.clear()
             level_complete = True
-            play_sound("bomb")
+            event_bus.fire(BombExplodedEvent())
         # === END DEBUG ===
 
         # Clear the screen and draw window layout
@@ -720,7 +704,6 @@ def main():
 
     # Clean up
     window.cleanup()
-    pygame.mixer.quit()
 
 
 if __name__ == "__main__":
