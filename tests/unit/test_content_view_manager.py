@@ -1,6 +1,7 @@
 import pytest
 from ui.content_view_manager import ContentViewManager
 
+
 class MockView:
     def __init__(self):
         self.drawn = False

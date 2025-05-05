@@ -1,7 +1,8 @@
-import pytest
 import pygame
-from ui.message_display import MessageDisplay
+import pytest
 from engine.events import MessageChangedEvent
+from ui.message_display import MessageDisplay
+
 
 @pytest.fixture(autouse=True, scope="module")
 def pygame_init_and_quit():

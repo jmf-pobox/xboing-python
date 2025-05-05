@@ -1,7 +1,9 @@
-import pygame
 import os
+
+import pygame
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir
+
 
 class InstructionsView:
     def __init__(self, layout, renderer, font, headline_font, text_font, amber_color=(255, 191, 63)):

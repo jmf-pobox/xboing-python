@@ -1,6 +1,5 @@
 from engine.events import TimerUpdatedEvent
 
-import pygame
 
 class TimerDisplay:
     """

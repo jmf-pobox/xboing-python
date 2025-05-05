@@ -1,9 +1,19 @@
 from engine.events import (
-    ScoreChangedEvent, LivesChangedEvent, LevelChangedEvent, TimerUpdatedEvent,
-    SpecialReverseChangedEvent, SpecialStickyChangedEvent, SpecialSaveChangedEvent,
-    SpecialFastGunChangedEvent, SpecialNoWallChangedEvent, SpecialKillerChangedEvent,
-    SpecialX2ChangedEvent, SpecialX4ChangedEvent, GameOverEvent
+    GameOverEvent,
+    LevelChangedEvent,
+    LivesChangedEvent,
+    ScoreChangedEvent,
+    SpecialFastGunChangedEvent,
+    SpecialKillerChangedEvent,
+    SpecialNoWallChangedEvent,
+    SpecialReverseChangedEvent,
+    SpecialSaveChangedEvent,
+    SpecialStickyChangedEvent,
+    SpecialX2ChangedEvent,
+    SpecialX4ChangedEvent,
+    TimerUpdatedEvent,
 )
+
 
 class GameState:
     def __init__(self, event_bus):

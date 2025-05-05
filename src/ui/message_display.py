@@ -1,5 +1,6 @@
 from engine.events import MessageChangedEvent
 
+
 class MessageDisplay:
     """
     UI component for displaying messages in the message window region.

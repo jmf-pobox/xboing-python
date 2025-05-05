@@ -1,6 +1,6 @@
 import pygame
-import pytest
 from ui.game_view import GameView
+
 
 class MockBlockManager:
     def __init__(self):

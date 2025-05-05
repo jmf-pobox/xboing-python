@@ -1,14 +1,14 @@
 from engine.events import (
-    SpecialReverseChangedEvent,
-    SpecialStickyChangedEvent,
-    SpecialSaveChangedEvent,
     SpecialFastGunChangedEvent,
-    SpecialNoWallChangedEvent,
     SpecialKillerChangedEvent,
+    SpecialNoWallChangedEvent,
+    SpecialReverseChangedEvent,
+    SpecialSaveChangedEvent,
+    SpecialStickyChangedEvent,
     SpecialX2ChangedEvent,
     SpecialX4ChangedEvent,
 )
-import pygame
+
 
 class SpecialDisplay:
     """

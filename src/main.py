@@ -19,40 +19,36 @@ from engine.events import (
     BombExplodedEvent,
     BonusCollectedEvent,
     GameOverEvent,
-    LevelChangedEvent,
-    LivesChangedEvent,
+    MessageChangedEvent,
     PaddleHitEvent,
     PowerUpCollectedEvent,
-    ScoreChangedEvent,
     UIButtonClickEvent,
     WallHitEvent,
-    TimerUpdatedEvent,
-    MessageChangedEvent,
 )
 from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
 from game.ball import Ball
 from game.collision import CollisionSystem
+from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlock, SpriteBlockManager
+from ui.content_view_manager import ContentViewManager
+from ui.game_view import GameView
+from ui.instructions_view import InstructionsView
 from ui.level_display import LevelDisplay
 from ui.lives_display import LivesDisplayComponent
+from ui.message_display import MessageDisplay
 from ui.score_display import ScoreDisplay
+from ui.special_display import SpecialDisplay
+from ui.timer_display import TimerDisplay
 from utils.asset_loader import create_font
 from utils.asset_paths import get_sounds_dir
 from utils.digit_display import DigitDisplay
 from utils.event_bus import EventBus
 from utils.layout import GameLayout
 from utils.lives_display import LivesDisplay
-from ui.timer_display import TimerDisplay
-from ui.message_display import MessageDisplay
-from ui.special_display import SpecialDisplay
-from game.game_state import GameState
-from ui.content_view_manager import ContentViewManager
-from ui.game_view import GameView
-from ui.instructions_view import InstructionsView
 
 # Set up logging
 logging.basicConfig(

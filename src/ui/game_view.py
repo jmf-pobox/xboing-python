@@ -1,5 +1,6 @@
 import pygame
 
+
 class GameView:
     def __init__(self, layout, block_manager, paddle, balls, renderer):
         self.layout = layout

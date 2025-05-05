@@ -1,11 +1,20 @@
 import pytest
-from game.game_state import GameState
 from engine.events import (
-    ScoreChangedEvent, LivesChangedEvent, LevelChangedEvent, TimerUpdatedEvent,
-    SpecialReverseChangedEvent, SpecialStickyChangedEvent, SpecialSaveChangedEvent,
-    SpecialFastGunChangedEvent, SpecialNoWallChangedEvent, SpecialKillerChangedEvent,
-    SpecialX2ChangedEvent, SpecialX4ChangedEvent
+    LevelChangedEvent,
+    LivesChangedEvent,
+    ScoreChangedEvent,
+    SpecialFastGunChangedEvent,
+    SpecialKillerChangedEvent,
+    SpecialNoWallChangedEvent,
+    SpecialReverseChangedEvent,
+    SpecialSaveChangedEvent,
+    SpecialStickyChangedEvent,
+    SpecialX2ChangedEvent,
+    SpecialX4ChangedEvent,
+    TimerUpdatedEvent,
 )
+from game.game_state import GameState
+
 
 class MockEventBus:
     def __init__(self):

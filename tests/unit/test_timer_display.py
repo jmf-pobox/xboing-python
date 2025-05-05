@@ -1,8 +1,8 @@
-import pytest
 import pygame
-from pygame.font import Font
-from ui.timer_display import TimerDisplay
+import pytest
 from engine.events import TimerUpdatedEvent
+from ui.timer_display import TimerDisplay
+
 
 @pytest.fixture(autouse=True, scope="module")
 def pygame_init_and_quit():
