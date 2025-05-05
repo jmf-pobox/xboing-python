@@ -137,3 +137,8 @@ Contributions are welcome! Areas that need work:
 ## License
 
 This project is licensed under the same terms as the original XBoing - see the LICENSE file for details.
+
+## Original Source
+
+The original source code is available in the subdirectory: xboing2.4-clang
+

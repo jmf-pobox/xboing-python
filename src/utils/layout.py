@@ -210,7 +210,7 @@ class GameLayout:
         # Message window
         self.mess_window = GameWindow(
             Rect(
-                offsetX, 65 + self.PLAY_HEIGHT + 10, self.PLAY_WIDTH // 2, mess_height
+                offsetX + 35, 50 + self.PLAY_HEIGHT + 10, self.PLAY_WIDTH // 2, mess_height
             ),
             name="messWindow",
             parent=self.main_window,
@@ -233,7 +233,7 @@ class GameLayout:
         # Time window
         self.time_window = GameWindow(
             Rect(
-                offsetX + self.PLAY_WIDTH // 2 + 10 + 180 + 5,
+                offsetX - 5 + self.PLAY_WIDTH // 2 + 10 + 180 + 5,
                 65 + self.PLAY_HEIGHT + 10,
                 self.PLAY_WIDTH // 8,
                 mess_height + 5,

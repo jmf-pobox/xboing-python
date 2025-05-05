@@ -34,3 +34,4 @@ htmlcov/
 
 .ruff_cache/
 .mypy_cache/
+xboing2.4-clang/

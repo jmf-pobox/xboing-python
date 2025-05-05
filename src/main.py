@@ -19,10 +19,15 @@ from engine.events import (
     BombExplodedEvent,
     BonusCollectedEvent,
     GameOverEvent,
+    LevelChangedEvent,
+    LivesChangedEvent,
     PaddleHitEvent,
     PowerUpCollectedEvent,
+    ScoreChangedEvent,
     UIButtonClickEvent,
     WallHitEvent,
+    TimerUpdatedEvent,
+    MessageChangedEvent,
 )
 from engine.graphics import Renderer
 from engine.input import InputManager
@@ -32,12 +37,22 @@ from game.collision import CollisionSystem
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlock, SpriteBlockManager
+from ui.level_display import LevelDisplay
+from ui.lives_display import LivesDisplayComponent
+from ui.score_display import ScoreDisplay
 from utils.asset_loader import create_font
 from utils.asset_paths import get_sounds_dir
 from utils.digit_display import DigitDisplay
 from utils.event_bus import EventBus
 from utils.layout import GameLayout
 from utils.lives_display import LivesDisplay
+from ui.timer_display import TimerDisplay
+from ui.message_display import MessageDisplay
+from ui.special_display import SpecialDisplay
+from game.game_state import GameState
+from ui.content_view_manager import ContentViewManager
+from ui.game_view import GameView
+from ui.instructions_view import InstructionsView
 
 # Set up logging
 logging.basicConfig(
@@ -87,86 +102,76 @@ def main():
     """Main entry point for the game."""
     print("Starting XBoing initialization...")
 
-    # Initialize the event bus
+    # --- Initialization: Event bus, game state, audio, window, input, layout ---
     event_bus = EventBus()
-
-    # Initialize the audio manager
+    game_state = GameState(event_bus)
     pygame.mixer.init()
     audio_manager = AudioManager(event_bus, sound_dir=get_sounds_dir(), event_sound_map=event_sound_map)
     audio_manager.load_sounds_from_map()
-
-    # Initialize the game window
-    print("Creating window...")
     window = Window(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE)
-    print("Window created.")
     renderer = Renderer(window.surface)
-    print("Renderer initialized.")
-
-    # Initialize input and managers
     input_manager = InputManager()
-
-    # Create the game layout
     layout = GameLayout(WINDOW_WIDTH, WINDOW_HEIGHT)
-
-    # Load backgrounds using default paths
     layout.load_backgrounds()
-
-    # Get play area rectangle
     play_rect = layout.get_play_rect()
-
-    # Initialize collision system with play area dimensions
     collision_system = CollisionSystem(play_rect.width, play_rect.height)
 
-    #
-    # Create game objects
-    #
-
-    # Position the paddle using the same DIST_BASE value as the original game (30px from bottom)
+    # --- Create game objects: paddle, balls, blocks, level manager ---
     paddle_x = play_rect.x + (play_rect.width // 2) - (PADDLE_WIDTH // 2)
     paddle_y = play_rect.y + play_rect.height - Paddle.DIST_BASE
     paddle = Paddle(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
-
-    # Create ball array
     balls = []
-
-    # Create sprite block manager positioned within the play area
-    block_manager = SpriteBlockManager(
-        play_rect.x, play_rect.y  # Offset all blocks by play area position
-    )
-
-    # Create level manager and set the block manager and layout
+    block_manager = SpriteBlockManager(play_rect.x, play_rect.y)
     level_manager = LevelManager()
     level_manager.set_block_manager(block_manager)
     level_manager.set_layout(layout)
-
-    # Set default background color (fallback)
     bg_color = (40, 44, 52)
 
-    # Create fonts
+    # --- Fonts and UI components ---
     font = create_font(None, 24)
     small_font = create_font(None, 18)
-    
-    # Create UI display objects
+    ui_font = create_font(None, 34)
+    message_font = create_font(None, 28)
+    special_font = create_font(None, 16)
+    instructions_headline_font = create_font(None, 26)
+    instructions_text_font = create_font(None, 21)
     digit_display = DigitDisplay()
     lives_display = LivesDisplay()
+    score_display = ScoreDisplay(event_bus, layout, digit_display, x=70, width=6)
+    lives_display_component = LivesDisplayComponent(event_bus, layout, lives_display, x=365, max_lives=3)
+    level_display_component = LevelDisplay(event_bus, layout, digit_display, x=510)
+    timer_display_component = TimerDisplay(event_bus, layout, renderer, ui_font)
+    message_display_component = MessageDisplay(event_bus, layout, renderer, message_font)
+    special_display_component = SpecialDisplay(event_bus, layout, renderer, special_font)
 
-    # Game state variables
-    lives = 3
-    score = 0
-    level = 1
-    sound_volume = 1.0  # Volume level (0.0 to 1.0)
-    sound_enabled = True  # Sound on/off toggle
+    # --- ContentViewManager and content views ---
+    content_view_manager = ContentViewManager()
+    game_view = GameView(layout, block_manager, paddle, balls, renderer)
+    content_view_manager.register_view('game', game_view)
+    content_view_manager.set_view('game')
+    instructions_active = False
+    instructions_view = InstructionsView(layout, renderer, font, instructions_headline_font, instructions_text_font)
+    content_view_manager.register_view('instructions', instructions_view)
+
+    # --- Game state variables ---
+    sound_volume = 1.0
+    sound_enabled = True
     game_over = False
     level_complete = False
     waiting_for_launch = True
 
-    # Load the first level
-    level_manager.load_level(level)
+    # --- Fire initial events for UI state ---
+    game_state.set_score(0)
+    game_state.set_lives(3)
+    game_state.set_level(1)
+    level_manager.load_level(game_state.level)
+    game_state.set_timer(level_manager.get_time_remaining())
+    level_info = level_manager.get_level_info()
+    level_title = level_info['title']
+    event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
 
-    # Function to create a new ball
+    # --- Helper: create a new ball stuck to the paddle ---
     def create_new_ball():
-        # The ball should be positioned relative to the paddle
-        # which is already positioned correctly in the play area
         ball = Ball(
             paddle.rect.centerx,
             paddle.rect.top - BALL_RADIUS - 1,
@@ -175,504 +180,293 @@ def main():
         )
         ball.stuck_to_paddle = True
         ball.paddle_offset = 0
-        # Start with birth animation on new ball
         ball.birth_animation = True
         ball.animation_frame = 0
         ball.frame_counter = 0
         return ball
 
-    # Create initial ball
+    # --- Start with one ball ---
     balls.append(create_new_ball())
 
-    #
-    # Main game loop
-    #
-
+    # --- Main game loop ---
     running = True
     last_time = time.time()
 
     while running:
-        # Calculate delta time
+        # --- Timing and input ---
         current_time = time.time()
         delta_ms = (current_time - last_time) * 1000
         last_time = current_time
-
-        # Process input
         if not input_manager.update():
             running = False
-
-        # Handle window events
         if not window.handle_events():
             running = False
 
-        # If game over, only handle restart input
-        if game_over:
+        # --- Game over screen logic ---
+        if game_state.is_game_over():
             if input_manager.is_key_down(pygame.K_r):
-                # Reset game
-                game_over = False
-                lives = 3
-                score = 0
-                level = 1
+                # Reset game state and objects
+                game_state.restart()
                 play_rect = layout.get_play_rect()
-                level_manager.load_level(level)
+                level_manager.load_level(game_state.level)
                 balls.clear()
                 balls.append(create_new_ball())
                 waiting_for_launch = True
-
-            # Draw game over screen
+            # Draw game over overlay and UI
             renderer.clear(bg_color)
-
-            # Draw the window layout
             layout.draw(window.surface)
-
-            # Draw semi-transparent overlay for better text visibility, just in the play area
             play_rect = layout.get_play_rect()
-            overlay = pygame.Surface(
-                (play_rect.width, play_rect.height), pygame.SRCALPHA
-            )
-            overlay.fill((0, 0, 0, 180))  # Semi-transparent black
+            overlay = pygame.Surface((play_rect.width, play_rect.height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
             window.surface.blit(overlay, (play_rect.x, play_rect.y))
-
-            renderer.draw_text(
-                "GAME OVER",
-                font,
-                (255, 50, 50),
-                play_rect.centerx,
-                play_rect.centery - 60,
-                centered=True,
-            )
-            
-            # Draw "FINAL SCORE" text
-            renderer.draw_text(
-                "FINAL SCORE",
-                small_font,
-                (255, 255, 255),
-                play_rect.centerx,
-                play_rect.centery - 20,
-                centered=True,
-            )
-            
-            # Render final score with LED digits
-            score_display = digit_display.render_number(score, spacing=2, scale=1.0)
-            
-            # Center the score in the play area
-            score_x = play_rect.centerx - (score_display.get_width() // 2)
-            score_y = play_rect.centery + 10
-            window.surface.blit(score_display, (score_x, score_y))
-            
-            renderer.draw_text(
-                "Press R to restart",
-                small_font,
-                (200, 200, 200),
-                play_rect.centerx,
-                play_rect.centery + 70,
-                centered=True,
-            )
-
-            # Update the display and continue
+            renderer.draw_text("GAME OVER", font, (255, 50, 50), play_rect.centerx, play_rect.centery - 60, centered=True)
+            renderer.draw_text("FINAL SCORE", small_font, (255, 255, 255), play_rect.centerx, play_rect.centery - 20, centered=True)
+            score_display.draw(window.surface)
+            renderer.draw_text("Press R to restart", small_font, (200, 200, 200), play_rect.centerx, play_rect.centery + 70, centered=True)
             window.update()
             continue
 
-        # If level complete, set up the next level
+        # --- Level complete logic ---
         if level_complete and input_manager.is_key_down(pygame.K_SPACE):
-            level += 1
-            level_manager.get_next_level()  # Load the next level
+            game_state.set_level(game_state.level + 1)
+            level_manager.get_next_level()
             level_complete = False
             waiting_for_launch = True
-            # Play sound for new level
             event_bus.fire(UIButtonClickEvent())
-
-            # Create a new ball if needed
+            level_info = level_manager.get_level_info()
+            level_title = level_info['title']
+            event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
             if not balls:
                 balls.append(create_new_ball())
 
-        # Launch ball when space is pressed
+        # --- Ball launch logic ---
         if waiting_for_launch and input_manager.is_key_down(pygame.K_SPACE):
             for ball in balls:
                 ball.release_from_paddle()
             waiting_for_launch = False
-            # Start the level timer when ball is launched
             level_manager.start_timer()
-            # Play launch sound
             event_bus.fire(BallShotEvent())
+            level_info = level_manager.get_level_info()
+            level_title = level_info['title']
+            event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
 
-        # Handle volume control
+        # --- Volume and sound controls ---
         if (
             input_manager.is_key_down(pygame.K_PLUS)
             or input_manager.is_key_down(pygame.K_KP_PLUS)
             or input_manager.is_key_down(pygame.K_EQUALS)
         ):
-            # Increase volume
             sound_volume = min(1.0, sound_volume + 0.1)
-            # Update volume for all sounds
             audio_manager.set_volume(sound_volume)
             event_bus.fire(UIButtonClickEvent())
-
-        if input_manager.is_key_down(pygame.K_MINUS) or input_manager.is_key_down(
-            pygame.K_KP_MINUS
-        ):
-            # Decrease volume
+        if input_manager.is_key_down(pygame.K_MINUS) or input_manager.is_key_down(pygame.K_KP_MINUS):
             sound_volume = max(0.0, sound_volume - 0.1)
-            # Update volume for all sounds
             audio_manager.set_volume(sound_volume)
             event_bus.fire(UIButtonClickEvent())
-
         if input_manager.is_key_down(pygame.K_m):
-            # Toggle sound on/off
             sound_enabled = not sound_enabled
             if sound_enabled:
                 audio_manager.unmute()
             else:
                 audio_manager.mute()
-            # Always play a click when enabling sound
             if sound_enabled:
                 event_bus.fire(UIButtonClickEvent())
 
-        # Update paddle movement based on input
-        paddle_direction = 0
-        if input_manager.is_key_pressed(pygame.K_LEFT):
-            paddle_direction = -1
-        elif input_manager.is_key_pressed(pygame.K_RIGHT):
-            paddle_direction = 1
+        # --- Instructions view toggle (Shift + / for '?') ---
+        if (
+            not instructions_active
+            and input_manager.is_key_down(pygame.K_SLASH)
+            and (pygame.key.get_mods() & pygame.KMOD_SHIFT)
+        ):
+            instructions_active = True
+            content_view_manager.set_view('instructions')
+        elif instructions_active and input_manager.is_key_down(pygame.K_SPACE):
+            instructions_active = False
+            content_view_manager.set_view('game')
 
-        # Update paddle position using play window boundaries
-        play_rect = layout.get_play_rect()
-        paddle.set_direction(paddle_direction)
-        paddle.update(delta_ms, play_rect.width, play_rect.x)
-
-        # Mouse control (convert global mouse position to play area position)
-        mouse_pos = input_manager.get_mouse_position()
-        if input_manager.is_mouse_button_pressed(0):  # Left mouse button
-            # Calculate paddle position relative to play area
-            local_x = mouse_pos[0] - play_rect.x - PADDLE_WIDTH // 2
-            paddle.move_to(local_x, play_rect.width, play_rect.x)
-
-        # Update blocks
-        block_manager.update(delta_ms)
-
-        # Update level timer if game is active
-        if not waiting_for_launch and not game_over and not level_complete:
-            level_manager.update(delta_ms)
-
-        # Update ball positions and check collisions
-        active_balls = []
-        for ball in balls:
-            # Update ball using play window boundaries
+        # --- Gameplay update (only if not in instructions view) ---
+        if not instructions_active:
+            # Paddle movement and input
+            paddle_direction = 0
+            if input_manager.is_key_pressed(pygame.K_LEFT):
+                paddle_direction = -1
+            elif input_manager.is_key_pressed(pygame.K_RIGHT):
+                paddle_direction = 1
             play_rect = layout.get_play_rect()
-            is_active, hit_paddle, hit_wall = ball.update(
-                delta_ms,
-                play_rect.width,  # Width of play area instead of window width
-                play_rect.height,  # Height of play area instead of window height
-                paddle,
-                play_rect.x,  # X offset of play area
-                play_rect.y,  # Y offset of play area
-            )
+            paddle.set_direction(paddle_direction)
+            paddle.update(delta_ms, play_rect.width, play_rect.x)
+            # Mouse paddle control
+            mouse_pos = input_manager.get_mouse_position()
+            if input_manager.is_mouse_button_pressed(0):
+                local_x = mouse_pos[0] - play_rect.x - PADDLE_WIDTH // 2
+                paddle.move_to(local_x, play_rect.width, play_rect.x)
+            # Block and timer updates
+            block_manager.update(delta_ms)
+            if not waiting_for_launch and not game_state.is_game_over() and not level_complete:
+                level_manager.update(delta_ms)
+                game_state.set_timer(level_manager.get_time_remaining())
+            # Ball update and collision
+            active_balls = []
+            for ball in balls:
+                play_rect = layout.get_play_rect()
+                is_active, hit_paddle, hit_wall = ball.update(
+                    delta_ms,
+                    play_rect.width,
+                    play_rect.height,
+                    paddle,
+                    play_rect.x,
+                    play_rect.y,
+                )
+                if is_active:
+                    # Check collisions with blocks
+                    points, broken, effects = block_manager.check_collisions(ball)
+                    if points != 0:
+                        game_state.add_score(points)
 
-            if is_active:
-                # Check collisions with blocks
-                points, broken, effects = block_manager.check_collisions(ball)
-                score += points
+                    # Play sounds for collisions
+                    if broken > 0:
+                        # Play boing sound for block hits at normal volume
+                        event_bus.fire(BlockHitEvent())
 
-                # Play sounds for collisions
-                if broken > 0:
-                    # Play boing sound for block hits at normal volume
-                    event_bus.fire(BlockHitEvent())
-
-                # Handle special block effects
-                for effect in effects:
-                    if effect == SpriteBlock.TYPE_EXTRABALL:
-                        # Add an extra ball
-                        new_ball = Ball(ball.x, ball.y, BALL_RADIUS, (255, 255, 255))
-                        # Give the new ball a different velocity
-                        new_ball.vx = -ball.vx
-                        new_ball.vy = ball.vy
-                        balls.append(new_ball)
-                        event_bus.fire(PowerUpCollectedEvent())
-
-                    elif effect == SpriteBlock.TYPE_MULTIBALL:
-                        # Add multiple balls
-                        for i in range(2):  # Add 2 more balls
-                            new_ball = Ball(
-                                ball.x, ball.y, BALL_RADIUS, (255, 255, 255)
-                            )
-                            # Give each new ball a different velocity
-                            angle = i * 3.14159 / 2  # 90 degrees apart
-                            speed = (ball.vx**2 + ball.vy**2) ** 0.5
-                            new_ball.vx = speed * (ball.vx / speed) * 0.8
-                            new_ball.vy = speed * (ball.vy / speed) * 0.8
+                    # Handle special block effects
+                    for effect in effects:
+                        if effect == SpriteBlock.TYPE_EXTRABALL:
+                            # Add an extra ball
+                            new_ball = Ball(ball.x, ball.y, BALL_RADIUS, (255, 255, 255))
+                            # Give the new ball a different velocity
+                            new_ball.vx = -ball.vx
+                            new_ball.vy = ball.vy
                             balls.append(new_ball)
-                        event_bus.fire(PowerUpCollectedEvent())
+                            event_bus.fire(PowerUpCollectedEvent())
 
-                    elif effect == SpriteBlock.TYPE_BOMB:
-                        # Explosion effect - would destroy neighboring blocks
-                        event_bus.fire(BombExplodedEvent())
+                        elif effect == SpriteBlock.TYPE_MULTIBALL:
+                            # Add multiple balls
+                            for i in range(2):  # Add 2 more balls
+                                new_ball = Ball(
+                                    ball.x, ball.y, BALL_RADIUS, (255, 255, 255)
+                                )
+                                # Give each new ball a different velocity
+                                angle = i * 3.14159 / 2  # 90 degrees apart
+                                speed = (ball.vx**2 + ball.vy**2) ** 0.5
+                                new_ball.vx = speed * (ball.vx / speed) * 0.8
+                                new_ball.vy = speed * (ball.vy / speed) * 0.8
+                                balls.append(new_ball)
+                            event_bus.fire(PowerUpCollectedEvent())
 
-                    elif effect in [
-                        SpriteBlock.TYPE_PAD_EXPAND,
-                        SpriteBlock.TYPE_PAD_SHRINK,
-                    ]:
-                        # Change paddle size
-                        if effect == SpriteBlock.TYPE_PAD_EXPAND:
-                            paddle.width = int(min(
-                                PADDLE_WIDTH * 1.5, PADDLE_WIDTH * 2
-                            ))  # Expand by 50%
-                        else:
-                            paddle.width = int(max(
-                                PADDLE_WIDTH * 0.5, PADDLE_WIDTH / 2
-                            ))  # Shrink by 50%
-                        # Update paddle rectangle
-                        paddle.rect.width = paddle.width
-                        event_bus.fire(PowerUpCollectedEvent())
+                        elif effect == SpriteBlock.TYPE_BOMB:
+                            # Explosion effect - would destroy neighboring blocks
+                            event_bus.fire(BombExplodedEvent())
 
-                    elif effect == SpriteBlock.TYPE_TIMER:
-                        # Add time to the level timer
-                        level_manager.add_time(20)  # Add 20 seconds
-                        event_bus.fire(PowerUpCollectedEvent())
+                        elif effect in [
+                            SpriteBlock.TYPE_PAD_EXPAND,
+                            SpriteBlock.TYPE_PAD_SHRINK,
+                        ]:
+                            # Change paddle size
+                            if effect == SpriteBlock.TYPE_PAD_EXPAND:
+                                paddle.width = int(min(
+                                    PADDLE_WIDTH * 1.5, PADDLE_WIDTH * 2
+                                ))  # Expand by 50%
+                            else:
+                                paddle.width = int(max(
+                                    PADDLE_WIDTH * 0.5, PADDLE_WIDTH / 2
+                                ))  # Shrink by 50%
+                            # Update paddle rectangle
+                            paddle.rect.width = paddle.width
+                            event_bus.fire(PowerUpCollectedEvent())
 
-                # Play paddle hit sound if paddle was hit
-                if hit_paddle:
-                    # Play the original paddle hit sound
-                    event_bus.fire(PaddleHitEvent())
+                        elif effect == SpriteBlock.TYPE_TIMER:
+                            # Add time to the level timer
+                            level_manager.add_time(20)  # Add 20 seconds
+                            event_bus.fire(PowerUpCollectedEvent())
 
-                # Play wall hit sound if wall was hit (at lower volume)
-                if hit_wall:
-                    # In the original game, the wall collision used the boing sound
-                    # but at a much lower volume (10 compared to normal 50-100)
-                    # We'll use a reduced volume boing sound for wall collisions
-                    if "boing" in event_sound_map:
-                        # Play at reduced volume (original used 10% of normal)
-                        temp_vol = audio_manager.get_volume()
-                        audio_manager.set_volume(
-                            temp_vol * 0.2
-                        )  # ~20% of normal volume
-                        event_bus.fire(WallHitEvent())
-                        # Restore normal volume after playing
-                        audio_manager.set_volume(temp_vol)
+                    # Play paddle hit sound if paddle was hit
+                    if hit_paddle:
+                        # Play the original paddle hit sound
+                        event_bus.fire(PaddleHitEvent())
 
-                active_balls.append(ball)
-            else:
-                # Ball lost sound
-                event_bus.fire(BallLostEvent())
+                    # Play wall hit sound if wall was hit (at lower volume)
+                    if hit_wall:
+                        # In the original game, the wall collision used the boing sound
+                        # but at a much lower volume (10 compared to normal 50-100)
+                        # We'll use a reduced volume boing sound for wall collisions
+                        if "boing" in event_sound_map:
+                            # Play at reduced volume (original used 10% of normal)
+                            temp_vol = audio_manager.get_volume()
+                            audio_manager.set_volume(
+                                temp_vol * 0.2
+                            )  # ~20% of normal volume
+                            event_bus.fire(WallHitEvent())
+                            # Restore normal volume after playing
+                            audio_manager.set_volume(temp_vol)
 
-        # Update active balls list
-        balls = active_balls
+                    active_balls.append(ball)
+                else:
+                    # Ball lost sound
+                    event_bus.fire(BallLostEvent())
 
-        # If all balls are lost, decrement lives
-        if len(balls) == 0:
-            lives -= 1
+            # Update active balls list
+            balls = active_balls
+            game_view.balls = balls
 
-            if lives > 0:
-                # Create a new ball
-                balls.append(create_new_ball())
-                waiting_for_launch = True
-                # Stop the timer while waiting for launch
-                level_manager.stop_timer()
-            else:
-                # Game over
-                game_over = True
-                # Stop the timer
-                level_manager.stop_timer()
-                # Play game over sound
-                event_bus.fire(GameOverEvent())
+            # If all balls are lost, decrement lives
+            if len(balls) == 0:
+                game_state.lose_life()
 
-        # Check if level is complete (all breakable blocks destroyed)
-        if level_manager.is_level_complete() and not level_complete:
-            level_complete = True
-            # Play level complete sound
-            event_bus.fire(ApplauseEvent())
+                if game_state.lives > 0:
+                    # Create a new ball
+                    balls.append(create_new_ball())
+                    game_view.balls = balls
+                    waiting_for_launch = True
+                    # Stop the timer while waiting for launch
+                    level_manager.stop_timer()
+                else:
+                    # Game over
+                    game_state.set_game_over(True)
+                    # Stop the timer
+                    level_manager.stop_timer()
+                    # Play game over sound
+                    event_bus.fire(GameOverEvent())
+                # Show 'Balls Terminated!' message only if lives remain
+                if game_state.lives > 0:
+                    event_bus.fire(MessageChangedEvent("Balls Terminated!", color=(0,255,0), alignment='left'))
 
-        # === DEBUG: Blow up all blocks and advance level with X key ===
-        if input_manager.is_key_down(pygame.K_x) and not game_over and not level_complete:
-            block_manager.blocks.clear()
-            level_complete = True
-            event_bus.fire(BombExplodedEvent())
-        # === END DEBUG ===
+            # Check if level is complete (all breakable blocks destroyed)
+            if level_manager.is_level_complete() and not level_complete:
+                level_complete = True
+                # Play level complete sound
+                event_bus.fire(ApplauseEvent())
 
+            # === DEBUG: Blow up all blocks and advance level with X key ===
+            if input_manager.is_key_down(pygame.K_x) and not game_state.is_game_over() and not level_complete:
+                block_manager.blocks.clear()
+                level_complete = True
+                event_bus.fire(BombExplodedEvent())
+            # === END DEBUG ===
+
+        # Drawing is always done, regardless of instructions_active
         # Clear the screen and draw window layout
         renderer.clear(bg_color)
         layout.draw(window.surface)
 
-        # Draw the blocks
-        block_manager.draw(window.surface)
-
-        # Draw the paddle
-        paddle.draw(window.surface)
-
-        # Draw all balls
-        for ball in balls:
-            ball.draw(window.surface)
-
-        # Draw the walls inside the play area
-        play_rect = layout.get_play_rect()
-        wall_color = (100, 100, 100)
-
-        pygame.draw.rect(
-            window.surface,
-            wall_color,
-            pygame.Rect(play_rect.x, play_rect.y, play_rect.width, 2),
-        )  # Top
-        pygame.draw.rect(
-            window.surface,
-            wall_color,
-            pygame.Rect(play_rect.x, play_rect.y, 2, play_rect.height),
-        )  # Left
-        pygame.draw.rect(
-            window.surface,
-            wall_color,
-            pygame.Rect(
-                play_rect.x + play_rect.width - 2, play_rect.y, 2, play_rect.height
-            ),
-        )  # Right
+        # Draw the current content view (gameplay, instructions, etc.)
+        content_view_manager.draw(window.surface)
 
         # Get UI rectangles for drawing elements
         score_rect = layout.get_score_rect()
-        level_rect = layout.get_level_rect()
-        message_rect = layout.get_message_rect()
-        
-        # Define the UI layout based on the original XBoing-C.png screenshot
-        # Element ordering in top bar (from right to left):
-        # 1. Level (LED digits) at far right
-        # 2. Lives (ball images) to the left of level
-        # 3. Score (LED digits) at left
-        # 4. Level name ("Genesis") in bottom left
-        # 5. Timer in bottom right with normal yellow font
-        
-        # Get the level info and render displays
-        level_info = level_manager.get_level_info()
-        level_num = level_info['level_num']
-        level_title = level_info['title']
-        
-        # Simple approach - render the numbers directly
-        score_display = digit_display.render_number(score, spacing=2, scale=1.0)
-        level_display = digit_display.render_number(level_num, spacing=2, scale=1.0)
-        
         # Render lives using ball images
-        lives_surf = lives_display.render(lives, spacing=10, scale=1.0, max_lives=3)
-        
+        lives_surf = lives_display.render(game_state.lives, spacing=10, scale=1.0, max_lives=3)
         # Calculate vertical position - center in top bar
-        top_bar_y = score_rect.y + (score_rect.height - score_display.get_height()) // 2
-        
-        # ********* SIMPLER DIRECT APPROACH ***********
-        # We'll directly set hard-coded positions to match original
-        
-        # From the debug log, we have:
-        # Score rect: x=35, y=10, width=224, height=42
-        
+        top_bar_y = score_rect.y + (score_rect.height - lives_surf.get_height()) // 2
+        # Hard-coded positions for level and lives
         level_x = 510
         lives_x = 525 - 100 - 60 
-        score_x = 220
-        
-        # Create debug log file
-        debug_log = open("/tmp/xboing_ui_debug.log", "w")
-        
-        # Log detailed UI information
-        debug_log.write("=== XBOING UI DEBUG LOG ===\n\n")
-        
-        # Log window dimensions
-        debug_log.write("WINDOW DIMENSIONS:\n")
-        debug_log.write(f"Window size: {WINDOW_WIDTH}x{WINDOW_HEIGHT}\n")
-        debug_log.write(f"Score rect: x={score_rect.x}, y={score_rect.y}, width={score_rect.width}, height={score_rect.height}\n")
-        debug_log.write(f"Level rect: x={level_rect.x}, y={level_rect.y}, width={level_rect.width}, height={level_rect.height}\n")
-        debug_log.write(f"Play rect: x={play_rect.x}, y={play_rect.y}, width={play_rect.width}, height={play_rect.height}\n\n")
-        
-        # Log element details 
-        debug_log.write("DISPLAY ELEMENTS:\n")
-        debug_log.write(f"Score value: {score}\n")
-        debug_log.write(f"Level value: {level_num}\n")
-        debug_log.write(f"Lives count: {lives}\n\n")
-        
-        # Log element dimensions
-        debug_log.write("ELEMENT DIMENSIONS:\n")
-        debug_log.write(f"Score display: width={score_display.get_width()}, height={score_display.get_height()}\n")
-        debug_log.write(f"Lives display: width={lives_surf.get_width()}, height={lives_surf.get_height()}\n")
-        debug_log.write(f"Level display: width={level_display.get_width()}, height={level_display.get_height()}\n\n")
-        
-        # Log positioning details
-        debug_log.write("ELEMENT POSITIONS:\n")
-        debug_log.write(f"Score position: x={score_x}, y={top_bar_y}\n")
-        debug_log.write(f"Lives position: x={lives_x}, y={top_bar_y}\n")
-        debug_log.write(f"Level position: x={level_x}, y={top_bar_y}\n\n")
-        
-        # Log right-alignment details
-        debug_log.write("RIGHT EDGE POSITIONS:\n")
-        debug_log.write(f"Score right edge: {score_x + score_display.get_width()}\n")
-        debug_log.write(f"Lives right edge: {lives_x + lives_surf.get_width()}\n")
-        debug_log.write(f"Level right edge: {level_x + level_display.get_width()}\n\n")
-        
-        # Close debug log
-        debug_log.close()
-        
         # Draw all elements in the top bar
-        window.surface.blit(score_display, (score_x, top_bar_y))
-        window.surface.blit(lives_surf, (lives_x, top_bar_y))
-        window.surface.blit(level_display, (level_x, top_bar_y))
-        
-        # Move level title to bottom bar (left-justified in message window)
-        # Get message window rect
-        message_rect = layout.get_message_rect()
-        renderer.draw_text(
-            level_title,
-            small_font,
-            (0, 255, 0),  # Green color like "Balls Terminated!" in original
-            message_rect.x + 10,  # Left margin
-            message_rect.y + (message_rect.height // 2),  # Vertically centered
-            centered=False,  # Left-aligned
-        )
-        
-        # Get a reference to the time window in the bottom right
-        time_rect = layout.time_window.rect.rect
-        
-        # Time bonus display if active - use regular font with yellow color
-        if not waiting_for_launch and not game_over and not level_complete:
-            time_remaining = level_manager.get_time_remaining()
-            
-            # Format time as MM:SS
-            minutes = time_remaining // 60
-            seconds = time_remaining % 60
-            time_str = f"{minutes:02d}:{seconds:02d}"
-            
-            # Create a large font for the timer
-            timer_font = create_font(None, 32)  # Larger font for timer
-            timer_color = (255, 255, 0)  # Bright yellow
-            
-            # Render and position in the bottom right corner
-            renderer.draw_text(
-                time_str,
-                timer_font,
-                timer_color,
-                time_rect.x + (time_rect.width // 2),
-                time_rect.y + (time_rect.height // 2),
-                centered=True,  # Center in the time window
-            )
-            
-            # Add a colored background when time is running low
-            if time_remaining < 10:
-                # Create a rectangle behind the timer text
-                time_text_width = timer_font.size(time_str)[0]
-                time_text_height = timer_font.size(time_str)[1]
-                time_bg_rect = pygame.Rect(
-                    time_rect.x + (time_rect.width // 2) - (time_text_width // 2) - 5,
-                    time_rect.y + (time_rect.height // 2) - (time_text_height // 2) - 5,
-                    time_text_width + 10,
-                    time_text_height + 10
-                )
-                pygame.draw.rect(window.surface, (255, 50, 50), time_bg_rect)  # Red background
-                
-                # Re-render text on top of red background
-                renderer.draw_text(
-                    time_str,
-                    timer_font,
-                    timer_color,
-                    time_rect.x + (time_rect.width // 2),
-                    time_rect.y + (time_rect.height // 2),
-                    centered=True,
-                )
-
-        # Original XBoing doesn't show these helper messages, so we've removed:
-        # - Sound status
-        # - "Press SPACE to launch" instruction
-        # - Control instructions
-
+        score_display.draw(window.surface)
+        lives_display_component.draw(window.surface)
+        level_display_component.draw(window.surface)
+        timer_display_component.draw(window.surface)
+        message_display_component.draw(window.surface)
+        special_display_component.draw(window.surface)
         # Draw level complete message
         if level_complete:
             # Draw level complete overlay in play area
