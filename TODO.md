@@ -52,4 +52,5 @@
 - [ ] Refactor GameView to avoid storing a direct reference to the balls list. Instead, provide a getter or observer mechanism so it always accesses the current balls list. This will prevent bugs caused by stale references when the balls list is reassigned in the main loop.
 - [x] Implement InstructionsView as a content view for the play window, displaying instructions text and headline as per the original C version.
 - [x] Wire up InstructionsView to ContentViewManager and main loop: swap to instructions on '?' key, back to game on SPACE, pausing gameplay updates while in instructions view.
-- [ ] Add unit tests for InstructionsView rendering and for view switching logic (Instructions <-> Game). 
+- [ ] Add unit tests for InstructionsView rendering and for view switching logic (Instructions <-> Game).
+- [ ] Review and update README.md documentation links whenever new design documents are added or removed from the docs/ directory to keep the documentation section current. 

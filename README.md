@@ -107,11 +107,13 @@ python scripts/sync_assets.py
 
 ### Documentation
 
-See the docs/ directory for detailed information:
-- [Block Implementation](docs/BLOCK_IMPLEMENTATION.md) - How blocks work and their behaviors
-- [Levels System](docs/LEVELS.md) - Level format and loading system
-- [Python Migration Notes](docs/PYTHON_MIGRATION.md) - Notes on porting from C to Python
-- [X11 Update Notes](docs/X11_UPDATE.md) - Notes on transitioning from X11 to pygame
+See the `docs/` directory for detailed information:
+- [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
+- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
+- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
+- [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
+- [Project Paths](docs/PROJECT-PATHS.md) – Directory structure and asset locations
+- [Hatch Usage](docs/HATCH_USAGE.md) – Using Hatch for environment and dependency management
 
 ### Contributing
 
@@ -125,14 +127,12 @@ Contributions are welcome! Areas that need work:
 
 ### Testing & Quality
 
-- **Unit tests** are in `tests/unit/` and run by default (see `pyproject.toml` and `pytest.ini`).
-- **Integration tests** are in `tests/integration/` and can be run manually with `pytest tests/integration`.
-- The audio system is fully unit tested, supports only `.wav` files, and uses a thread-safe, cached audio player.
-- The lives display is fixed-width, always shows 3 slots, and invisible balls are on the left (matching the original game). This is also fully unit tested.
-- Unused or legacy code (e.g., background pattern generator) has been removed for clarity and maintainability.
-- Logging is used throughout for warnings and errors (no print statements in production code).
-- Type hints and docstrings are used for clarity and static analysis.
-- Caching is used where appropriate for performance (audio, lives display, etc.).
+- All major UI components (score, lives, level, timer, message window) are event-driven, component-based, and have dedicated unit tests.
+- The test suite includes both unit and integration tests, covering game logic, event-driven UI updates, and core systems.
+- Tests are run before and after each major change to ensure stability and catch regressions early.
+- Type hints and docstrings are used throughout for clarity and static analysis.
+- Logging is used for warnings and errors (no print statements in production code).
+- The codebase is designed for maintainability, extensibility, and testability, following modern Python best practices.
 
 ## License
 
