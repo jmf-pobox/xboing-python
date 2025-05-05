@@ -1,96 +1,81 @@
-# XBoing Migration to Python/SDL2: Directory Structure
+# XBoing Python Project Structure & Paths
 
-## Recommended Directory Structure
+This document describes the organization of the XBoing Python project, including the layout of source code, assets, documentation, tests, and legacy materials. The structure is designed to support incremental development, maintainability, and a clean separation between the modern Python implementation and the original C codebase.
+
+---
+
+## Project Directory Overview
 
 ```
-xboing/
-├── docs/                    # Documentation
-│   ├── original/           # Original game documentation
-│   └── X11_UPDATE.md       # Migration analysis document
-├── legacy/                 # Original C codebase (unmodified)
-│   ├── audio/
-│   ├── bitmaps/
-│   ├── include/
-│   └── ...
-├── src/                    # New Python implementation
-│   ├── assets/             # Converted game assets
-│   │   ├── images/         # PNG images converted from XPM
-│   │   │   ├── balls/      # Ball sprites
-│   │   │   ├── blocks/     # Block sprites
-│   │   │   ├── backgrounds/
-│   │   │   └── ...
-│   │   ├── sounds/         # Audio files
-│   │   └── levels/         # Level data
-│   ├── engine/             # Core engine components
-│   │   ├── __init__.py
-│   │   ├── graphics.py     # SDL2 rendering abstraction
-│   │   ├── input.py        # Input handling
-│   │   ├── audio.py        # Audio system
-│   │   └── window.py       # Window management
-│   ├── game/               # Game logic
-│   │   ├── __init__.py
-│   │   ├── paddle.py       # Paddle mechanics
-│   │   ├── ball.py         # Ball physics
-│   │   ├── blocks.py       # Block behaviors
-│   │   ├── levels.py       # Level loading/management
-│   │   ├── powerups.py     # Powerup system
-│   │   ├── score.py        # Scoring system
-│   │   └── states.py       # Game state machine
-│   ├── ui/                 # User interface
-│   │   ├── __init__.py
-│   │   ├── menus.py        # Menu screens
-│   │   ├── hud.py          # Heads-up display
-│   │   └── effects.py      # Visual effects
-│   ├── utils/              # Utility functions
-│   │   ├── __init__.py
-│   │   ├── asset_loader.py # Asset loading utilities
-│   │   ├── config.py       # Configuration management
-│   │   └── profiler.py     # Performance monitoring
-│   ├── main.py             # Application entry point
-│   └── config.ini          # Game configuration
-├── tests/                  # Test suite
-│   ├── test_ball.py
-│   ├── test_blocks.py
-│   └── ...
-├── tools/                  # Development and conversion tools
-│   ├── xpm_to_png.py       # Asset conversion utilities
-│   ├── level_converter.py  # Level format converter
-│   └── ...
-├── .gitignore
-├── pyproject.toml          # Modern Python packaging
-├── requirements.txt        # Dependencies
-└── README.md
+xboing-python/
+├── assets/                # Game assets (images, sounds, levels) for the Python port
+│   ├── images/
+│   ├── levels/
+│   └── sounds/
+├── docs/                  # Project documentation and design docs
+├── dist/                  # Build/distribution artifacts (if any)
+├── scripts/               # Utility scripts for asset conversion, etc.
+├── src/                   # Main Python source code
+│   ├── assets/            # (Optional) In-code asset references or helpers
+│   ├── engine/            # Core engine: graphics, audio, input, window, events
+│   ├── game/              # Game logic: ball, paddle, blocks, collision, state
+│   ├── ui/                # UI components: score, lives, timer, overlays, views
+│   └── utils/             # Utility functions and helpers
+├── tests/                 # Test suite
+│   ├── unit/              # Unit tests
+│   └── integration/       # Integration tests
+├── xboing2.4-clang/       # Original XBoing C codebase and assets (read-only)
+├── .venv/                 # Python virtual environment (local, not versioned)
+├── .vscode/               # VS Code settings (optional)
+├── pyproject.toml         # Python project configuration and dependencies
+├── README.md              # Project overview and instructions
+├── TODO.md                # Developer action items
+└── ...                    # Other standard files (.gitignore, LICENSE, etc.)
 ```
 
-## Rationale
+---
 
-This structure follows modern Python project organization principles while addressing the specific needs of the XBoing migration:
+## Directory & File Descriptions
 
-1. **Clear separation from legacy code**: The original C code remains untouched in the `legacy/` directory for reference
+- **assets/**: Contains all game assets for the Python version, including images (PNG), sounds (WAV), and level data. This directory mirrors the structure of the original game's resources but uses modern formats.
 
-2. **Clean module organization**: 
-   - `engine/` handles all SDL2 and system-level interactions
-   - `game/` contains pure game logic with minimal dependencies
-   - `ui/` separates user interface concerns
-   - `utils/` houses supporting functionality
+- **docs/**: Holds all design and technical documentation, including GUI, audio, level, and block design documents, as well as project path explanations and environment usage guides.
 
-3. **Asset management**: The `assets/` directory organizes converted game resources in modern formats with a structure mirroring the original
+- **dist/**: Used for build or distribution artifacts. Typically empty unless building a distributable package.
 
-4. **Development support**: Includes `tools/` for migration utilities and `tests/` for ensuring game logic correctness
+- **scripts/**: Contains utility scripts for asset conversion (e.g., XPM to PNG, AU to WAV), asset synchronization, and other development tools. These scripts help bridge the gap between the legacy and modern codebases.
 
-5. **Modern Python practices**:
-   - Uses packages with `__init__.py` files
-   - Employs modern Python packaging with `pyproject.toml`
-   - Follows Python naming conventions
+- **src/**: The main source code for the Python implementation.
+  - **src/assets/**: (Optional) Helpers or references for asset management within code.
+  - **src/engine/**: Handles graphics, audio, input, window management, and event systems.
+  - **src/game/**: Contains core game logic, including ball and paddle mechanics, block behaviors, level management, and game state.
+  - **src/ui/**: Houses all user interface components, including event-driven displays for score, lives, level, timer, messages, and content views.
+  - **src/utils/**: Utility modules for asset loading, layout, event bus, and other helpers.
 
-This structure facilitates incremental development, allowing individual components to be implemented and tested in isolation while maintaining a clear path for the overall migration.
+- **tests/**: Contains all automated tests.
+  - **tests/unit/**: Unit tests for individual modules and components.
+  - **tests/integration/**: Integration tests for system-level and event-driven behaviors.
 
-## Discrepancies with Recommended Structure
+- **xboing2.4-clang/**: The original XBoing C codebase, including legacy assets and documentation. This directory is read-only and serves as a reference for the porting process.
 
-- The `src/ui/` directory does not exist; UI-related code is in `src/utils/`.
-- The `src/game/` directory contains files with different names than recommended (e.g., `sprite_block.py`, `level_manager.py`, `block.py` instead of `blocks.py`, `levels.py`).
-- The `assets/levels/` directory is at the project root, not under `src/assets/levels/`.
-- No `legacy/` directory is present for the original C codebase.
-- No `tools/` directory; migration and asset scripts are in `scripts/`.
-- The `tests/` directory is organized into `unit/` and `integration/` subdirectories, rather than a flat structure.
-- Additional development and tooling directories/files are present (e.g., `.venv/`, `.mypy_cache/`, `.ruff_cache/`, `.vscode/`), which are not shown in the recommended structure but are standard for modern Python projects.
+- **.venv/**: Local Python virtual environment for dependency management (not tracked in version control).
+
+- **pyproject.toml**: The central configuration file for Python packaging, dependencies, and development tools.
+
+- **README.md**: Project overview, installation instructions, and developer notes.
+
+- **TODO.md**: Ongoing developer action items and migration steps.
+
+---
+
+## Notes on Structure & Migration
+
+- The project maintains a clear separation between the modern Python implementation (`src/`, `assets/`, `docs/`) and the original C codebase (`xboing2.4-clang/`).
+- Asset conversion and synchronization are handled via scripts in the `scripts/` directory, not a separate `tools/` directory.
+- The test suite is organized into `unit/` and `integration/` subdirectories for clarity and maintainability.
+- Some directories (e.g., `.venv/`, `.vscode/`, `.mypy_cache/`, `.ruff_cache/`) are standard for Python development but are not part of the core project logic.
+- The structure supports incremental development: new features and refactors can be implemented and tested in isolation, while legacy code remains available for reference.
+
+---
+
+This structure is designed to facilitate a clean, maintainable, and testable codebase, supporting both ongoing development and future extensions of XBoing Python.
