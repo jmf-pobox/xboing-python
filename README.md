@@ -108,12 +108,12 @@ python scripts/sync_assets.py
 ### Documentation
 
 See the `docs/` directory for detailed information:
-- [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
-- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
-- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
-- [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
 - [Project Paths](docs/PROJECT-PATHS.md) – Directory structure and asset locations
 - [Hatch Usage](docs/HATCH_USAGE.md) – Using Hatch for environment and dependency management
+- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
+- [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
+- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
+- [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
 
 ### Contributing
 
