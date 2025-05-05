@@ -1,21 +1,28 @@
-# XBoing Python GUI Layout & Window Design
+# XBoing Python GUI Design & Architecture
 
-**Status Summary (2024-05-05):**
-- The play window is now managed by a ContentViewManager, which swaps between content views (currently GameView and InstructionsView).
-- The main loop delegates all play window rendering to ContentViewManager.
-- Top bar UI (score, lives, timer, message, specials) remains visible and is not affected by content view swaps.
-- InstructionsView and GameView are implemented and fully integrated.
-- Additional content views (WelcomeView, DemoView, LevelPreviewView, GameKeysView, HighScoresView) and overlays (Game Over, Level Complete, etc.) are planned.
-- Event-driven view switching (e.g., ShowWelcomeEvent) is a next step.
-- See TODO.md for detailed action items.
-
-This document describes the window and layout structure of the XBoing Python port, focusing on the containers and UI regions that make up the game's graphical interface. This is intended for developers and designers working on the game's UI, not for documenting individual sprites or game objects (which will be covered separately).
+This document describes the graphical user interface (GUI) architecture and window layout of the XBoing Python port. It covers both the visual structure (window regions, layout) and the underlying event-driven, component-based UI system that powers all user interface elements. The goal is to provide a clear, maintainable, and extensible foundation for both developers and designers.
 
 ---
 
-## 1. Main Window Hierarchy
+## 1. Overview & Rationale
 
-The game window is organized into a hierarchy of virtual windows, mimicking the original XBoing layout. The main window is subdivided into several regions, each with a specific purpose.
+The XBoing Python GUI is designed around two core principles:
+- **Faithful recreation of the original XBoing window layout and visual regions**
+- **Modern, event-driven, component-based UI architecture for maintainability and testability**
+
+This approach ensures the game looks and feels like the original, while making the codebase robust, extensible, and easy to test.
+
+### Why Event-Driven, Component-Based UI?
+- **Decoupling:** UI components react to events, not direct state changes, making them independent and reusable.
+- **Testability:** Components can be tested in isolation by firing events.
+- **Extensibility:** New UI features (overlays, menus, etc.) can be added as components without modifying core game logic.
+- **Pygame Compatibility:** The design fits naturally with Pygame's event loop and rendering model.
+
+---
+
+## 2. Main Window Hierarchy & Layout
+
+The game window is organized into a hierarchy of virtual windows, mimicking the original XBoing layout. The main window is subdivided into several regions, each with a specific purpose:
 
 ```
 +------------------------------------------------------------+
@@ -35,142 +42,44 @@ The game window is organized into a hierarchy of virtual windows, mimicking the 
 
 ### Window Regions
 - **Main Window**: The root window, contains all other regions.
-- **Score Window**: Displays the player's score using LED-style digits. (Parent: Main Window)
-- **Level Window**: Shows the current level number and lives display (ball images). (Parent: Main Window)
-- **Play Window**: The main game area where blocks, paddle, and balls are rendered. (Parent: Main Window)
-- **Message Window**: Displays level names or status messages. (Parent: Main Window)
-- **Special Window**: Reserved for bonus displays or special effects. (Parent: Main Window)
-- **Time Window**: Shows the level timer in MM:SS format. (Parent: Main Window)
+- **Score Window**: Displays the player's score using LED-style digits.
+- **Level Window**: Shows the current level number and lives display (ball images).
+- **Play Window**: The main game area where blocks, paddle, and balls are rendered.
+- **Message Window**: Displays level names or status messages.
+- **Special Window**: Reserved for bonus displays or special effects.
+- **Time Window**: Shows the level timer in MM:SS format.
 
 #### Window Hierarchy Table
 
-|---------------|---------------|
-| Window        | Parent        |
-|---------------|---------------|
-| Main Window   | (root)        |
-| Score Window  | Main Window   |
-| Level Window  | Main Window   |
-| Play Window   | Main Window   |
-| Message Window| Main Window   |
-| Special Window| Main Window   |
-| Time Window   | Main Window   |
-|---------------|---------------|
+| Window         | Parent      |
+|----------------|------------|
+| Main Window    | (root)     |
+| Score Window   | Main Window|
+| Level Window   | Main Window|
+| Play Window    | Main Window|
+| Message Window | Main Window|
+| Special Window | Main Window|
+| Time Window    | Main Window|
 
 ---
 
-## 2. Layout Details (from `GameLayout`)
+## 3. UI Component Structure & Event-Driven Architecture
 
-- **Window Sizes (pixels, matching original XBoing):**
-  - Main Window: 565 x 710
-  - Play Window: 495 x 580
-  - Score Window: 224 x 42
-  - Level Window: (dynamic width, 52 high)
-  - Message Window: (half play width, 30 high)
-  - Special Window: 180 x 35
-  - Time Window: (1/8 play width, 35 high)
-
-- **Positioning:**
-  - The Score and Level windows are at the top.
-  - The Play window is centered below them.
-  - The Message, Special, and Time windows are at the bottom.
-
----
-
-## 3. What Each Region Displays
-
-### Score Window
-- **Displays:** Player's score using LED-style digits (see `DigitDisplay`).
-- **Rendering:**
-  - Uses digit sprites for a classic LED look.
-  - Right-aligned or left-aligned as per original game.
-
-### Level Window
-- **Displays:**
-  - Current level number (LED digits).
-  - Number of lives left (ball images, see `LivesDisplay`).
-- **Rendering:**
-  - Lives are always shown as 3 slots, with invisible balls on the left for lost lives.
-
-### Play Window
-- **Displays:**
-  - The main game area: blocks, paddle, balls, and all gameplay action.
-- **Background:**
-  - Cycles through different backgrounds per level (see `level_manager.py`).
-
-### Message Window
-- **Displays:**
-  - Level name or status messages (e.g., "Genesis", "Level Complete!").
-- **Rendering:**
-  - Text is left-aligned, green for level names.
-
-### Special Window
-- **Displays:**
-  - Reserved for bonus or special effects (not always used).
-
-### Time Window
-- **Displays:**
-  - Level timer in MM:SS format, using LED-style digits and a yellow colon.
-  - When time is low, background behind timer turns red.
-
----
-
-## 4. Rendering Flow (from `main.py`)
-
-- Each frame, the main loop:
-  1. Clears the window and draws the layout backgrounds.
-  2. Draws blocks, paddle, and balls in the play area.
-  3. Draws the score, level, and lives in the top bar.
-  4. Draws the level name and timer in the bottom bar.
-  5. Handles overlays for game over, level complete, etc.
-
----
-
-## 5. Extending the Layout
-
-- The layout is managed by `GameLayout` and can be extended by adding new `GameWindow` regions.
-- Each region can have its own background (color or image), children, and draw logic.
-- The current design is modular and matches the original game's UI structure.
-
----
-
-## 6. References
-- `src/utils/layout.py` — Window and layout management
-- `src/utils/digit_display.py` — Score and timer rendering
-- `src/utils/lives_display.py` — Lives display (ball images)
-- `src/main.py` — Main game loop and rendering logic
-- `src/game/level_manager.py` — Level backgrounds and play area management
-
----
-
-## 7. Event-Driven, Component-Based UI Architecture (Proposed)
-
-### Overview
-
-To improve maintainability, testability, and extensibility, the XBoing Python port will migrate to an event-driven, component-based UI architecture. This approach separates game state (logic) from UI rendering, using the Observer pattern (via the existing `EventBus`) to decouple state changes from UI updates. This is both idiomatic for Pygame and aligns with modern MVC principles.
-
-### Rationale
-- **Decoupling:** UI components do not query or mutate game state directly; they react to events.
-- **Testability:** UI logic can be tested in isolation by firing events.
-- **Extensibility:** New UI features (e.g., overlays, menus) can be added as components without modifying core game logic.
-- **Pygame Compatibility:** The design fits naturally with Pygame's event loop and rendering model.
-
-### UI Component Structure
-- Each UI region (score, lives, timer, overlays, menus) is implemented as a class/component.
-- Components:
-  - Subscribe to relevant game events via the `EventBus`.
-  - Maintain their own display state, updated in response to events.
-  - Know how to render themselves in their assigned region (using `GameLayout`).
+Each UI region is implemented as a class/component that:
+- Subscribes to relevant game events via the `EventBus`
+- Maintains its own display state, updated in response to events
+- Knows how to render itself in its assigned region (using `GameLayout`)
 
 **Example Components:**
 - `ScoreDisplay` (subscribes to `ScoreChangedEvent`)
-- `LivesDisplay` (subscribes to `LifeLostEvent` or similar)
+- `LivesDisplay` (subscribes to `LivesChangedEvent`)
 - `LevelDisplay` (subscribes to `LevelChangedEvent`)
 - `TimerDisplay` (subscribes to timer events)
-- `MessageOverlay` (subscribes to `GameOverEvent`, `LevelCompleteEvent`, etc.)
-- `Menu` (subscribes to UI navigation events)
+- `MessageDisplay` (subscribes to `MessageChangedEvent`)
+- `SpecialDisplay` (subscribes to special state events)
 
 ### Event Flow
-- Game logic fires events (using the existing `EventBus`).
+- Game logic fires events (using the `EventBus`).
 - UI components update their internal state and redraw as needed in response to these events.
 - The main loop simply calls `ui_manager.draw_all(window.surface)` after updating game state.
 
@@ -182,27 +91,46 @@ To improve maintainability, testability, and extensibility, the XBoing Python po
 - UI components use `GameLayout` to determine their drawing regions.
 - The window hierarchy remains unchanged; only the update/draw logic is refactored.
 
-### Migration Plan Outline
-1. **Create `src/ui/` Package:** Move or refactor UI-related code (score, lives, timer, overlays, menus) into this package.
-2. **Implement UI Components:** Refactor each UI region into a component class that subscribes to relevant events.
-3. **Introduce UI Events:** Define events such as `ScoreChangedEvent`, `LifeLostEvent`, `LevelChangedEvent`, etc., in `events.py`.
-4. **Add UIManager:** Implement a manager to own and draw all UI components.
-5. **Refactor Main Loop:** Remove direct UI rendering from the main loop; fire events for state changes and call `ui_manager.draw_all(surface)`.
-6. **Test and Iterate:** Ensure all UI updates are event-driven and components are decoupled from game logic.
+---
+
+## 4. Content View Management (ContentViewManager)
+
+The play window region is managed by a `ContentViewManager`, which is responsible for displaying one of several possible content views at any time. This enables the game to support multiple major UI screens, all occupying the same viewport:
+
+- WelcomeView: Title, logo, and start prompt
+- InstructionsView: Game instructions and rules
+- DemoView: Autoplay demonstration with overlays
+- LevelPreviewView: Shows the next level layout and info
+- GameView: The main gameplay area (blocks, paddle, balls, etc.)
+- GameKeysView: Shows game controls and key bindings
+- HighScoresView: Displays high scores and player names
+
+### ContentViewManager Responsibilities
+- Maintains a registry of all available content views.
+- Listens for events (e.g., ShowWelcomeEvent, ShowInstructionsEvent, etc.) to swap the active view.
+- Delegates rendering and (optionally) input handling to the active view.
+- Provides a draw(surface) method called by the main loop/UIManager.
+
+### Content View Classes
+Each content view is a class/component that:
+- Subscribes to relevant events (if needed)
+- Renders itself in the play window region
+- Handles its own state and logic
+
+### Event Flow
+- Game logic or menu navigation fires an event (e.g., ShowInstructionsEvent)
+- ContentViewManager receives the event and swaps in the appropriate view
+- The new view handles its own rendering and (if needed) input/events
+
+### Extensibility
+- New content views can be added by creating a new class and registering it with the manager
+- Overlays (e.g., pause, game over) can be layered on top of the current content view if needed
 
 ---
 
-*This section describes the planned migration to an event-driven, component-based UI for XBoing Python. See the migration plan for step-by-step details.*
+## 5. Implementation & Migration Plan
 
----
-
-*This document will be expanded to include sprite and object documentation in the future.*
-
----
-
-## 8. Migration Plan: Event-Driven, Component-Based UI
-
-This section details the step-by-step migration plan for refactoring the XBoing Python UI to an event-driven, component-based architecture. Each step includes guidance for adding or updating tests to ensure correctness and maintainability.
+The following step-by-step migration plan was used to refactor the XBoing Python UI to this event-driven, component-based architecture. Each step included guidance for adding or updating tests to ensure correctness and maintainability.
 
 ### Step 1: Create the `src/ui/` Package
 - Add a new `src/ui/` directory to house all UI components.
@@ -211,12 +139,12 @@ This section details the step-by-step migration plan for refactoring the XBoing 
 
 ### Step 2: Move/Refactor UI Code into Components
 - Identify all UI-related code in `main.py` and `utils/` (score, lives, timer, overlays, menus).
-- For each UI region, create a component class in `src/ui/` (e.g., `ScoreDisplay`, `LivesDisplay`, `TimerDisplay`, `MessageOverlay`, `Menu`).
+- For each UI region, create a component class in `src/ui/` (e.g., `ScoreDisplay`, `LivesDisplay`, `TimerDisplay`, `MessageDisplay`, `Menu`).
 - Move rendering logic and state into these classes.
 - **Test:** Add unit tests for each component's rendering (e.g., correct display for given state).
 
 ### Step 3: Define UI Events
-- In `src/engine/events.py`, define events for UI state changes (e.g., `ScoreChangedEvent`, `LifeLostEvent`, `LevelChangedEvent`, `TimerUpdatedEvent`, `ShowOverlayEvent`).
+- In `src/engine/events.py`, define events for UI state changes (e.g., `ScoreChangedEvent`, `LivesChangedEvent`, `LevelChangedEvent`, `TimerUpdatedEvent`, `ShowOverlayEvent`).
 - **Test:** Add unit tests for event creation and event bus subscription/dispatch.
 
 ### Step 4: Update Game Logic to Fire UI Events
@@ -240,7 +168,7 @@ This section details the step-by-step migration plan for refactoring the XBoing 
 - **Test:** Add end-to-end tests to verify that UI updates correctly in response to gameplay (e.g., scoring, losing lives, level transitions).
 
 ### Step 8: Add/Update Documentation
-- Update `GUI-DESIGN.md` and developer docs to describe the new architecture and usage patterns.
+- Update this document and developer docs to describe the new architecture and usage patterns.
 - **Test:** Peer review and/or documentation tests (e.g., docstring checks, Sphinx build if used).
 
 ### Step 9: Continuous Testing
@@ -249,42 +177,13 @@ This section details the step-by-step migration plan for refactoring the XBoing 
 
 ---
 
-*This migration plan ensures a smooth, test-driven transition to an event-driven, component-based UI for XBoing Python. Each step is designed to be incremental and verifiable.*
+## 6. References
+- `src/utils/layout.py` — Window and layout management
+- `src/utils/digit_display.py` — Score and timer rendering
+- `src/utils/lives_display.py` — Lives display (ball images)
+- `src/main.py` — Main game loop and rendering logic
+- `src/game/level_manager.py` — Level backgrounds and play area management
 
-# Play Window Content Management (ContentViewManager)
+---
 
-The play window region is managed by a ContentViewManager, which is responsible for displaying one of several possible content views at any time. This enables the game to support multiple major UI screens, all occupying the same viewport:
-
-- WelcomeView: Title, logo, and start prompt
-- InstructionsView: Game instructions and rules
-- DemoView: Autoplay demonstration with overlays
-- LevelPreviewView: Shows the next level layout and info
-- GameView: The main gameplay area (blocks, paddle, balls, etc.)
-- GameKeysView: Shows game controls and key bindings
-- HighScoresView: Displays high scores and player names
-
-## ContentViewManager Responsibilities
-- Maintains a registry of all available content views.
-- Listens for events (e.g., ShowWelcomeEvent, ShowInstructionsEvent, etc.) to swap the active view.
-- Delegates rendering and (optionally) input handling to the active view.
-- Provides a draw(surface) method called by the main loop/UIManager.
-
-## Content View Classes
-Each content view is a class/component that:
-- Subscribes to relevant events (if needed)
-- Renders itself in the play window region
-- Handles its own state and logic
-
-## Event Flow
-- Game logic or menu navigation fires an event (e.g., ShowInstructionsEvent)
-- ContentViewManager receives the event and swaps in the appropriate view
-- The new view handles its own rendering and (if needed) input/events
-
-## Extensibility
-- New content views can be added by creating a new class and registering it with the manager
-- Overlays (e.g., pause, game over) can be layered on top of the current content view if needed
-
-## Example Usage
-- The main loop or UIManager calls content_view_manager.draw(surface) each frame
-- To switch to the Instructions screen: event_bus.fire(ShowInstructionsEvent())
-- To return to gameplay: event_bus.fire(ShowGameEvent()) 
+*This document provides a unified overview of both the visual layout and the event-driven, component-based UI architecture of XBoing Python. It is intended to guide both current development and future extensions.* 
