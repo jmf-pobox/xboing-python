@@ -6,6 +6,7 @@ abstracting the underlying pygame implementation.
 """
 
 import pygame
+import logging
 
 
 class InputManager:
@@ -25,11 +26,16 @@ class InputManager:
         self.mouse_buttons_up = [False, False, False]
         self.mouse_motion = (0, 0)
 
-    def update(self):
+    def update(self, events=None):
         """
         Update input state for the current frame.
         Should be called at the beginning of each frame.
         """
+        logger = logging.getLogger("xboing.InputManager")
+        if events is None:
+            events = pygame.event.get()
+        for event in events:
+            logger.debug(f"InputManager.update: event={event}")
         # Clear one-frame states
         self.keys_down.clear()
         self.keys_up.clear()
@@ -38,7 +44,7 @@ class InputManager:
         self.mouse_motion = (0, 0)
 
         # Process events
-        for event in pygame.event.get():
+        for event in events:  # Use the same events list!
             if event.type == pygame.QUIT:
                 return False  # Signal to quit
 

@@ -78,14 +78,16 @@ class Window:
         """Get the current framerate."""
         return self.clock.get_fps()
 
-    def handle_events(self):
+    def handle_events(self, events=None):
         """
         Process window events.
 
         Returns:
             bool: False if the window should close, True otherwise
         """
-        for event in pygame.event.get():
+        if events is None:
+            events = pygame.event.get()
+        for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:

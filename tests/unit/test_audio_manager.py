@@ -9,6 +9,10 @@ class BallLostEvent:
 class BlockHitEvent:
     pass
 
+class UnrelatedEvent: 
+    pass
+
+
 def make_manager_and_bus():
     bus = EventBus()
     event_sound_map = {BallLostEvent: "ball_lost", BlockHitEvent: "block_hit"}
@@ -64,6 +68,5 @@ def test_unsubscribed_event_does_not_play(monkeypatch):
     mgr, bus = make_manager_and_bus()
     fake_sound = MagicMock()
     mgr.sounds["ball_lost"] = fake_sound
-    class UnrelatedEvent: pass
     bus.fire(UnrelatedEvent())
     fake_sound.play.assert_not_called() 

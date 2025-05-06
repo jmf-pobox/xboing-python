@@ -2,10 +2,12 @@ import os
 
 import pygame
 from utils.asset_loader import load_image
-from utils.asset_paths import get_backgrounds_dir
+from utils.asset_paths import get_backgrounds_dir, get_images_dir
+
+from .content_view import ContentView
 
 
-class InstructionsView:
+class InstructionsView(ContentView):
     def __init__(self, layout, renderer, font, headline_font, text_font, amber_color=(255, 191, 63)):
         self.layout = layout
         self.renderer = renderer
@@ -42,6 +44,11 @@ class InstructionsView:
         backgrounds_dir = get_backgrounds_dir()
         bg_path = os.path.join(backgrounds_dir, "mnbgrnd.png")
         self.bg_image = load_image(bg_path, alpha=False)
+        
+        # Load xboing.png logo from the main images directory
+        images_dir = get_images_dir()
+        logo_path = os.path.join(images_dir, "xboing.png")
+        self.logo_image = load_image(logo_path, alpha=True)
 
     def draw(self, surface):
         play_rect = self.layout.get_play_rect()
@@ -59,13 +66,27 @@ class InstructionsView:
             play_surf.fill((40, 40, 50))
         centerx = play_rect.width // 2
 
-        # Draw XBoing logo (placeholder)
-        logo_font = self.headline_font
-        logo_text = "XBoing"
-        logo_surf = logo_font.render(logo_text, True, (255, 255, 255))
-        logo_rect = logo_surf.get_rect(center=(centerx, 40))
-        play_surf.blit(logo_surf, logo_rect)
-        y = logo_rect.bottom + 10
+        # Draw XBoing logo image if available
+        y = 20
+        if self.logo_image:
+            # Scale logo to fit nicely (max width 320, max height 100)
+            max_logo_width = min(320, play_rect.width - 40)
+            max_logo_height = 100
+            logo_w, logo_h = self.logo_image.get_width(), self.logo_image.get_height()
+            scale = min(max_logo_width / logo_w, max_logo_height / logo_h, 1.0)
+            scaled_w, scaled_h = int(logo_w * scale), int(logo_h * scale)
+            logo_surf = pygame.transform.smoothscale(self.logo_image, (scaled_w, scaled_h))
+            logo_rect = logo_surf.get_rect(center=(centerx, y + scaled_h // 2))
+            play_surf.blit(logo_surf, logo_rect)
+            y = logo_rect.bottom + 10
+        else:
+            # fallback: text logo
+            logo_font = self.headline_font
+            logo_text = "XBoing"
+            logo_surf = logo_font.render(logo_text, True, (255, 255, 255))
+            logo_rect = logo_surf.get_rect(center=(centerx, 40))
+            play_surf.blit(logo_surf, logo_rect)
+            y = logo_rect.bottom + 10
 
         # Draw red headline
         headline = " - Instructions - "
@@ -101,4 +122,11 @@ class InstructionsView:
         amber_rect = amber_surf.get_rect(center=(centerx, play_rect.height - 40))
         play_surf.blit(amber_surf, amber_rect)
         # Blit the play window surface to the main surface at play_rect.topleft
-        surface.blit(play_surf, play_rect.topleft) 
+        surface.blit(play_surf, play_rect.topleft)
+
+    def handle_event(self, event):
+        pass  # InstructionsView may handle events in the future
+    def activate(self):
+        pass
+    def deactivate(self):
+        pass 

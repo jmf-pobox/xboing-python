@@ -53,4 +53,17 @@
 - [x] Implement InstructionsView as a content view for the play window, displaying instructions text and headline as per the original C version.
 - [x] Wire up InstructionsView to ContentViewManager and main loop: swap to instructions on '?' key, back to game on SPACE, pausing gameplay updates while in instructions view.
 - [ ] Add unit tests for InstructionsView rendering and for view switching logic (Instructions <-> Game).
-- [ ] Review and update README.md documentation links whenever new design documents are added or removed from the docs/ directory to keep the documentation section current. 
+- [ ] Review and update README.md documentation links whenever new design documents are added or removed from the docs/ directory to keep the documentation section current.
+- [x] Refactor main.py to remove view booleans (e.g., instructions_active) and use content_view_manager.current_name for all view checks. This enables extensibility for arbitrary content views.
+- [ ] Extract game over overlay logic from main.py and move to HighScoreView.
+- [ ] Implement HighScoreView as a content view in src/ui/high_score_view.py.
+- [ ] Register HighScoreView with ContentViewManager in main.py.
+- [ ] On game over, switch to HighScoreView instead of drawing overlay in main loop.
+- [ ] In HighScoreView, pressing Space resets the game and returns to GameView at level 1.
+- [ ] Remove all direct game over overlay/UI code from main.py.
+- [ ] Add/extend unit and integration tests for HighScoreView and view switching.
+- [ ] Update documentation to reflect new content view flow.
+- [x] Fix: Game over overlay should only cover play area, not the entire window
+- [x] Fix: Spacebar in game over view should restart the game (reset_game is now called)
+- [ ] Review: Check for any remaining legacy direct rendering code for overlays or UI
+- [x] Add xboing.png as the logo in the instructions screen, loaded and displayed above the headline, using asset loader and asset_paths utilities. 

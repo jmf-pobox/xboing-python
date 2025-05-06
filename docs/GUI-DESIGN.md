@@ -27,7 +27,7 @@ The game window is organized into a hierarchy of virtual windows, mimicking the 
 ```
 +------------------------------------------------------------+
 |                      Main Game Window                      |
-|                                                            |
+|   Top Bar View                                             |
 |  +-------------------+---------------------------------+   |
 |  |   Score Window    |         Level Window            |   |
 |  +-------------------+---------------------------------+   |
@@ -35,31 +35,37 @@ The game window is organized into a hierarchy of virtual windows, mimicking the 
 |  |                  Play Window                        |   |
 |  |                                                     |   |
 |  +-----------------------------------------------------+   |
-|  | Message | Special | Time Window                     |   |
+|  |       Message               | Special | Time Window |   |
 |  +-----------------------------------------------------+   |
+|   Bottom Bar View                                          |
 +------------------------------------------------------------+
 ```
 
-### Window Regions
+### Updated Component Hierarchy
+
 - **Main Window**: The root window, contains all other regions.
-- **Score Window**: Displays the player's score using LED-style digits.
-- **Level Window**: Shows the current level number and lives display (ball images).
-- **Play Window**: The main game area where blocks, paddle, and balls are rendered.
-- **Message Window**: Displays level names or status messages.
-- **Special Window**: Reserved for bonus displays or special effects.
-- **Time Window**: Shows the level timer in MM:SS format.
+- **TopBarView**: A composite component that manages and draws all top bar UI elements:
+  - **ScoreDisplay** (Score Window)
+  - **LivesDisplayComponent** (Level Window)
+  - **LevelDisplay** (Level Window)
+- **MessageDisplay** (Message Window)
+- **SpecialDisplay** (Special Window)
+- **TimerDisplay** (Time Window)
+- **ContentViewManager**: Manages the play window region, swapping between content views (GameView, InstructionsView, HighScoreView, etc.).
+- **Play Window**: The main game area where blocks, paddle, and balls are rendered (via the current content view).
 
 #### Window Hierarchy Table
 
-| Window         | Parent      |
-|----------------|------------|
-| Main Window    | (root)     |
-| Score Window   | Main Window|
-| Level Window   | Main Window|
-| Play Window    | Main Window|
-| Message Window | Main Window|
-| Special Window | Main Window|
-| Time Window    | Main Window|
+| Window         | Parent      | Component/Manager      |
+|----------------|------------|------------------------|
+| Main Window    | (root)     |                        |
+| TopBarView     | Main Window| TopBarView             |
+| Score Window   | TopBarView | ScoreDisplay           |
+| Level Window   | TopBarView | LevelDisplay, LivesDisplayComponent |
+| Message Window | TopBarView | MessageDisplay         |
+| Special Window | TopBarView | SpecialDisplay         |
+| Time Window    | TopBarView | TimerDisplay           |
+| Play Window    | Main Window| ContentViewManager     |
 
 ---
 
@@ -71,21 +77,23 @@ Each UI region is implemented as a class/component that:
 - Knows how to render itself in its assigned region (using `GameLayout`)
 
 **Example Components:**
+- `TopBarView` (owns and draws ScoreDisplay, LivesDisplayComponent, LevelDisplay, TimerDisplay, MessageDisplay, SpecialDisplay)
 - `ScoreDisplay` (subscribes to `ScoreChangedEvent`)
-- `LivesDisplay` (subscribes to `LivesChangedEvent`)
+- `LivesDisplayComponent` (subscribes to `LivesChangedEvent`)
 - `LevelDisplay` (subscribes to `LevelChangedEvent`)
 - `TimerDisplay` (subscribes to timer events)
 - `MessageDisplay` (subscribes to `MessageChangedEvent`)
 - `SpecialDisplay` (subscribes to special state events)
+- `ContentViewManager` (manages play window content views)
 
 ### Event Flow
 - Game logic fires events (using the `EventBus`).
 - UI components update their internal state and redraw as needed in response to these events.
-- The main loop simply calls `ui_manager.draw_all(window.surface)` after updating game state.
+- The main loop simply calls `content_view_manager.draw(window.surface)` for the play window and `top_bar_view.draw(window.surface)` for the top bar after updating game state.
 
 ### UI Manager
-- A `UIManager` class owns all UI components and handles drawing them in the correct order.
-- Optionally, it can route UI-specific events (e.g., menu navigation).
+- The `TopBarView` acts as the UI manager for all top bar elements.
+- The `ContentViewManager` manages the play window content views.
 
 ### Integration with GameLayout
 - UI components use `GameLayout` to determine their drawing regions.
@@ -178,6 +186,7 @@ The following step-by-step migration plan was used to refactor the XBoing Python
 ---
 
 ## 6. References
+- `src/ui/top_bar_view.py` — Top bar UI manager
 - `src/utils/layout.py` — Window and layout management
 - `src/utils/digit_display.py` — Score and timer rendering
 - `src/utils/lives_display.py` — Lives display (ball images)

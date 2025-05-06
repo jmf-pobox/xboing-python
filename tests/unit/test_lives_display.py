@@ -80,6 +80,7 @@ def test_logging_warning_for_missing_image(monkeypatch, caplog):
     monkeypatch.setattr("pygame.Surface", lambda size, flags=0: mock.MagicMock())
     with caplog.at_level(logging.WARNING, logger="xboing.lives_display"):
         display = LivesDisplay()
+        assert display is not None
     assert any("Could not load ball image for lives display" in r.getMessage() for r in caplog.records)
 
 def test_invisible_balls_on_left(monkeypatch, patch_pygame):

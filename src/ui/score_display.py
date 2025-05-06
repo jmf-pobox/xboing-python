@@ -28,8 +28,4 @@ class ScoreDisplay:
             self.score, spacing=2, scale=1.0, width=self.width, right_justified=True
         )
         y = score_rect.y + (score_rect.height - score_surf.get_height()) // 2
-        # Calculate x so the right edge is fixed at self.x + fixed_width
-        fixed_width = score_surf.get_width()
-        right_edge = self.x + fixed_width
-        x = self.x
-        surface.blit(score_surf, (x, y)) 
+        surface.blit(score_surf, (self.x, y)) 

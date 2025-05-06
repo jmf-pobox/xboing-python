@@ -174,7 +174,6 @@ class GameLayout:
 
         # Layout constants - these match the original XBoing values
         offsetX = self.MAIN_WIDTH // 2
-        offsetY = self.MAIN_HEIGHT // 2
         score_width = 224
         mess_height = 30
 

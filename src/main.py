@@ -29,13 +29,14 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
 from game.ball import Ball
-from game.collision import CollisionSystem
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlock, SpriteBlockManager
+from ui.bottom_bar_view import BottomBarView
 from ui.content_view_manager import ContentViewManager
 from ui.game_view import GameView
+from ui.game_over_view import GameOverView
 from ui.instructions_view import InstructionsView
 from ui.level_display import LevelDisplay
 from ui.lives_display import LivesDisplayComponent
@@ -43,6 +44,7 @@ from ui.message_display import MessageDisplay
 from ui.score_display import ScoreDisplay
 from ui.special_display import SpecialDisplay
 from ui.timer_display import TimerDisplay
+from ui.top_bar_view import TopBarView
 from utils.asset_loader import create_font
 from utils.asset_paths import get_sounds_dir
 from utils.digit_display import DigitDisplay
@@ -109,8 +111,7 @@ def main():
     input_manager = InputManager()
     layout = GameLayout(WINDOW_WIDTH, WINDOW_HEIGHT)
     layout.load_backgrounds()
-    play_rect = layout.get_play_rect()
-    collision_system = CollisionSystem(play_rect.width, play_rect.height)
+    play_rect = layout.get_play_rect()  # Only used for paddle/block_manager init below
 
     # --- Create game objects: paddle, balls, blocks, level manager ---
     paddle_x = play_rect.x + (play_rect.width // 2) - (PADDLE_WIDTH // 2)
@@ -142,17 +143,25 @@ def main():
 
     # --- ContentViewManager and content views ---
     content_view_manager = ContentViewManager()
+    # --- Game View ---
     game_view = GameView(layout, block_manager, paddle, balls, renderer)
     content_view_manager.register_view('game', game_view)
     content_view_manager.set_view('game')
-    instructions_active = False
+    # --- Instructions View ---
     instructions_view = InstructionsView(layout, renderer, font, instructions_headline_font, instructions_text_font)
     content_view_manager.register_view('instructions', instructions_view)
+    # --- Game Over View ---
+    game_over_view = GameOverView(
+        layout,
+        renderer,
+        font,
+        small_font,
+        lambda: game_state.score,
+        reset_game_callback=None  # Will be set after definition
+    )
+    content_view_manager.register_view('game_over', game_over_view)
 
     # --- Game state variables ---
-    sound_volume = 1.0
-    sound_enabled = True
-    game_over = False
     level_complete = False
     waiting_for_launch = True
 
@@ -182,9 +191,37 @@ def main():
         return ball
 
     # --- Start with one ball ---
-    balls.append(create_new_ball())
+    def reset_game():
+        logger.info("reset_game called: restarting game state and returning to gameplay view.")
+        game_state.restart()
+        logger.info(f"After restart: game_state.is_game_over() = {game_state.is_game_over()}")
+        play_rect = layout.get_play_rect()
+        level_manager.load_level(game_state.level)
+        balls.clear()
+        balls.append(create_new_ball())
+        game_view.balls = balls
+        nonlocal waiting_for_launch
+        waiting_for_launch = True
+        content_view_manager.set_view('game')
+    game_over_view.reset_game = reset_game
 
-    # --- Main game loop ---
+    top_bar_view = TopBarView(
+        score_display,
+        lives_display_component,
+        level_display_component,
+        timer_display_component,
+        message_display_component,
+        special_display_component
+    )
+
+    bottom_bar_view = BottomBarView(
+        message_display_component,
+        special_display_component,
+        timer_display_component
+    )
+
+    # --- Game loop ---
+    balls.append(create_new_ball())
     running = True
     last_time = time.time()
 
@@ -193,32 +230,27 @@ def main():
         current_time = time.time()
         delta_ms = (current_time - last_time) * 1000
         last_time = current_time
-        if not input_manager.update():
+        events = pygame.event.get()  # Only call once per frame!
+        if not input_manager.update(events):
             running = False
-        if not window.handle_events():
+        if not window.handle_events(events):
             running = False
+        # Route key events to current content view
+        for event in events:
+            logger.debug(f"Main loop: routing event {event} to current view: {content_view_manager.current_name}")
+            if content_view_manager.current_view is not None:
+                logger.debug(f"Routing event {event} to current view: {content_view_manager.current_name}")
+                content_view_manager.current_view.handle_event(event)
 
         # --- Game over screen logic ---
         if game_state.is_game_over():
-            if input_manager.is_key_down(pygame.K_r):
-                # Reset game state and objects
-                game_state.restart()
-                play_rect = layout.get_play_rect()
-                level_manager.load_level(game_state.level)
-                balls.clear()
-                balls.append(create_new_ball())
-                waiting_for_launch = True
-            # Draw game over overlay and UI
+            if content_view_manager.current_name != 'game_over':
+                logger.info("Switching to game_over view.")
+                content_view_manager.set_view('game_over')
+            logger.debug("Game over state detected. Drawing only game over overlay.")
             renderer.clear(bg_color)
             layout.draw(window.surface)
-            play_rect = layout.get_play_rect()
-            overlay = pygame.Surface((play_rect.width, play_rect.height), pygame.SRCALPHA)
-            overlay.fill((0, 0, 0, 180))
-            window.surface.blit(overlay, (play_rect.x, play_rect.y))
-            renderer.draw_text("GAME OVER", font, (255, 50, 50), play_rect.centerx, play_rect.centery - 60, centered=True)
-            renderer.draw_text("FINAL SCORE", small_font, (255, 255, 255), play_rect.centerx, play_rect.centery - 20, centered=True)
-            score_display.draw(window.surface)
-            renderer.draw_text("Press R to restart", small_font, (200, 200, 200), play_rect.centerx, play_rect.centery + 70, centered=True)
+            content_view_manager.draw(window.surface)
             window.update()
             continue
 
@@ -252,36 +284,32 @@ def main():
             or input_manager.is_key_down(pygame.K_KP_PLUS)
             or input_manager.is_key_down(pygame.K_EQUALS)
         ):
-            sound_volume = min(1.0, sound_volume + 0.1)
-            audio_manager.set_volume(sound_volume)
+            new_volume = min(1.0, audio_manager.get_volume() + 0.1)
+            audio_manager.set_volume(new_volume)
             event_bus.fire(UIButtonClickEvent())
         if input_manager.is_key_down(pygame.K_MINUS) or input_manager.is_key_down(pygame.K_KP_MINUS):
-            sound_volume = max(0.0, sound_volume - 0.1)
-            audio_manager.set_volume(sound_volume)
+            new_volume = max(0.0, audio_manager.get_volume() - 0.1)
+            audio_manager.set_volume(new_volume)
             event_bus.fire(UIButtonClickEvent())
         if input_manager.is_key_down(pygame.K_m):
-            sound_enabled = not sound_enabled
-            if sound_enabled:
+            if audio_manager.is_muted():
                 audio_manager.unmute()
+                event_bus.fire(UIButtonClickEvent())
             else:
                 audio_manager.mute()
-            if sound_enabled:
-                event_bus.fire(UIButtonClickEvent())
 
         # --- Instructions view toggle (Shift + / for '?') ---
         if (
-            not instructions_active
+            content_view_manager.current_name != 'instructions'
             and input_manager.is_key_down(pygame.K_SLASH)
             and (pygame.key.get_mods() & pygame.KMOD_SHIFT)
         ):
-            instructions_active = True
             content_view_manager.set_view('instructions')
-        elif instructions_active and input_manager.is_key_down(pygame.K_SPACE):
-            instructions_active = False
+        elif content_view_manager.current_name == 'instructions' and input_manager.is_key_down(pygame.K_SPACE):
             content_view_manager.set_view('game')
 
         # --- Gameplay update (only if not in instructions view) ---
-        if not instructions_active:
+        if content_view_manager.current_name != 'instructions':
             # Paddle movement and input
             paddle_direction = 0
             if input_manager.is_key_pressed(pygame.K_LEFT):
@@ -337,12 +365,11 @@ def main():
 
                         elif effect == SpriteBlock.TYPE_MULTIBALL:
                             # Add multiple balls
-                            for i in range(2):  # Add 2 more balls
+                            for _ in range(2):  # Add 2 more balls
                                 new_ball = Ball(
                                     ball.x, ball.y, BALL_RADIUS, (255, 255, 255)
                                 )
                                 # Give each new ball a different velocity
-                                angle = i * 3.14159 / 2  # 90 degrees apart
                                 speed = (ball.vx**2 + ball.vy**2) ** 0.5
                                 new_ball.vx = speed * (ball.vx / speed) * 0.8
                                 new_ball.vy = speed * (ball.vy / speed) * 0.8
@@ -447,22 +474,12 @@ def main():
         # Draw the current content view (gameplay, instructions, etc.)
         content_view_manager.draw(window.surface)
 
-        # Get UI rectangles for drawing elements
-        score_rect = layout.get_score_rect()
-        # Render lives using ball images
-        lives_surf = lives_display.render(game_state.lives, spacing=10, scale=1.0, max_lives=3)
-        # Calculate vertical position - center in top bar
-        top_bar_y = score_rect.y + (score_rect.height - lives_surf.get_height()) // 2
-        # Hard-coded positions for level and lives
-        level_x = 510
-        lives_x = 525 - 100 - 60 
         # Draw all elements in the top bar
-        score_display.draw(window.surface)
-        lives_display_component.draw(window.surface)
-        level_display_component.draw(window.surface)
-        timer_display_component.draw(window.surface)
-        message_display_component.draw(window.surface)
-        special_display_component.draw(window.surface)
+        top_bar_view.draw(window.surface)
+
+        # Draw all elements in the bottom bar
+        bottom_bar_view.draw(window.surface)
+
         # Draw level complete message
         if level_complete:
             # Draw level complete overlay in play area
@@ -498,3 +515,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

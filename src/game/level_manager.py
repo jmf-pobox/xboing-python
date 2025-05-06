@@ -294,23 +294,14 @@ class LevelManager:
         # Calculate block dimensions and spacing (these should match SpriteBlockManager)
         brick_width = self.block_manager.brick_width
         brick_height = self.block_manager.brick_height
-        spacing = self.block_manager.spacing
 
         # Clear existing blocks
         self.block_manager.blocks = []
 
         # Get play area width from the block manager's offset
         # The original XBoing uses 495 pixels for the play width
-        play_width = 495  # Default value based on the original game
-
+        # The original XBoing uses 495 pixels for the play width
         # Calculate grid dimensions
-        max_cols = 9  # Original XBoing uses MAX_COL=9
-
-        # Based on precise calculations for a 495px playfield with 9 blocks:
-        # Each block is 40px wide, 9 blocks = 360px total
-        # With wall spacing of 10px on each side (20px total)
-        # Remaining space: 495 - 360 - 20 = 115px
-        # Ideal spacing between blocks: 115px / 8 spaces = 14.375px
         wall_spacing = 10  # Wall spacing on each side
         horizontal_spacing = 14  # Exact spacing between blocks
 
@@ -318,12 +309,7 @@ class LevelManager:
         block_width = brick_width  # Use original 40px block width
 
         # Calculate total width of blocks + spacing
-        total_width = (
-            (max_cols * block_width)
-            + ((max_cols - 1) * horizontal_spacing)
-            + (2 * wall_spacing)
-        )
-
+        # Calculate total width of blocks + spacing
         # This should be 494px, almost exactly filling the 495px play_width
         # print(f"Total calculated width: {total_width}")
 

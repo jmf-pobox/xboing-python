@@ -1,7 +1,9 @@
 import pygame
 
+from .content_view import ContentView
 
-class GameView:
+
+class GameView(ContentView):
     def __init__(self, layout, block_manager, paddle, balls, renderer):
         self.layout = layout
         self.block_manager = block_manager
@@ -40,3 +42,12 @@ class GameView:
                 play_rect.x + play_rect.width - 2, play_rect.y, 2, play_rect.height
             ),
         )  # Right 
+
+    def handle_event(self, event):
+        pass  # GameView may handle events in the future
+
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        pass 
