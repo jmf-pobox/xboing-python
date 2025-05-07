@@ -12,6 +12,7 @@ from engine.events import (
     SpecialX2ChangedEvent,
     SpecialX4ChangedEvent,
     TimerUpdatedEvent,
+    MessageChangedEvent,
 )
 
 
@@ -94,5 +95,21 @@ class GameState:
         self.set_game_over(False)
         for name in self.specials:
             self.set_special(name, False)
+
+    def full_restart(self, level_manager, event_bus):
+        """
+        Reset all game state, load the level, set timer from level manager, and fire the level title message.
+        """
+        self.game_over = False
+        self.set_score(0)
+        self.set_lives(3)
+        self.set_level(1)
+        for name in self.specials:
+            self.set_special(name, False)
+        level_manager.load_level(self.level)
+        self.set_timer(level_manager.get_time_remaining())
+        level_info = level_manager.get_level_info()
+        level_title = level_info['title']
+        event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
 
     # Optionally, add more methods for other state changes as needed 

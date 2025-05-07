@@ -195,4 +195,121 @@ The following step-by-step migration plan was used to refactor the XBoing Python
 
 ---
 
+## 7. Proposed UIManager Component
+
+To further unify and simplify UI management, we propose introducing a `UIManager` class. This class would:
+
+- Own and coordinate all UI components (top bar, bottom bar, overlays, and content views).
+- Provide a single `draw_all(surface)` method to render all UI elements in the correct order.
+- Handle overlay stacking (e.g., pause, notifications) if needed.
+- Route events to the correct UI components or overlays.
+- Optionally, manage transitions and animations between views.
+
+### Responsibilities
+- Register and own all UI components (ScoreDisplay, LivesDisplay, etc.), bars, and content views.
+- Register overlays and manage their display order.
+- Provide a unified interface for drawing and updating the UI.
+- Serve as the main point of contact for the main loop regarding UI rendering and event routing.
+
+### Integration Points
+- The main loop would instantiate a `UIManager` and call `ui_manager.draw_all(surface)` each frame.
+- ContentViewManager and overlays would be managed by the UIManager.
+- All UI event subscriptions would be handled within the UIManager or delegated to its components.
+
+### Benefits
+- Centralizes all UI logic, making the main loop even cleaner.
+- Makes it easier to add overlays, modals, or new UI regions.
+- Facilitates testing and future refactoring.
+
+---
+
+## 8. View Extraction Progress (as of current refactor)
+
+| View/Component         | Extracted? | File/Status                        |
+|------------------------|:----------:|------------------------------------|
+| GameView               |    Yes     | `src/ui/game_view.py`              |
+| InstructionsView       |    Yes     | `src/ui/instructions_view.py`      |
+| GameOverView           |    Yes     | `src/ui/game_over_view.py`         |
+| LevelCompleteView      |    Yes     | `src/ui/level_complete_view.py`    |
+| WelcomeView            |     No     | Not implemented                    |
+| DemoView               |     No     | Not implemented                    |
+| LevelPreviewView       |     No     | Not implemented                    |
+| GameKeysView           |     No     | Not implemented                    |
+| HighScoresView         |     No     | Not implemented                    |
+| Score/Lives/Level/Timer/Message/Special | Yes | `src/ui/` components         |
+| TopBarView/BottomBarView | Yes      | `src/ui/top_bar_view.py`, etc.     |
+| ContentViewManager     |    Yes     | `src/ui/content_view_manager.py`   |
+
+---
+
+## 9. Controllers, UIManager, and Model Roles
+
+### Overall Architecture
+
+- **UIManager**: Owns and coordinates all UI components, content views, overlays, and manages which view is active. Provides a single `draw_all(surface)` method for rendering the UI.
+- **ControllerManager**: (or as part of UIManager) Owns all controllers and switches the active controller based on the current view. Each controller handles input, updates, and transitions for its associated view.
+- **Controllers**: Each major view has a corresponding controller (e.g., `GameController`, `InstructionsController`, `LevelCompleteController`). The active controller is responsible for:
+  - Handling input/events
+  - Updating the model (e.g., GameState)
+  - Managing transitions (e.g., switching views)
+- **GameState**: The central model for all gameplay-related state (score, lives, level, timer, specials, game over, etc.).
+- **Other Models**: Specialized models (e.g., `LeaderBoard` for high scores) can be added as needed, either as properties of GameState or as separate classes.
+
+### Data Flow
+- Controllers read from and write to the model(s).
+- Views render based on the model state and/or events.
+- UIManager coordinates which view is active and handles all drawing.
+- ControllerManager ensures the correct controller is active for the current view.
+
+### Example Main Loop
+```python
+while running:
+    events = pygame.event.get()
+    controller_manager.active_controller.handle_events(events)
+    controller_manager.active_controller.update(delta_time)
+    ui_manager.draw_all(surface)
+    window.update()
+```
+
+### Model Ownership Table
+| Data/Model      | Owner/Location         | Accessed by           |
+|-----------------|-----------------------|-----------------------|
+| Game state      | `GameState`           | All controllers/views |
+| Level data      | `LevelManager`        | GameController, GameView |
+| High scores     | `LeaderBoard` (subclass or separate) | HighScoresController/View |
+| Settings        | (optional) Settings model | SettingsController/View |
+| Instructions    | Static or minimal     | InstructionsController/View |
+
+---
+
+## 10. Implementation Plan: UIManager and Controllers
+
+### Step 1: UIManager
+- Create a `UIManager` class that owns all UI components, content views, overlays, and manages which view is active.
+- Move all UI registration and drawing logic from `main.py` into `UIManager`.
+- Provide a `draw_all(surface)` method to render the entire UI.
+- Refactor the main loop to use `ui_manager.draw_all(surface)`.
+
+### Step 2: Controller Base and ControllerManager
+- Define a `BaseController` class with `handle_events(events)` and `update(delta_time)` methods.
+- Create a `ControllerManager` (or add to UIManager) to own all controllers and switch the active controller based on the current view.
+- Refactor the main loop to delegate input and update logic to the active controller.
+
+### Step 3: Implement Initial Controllers
+- **GameController**: Handles gameplay input, updates, and transitions.
+- **LevelCompleteController**: Handles input and transitions for the level complete view.
+- **InstructionsController**: Handles input and transitions for the instructions view.
+- Each controller should be responsible for its own logic, removing conditional logic from the main loop.
+
+### Step 4: Integration
+- When a view is activated via UIManager, the corresponding controller is also activated.
+- Controllers interact with GameState and other models as needed.
+- Views remain focused on rendering and do not handle input or state changes directly.
+
+### Step 5: Testing and Documentation
+- Add/extend unit and integration tests for UIManager, controllers, and transitions.
+- Update documentation to reflect the new architecture and flow.
+
+---
+
 *This document provides a unified overview of both the visual layout and the event-driven, component-based UI architecture of XBoing Python. It is intended to guide both current development and future extensions.* 

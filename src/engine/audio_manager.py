@@ -22,7 +22,7 @@ class AudioManager:
         self.event_bus = event_bus
         self.sound_dir = sound_dir
         self.sounds: Dict[str, Any] = {}  # str -> pygame.mixer.Sound
-        self.volume: float = 1.0
+        self.volume: float = 0.25
         self.muted: bool = False
         self.event_sound_map = event_sound_map or {}
         self._subscribed_events = set()

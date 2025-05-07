@@ -51,6 +51,7 @@ from utils.digit_display import DigitDisplay
 from utils.event_bus import EventBus
 from utils.layout import GameLayout
 from utils.lives_display import LivesDisplay
+from ui.level_complete_view import LevelCompleteView
 
 # Set up logging
 logging.basicConfig(
@@ -160,20 +161,30 @@ def main():
         reset_game_callback=None  # Will be set after definition
     )
     content_view_manager.register_view('game_over', game_over_view)
+    # --- Level Complete View ---
+    def advance_to_next_level():
+        nonlocal level_complete, waiting_for_launch
+        game_state.set_level(game_state.level + 1)
+        level_manager.get_next_level()
+        level_complete = False
+        waiting_for_launch = True
+        event_bus.fire(UIButtonClickEvent())
+        level_info = level_manager.get_level_info()
+        level_title = level_info['title']
+        event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
+        balls.clear()
+        balls.append(create_new_ball())
+        game_view.balls = balls
+        content_view_manager.set_view('game')
+    level_complete_view = LevelCompleteView(layout, renderer, font, small_font, game_state, level_manager, on_advance_callback=advance_to_next_level)
+    content_view_manager.register_view('level_complete', level_complete_view)
 
     # --- Game state variables ---
     level_complete = False
     waiting_for_launch = True
 
     # --- Fire initial events for UI state ---
-    game_state.set_score(0)
-    game_state.set_lives(3)
-    game_state.set_level(1)
-    level_manager.load_level(game_state.level)
-    game_state.set_timer(level_manager.get_time_remaining())
-    level_info = level_manager.get_level_info()
-    level_title = level_info['title']
-    event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
+    game_state.full_restart(level_manager, event_bus)
 
     # --- Helper: create a new ball stuck to the paddle ---
     def create_new_ball():
@@ -193,10 +204,9 @@ def main():
     # --- Start with one ball ---
     def reset_game():
         logger.info("reset_game called: restarting game state and returning to gameplay view.")
-        game_state.restart()
-        logger.info(f"After restart: game_state.is_game_over() = {game_state.is_game_over()}")
+        game_state.full_restart(level_manager, event_bus)
+        logger.info(f"After full_restart: game_state.is_game_over() = {game_state.is_game_over()}")
         play_rect = layout.get_play_rect()
-        level_manager.load_level(game_state.level)
         balls.clear()
         balls.append(create_new_ball())
         game_view.balls = balls
@@ -221,10 +231,10 @@ def main():
     )
 
     # --- Game loop ---
-    balls.append(create_new_ball())
-    running = True
     last_time = time.time()
+    balls.append(create_new_ball())
 
+    running = True
     while running:
         # --- Timing and input ---
         current_time = time.time()
@@ -255,20 +265,13 @@ def main():
             continue
 
         # --- Level complete logic ---
-        if level_complete and input_manager.is_key_down(pygame.K_SPACE):
-            game_state.set_level(game_state.level + 1)
-            level_manager.get_next_level()
-            level_complete = False
-            waiting_for_launch = True
-            event_bus.fire(UIButtonClickEvent())
-            level_info = level_manager.get_level_info()
-            level_title = level_info['title']
-            event_bus.fire(MessageChangedEvent(level_title, color=(0,255,0), alignment='left'))
-            if not balls:
-                balls.append(create_new_ball())
+        if level_complete:
+            if content_view_manager.current_name != 'level_complete':
+                content_view_manager.set_view('level_complete')
+            # No need to draw overlay here; LevelCompleteView handles it
 
         # --- Ball launch logic ---
-        if waiting_for_launch and input_manager.is_key_down(pygame.K_SPACE):
+        if waiting_for_launch and input_manager.is_mouse_button_pressed(0):
             for ball in balls:
                 ball.release_from_paddle()
             waiting_for_launch = False
@@ -308,8 +311,8 @@ def main():
         elif content_view_manager.current_name == 'instructions' and input_manager.is_key_down(pygame.K_SPACE):
             content_view_manager.set_view('game')
 
-        # --- Gameplay update (only if not in instructions view) ---
-        if content_view_manager.current_name != 'instructions':
+        # --- Gameplay update (if in game view) ---
+        if content_view_manager.current_name == 'game':
             # Paddle movement and input
             paddle_direction = 0
             if input_manager.is_key_pressed(pygame.K_LEFT):
@@ -479,32 +482,6 @@ def main():
 
         # Draw all elements in the bottom bar
         bottom_bar_view.draw(window.surface)
-
-        # Draw level complete message
-        if level_complete:
-            # Draw level complete overlay in play area
-            level_overlay = pygame.Surface(
-                (play_rect.width, play_rect.height), pygame.SRCALPHA
-            )
-            level_overlay.fill((0, 0, 0, 150))  # Semi-transparent black
-            window.surface.blit(level_overlay, (play_rect.x, play_rect.y))
-
-            renderer.draw_text(
-                "LEVEL COMPLETE!",
-                font,
-                (50, 255, 50),
-                play_rect.centerx,
-                play_rect.centery - 30,
-                centered=True,
-            )
-            renderer.draw_text(
-                "Press SPACE for next level",
-                small_font,
-                (200, 200, 200),
-                play_rect.centerx,
-                play_rect.centery + 10,
-                centered=True,
-            )
 
         # Update the display
         window.update()

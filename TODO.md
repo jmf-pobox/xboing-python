@@ -66,4 +66,7 @@
 - [x] Fix: Game over overlay should only cover play area, not the entire window
 - [x] Fix: Spacebar in game over view should restart the game (reset_game is now called)
 - [ ] Review: Check for any remaining legacy direct rendering code for overlays or UI
-- [x] Add xboing.png as the logo in the instructions screen, loaded and displayed above the headline, using asset loader and asset_paths utilities. 
+- [x] Add xboing.png as the logo in the instructions screen, loaded and displayed above the headline, using asset loader and asset_paths utilities.
+- [ ] Extract repeated game state initialization logic (score, lives, level, timer, level title message) into a reusable function and use it at startup and in reset_game().
+- [x] Rationalize game state reset/initialization into GameState.full_restart and remove the old helper function from main.py.
+- [ ] Design and implement a UIManager class to own and coordinate all UI components, overlays, and content views, as proposed in GUI-DESIGN.md. 
