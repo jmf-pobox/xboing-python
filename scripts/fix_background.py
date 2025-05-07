@@ -4,11 +4,15 @@ Fix Background Image Converter
 
 This script is specifically designed to correctly convert the XBoing
 background pattern XPM to a PNG file for the Python port.
+
+Usage:
+  python fix_background.py [--input INPUT_FILE] [--output OUTPUT_FILE]
+  (Defaults: input=xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm, output=assets/images/bgrnds/bgrnd.png)
 """
-
+import argparse
 import os
+from pathlib import Path
 import sys
-
 from PIL import Image
 
 
@@ -69,19 +73,21 @@ def create_background_from_xpm(xpm_path, png_path):
 
 
 def main():
-    """Main entry point."""
-    if len(sys.argv) != 3:
-        print("Usage: python fix_background.py <xpm_file> <png_file>")
-        return 1
-
-    xpm_path = os.path.abspath(sys.argv[1])
-    png_path = os.path.abspath(sys.argv[2])
-
-    if not os.path.exists(xpm_path):
+    parser = argparse.ArgumentParser(description="Convert bgrnd.xpm to PNG for XBoing Python port.")
+    parser.add_argument(
+        "--input", "-i", default="xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm", help="Input XPM file (default: xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm)"
+    )
+    parser.add_argument(
+        "--output", "-o", default="assets/images/bgrnds/bgrnd.png", help="Output PNG file (default: assets/images/bgrnds/bgrnd.png)"
+    )
+    args = parser.parse_args()
+    xpm_path = Path(args.input).resolve()
+    png_path = Path(args.output).resolve()
+    png_path.parent.mkdir(parents=True, exist_ok=True)
+    if not xpm_path.exists():
         print(f"Input file {xpm_path} does not exist")
         return 1
-
-    if create_background_from_xpm(xpm_path, png_path):
+    if create_background_from_xpm(str(xpm_path), str(png_path)):
         return 0
     else:
         return 1

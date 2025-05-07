@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
 Special converter for the balllost.au file which has a corrupted header.
-"""
 
+Usage:
+  python fix_balllost.py [--input INPUT_FILE] [--output OUTPUT_FILE]
+  (Defaults: input=xboing2.4-clang/sounds/balllost.au, output=assets/sounds/balllost.wav)
+"""
+import argparse
 import os
 import wave
+from pathlib import Path
 
 
 def fix_balllost_au(input_path, output_path):
@@ -94,20 +99,27 @@ def fix_balllost_au(input_path, output_path):
         return False
 
 
-if __name__ == "__main__":
-    # Set paths
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    source_dir = os.path.abspath(os.path.join(script_dir, "../../sounds"))
-    target_dir = os.path.abspath(os.path.join(script_dir, "../src/assets/sounds"))
-
-    # Make sure target directory exists
-    os.makedirs(target_dir, exist_ok=True)
-
-    # Convert balllost.au file
-    input_file = os.path.join(source_dir, "balllost.au")
-    output_file = os.path.join(target_dir, "balllost.wav")
-
-    if os.path.exists(input_file):
-        fix_balllost_au(input_file, output_file)
+def main():
+    parser = argparse.ArgumentParser(description="Fix and convert the balllost.au file to .wav format.")
+    parser.add_argument(
+        "--input", "-i", default="xboing2.4-clang/sounds/balllost.au", help="Input .au file (default: xboing2.4-clang/sounds/balllost.au)"
+    )
+    parser.add_argument(
+        "--output", "-o", default="assets/sounds/balllost.wav", help="Output .wav file (default: assets/sounds/balllost.wav)"
+    )
+    args = parser.parse_args()
+    input_path = Path(args.input).resolve()
+    output_path = Path(args.output).resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if not input_path.exists():
+        print(f"Error: Could not find {input_path}")
+        return 1
+    if fix_balllost_au(str(input_path), str(output_path)):
+        return 0
     else:
-        print(f"Error: Could not find {input_file}")
+        return 1
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main())
