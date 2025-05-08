@@ -10,9 +10,9 @@ Usage:
   (Defaults: input=xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm, output=assets/images/bgrnds/bgrnd.png)
 """
 import argparse
-import os
-from pathlib import Path
 import sys
+from pathlib import Path
+
 from PIL import Image
 
 
@@ -73,12 +73,20 @@ def create_background_from_xpm(xpm_path, png_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert bgrnd.xpm to PNG for XBoing Python port.")
-    parser.add_argument(
-        "--input", "-i", default="xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm", help="Input XPM file (default: xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm)"
+    parser = argparse.ArgumentParser(
+        description="Convert bgrnd.xpm to PNG for XBoing Python port."
     )
     parser.add_argument(
-        "--output", "-o", default="assets/images/bgrnds/bgrnd.png", help="Output PNG file (default: assets/images/bgrnds/bgrnd.png)"
+        "--input",
+        "-i",
+        default="xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm",
+        help="Input XPM file (default: xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="assets/images/bgrnds/bgrnd.png",
+        help="Output PNG file (default: assets/images/bgrnds/bgrnd.png)",
     )
     args = parser.parse_args()
     xpm_path = Path(args.input).resolve()

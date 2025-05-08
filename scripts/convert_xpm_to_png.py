@@ -21,6 +21,8 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import Dict, List
+
 from PIL import Image
 
 # Color mapping for XBoing's named colors (based on X11 color names)
@@ -393,7 +395,7 @@ def convert_directory(input_dir, output_dir, dry_run=False):
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
     """
-    results = {'converted': [], 'skipped': [], 'failed': []}
+    results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
     for root, _, files in os.walk(input_dir):
         for file in files:
             if file.endswith(".xpm"):
@@ -405,21 +407,25 @@ def convert_directory(input_dir, output_dir, dry_run=False):
                 png_path = out_subdir / png_name
                 if png_path.exists():
                     print(f"[SKIP] {png_path.relative_to(output_dir)} already exists.")
-                    results['skipped'].append(str(xpm_path.relative_to(input_dir)))
+                    results["skipped"].append(str(xpm_path.relative_to(input_dir)))
                     continue
                 if dry_run:
-                    print(f"[DRY-RUN] Would convert {xpm_path.relative_to(input_dir)} -> {png_path.relative_to(output_dir)}")
-                    results['converted'].append(str(xpm_path.relative_to(input_dir)))
+                    print(
+                        f"[DRY-RUN] Would convert {xpm_path.relative_to(input_dir)} -> {png_path.relative_to(output_dir)}"
+                    )
+                    results["converted"].append(str(xpm_path.relative_to(input_dir)))
                     continue
                 print(f"Converting {xpm_path} to {png_path}...")
                 try:
                     if convert_xpm_to_png(str(xpm_path), str(png_path)):
-                        results['converted'].append(str(xpm_path.relative_to(input_dir)))
+                        results["converted"].append(
+                            str(xpm_path.relative_to(input_dir))
+                        )
                     else:
-                        results['failed'].append(str(xpm_path.relative_to(input_dir)))
+                        results["failed"].append(str(xpm_path.relative_to(input_dir)))
                 except Exception as e:
                     print(f"[FAIL] Error converting {xpm_path}: {e}")
-                    results['failed'].append(str(xpm_path.relative_to(input_dir)))
+                    results["failed"].append(str(xpm_path.relative_to(input_dir)))
     return results
 
 
@@ -428,13 +434,21 @@ def main():
         description="Convert XBoing XPM files to PNG format. Requires Pillow."
     )
     parser.add_argument(
-        "--input", "-i", default="xboing2.4-clang/bitmaps", help="Input directory containing XPM files (default: xboing2.4-clang/bitmaps)"
+        "--input",
+        "-i",
+        default="xboing2.4-clang/bitmaps",
+        help="Input directory containing XPM files (default: xboing2.4-clang/bitmaps)",
     )
     parser.add_argument(
-        "--output", "-o", default="assets/images", help="Output directory for PNG files (default: assets/images)"
+        "--output",
+        "-o",
+        default="assets/images",
+        help="Output directory for PNG files (default: assets/images)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Preview what would be converted, but do not actually convert."
+        "--dry-run",
+        action="store_true",
+        help="Preview what would be converted, but do not actually convert.",
     )
     args = parser.parse_args()
 
@@ -442,7 +456,9 @@ def main():
     output_path = Path(args.output).resolve()
 
     if not input_path.exists() or not input_path.is_dir():
-        print(f"[ERROR] Input directory {input_path} does not exist or is not a directory.")
+        print(
+            f"[ERROR] Input directory {input_path} does not exist or is not a directory."
+        )
         return 1
 
     print(f"Input:  {input_path}")
@@ -454,9 +470,9 @@ def main():
     print(f"  Converted: {len(results['converted'])}")
     print(f"  Skipped:   {len(results['skipped'])}")
     print(f"  Failed:    {len(results['failed'])}")
-    if results['failed']:
+    if results["failed"]:
         print("  Failed files:")
-        for f in results['failed']:
+        for f in results["failed"]:
             print(f"    - {f}")
     return 0
 

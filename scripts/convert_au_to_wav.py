@@ -14,18 +14,24 @@ Usage:
 """
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import Dict, List
+
 
 def check_ffmpeg():
     """Check if ffmpeg is available in PATH."""
     try:
-        subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(
+            ["ffmpeg", "-version"],
+            check=True,
+            capture_output=True,
+        )
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
+
 
 def convert_au_to_wav(input_file, output_file=None, dry_run=False):
     """
@@ -55,8 +61,7 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
                 str(output_file),
             ],
             check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
         )
         print(f"[OK] Converted {input_file.name} -> {output_file.name}")
         return True
@@ -66,6 +71,7 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
     except FileNotFoundError:
         print("[FAIL] ffmpeg not found. Please install ffmpeg on your system.")
         return False
+
 
 def convert_directory(input_dir, output_dir, dry_run=False):
     """
@@ -79,30 +85,39 @@ def convert_directory(input_dir, output_dir, dry_run=False):
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     au_files = sorted(input_dir.glob("*.au"))
-    results = {'converted': [], 'skipped': [], 'failed': []}
+    results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
     for au_file in au_files:
         wav_file = output_dir / (au_file.stem + ".wav")
         result = convert_au_to_wav(au_file, wav_file, dry_run=dry_run)
         if result is True:
-            results['converted'].append(au_file.name)
+            results["converted"].append(au_file.name)
         elif result is None:
-            results['skipped'].append(au_file.name)
+            results["skipped"].append(au_file.name)
         else:
-            results['failed'].append(au_file.name)
+            results["failed"].append(au_file.name)
     return results
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="Convert .au audio files from legacy XBoing to .wav for Python port. Requires ffmpeg."
     )
     parser.add_argument(
-        "--input", "-i", default="xboing2.4-clang/sounds", help="Input directory containing .au files (default: xboing2.4-clang/sounds)"
+        "--input",
+        "-i",
+        default="xboing2.4-clang/sounds",
+        help="Input directory containing .au files (default: xboing2.4-clang/sounds)",
     )
     parser.add_argument(
-        "--output", "-o", default="assets/sounds", help="Output directory for .wav files (default: assets/sounds)"
+        "--output",
+        "-o",
+        default="assets/sounds",
+        help="Output directory for .wav files (default: assets/sounds)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true", help="Preview what would be converted, but do not actually convert."
+        "--dry-run",
+        action="store_true",
+        help="Preview what would be converted, but do not actually convert.",
     )
     args = parser.parse_args()
 
@@ -110,10 +125,14 @@ def main():
     output_path = Path(args.output).resolve()
 
     if not input_path.exists() or not input_path.is_dir():
-        print(f"[ERROR] Input directory {input_path} does not exist or is not a directory.")
+        print(
+            f"[ERROR] Input directory {input_path} does not exist or is not a directory."
+        )
         return 1
     if not check_ffmpeg():
-        print("[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script.")
+        print(
+            "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."
+        )
         return 1
 
     print(f"Input:  {input_path}")
@@ -125,11 +144,12 @@ def main():
     print(f"  Converted: {len(results['converted'])}")
     print(f"  Skipped:   {len(results['skipped'])}")
     print(f"  Failed:    {len(results['failed'])}")
-    if results['failed']:
+    if results["failed"]:
         print("  Failed files:")
-        for f in results['failed']:
+        for f in results["failed"]:
             print(f"    - {f}")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

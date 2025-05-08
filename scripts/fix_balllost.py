@@ -7,7 +7,6 @@ Usage:
   (Defaults: input=xboing2.4-clang/sounds/balllost.au, output=assets/sounds/balllost.wav)
 """
 import argparse
-import os
 import wave
 from pathlib import Path
 
@@ -100,12 +99,20 @@ def fix_balllost_au(input_path, output_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fix and convert the balllost.au file to .wav format.")
-    parser.add_argument(
-        "--input", "-i", default="xboing2.4-clang/sounds/balllost.au", help="Input .au file (default: xboing2.4-clang/sounds/balllost.au)"
+    parser = argparse.ArgumentParser(
+        description="Fix and convert the balllost.au file to .wav format."
     )
     parser.add_argument(
-        "--output", "-o", default="assets/sounds/balllost.wav", help="Output .wav file (default: assets/sounds/balllost.wav)"
+        "--input",
+        "-i",
+        default="xboing2.4-clang/sounds/balllost.au",
+        help="Input .au file (default: xboing2.4-clang/sounds/balllost.au)",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="assets/sounds/balllost.wav",
+        help="Output .wav file (default: assets/sounds/balllost.wav)",
     )
     args = parser.parse_args()
     input_path = Path(args.input).resolve()
@@ -122,4 +129,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())
