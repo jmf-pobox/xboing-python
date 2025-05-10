@@ -5,9 +5,12 @@ This module provides functions for loading game assets such as
 images and converting them for use with pygame.
 """
 
+import logging
 import os
 
 import pygame
+
+logger = logging.getLogger("xboing.AssetLoader")
 
 
 def load_image(filename, alpha=True, scale=None):
@@ -25,7 +28,7 @@ def load_image(filename, alpha=True, scale=None):
     try:
         surface = pygame.image.load(filename)
     except pygame.error as e:
-        print(f"Error loading image {filename}: {e}")
+        logger.error(f"Error loading image {filename}: {e}")
         # Create a small error surface
         surface = pygame.Surface((64, 64))
         surface.fill((255, 0, 255))  # Fill with magenta to make errors obvious
