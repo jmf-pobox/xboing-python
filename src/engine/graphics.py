@@ -5,6 +5,8 @@ This module provides a clean interface for sprite rendering, animations,
 and other graphical operations, abstracting the underlying pygame implementation.
 """
 
+import logging
+
 import pygame
 
 
@@ -166,10 +168,14 @@ class Renderer:
         Args:
             window_surface (pygame.Surface): The main window surface
         """
+        self.logger = logging.getLogger("xboing.Renderer")
+        if window_surface is None:
+            self.logger.error("Renderer initialized with None window_surface!")
         self.surface = window_surface
         self.width = window_surface.get_width()
         self.height = window_surface.get_height()
         self.background_color = (0, 0, 0)
+        self.logger.info(f"Renderer initialized: {self.width}x{self.height}")
 
     def clear(self, color=None):
         """Clear the renderer with the specified color."""
