@@ -9,6 +9,9 @@ Usage:
 import argparse
 import wave
 from pathlib import Path
+import logging
+
+logger = logging.getLogger("xboing.scripts.fix_balllost")
 
 
 def fix_balllost_au(input_path, output_path):
@@ -29,7 +32,9 @@ def fix_balllost_au(input_path, output_path):
 
         # Verify it's an AU file by checking magic number
         if data[0:4] != b".snd":
-            print(f"Warning: {input_path} does not appear to be a valid .au file")
+            logger.warning(
+                f"Warning: {input_path} does not appear to be a valid .au file"
+            )
             return False
 
         # Skip header entirely - just use a fixed offset of 32 bytes
@@ -90,11 +95,11 @@ def fix_balllost_au(input_path, output_path):
 
             wav_file.writeframes(pcm_data)
 
-        print(f"Successfully converted {input_path} to {output_path}")
+        logger.info(f"Successfully converted {input_path} to {output_path}")
         return True
 
     except Exception as e:
-        print(f"Error converting {input_path}: {e}")
+        logger.error(f"Error converting {input_path}: {e}")
         return False
 
 
@@ -119,7 +124,7 @@ def main():
     output_path = Path(args.output).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if not input_path.exists():
-        print(f"Error: Could not find {input_path}")
+        logger.error(f"Error: Could not find {input_path}")
         return 1
     if fix_balllost_au(str(input_path), str(output_path)):
         return 0

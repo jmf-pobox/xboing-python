@@ -12,8 +12,11 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
+import logging
 
 from PIL import Image
+
+logger = logging.getLogger("xboing.scripts.fix_background")
 
 
 def create_background_from_xpm(xpm_path, png_path):
@@ -47,7 +50,7 @@ def create_background_from_xpm(xpm_path, png_path):
                     pattern_data.append(pattern_row)
 
     if not pattern_data:
-        print(f"Failed to extract pattern data from {xpm_path}")
+        logger.error(f"Failed to extract pattern data from {xpm_path}")
         return False
 
     # Create a new image
@@ -55,7 +58,7 @@ def create_background_from_xpm(xpm_path, png_path):
     height = len(pattern_data)
     img = Image.new("RGB", (width, height))
 
-    print(f"Creating {width}x{height} image from pattern data")
+    logger.info(f"Creating {width}x{height} image from pattern data")
 
     # Set pixels according to the pattern
     for y, row in enumerate(pattern_data):
@@ -63,12 +66,12 @@ def create_background_from_xpm(xpm_path, png_path):
             if char in colors:
                 img.putpixel((x, y), colors[char])
             else:
-                print(f"Warning: Unknown character '{char}' at ({x}, {y})")
+                logger.warning(f"Warning: Unknown character '{char}' at ({x}, {y})")
                 img.putpixel((x, y), (0, 0, 0))  # Default to black
 
     # Save the image
     img.save(png_path)
-    print(f"Saved background image to {png_path}")
+    logger.info(f"Saved background image to {png_path}")
     return True
 
 
@@ -93,7 +96,7 @@ def main():
     png_path = Path(args.output).resolve()
     png_path.parent.mkdir(parents=True, exist_ok=True)
     if not xpm_path.exists():
-        print(f"Input file {xpm_path} does not exist")
+        logger.error(f"Input file {xpm_path} does not exist")
         return 1
     if create_background_from_xpm(str(xpm_path), str(png_path)):
         return 0

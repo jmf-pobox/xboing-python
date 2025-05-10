@@ -22,6 +22,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Dict, List
+import logging
 
 from PIL import Image
 
@@ -82,6 +83,8 @@ X11_COLORS = {
     "None": (0, 0, 0, 0),  # Transparent
 }
 
+logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
+
 
 def parse_xpm(xpm_file):
     """
@@ -96,14 +99,14 @@ def parse_xpm(xpm_file):
     with open(xpm_file) as f:
         content = f.read()
 
-    print(f"\nParsing {xpm_file}")
+    logger.info(f"\nParsing {xpm_file}")
 
-    # Extract the XPM data array with improved regex pattern
+    # Extract the XPM data array with a regex pattern
     match = re.search(
         r"static\s+char\s+\*\s*\w+\s*\[\s*\]\s*=\s*{(.*?)};", content, re.DOTALL
     )
     if not match:
-        print(f"Failed to parse XPM data in {xpm_file}")
+        logger.error(f"Failed to parse XPM data in {xpm_file}")
         return None
 
     xpm_data = match.group(1).strip()
@@ -127,10 +130,10 @@ def parse_xpm(xpm_file):
         header_index += 1
 
     if header_index >= len(lines):
-        print(f"Could not find header in {xpm_file}")
+        logger.error(f"Could not find header in {xpm_file}")
         return None
 
-    print(f"Header line: '{lines[header_index]}'")
+    logger.info(f"Header line: '{lines[header_index]}'")
 
     header = lines[header_index].split()
     try:
@@ -138,30 +141,30 @@ def parse_xpm(xpm_file):
         height = int(header[1])
         num_colors = int(header[2])
         chars_per_pixel = int(header[3])
-        print(
+        logger.info(
             f"Parsed header: width={width}, height={height}, colors={num_colors}, chars_per_pixel={chars_per_pixel}"
         )
     except (ValueError, IndexError):
-        print(f"Invalid XPM header in {xpm_file}: {lines[header_index]}")
+        logger.error(f"Invalid XPM header in {xpm_file}: {lines[header_index]}")
         return None
 
     # Parse color table
     color_table = {}
     for i in range(header_index + 1, header_index + num_colors + 1):
         if i >= len(lines):
-            print(f"Unexpected end of color table in {xpm_file}")
+            logger.error(f"Unexpected end of color table in {xpm_file}")
             return None
 
         color_line = lines[i]
         if len(color_line) < chars_per_pixel:
-            print(
+            logger.error(
                 f"Invalid color definition in {xpm_file}, line too short: {color_line}"
             )
             return None
 
         key = color_line[:chars_per_pixel]
 
-        # Handle special case for None (transparent)
+        # Handle the special case for None (transparent)
         if re.search(r"c\s+None", color_line):
             r, g, b, a = 0, 0, 0, 0  # Transparent
             color_table[key] = (r, g, b, a)
@@ -179,7 +182,7 @@ def parse_xpm(xpm_file):
             color_table[key] = (r, g, b, a)
             continue
 
-        # Try hex color format with more digits, e.g. #4949FFFF
+        # Try a hex color format with more digits, e.g., #4949FFFF
         hex_match_long = re.search(r"c\s+#([0-9A-Fa-f]{8,12})", color_line)
         if hex_match_long:
             color_hex = hex_match_long.group(1)
@@ -210,12 +213,16 @@ def parse_xpm(xpm_file):
             if color_name in X11_COLORS:
                 color_table[key] = X11_COLORS[color_name]
             else:
-                print(f"Unknown color name '{color_name}' in {xpm_file}, using black")
+                logger.warning(
+                    f"Unknown color name '{color_name}' in {xpm_file}, using black"
+                )
                 color_table[key] = (0, 0, 0, 255)
             continue
 
         # If we got here, we couldn't parse the color
-        print(f"Could not parse color in {xpm_file}, line: {color_line} - using black")
+        logger.warning(
+            f"Could not parse color in {xpm_file}, line: {color_line} - using black"
+        )
         color_table[key] = (0, 0, 0, 255)  # Default to black
 
     # Parse pixel data
@@ -224,7 +231,7 @@ def parse_xpm(xpm_file):
 
     for i in range(pixel_start_index, pixel_start_index + height):
         if i >= len(lines):
-            print(f"Unexpected end of pixel data in {xpm_file}")
+            logger.error(f"Unexpected end of pixel data in {xpm_file}")
             return None
 
         row = lines[i]
@@ -236,7 +243,7 @@ def parse_xpm(xpm_file):
                 if pixel_key in color_table:
                     row_pixels.append(color_table[pixel_key])
                 else:
-                    print(
+                    logger.warning(
                         f"Unknown pixel key '{pixel_key}' in {xpm_file}, row {i}, column {j}"
                     )
                     row_pixels.append((0, 0, 0, 255))  # Default to black
@@ -245,11 +252,13 @@ def parse_xpm(xpm_file):
 
     # Verify image dimensions
     if len(pixels) != height:
-        print(f"Warning: Expected {height} rows, got {len(pixels)} in {xpm_file}")
+        logger.warning(
+            f"Warning: Expected {height} rows, got {len(pixels)} in {xpm_file}"
+        )
 
     for row_index, row in enumerate(pixels):
         if len(row) != width:
-            print(
+            logger.warning(
                 f"Warning: Row {row_index} expected {width} pixels, got {len(row)} in {xpm_file}"
             )
 
@@ -291,7 +300,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                     # If we're missing pixels in a row, fill with transparent
                     img.putpixel((x, y), (0, 0, 0, 0))
 
-    # Verify image has valid pixel data (not all transparent or black)
+    # Verify the image has valid pixel data (not all transparent or black)
     valid_pixels = 0
     for y in range(height):
         for x in range(width):
@@ -305,7 +314,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                 valid_pixels += 1
 
     if valid_pixels == 0:
-        print(
+        logger.warning(
             f"Warning: Image {os.path.basename(xpm_path)} has no visible pixels, generating a placeholder."
         )
         # Create a placeholder based on the filename
@@ -327,7 +336,7 @@ def convert_xpm_to_png(xpm_path, png_path):
         else:
             color = (150, 150, 150, 255)
 
-        # Create a rounded block with 3D effect
+        # Create a rounded block with a 3D effect
         for y in range(height):
             for x in range(width):
                 # Leave corners transparent
@@ -341,7 +350,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                 # Main block body
                 elif 2 <= x < width - 2 and 2 <= y < height - 2:
                     img.putpixel((x, y), color)
-                # Top edge highlight
+                # Top-edge highlight
                 elif y < 2:
                     highlight = (
                         min(255, color[0] + 40),
@@ -350,7 +359,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                         255,
                     )
                     img.putpixel((x, y), highlight)
-                # Left edge highlight
+                # Left-edge highlight
                 elif x < 2:
                     highlight = (
                         min(255, color[0] + 40),
@@ -359,7 +368,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                         255,
                     )
                     img.putpixel((x, y), highlight)
-                # Bottom edge shadow
+                # Bottom-edge shadow
                 elif y >= height - 2:
                     shadow = (
                         max(0, color[0] - 40),
@@ -368,7 +377,7 @@ def convert_xpm_to_png(xpm_path, png_path):
                         255,
                     )
                     img.putpixel((x, y), shadow)
-                # Right edge shadow
+                # Right-edge shadow
                 elif x >= width - 2:
                     shadow = (
                         max(0, color[0] - 40),
@@ -381,17 +390,18 @@ def convert_xpm_to_png(xpm_path, png_path):
     # Save the image with maximum quality
     img.save(png_path, optimize=True)
 
-    print(f"Successfully converted {xpm_path} to {png_path}")
+    logger.info(f"Successfully converted {xpm_path} to {png_path}")
     return True
 
 
 def convert_directory(input_dir, output_dir, dry_run=False):
     """
-    Convert all XPM files in a directory tree to PNG, preserving subdirectory structure.
+    Convert all XPM files in a directory tree to PNG, preserving
+    the subdirectory structure.
     Args:
         input_dir (Path): Input directory with XPM files
         output_dir (Path): Output directory for PNG files
-        dry_run (bool): If True, do not actually convert
+        dry_run (bool): If True, do not convert
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
     """
@@ -406,16 +416,18 @@ def convert_directory(input_dir, output_dir, dry_run=False):
                 png_name = Path(file).with_suffix(".png").name
                 png_path = out_subdir / png_name
                 if png_path.exists():
-                    print(f"[SKIP] {png_path.relative_to(output_dir)} already exists.")
+                    logger.info(
+                        f"[SKIP] {png_path.relative_to(output_dir)} already exists."
+                    )
                     results["skipped"].append(str(xpm_path.relative_to(input_dir)))
                     continue
                 if dry_run:
-                    print(
+                    logger.info(
                         f"[DRY-RUN] Would convert {xpm_path.relative_to(input_dir)} -> {png_path.relative_to(output_dir)}"
                     )
                     results["converted"].append(str(xpm_path.relative_to(input_dir)))
                     continue
-                print(f"Converting {xpm_path} to {png_path}...")
+                logger.info(f"Converting {xpm_path} to {png_path}...")
                 try:
                     if convert_xpm_to_png(str(xpm_path), str(png_path)):
                         results["converted"].append(
@@ -424,7 +436,7 @@ def convert_directory(input_dir, output_dir, dry_run=False):
                     else:
                         results["failed"].append(str(xpm_path.relative_to(input_dir)))
                 except Exception as e:
-                    print(f"[FAIL] Error converting {xpm_path}: {e}")
+                    logger.error(f"[FAIL] Error converting {xpm_path}: {e}")
                     results["failed"].append(str(xpm_path.relative_to(input_dir)))
     return results
 
@@ -456,24 +468,24 @@ def main():
     output_path = Path(args.output).resolve()
 
     if not input_path.exists() or not input_path.is_dir():
-        print(
+        logger.error(
             f"[ERROR] Input directory {input_path} does not exist or is not a directory."
         )
         return 1
 
-    print(f"Input:  {input_path}")
-    print(f"Output: {output_path}")
-    print(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
+    logger.info(f"Input:  {input_path}")
+    logger.info(f"Output: {output_path}")
+    logger.info(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
 
     results = convert_directory(input_path, output_path, dry_run=args.dry_run)
-    print("\nSummary:")
-    print(f"  Converted: {len(results['converted'])}")
-    print(f"  Skipped:   {len(results['skipped'])}")
-    print(f"  Failed:    {len(results['failed'])}")
+    logger.info("\nSummary:")
+    logger.info(f"  Converted: {len(results['converted'])}")
+    logger.info(f"  Skipped:   {len(results['skipped'])}")
+    logger.info(f"  Failed:    {len(results['failed'])}")
     if results["failed"]:
-        print("  Failed files:")
+        logger.info("  Failed files:")
         for f in results["failed"]:
-            print(f"    - {f}")
+            logger.info(f"    - {f}")
     return 0
 
 

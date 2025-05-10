@@ -18,6 +18,9 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List
+import logging
+
+logger = logging.getLogger("xboing.scripts.convert_au_to_wav")
 
 
 def check_ffmpeg():
@@ -39,17 +42,17 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
     Args:
         input_file (Path): Path to the .au file
         output_file (Path): Path for the output .wav file (optional)
-        dry_run (bool): If True, do not actually convert
+        dry_run (bool): If True, do not convert
     Returns:
         bool: True if converted, False if failed or skipped
     """
     if output_file is None:
         output_file = input_file.with_suffix(".wav")
     if output_file.exists():
-        print(f"[SKIP] {output_file.name} already exists.")
+        logger.info(f"[SKIP] {output_file.name} already exists.")
         return None  # Skipped
     if dry_run:
-        print(f"[DRY-RUN] Would convert {input_file.name} -> {output_file.name}")
+        logger.info(f"[DRY-RUN] Would convert {input_file.name} -> {output_file.name}")
         return True
     try:
         subprocess.run(
@@ -63,13 +66,13 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
             check=True,
             capture_output=True,
         )
-        print(f"[OK] Converted {input_file.name} -> {output_file.name}")
+        logger.info(f"[OK] Converted {input_file.name} -> {output_file.name}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"[FAIL] Error converting {input_file.name}: {e}")
+        logger.error(f"[FAIL] Error converting {input_file.name}: {e}")
         return False
     except FileNotFoundError:
-        print("[FAIL] ffmpeg not found. Please install ffmpeg on your system.")
+        logger.error("[FAIL] ffmpeg not found. Please install ffmpeg on your system.")
         return False
 
 
@@ -79,7 +82,7 @@ def convert_directory(input_dir, output_dir, dry_run=False):
     Args:
         input_dir (Path): Directory containing .au files
         output_dir (Path): Directory to save .wav files
-        dry_run (bool): If True, do not actually convert
+        dry_run (bool): If True, do not convert
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
     """
@@ -125,29 +128,29 @@ def main():
     output_path = Path(args.output).resolve()
 
     if not input_path.exists() or not input_path.is_dir():
-        print(
+        logger.error(
             f"[ERROR] Input directory {input_path} does not exist or is not a directory."
         )
         return 1
     if not check_ffmpeg():
-        print(
+        logger.error(
             "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."
         )
         return 1
 
-    print(f"Input:  {input_path}")
-    print(f"Output: {output_path}")
-    print(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
+    logger.info(f"Input:  {input_path}")
+    logger.info(f"Output: {output_path}")
+    logger.info(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
 
     results = convert_directory(input_path, output_path, dry_run=args.dry_run)
-    print("\nSummary:")
-    print(f"  Converted: {len(results['converted'])}")
-    print(f"  Skipped:   {len(results['skipped'])}")
-    print(f"  Failed:    {len(results['failed'])}")
+    logger.info("\nSummary:")
+    logger.info(f"  Converted: {len(results['converted'])}")
+    logger.info(f"  Skipped:   {len(results['skipped'])}")
+    logger.info(f"  Failed:    {len(results['failed'])}")
     if results["failed"]:
-        print("  Failed files:")
+        logger.warning("  Failed files:")
         for f in results["failed"]:
-            print(f"    - {f}")
+            logger.warning(f"    - {f}")
     return 0
 
 
