@@ -65,7 +65,7 @@ def get_blocks_dir():
 
 def get_backgrounds_dir():
     """Get the path to the backgrounds directory."""
-    return get_asset_path("images/backgrounds", create_dirs=True)
+    return get_asset_path("images/bgrnds", create_dirs=True)
 
 
 def get_paddles_dir():
