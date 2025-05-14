@@ -1,6 +1,9 @@
 import os
+from typing import Any
 
 import pygame
+from injector import inject
+
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir, get_images_dir
 
@@ -8,7 +11,16 @@ from .content_view import ContentView
 
 
 class InstructionsView(ContentView):
-    def __init__(self, layout, renderer, font, headline_font, text_font, amber_color=(255, 191, 63)):
+    @inject
+    def __init__(
+        self,
+        layout: Any,
+        renderer: Any,
+        font: Any,
+        headline_font: Any,
+        text_font: Any,
+        amber_color: tuple = (255, 191, 63),
+    ):
         self.layout = layout
         self.renderer = renderer
         self.font = font
@@ -38,13 +50,13 @@ class InstructionsView(ContentView):
             "Sometimes a special block may appear or be added to another block",
             "that will affect the gameplay if hit. They also disappear randomly.",
             # Paragraph 6 (1 line)
-            "Please read the manual for more information on how to play."
+            "Please read the manual for more information on how to play.",
         ]
         # Use asset loader utility and asset_paths to load mnbgrnd.png
         backgrounds_dir = get_backgrounds_dir()
         bg_path = os.path.join(backgrounds_dir, "mnbgrnd.png")
         self.bg_image = load_image(bg_path, alpha=False)
-        
+
         # Load xboing.png logo from the main images directory
         images_dir = get_images_dir()
         logo_path = os.path.join(images_dir, "xboing.png")
@@ -75,7 +87,9 @@ class InstructionsView(ContentView):
             logo_w, logo_h = self.logo_image.get_width(), self.logo_image.get_height()
             scale = min(max_logo_width / logo_w, max_logo_height / logo_h, 1.0)
             scaled_w, scaled_h = int(logo_w * scale), int(logo_h * scale)
-            logo_surf = pygame.transform.smoothscale(self.logo_image, (scaled_w, scaled_h))
+            logo_surf = pygame.transform.smoothscale(
+                self.logo_image, (scaled_w, scaled_h)
+            )
             logo_rect = logo_surf.get_rect(center=(centerx, y + scaled_h // 2))
             play_surf.blit(logo_surf, logo_rect)
             y = logo_rect.bottom + 10
@@ -126,7 +140,9 @@ class InstructionsView(ContentView):
 
     def handle_event(self, event):
         pass  # InstructionsView may handle events in the future
+
     def activate(self):
         pass
+
     def deactivate(self):
-        pass 
+        pass

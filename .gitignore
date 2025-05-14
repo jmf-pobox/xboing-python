@@ -14,6 +14,10 @@ dist/
 build/
 *.egg-info/
 
+# Python tools
+.ruff_cache/
+.mypy_cache/
+
 # IDE settings
 .idea/
 .vscode/
@@ -32,6 +36,5 @@ htmlcov/
 # Logs
 *.log
 
-.ruff_cache/
-.mypy_cache/
+# Project specific files
 xboing2.4-clang/

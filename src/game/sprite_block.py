@@ -5,15 +5,19 @@ This module implements blocks using the original XBoing styling,
 with proper rounded edges and spacing matching the original game.
 """
 
+import logging
 import os
 import random
 
 import pygame
+
 from utils.asset_paths import get_blocks_dir
 
 
 class SpriteBlock:
     """A sprite-based breakable block in the game."""
+
+    logger = logging.getLogger("xboing.SpriteBlock")
 
     # Block types (matching original XBoing)
     TYPE_RED = 0
@@ -146,7 +150,7 @@ class SpriteBlock:
         loaded_count = 0
         failed_count = 0
 
-        print(f"\nLoading block images from {blocks_dir}")
+        cls.logger.info(f"Loading block images from {blocks_dir}")
 
         # Load regular block images
         for _, block_info in cls.BLOCK_IMAGES.items():
@@ -164,10 +168,10 @@ class SpriteBlock:
                     loaded_count += 1
 
                 except Exception as e:
-                    print(f"Failed to load block image {image_file}: {e}")
+                    cls.logger.warning(f"Failed to load block image {image_file}: {e}")
                     failed_count += 1
             else:
-                print(f"Block image not found: {image_path}")
+                cls.logger.warning(f"Block image not found: {image_path}")
                 failed_count += 1
 
         # Load animation frames
@@ -182,7 +186,9 @@ class SpriteBlock:
                             ).convert_alpha()
                             loaded_count += 1
                         except Exception as e:
-                            print(f"Failed to load animation frame {frame}: {e}")
+                            cls.logger.warning(
+                                f"Failed to load animation frame {frame}: {e}"
+                            )
                             failed_count += 1
             elif isinstance(frames, dict):
                 for _, frame in frames.items():
@@ -194,10 +200,12 @@ class SpriteBlock:
                             ).convert_alpha()
                             loaded_count += 1
                         except Exception as e:
-                            print(f"Failed to load animation frame {frame}: {e}")
+                            cls.logger.warning(
+                                f"Failed to load animation frame {frame}: {e}"
+                            )
                             failed_count += 1
 
-        print(
+        cls.logger.info(
             f"Block image loading complete: {loaded_count} loaded, {failed_count} failed"
         )
 
@@ -273,7 +281,7 @@ class SpriteBlock:
             self.image = self._image_cache[self.image_file]
         else:
             # If image is not available, log error and use a placeholder
-            print(
+            self.logger.warning(
                 f"Error: Missing block image '{self.image_file}' for block type {block_type}"
             )
             self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
@@ -377,10 +385,14 @@ class SpriteBlock:
                 self.is_hit = False
 
         # Update animations for special blocks
-        if self.animation_frames and isinstance(self.animation_frames, list) and not (
-            self.type == self.TYPE_COUNTER
-            and hasattr(self, "counter_value")
-            and self.counter_value == 0
+        if (
+            self.animation_frames
+            and isinstance(self.animation_frames, list)
+            and not (
+                self.type == self.TYPE_COUNTER
+                and hasattr(self, "counter_value")
+                and self.counter_value == 0
+            )
         ):
             # Skip animation updates for counter blocks with counter_value=0
             self.animation_timer += delta_ms
@@ -535,6 +547,7 @@ class SpriteBlockManager:
             offset_x (int): X offset for all blocks (for positioning within play area)
             offset_y (int): Y offset for all blocks (for positioning within play area)
         """
+        self.logger = logging.getLogger("xboing.SpriteBlockManager")
         # Original XBoing block dimensions and spacing
         self.brick_width = 40  # BLOCK_WIDTH in original XBoing
         self.brick_height = 20  # BLOCK_HEIGHT in original XBoing
@@ -553,7 +566,7 @@ class SpriteBlockManager:
 
         # Get blocks directory using asset path utility
         blocks_dir = get_blocks_dir()
-        print(f"Using block images from {blocks_dir}")
+        self.logger.info(f"Using block images from {blocks_dir}")
 
         # Preload all block images for better performance
         SpriteBlock.preload_images(blocks_dir)
@@ -867,3 +880,7 @@ class SpriteBlockManager:
     def get_breakable_count(self):
         """Get the number of breakable blocks (excluding unbreakable ones)."""
         return sum(1 for block in self.blocks if block.type != SpriteBlock.TYPE_BLACK)
+
+    def remaining_blocks(self):
+        count = len([b for b in self.blocks if not b.is_broken()])
+        return count

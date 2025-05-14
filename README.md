@@ -1,3 +1,4 @@
+
 # XBoing Python Port
 
 A Python reimplementation of the classic XBoing game originally written for X11 in C. This modernized port maintains the gameplay and charm of the original while offering improved compatibility with modern systems.

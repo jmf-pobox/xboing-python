@@ -5,6 +5,7 @@ This module provides a centralized collision detection system
 that handles interactions between game objects.
 """
 
+import logging
 
 
 class CollisionSystem:
@@ -26,8 +27,10 @@ class CollisionSystem:
             screen_width (int): Screen width for boundary checks
             screen_height (int): Screen height for boundary checks
         """
+        self.logger = logging.getLogger("xboing.CollisionSystem")
         self.screen_width = screen_width
         self.screen_height = screen_height
+        self.logger.info(f"CollisionSystem initialized: {screen_width}x{screen_height}")
 
     def update_boundaries(self, width, height):
         """Update the screen boundaries."""
@@ -54,24 +57,28 @@ class CollisionSystem:
         if x - radius < 0:
             result["collision"] = True
             result["side"] = "left"
+            self.logger.info("Ball collided with left wall.")
             return result
 
         # Check right wall
         if x + radius > self.screen_width:
             result["collision"] = True
             result["side"] = "right"
+            self.logger.info("Ball collided with right wall.")
             return result
 
         # Check top wall
         if y - radius < 0:
             result["collision"] = True
             result["side"] = "top"
+            self.logger.info("Ball collided with top wall.")
             return result
 
         # Check bottom (ball lost)
         if y + radius > self.screen_height:
             result["collision"] = True
             result["side"] = "bottom"
+            self.logger.info("Ball collided with bottom wall (lost).")
             return result
 
         return result
@@ -106,6 +113,7 @@ class CollisionSystem:
 
         result["collision"] = True
         result["position"] = offset
+        self.logger.info(f"Ball collided with paddle at offset {offset:.2f}")
 
         return result
 

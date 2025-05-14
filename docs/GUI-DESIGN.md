@@ -91,7 +91,7 @@ Each UI region is implemented as a class/component that:
 | - event_bus       |<------->| - event_bus         |
 | - game_state      |         | - views             |
 |                   |         | - top_bar           |
-| fires events      |         | - bottom_bar        |
+| | fires events    |         | - bottom_bar        |
 +-------------------+         | - draw_all()        |
          ^                    +---------------------+
          |                            ^
@@ -261,5 +261,80 @@ while running:
 |-----------------|----------------------|-----------------------------|
 ```
 ---
+
+## 10. Event Routing: Unified Pygame Event System (2024 Redesign)
+
+### Overview
+
+- **All events** (user input, UI, game logic, custom game events) are routed through the Pygame event queue.
+- **Custom events** are defined using `pygame.USEREVENT + n` and posted with `pygame.event.post`.
+- **Handlers** (controllers, UI components, managers) implement a single `handle_events(events)` method and check for both built-in and custom event types.
+- **No custom EventBus or protocol-based event handlers.**
+
+### Example: Defining and Posting Custom Events
+
+```python
+MY_CUSTOM_EVENT = pygame.USEREVENT + 1
+pygame.event.post(pygame.event.Event(MY_CUSTOM_EVENT, {"score": 100}))
+```
+
+### Example: Handling Events in a Controller or View
+
+```python
+def handle_events(self, events):
+    for event in events:
+        if event.type == pygame.KEYDOWN:
+            ... # handle input
+        elif event.type == MY_CUSTOM_EVENT:
+            print("Custom event received! Score:", event.score)
+```
+
+### Updated Event Routing Table
+
+| **Event**                | **Fired By (Class/Method)**         | **Handler(s) (Class/Method)**                | **Notes**                                                                 |
+|--------------------------|-------------------------------------|----------------------------------------------|--------------------------------------------------------------------------|
+| `BlockHitEvent`          | `GameController.update_balls_and_collisions` | `AudioManager.handle_events`, etc.           | Sound/UI update                                                          |
+| `GameOverEvent`          | `GameState.lose_life`, `GameController.handle_life_loss` | `UIManager.handle_events`, etc.              | UI view switch, sound, etc.                                              |
+| `BallLostEvent`          | `GameController.update_balls_and_collisions` | `GameController.handle_events`               | Life loss/game logic                                                     |
+| `ScoreChangedEvent`      | `GameState.add_score`, `set_score`  | `ScoreDisplay.handle_events`                 | UI update                                                                |
+| ...                      | ...                                 | ...                                         | ...                                                                      |
+| **Pygame Events**        | User input, system events           | All controllers/views via `handle_events`    | Unified event loop                                                        |
+
+### Handler Class/Method Key
+- All handlers use `handle_events(events)` and check for both Pygame and custom event types.
+- No protocol-based or function-based event subscriptions.
+
+### Notes on Routing
+- **All event subscriptions and handling are via the Pygame event queue.**
+- **No custom EventBus or protocol-based handlers remain.**
+- **UI components, controllers, and managers all use the same event loop.**
+
+### Pygame Events
+- **All events** (keyboard, mouse, custom) are handled in the same loop.
+
+---
+
+## 11. Migration Plan: Event System Simplification (2024)
+
+### Step-by-Step Checklist
+
+1. **Remove EventBus and EventHandlerProtocol from the codebase.**
+2. **Update all event firing to use `pygame.event.post` with custom events.**
+3. **Update all event handlers to use only `handle_events(events)` and check for both Pygame and custom event types.**
+4. **Update UI components, controllers, and managers to subscribe to events via the Pygame event queue.**
+5. **Update tests and documentation.**
+
+### Migration Order (Class-by-Class)
+- [ ] Remove EventBus and protocol-based code from all modules.
+- [ ] Update GameController: move all event handling to `handle_events` and use Pygame custom events.
+- [ ] Update LevelCompleteController, GameOverController, InstructionsController: same as above.
+- [ ] Update UI components (ScoreDisplay, LivesDisplay, etc.): handle custom events in `handle_events`.
+- [ ] Update AudioManager: handle sound-triggering events in `handle_events`.
+- [ ] Update main loop: only use Pygame event queue.
+- [ ] Update tests and documentation.
+
+---
+
+*This new design provides a single, unified event system for all game, UI, and input events, greatly simplifying the architecture and reducing confusion.*
 
 *This document provides a unified overview of both the visual layout and the event-driven, component-based UI architecture of XBoing Python. It is intended to guide both current development and future extensions.* 

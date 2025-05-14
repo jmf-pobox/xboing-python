@@ -8,19 +8,18 @@ class MessageDisplay:
     Style matches the timer: bright green, same font size.
     """
 
-    def __init__(self, event_bus, layout, renderer, font):
-        self.event_bus = event_bus
+    def __init__(self, layout, renderer, font):
         self.layout = layout
         self.renderer = renderer
         self.font = font
         self.message = ""
         self.alignment = "left"
-        # Subscribe to message change events
-        self.event_bus.subscribe(MessageChangedEvent, self.on_message_changed)
 
-    def on_message_changed(self, event):
-        self.message = event.message
-        self.alignment = event.alignment
+    def handle_events(self, events):
+        for event in events:
+            if hasattr(event, 'event') and isinstance(event.event, MessageChangedEvent):
+                self.message = event.event.message
+                self.alignment = event.event.alignment
 
     def draw(self, surface):
         message_rect = self.layout.get_message_rect()

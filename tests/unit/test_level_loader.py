@@ -22,6 +22,7 @@ def setup_pygame():
     yield
     pygame.quit()
 
+
 def test_level_loading():
     """
     Test that LevelManager can load levels 1-10 and populates block manager.
@@ -37,8 +38,14 @@ def test_level_loading():
         assert success, f"Level {level_num} failed to load"
         info = level_manager.get_level_info()
         # Basic checks: title is non-empty, time_bonus is int, blocks exist
-        assert isinstance(info["title"], str) and info["title"], f"Level {level_num} has no title"
-        assert isinstance(info["time_bonus"], int), f"Level {level_num} has invalid time_bonus"
+        assert (
+            isinstance(info["title"], str) and info["title"]
+        ), f"Level {level_num} has no title"
+        assert isinstance(
+            info["time_bonus"], int
+        ), f"Level {level_num} has invalid time_bonus"
         assert len(block_manager.blocks) > 0, f"Level {level_num} has no blocks"
         # Optionally, print for debug (pytest -s)
-        print(f"Level {level_num}: Title='{info['title']}', Time Bonus={info['time_bonus']}, Block Count={len(block_manager.blocks)}")
+        print(
+            f"Level {level_num}: Title='{info['title']}', Time Bonus={info['time_bonus']}, Block Count={len(block_manager.blocks)}"
+        )

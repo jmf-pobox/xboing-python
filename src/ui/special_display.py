@@ -15,36 +15,40 @@ class SpecialDisplay:
     UI component for displaying the status of special power-ups in the special window region.
     Subscribes to events for each special and renders their state as colored labels.
     """
+
     LABELS = [
-        ("Reverse", "reverse"), ("Save", "save"), ("NoWall", "nowall"), ("x2", "x2"),
-        ("Sticky", "sticky"), ("FastGun", "fastgun"), ("Killer", "killer"), ("x4", "x4"),
+        ("Reverse", "reverse"),
+        ("Save", "save"),
+        ("NoWall", "nowall"),
+        ("x2", "x2"),
+        ("Sticky", "sticky"),
+        ("FastGun", "fastgun"),
+        ("Killer", "killer"),
+        ("x4", "x4"),
     ]
     EVENT_MAP = {
-        'reverse': SpecialReverseChangedEvent,
-        'sticky': SpecialStickyChangedEvent,
-        'save': SpecialSaveChangedEvent,
-        'fastgun': SpecialFastGunChangedEvent,
-        'nowall': SpecialNoWallChangedEvent,
-        'killer': SpecialKillerChangedEvent,
-        'x2': SpecialX2ChangedEvent,
-        'x4': SpecialX4ChangedEvent,
+        "reverse": SpecialReverseChangedEvent,
+        "sticky": SpecialStickyChangedEvent,
+        "save": SpecialSaveChangedEvent,
+        "fastgun": SpecialFastGunChangedEvent,
+        "nowall": SpecialNoWallChangedEvent,
+        "killer": SpecialKillerChangedEvent,
+        "x2": SpecialX2ChangedEvent,
+        "x4": SpecialX4ChangedEvent,
     }
 
-    def __init__(self, event_bus, layout, renderer, font):
-        self.event_bus = event_bus
+    def __init__(self, layout, renderer, font):
         self.layout = layout
         self.renderer = renderer
         self.font = font
         # State for each special (all off by default)
         self.state = {key: False for _, key in self.LABELS}
-        # Subscribe to events
-        for key, event_cls in self.EVENT_MAP.items():
-            self.event_bus.subscribe(event_cls, self._make_handler(key))
 
-    def _make_handler(self, key):
-        def handler(event):
-            self.state[key] = event.active
-        return handler
+    def handle_events(self, events):
+        for event in events:
+            for key, event_cls in self.EVENT_MAP.items():
+                if hasattr(event, 'event') and isinstance(event.event, event_cls):
+                    self.state[key] = event.event.active
 
     def draw(self, surface):
         special_rect = self.layout.special_window.rect.rect
@@ -57,4 +61,4 @@ class SpecialDisplay:
             x = x0 + col * col_width
             y = y0 + row * row_height
             color = (255, 255, 0) if self.state[key] else (255, 255, 255)
-            self.renderer.draw_text(label, self.font, color, x, y, centered=False) 
+            self.renderer.draw_text(label, self.font, color, x, y, centered=False)

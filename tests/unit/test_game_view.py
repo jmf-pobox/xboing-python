@@ -5,29 +5,38 @@ from ui.game_view import GameView
 class MockBlockManager:
     def __init__(self):
         self.drawn = False
+
     def draw(self, surface):
         self.drawn = True
+
 
 class MockPaddle:
     def __init__(self):
         self.drawn = False
+
     def draw(self, surface):
         self.drawn = True
+
 
 class MockBall:
     def __init__(self):
         self.drawn = False
+
     def draw(self, surface):
         self.drawn = True
+
 
 class MockLayout:
     def get_play_rect(self):
         class R:
             x, y, width, height = 0, 0, 100, 100
+
         return R()
+
 
 class MockRenderer:
     pass
+
 
 def test_game_view_draw():
     pygame.init()
@@ -42,4 +51,4 @@ def test_game_view_draw():
     assert block_manager.drawn
     assert paddle.drawn
     assert all(ball.drawn for ball in balls)
-    pygame.quit() 
+    pygame.quit()

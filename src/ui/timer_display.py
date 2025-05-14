@@ -7,18 +7,18 @@ class TimerDisplay:
     Subscribes to TimerUpdatedEvent and renders itself in the time window region.
     Uses renderer.draw_text, not digit sprites.
     """
-    def __init__(self, event_bus, layout, renderer, font, x=0):
-        self.event_bus = event_bus
+
+    def __init__(self, layout, renderer, font, x=0):
         self.layout = layout
         self.renderer = renderer
         self.font = font
         self.time_remaining = 0
         self.x = x
-        # Subscribe to timer update events
-        self.event_bus.subscribe(TimerUpdatedEvent, self.on_timer_updated)
 
-    def on_timer_updated(self, event):
-        self.time_remaining = event.time_remaining
+    def handle_events(self, events):
+        for event in events:
+            if hasattr(event, 'event') and isinstance(event.event, TimerUpdatedEvent):
+                self.time_remaining = event.event.time_remaining
 
     def draw(self, surface):
         # Get the time window rect from layout
@@ -43,4 +43,4 @@ class TimerDisplay:
             time_rect.x + (time_rect.width // 2),
             time_rect.y + (time_rect.height // 2),
             centered=True,
-        ) 
+        )

@@ -5,12 +5,15 @@ This module provides keyboard and mouse input management,
 abstracting the underlying pygame implementation.
 """
 
-import pygame
 import logging
+
+import pygame
 
 
 class InputManager:
     """Manages keyboard and mouse input."""
+
+    logger = logging.getLogger("xboing.InputManager")
 
     def __init__(self):
         """Initialize the input manager."""
@@ -31,11 +34,8 @@ class InputManager:
         Update input state for the current frame.
         Should be called at the beginning of each frame.
         """
-        logger = logging.getLogger("xboing.InputManager")
         if events is None:
             events = pygame.event.get()
-        for event in events:
-            logger.debug(f"InputManager.update: event={event}")
         # Clear one-frame states
         self.keys_down.clear()
         self.keys_up.clear()

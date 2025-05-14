@@ -5,6 +5,7 @@ This module contains the block class and related utilities for
 creating, rendering, and managing breakable blocks.
 """
 
+import logging
 import random
 
 import pygame
@@ -12,6 +13,8 @@ import pygame
 
 class Block:
     """A breakable block in the game."""
+
+    logger = logging.getLogger("xboing.Block")
 
     # Block types
     TYPE_NORMAL = 0
@@ -76,6 +79,9 @@ class Block:
         self.animation_frame = 0
         self.is_hit = False
         self.hit_timer = 0
+        self.logger.info(
+            f"Block created at ({x}, {y}) type={block_type} color={color_name}"
+        )
 
     def update(self, delta_ms):
         """
@@ -110,6 +116,9 @@ class Block:
 
         # Check if broken
         if self.health <= 0:
+            self.logger.info(
+                f"Block at ({self.x}, {self.y}) broken, points={self.points}"
+            )
             return (True, self.points)
 
         return (False, 0)

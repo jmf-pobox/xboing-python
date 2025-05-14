@@ -41,7 +41,7 @@ class GameView(ContentView):
             pygame.Rect(
                 play_rect.x + play_rect.width - 2, play_rect.y, 2, play_rect.height
             ),
-        )  # Right 
+        )  # Right
 
     def handle_event(self, event):
         pass  # GameView may handle events in the future
@@ -50,4 +50,4 @@ class GameView(ContentView):
         pass
 
     def deactivate(self):
-        pass 
+        pass

@@ -5,12 +5,16 @@ This module contains the ball class that handles physics, movement,
 and collision detection with walls and the paddle.
 """
 
+import logging
 import math
 import os
 import random
 
 import pygame
 
+from utils.asset_paths import get_balls_dir
+
+logger = logging.getLogger(__name__)
 
 class Ball:
     """A bouncing ball with physics and collision detection."""
@@ -25,15 +29,7 @@ class Ball:
         if cls.sprites is None:
             cls.sprites = []
             cls.animation_frames = []
-
-            # Determine the assets directory path
-            # First try to find it relative to this file
-            assets_dir = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                "assets",
-                "images",
-                "balls",
-            )
+            assets_dir = get_balls_dir()
 
             # Load the four main ball sprites
             for i in range(1, 5):
@@ -42,7 +38,7 @@ class Ball:
                     img = pygame.image.load(sprite_path).convert_alpha()
                     cls.sprites.append(img)
                 except (pygame.error, FileNotFoundError) as e:
-                    print(f"Failed to load ball sprite {i}: {e}")
+                    cls.logger.warning(f"Failed to load ball sprite {i}: {e}")
                     # Create a fallback sprite if loading fails
                     fallback = pygame.Surface((20, 20), pygame.SRCALPHA)
                     pygame.draw.circle(fallback, (255, 255, 255), (10, 10), 10)
@@ -55,7 +51,7 @@ class Ball:
                     img = pygame.image.load(anim_path).convert_alpha()
                     cls.animation_frames.append(img)
                 except (pygame.error, FileNotFoundError) as e:
-                    print(f"Failed to load ball animation frame {i}: {e}")
+                    cls.logger.warning(f"Failed to load ball animation frame {i}: {e}")
 
     def __init__(self, x, y, radius=8, color=(255, 255, 255)):
         """
@@ -125,7 +121,6 @@ class Ball:
         if not self.active:
             return (False, False, False)
 
-        # If the ball is stuck to the paddle, update its position
         if self.stuck_to_paddle and paddle:
             self.x = paddle.rect.centerx + self.paddle_offset
             self.y = paddle.rect.top - self.radius - 1
@@ -244,6 +239,7 @@ class Ball:
 
     def release_from_paddle(self):
         """Release the ball if it's stuck to the paddle."""
+        logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
         self.stuck_to_paddle = False
 
     def _add_random_factor(self):

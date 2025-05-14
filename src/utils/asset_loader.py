@@ -68,7 +68,7 @@ def load_image_sequence(directory, pattern, num_frames, alpha=True):
     return frames
 
 
-def create_font(font_name, size):
+def create_font(size):
     """
     Create a pygame font object.
 
@@ -79,17 +79,4 @@ def create_font(font_name, size):
     Returns:
         pygame.font.Font: The font object
     """
-    try:
-        # Use default font if None is provided
-        if font_name is None:
-            return pygame.font.Font(None, size)
-
-        # Try to load custom font if it's a path
-        if os.path.exists(font_name):
-            return pygame.font.Font(font_name, size)
-
-        # Otherwise use system font
-        return pygame.font.SysFont(font_name, size)
-    except pygame.error:
-        # Fall back to default font
-        return pygame.font.Font(None, size)
+    return pygame.font.Font(None, size)

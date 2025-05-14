@@ -5,11 +5,11 @@ This module handles loading, parsing, and managing XBoing level files.
 It interfaces with the SpriteBlockManager to create the appropriate block layout.
 """
 
+import logging
 import os
 
-from utils.asset_paths import get_levels_dir
-
 from game.sprite_block import SpriteBlock
+from utils.asset_paths import get_levels_dir
 
 
 class LevelManager:
@@ -76,6 +76,7 @@ class LevelManager:
                 If None, tries to find the default levels directory.
             layout (GameLayout): The game layout to set backgrounds on.
         """
+        self.logger = logging.getLogger("xboing.LevelManager")
         self.current_level = 1
         self.level_title = ""
         self.time_bonus = 0
@@ -92,7 +93,7 @@ class LevelManager:
         # Set the levels directory
         self.levels_dir = levels_dir if levels_dir is not None else get_levels_dir()
 
-        print(f"Using levels directory: {self.levels_dir}")
+        self.logger.info(f"Using levels directory: {self.levels_dir}")
 
     def set_block_manager(self, block_manager):
         """
@@ -135,7 +136,7 @@ class LevelManager:
         level_file = self._get_level_file_path(self.current_level)
 
         if not os.path.exists(level_file):
-            print(f"Level file not found: {level_file}")
+            self.logger.warning(f"Level file not found: {level_file}")
             return False
 
         try:
@@ -154,13 +155,13 @@ class LevelManager:
 
                     return True
                 else:
-                    print("Error: Block manager not set")
+                    self.logger.error("Error: Block manager not set")
                     return False
             else:
-                print(f"Failed to parse level file: {level_file}")
+                self.logger.warning(f"Failed to parse level file: {level_file}")
                 return False
         except Exception as e:
-            print(f"Error loading level {self.current_level}: {e}")
+            self.logger.error(f"Error loading level {self.current_level}: {e}")
             return False
 
     def get_next_level(self):
@@ -288,7 +289,7 @@ class LevelManager:
             layout (list): List of rows, each a string of characters representing blocks
         """
         if not self.block_manager:
-            print("Error: Block manager not set")
+            self.logger.error("Block manager not set")
             return
 
         # Calculate block dimensions and spacing (these should match SpriteBlockManager)
@@ -396,7 +397,7 @@ class LevelManager:
         bg_file = f"bgrnd{bg_index+2}.png"
 
         # Debug information
-        print(
+        self.logger.info(
             f"Setting level {self.current_level} background to: {bg_file} (background {self.current_background})"
         )
 
@@ -449,5 +450,5 @@ class LevelManager:
 
                 return {"title": title, "time_bonus": time_bonus, "layout": layout}
         except Exception as e:
-            print(f"Error parsing level file {file_path}: {e}")
+            self.logger.error(f"Error parsing level file {file_path}: {e}")
             return None

@@ -1,14 +1,28 @@
-import pygame
-from typing import Callable, Optional
-from .content_view import ContentView
 import logging
+from typing import Callable, Optional
+
+import pygame
+from injector import inject
+
+from .content_view import ContentView
+
 
 class GameOverView(ContentView):
     """
     Content view for the game over screen. Draws only within the play window region.
     Calls reset_game callback when Space is pressed.
     """
-    def __init__(self, layout, renderer, font, small_font, get_score_callback, reset_game_callback: Optional[Callable[[], None]] = None):
+
+    @inject
+    def __init__(
+        self,
+        layout,
+        renderer,
+        font,
+        small_font,
+        get_score_callback: Callable[[], int],
+        reset_game_callback: Optional[Callable[[], None]] = None,
+    ):
         self.layout = layout
         self.renderer = renderer
         self.font = font
@@ -40,8 +54,36 @@ class GameOverView(ContentView):
         overlay.fill((0, 0, 0, 180))
         surface.blit(overlay, (play_rect.x, play_rect.y))
         # Text
-        self.renderer.draw_text("GAME OVER", self.font, (255, 50, 50), play_rect.centerx, play_rect.centery - 60, centered=True)
-        self.renderer.draw_text("FINAL SCORE", self.small_font, (255, 255, 255), play_rect.centerx, play_rect.centery - 20, centered=True)
+        self.renderer.draw_text(
+            "GAME OVER",
+            self.font,
+            (255, 50, 50),
+            play_rect.centerx,
+            play_rect.centery - 60,
+            centered=True,
+        )
+        self.renderer.draw_text(
+            "FINAL SCORE",
+            self.small_font,
+            (255, 255, 255),
+            play_rect.centerx,
+            play_rect.centery - 20,
+            centered=True,
+        )
         score = self.get_score()
-        self.renderer.draw_text(str(score), self.font, (255, 255, 0), play_rect.centerx, play_rect.centery + 20, centered=True)
-        self.renderer.draw_text("Press SPACE to restart", self.small_font, (200, 200, 200), play_rect.centerx, play_rect.centery + 70, centered=True) 
+        self.renderer.draw_text(
+            str(score),
+            self.font,
+            (255, 255, 0),
+            play_rect.centerx,
+            play_rect.centery + 20,
+            centered=True,
+        )
+        self.renderer.draw_text(
+            "Press SPACE to restart",
+            self.small_font,
+            (200, 200, 200),
+            play_rect.centerx,
+            play_rect.centery + 70,
+            centered=True,
+        )
