@@ -53,9 +53,10 @@ class GameOverController(BaseController):
         self.logger.info(
             "reset_game called: restarting game state and returning to gameplay view."
         )
-        self.game_state.full_restart(
+        changes = self.game_state.full_restart(
             self.level_manager,
         )
+        self.game_controller.post_game_state_events(changes)
         self.logger.info(
             f"After full_restart: game_state.is_game_over() = {self.game_state.is_game_over()}"
         )

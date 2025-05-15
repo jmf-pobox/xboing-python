@@ -66,3 +66,9 @@ Continue with main.py compliance refactor, starting with moving UIManager/Contro
 - [x] Set the timer in GameState at the start of each round and after loading a level.
 - [x] Ensure the timer is updated in the UI immediately after the ball is launched.
 - [ ] Test that the timer displays and counts down correctly in-game.
+
+- [x] Integrate application icon using assets/images/icon.png in the game window (complete)
+
+- [x] Refactor GameState and GameController to decouple event firing (complete)
+
+- [x] BUGFIX: When the last life is lost, the lives display (balls) should update to zero before the game over overlay appears. Fixed by emitting both LivesChangedEvent(0) and GameOverEvent in GameState.lose_life(). Added a test to ensure event order.

@@ -41,8 +41,8 @@ from ui.game_over_view import GameOverView
 from ui.instructions_view import InstructionsView
 from ui.ui_factory import UIFactory
 from ui.ui_manager import UIManager
-from utils.asset_loader import create_font
-from utils.asset_paths import get_sounds_dir
+from utils.asset_loader import create_font, load_image
+from utils.asset_paths import get_sounds_dir, get_asset_path
 from utils.logging_config import setup_logging
 from app_coordinator import AppCoordinator
 
@@ -102,6 +102,10 @@ def main():
     audio_manager.load_sounds_from_map()
 
     window = Window(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE)
+    # Set application icon
+    icon_path = get_asset_path('images/icon.png')
+    icon_surface = load_image(icon_path, alpha=True)
+    window.set_icon(icon_surface)
     renderer = Renderer(window.surface)
     input_manager = InputManager()
     layout = GameLayout(WINDOW_WIDTH, WINDOW_HEIGHT)

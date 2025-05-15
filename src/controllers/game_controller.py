@@ -26,6 +26,11 @@ class GameController(BaseController):
     """
     Handles gameplay input, updates, and transitions for the GameView.
     Handles paddle, ball, block, and debug logic, as well as global controls via BaseController.
+
+    **Event decoupling pattern:**
+    GameState and other model methods do not post events directly. Instead, they return a list of event instances
+    representing state changes. GameController is responsible for posting these events to the Pygame event queue
+    using the post_game_state_events helper. This enables headless testing and decouples model logic from the event system.
     """
 
     BALL_RADIUS = (
@@ -62,33 +67,31 @@ class GameController(BaseController):
         self.renderer = renderer
         self.audio_manager = audio_manager
         self.event_sound_map = event_sound_map
-        self.waiting_for_launch = True  # Track launch state here
+        self.waiting_for_launch = True
         self.level_complete = False
 
     def handle_events(self, events):
         super().handle_events(events)
         for event in events:
-            if event.type == 1025:  # pygame.MOUSEBUTTONDOWN
-                logger.debug(
-                    f"MOUSEBUTTONDOWN detected in GameController. waiting_for_launch={self.waiting_for_launch}"
-                )
-                if self.waiting_for_launch:
-                    logger.debug("Launching ball(s) from paddle.")
-                    for i, ball in enumerate(self.balls):
-                        logger.debug(f"Calling release_from_paddle on ball {i}")
-                        ball.release_from_paddle()
-                    self.waiting_for_launch = False
-                    self.game_state.set_timer(self.level_manager.get_time_remaining())
-                    self.level_manager.start_timer()
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()}))
-                    level_info = self.level_manager.get_level_info()
-                    level_title = level_info["title"]
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")}))
-                    logger.debug("Ball(s) launched and timer started.")
-                else:
-                    logger.debug("Not launching: waiting_for_launch is False.")
+            # Launch balls from paddle when mouse button is clicked
+            if event.type == 1025 and self.waiting_for_launch:  # pygame.MOUSEBUTTONDOWN
+                logger.debug("Launching ball(s) from paddle.")
+                for i, ball in enumerate(self.balls):
+                    logger.debug(f"Calling release_from_paddle on ball {i}")
+                    ball.release_from_paddle()
+                self.waiting_for_launch = False
+                # GameState.set_timer now returns events, which must be posted by the controller
+                changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
+                self.post_game_state_events(changes)
+                self.level_manager.start_timer()
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()}))
+                level_info = self.level_manager.get_level_info()
+                level_title = level_info["title"]
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")}))
+                logger.debug("Ball(s) launched and timer started.")
+
             # Check for BallLostEvent in the correct way
-            if hasattr(event, 'event') and isinstance(event.event, BallLostEvent):
+            if event.type == pygame.USEREVENT and isinstance(event.event, BallLostEvent):
                 logger.debug("BallLostEvent detected in GameController.")
                 self.handle_life_loss()
 
@@ -138,7 +141,8 @@ class GameController(BaseController):
             and not self.level_complete
         ):
             self.level_manager.update(delta_ms)
-            self.game_state.set_timer(self.level_manager.get_time_remaining())
+            changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
+            self.post_game_state_events(changes)
 
     def update_balls_and_collisions(self, delta_ms):
         """Update balls, check for collisions, and handle block effects."""
@@ -156,7 +160,8 @@ class GameController(BaseController):
             if is_active:
                 points, broken, effects = self.block_manager.check_collisions(ball)
                 if points != 0:
-                    self.game_state.add_score(points)
+                    changes = self.game_state.add_score(points)
+                    self.post_game_state_events(changes)
                 if broken > 0:
                     pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()}))
                 for effect in effects:
@@ -219,7 +224,8 @@ class GameController(BaseController):
 
         # Always show "Balls Terminated!" message a ball / life is lost
         self.level_manager.stop_timer()
-        self.game_state.lose_life()
+        changes = self.game_state.lose_life()
+        self.post_game_state_events(changes)
         logger.debug(f"Life lost. Remaining lives: {self.game_state.lives}")
         pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent("Balls Terminated!", color=(0, 255, 0), alignment="left")}))
 
@@ -235,8 +241,8 @@ class GameController(BaseController):
         # If no lives remain, set game over
         else:
             logger.debug("No lives remain, setting game over.")
-            self.game_state.set_game_over(True)
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": GameOverEvent()}))
+            changes = self.game_state.set_game_over(True)
+            self.post_game_state_events(changes)
 
     def check_level_complete(self):
         """Check if the level is complete and fire events if so."""
@@ -296,3 +302,19 @@ class GameController(BaseController):
             logger.debug("BallLostEvent detected in GameController via handle_event.")
             self.handle_life_loss(event)
         # Add more event handling as needed
+
+    def post_game_state_events(self, changes):
+        """
+        Post all events returned by GameState/model methods to the Pygame event queue.
+        This implements the decoupled event firing pattern: models return events, controllers post them.
+        """
+        for event in changes:
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": event}))
+
+    def restart_game(self):
+        changes = self.game_state.restart()
+        self.post_game_state_events(changes)
+
+    def full_restart_game(self):
+        changes = self.game_state.full_restart(self.level_manager)
+        self.post_game_state_events(changes)

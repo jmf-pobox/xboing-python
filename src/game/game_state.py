@@ -1,5 +1,4 @@
 import logging
-import pygame
 
 from engine.events import (
     GameOverEvent,
@@ -49,84 +48,127 @@ class GameState:
         }
 
     def add_score(self, points):
+        """
+        Add points to the score and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.score += points
         self.logger.info(f"Score increased by {points}, new score: {self.score}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": ScoreChangedEvent(self.score)}))
+        return [ScoreChangedEvent(self.score)]
 
     def set_score(self, score):
+        """
+        Set the score and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.score = score
         self.logger.info(f"Score set to {self.score}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": ScoreChangedEvent(self.score)}))
+        return [ScoreChangedEvent(self.score)]
 
     def lose_life(self):
+        """
+        Decrement lives and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.lives -= 1
         self.logger.info(f"Life lost, remaining lives: {self.lives}")
         if self.lives <= 0:
             self.set_game_over(True)
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": GameOverEvent()}))
+            return [LivesChangedEvent(0), GameOverEvent()]
         else:
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": LivesChangedEvent(self.lives)}))
+            return [LivesChangedEvent(self.lives)]
 
     def set_lives(self, lives):
+        """
+        Set the number of lives and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.lives = lives
         self.logger.info(f"Lives set to {self.lives}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": LivesChangedEvent(self.lives)}))
+        return [LivesChangedEvent(self.lives)]
 
     def set_level(self, level):
+        """
+        Set the level and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.level = level
         self.logger.info(f"Level set to {self.level}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": LevelChangedEvent(self.level)}))
+        return [LevelChangedEvent(self.level)]
 
     def set_timer(self, time_remaining):
+        """
+        Set the timer and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         self.timer = time_remaining
         self.logger.debug(f"Timer set to {self.timer}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": TimerUpdatedEvent(self.timer)}))
+        return [TimerUpdatedEvent(self.timer)]
 
     def set_special(self, name, value):
+        """
+        Set a special flag and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         if name in self.specials and self.specials[name] != value:
             self.specials[name] = value
             self.logger.info(f"Special '{name}' set to {value}")
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": self._event_map[name](value)}))
+            return [self._event_map[name](value)]
+        return []
 
     def get_special(self, name):
         return self.specials.get(name, False)
 
     def set_game_over(self, value: bool):
+        """
+        Set the game over flag and return a list of change events.
+        Does not fire events directly (side-effect free).
+        """
         if self.game_over != value:
             self.game_over = value
             self.logger.info(f"Game over set to {self.game_over}")
             if value:
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": GameOverEvent()}))
+                return [GameOverEvent()]
+        return []
 
     def is_game_over(self):
         return self.game_over
 
     def restart(self):
+        """
+        Reset the game state and return a list of all change events.
+        Does not fire events directly (side-effect free).
+        """
         self.logger.info("Game state restarted")
+        all_events = []
         self.game_over = False
-        self.set_score(0)
-        self.set_lives(3)
-        self.set_level(1)
-        self.set_timer(0)
-        self.set_game_over(False)
+        all_events += self.set_score(0)
+        all_events += self.set_lives(3)
+        all_events += self.set_level(1)
+        all_events += self.set_timer(0)
+        all_events += self.set_game_over(False)
         for name in self.specials:
-            self.set_special(name, False)
+            all_events += self.set_special(name, False)
+        return all_events
 
     def full_restart(self, level_manager):
         """
-        Reset all game state, load the level, set timer from level manager, and fire the level title message.
+        Reset all game state, load the level, set timer from level manager, and return all change events.
+        Does not fire events directly (side-effect free).
         """
         self.logger.info("Full game state restart")
+        all_events = []
+
         self.game_over = False
-        self.set_score(0)
-        self.set_lives(3)
-        self.set_level(1)
+        all_events += self.set_score(0)
+        all_events += self.set_lives(3)
+        all_events += self.set_level(1)
         for name in self.specials:
-            self.set_special(name, False)
+            all_events += self.set_special(name, False)
+
         level_manager.load_level(self.level)
-        self.set_timer(level_manager.get_time_remaining())
+        all_events += self.set_timer(level_manager.get_time_remaining())
         level_info = level_manager.get_level_info()
         level_title = level_info["title"]
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")}))
-
-    # Optionally, add more methods for other state changes as needed
+        all_events.append(MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left"))
+        return all_events

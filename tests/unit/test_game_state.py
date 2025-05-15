@@ -15,6 +15,7 @@ from engine.events import (
     SpecialX2ChangedEvent,
     SpecialX4ChangedEvent,
     TimerUpdatedEvent,
+    GameOverEvent,
 )
 from game.game_state import GameState
 
@@ -29,70 +30,56 @@ def game_state():
 
 def test_score_event(game_state):
     state, mock_post = game_state
-    state.set_score(42)
-    # Check that pygame.event.post was called with a pygame.event.Event containing a ScoreChangedEvent
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, ScoreChangedEvent)
-    assert pygame_event.event.score == 42
+    # Test set_score returns correct event
+    changes = state.set_score(42)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, ScoreChangedEvent)
+    assert event.score == 42
 
-    # Reset the mock and test add_score
-    mock_post.reset_mock()
-    state.add_score(8)
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, ScoreChangedEvent)
-    assert pygame_event.event.score == 50
+    # Test add_score returns correct event
+    changes = state.add_score(8)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, ScoreChangedEvent)
+    assert event.score == 50
 
 
 def test_lives_event(game_state):
     state, mock_post = game_state
-    state.set_lives(5)
-    # Check that pygame.event.post was called with a pygame.event.Event containing a LivesChangedEvent
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, LivesChangedEvent)
-    assert pygame_event.event.lives == 5
+    # Test set_lives returns correct event
+    changes = state.set_lives(5)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, LivesChangedEvent)
+    assert event.lives == 5
 
-    # Reset the mock and test lose_life
-    mock_post.reset_mock()
-    state.lose_life()
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, LivesChangedEvent)
-    assert pygame_event.event.lives == 4
+    # Test lose_life returns correct event (should decrement to 4)
+    changes = state.lose_life()
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, LivesChangedEvent)
+    assert event.lives == 4
 
 
 def test_level_event(game_state):
     state, mock_post = game_state
-    state.set_level(3)
-    # Check that pygame.event.post was called with a pygame.event.Event containing a LevelChangedEvent
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, LevelChangedEvent)
-    assert pygame_event.event.level == 3
+    # Test set_level returns correct event
+    changes = state.set_level(3)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, LevelChangedEvent)
+    assert event.level == 3
 
 
 def test_timer_event(game_state):
     state, mock_post = game_state
-    state.set_timer(99)
-    # Check that pygame.event.post was called with a pygame.event.Event containing a TimerUpdatedEvent
-    mock_post.assert_called()
-    args, _ = mock_post.call_args
-    pygame_event = args[0]
-    assert pygame_event.type == pygame.USEREVENT
-    assert isinstance(pygame_event.event, TimerUpdatedEvent)
-    assert pygame_event.event.time_remaining == 99
+    # Test set_timer returns correct event
+    changes = state.set_timer(99)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, TimerUpdatedEvent)
+    assert event.time_remaining == 99
 
 
 def test_special_events(game_state):
@@ -109,21 +96,31 @@ def test_special_events(game_state):
     ]
     for name, event_cls in specials:
         # Test setting special to True
-        mock_post.reset_mock()
-        state.set_special(name, True)
-        mock_post.assert_called()
-        args, _ = mock_post.call_args
-        pygame_event = args[0]
-        assert pygame_event.type == pygame.USEREVENT
-        assert isinstance(pygame_event.event, event_cls)
-        assert pygame_event.event.active is True
+        changes = state.set_special(name, True)
+        assert len(changes) == 1
+        event = changes[0]
+        assert isinstance(event, event_cls)
+        assert event.active is True
 
         # Test setting special to False
-        mock_post.reset_mock()
-        state.set_special(name, False)
-        mock_post.assert_called()
-        args, _ = mock_post.call_args
-        pygame_event = args[0]
-        assert pygame_event.type == pygame.USEREVENT
-        assert isinstance(pygame_event.event, event_cls)
-        assert pygame_event.event.active is False
+        changes = state.set_special(name, False)
+        assert len(changes) == 1
+        event = changes[0]
+        assert isinstance(event, event_cls)
+        assert event.active is False
+
+
+def test_game_over_event(game_state):
+    state, mock_post = game_state
+    # Should return GameOverEvent when setting to True
+    changes = state.set_game_over(True)
+    if not changes:
+        # If already True, set to False and try again
+        state.set_game_over(False)
+        changes = state.set_game_over(True)
+    assert len(changes) == 1
+    event = changes[0]
+    assert isinstance(event, GameOverEvent)
+    # Should return empty list if setting to False or no change
+    changes = state.set_game_over(False)
+    assert changes == []

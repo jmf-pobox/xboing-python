@@ -1,340 +1,207 @@
 # XBoing Python GUI Design & Architecture
 
-## 1. Overview & Rationale
+## 1. Overview
 
-The XBoing Python GUI is designed around two core principles:
-- **Faithful recreation of the original XBoing window layout and visual regions**
-- **Modern, event-driven, component-based UI architecture for maintainability and testability**
-
-This approach ensures the game looks and feels like the original, while making the codebase robust, extensible, and easy to test.
-
-### Why Event-Driven, Component-Based UI?
-- **Decoupling:** UI components react to events, not direct state changes, making them independent and reusable.
-- **Testability:** Components can be tested in isolation by firing events.
-- **Extensibility:** New UI features (overlays, menus, etc.) can be added as components without modifying core game logic.
-- **Pygame Compatibility:** The design fits naturally with Pygame's event loop and rendering model.
+- **Faithful recreation** of the original XBoing window layout and visual regions.
+- **Modern, event-driven, component-based UI architecture** for maintainability and testability.
+- **All events** (game, UI, input) are routed through the Pygame event queue. No custom EventBus remains.
 
 ---
 
 ## 2. Main Window Hierarchy & Layout
 
-The game window is organized into a hierarchy of virtual windows, mimicking the original XBoing layout. The main window is subdivided into several regions, each with a specific purpose:
-
-```
-+------------------------------------------------------------+
-|                      Main Game Window                      |
-|   Top Bar View                                             |
-|  +-------------------+---------------------------------+   |
-|  |   Score Window    |         Level Window            |   |
-|  +-------------------+---------------------------------+   |
-|  |                                                     |   |
-|  |                  Play Window                        |   |
-|  |                                                     |   |
-|  +-----------------------------------------------------+   |
-|  |       Message               | Special | Time Window |   |
-|  +-----------------------------------------------------+   |
-|   Bottom Bar View                                          |
-+------------------------------------------------------------+
-```
-
-### Updated Component Hierarchy
-
-- **Main Window**: The root window, contains all other regions.
-- **TopBarView**: A composite component that manages and draws all top bar UI elements:
-  - **ScoreDisplay** (Score Window)
-  - **LivesDisplayComponent** (Level Window)
-  - **LevelDisplay** (Level Window)
-- **MessageDisplay** (Message Window)
-- **SpecialDisplay** (Special Window)
-- **TimerDisplay** (Time Window)
-- **ContentViewManager**: Manages the play window region, swapping between content views (GameView, InstructionsView, HighScoreView, etc.).
-- **Play Window**: The main game area where blocks, paddle, and balls are rendered (via the current content view).
+- The main window is subdivided into regions: TopBarView, Play Window, BottomBarView.
+- **TopBarView**: ScoreDisplay, LivesDisplayComponent, LevelDisplay, TimerDisplay, MessageDisplay, SpecialDisplay.
+- **Play Window**: Main gameplay area (blocks, paddle, balls, etc.), managed by UIManager as a content view.
+- **BottomBarView**: MessageDisplay, SpecialDisplay, TimerDisplay.
 
 ---
 
 ## 3. UI Component Structure & Event-Driven Architecture
 
-Each UI region is implemented as a class/component that:
-- Subscribes to relevant game events via the `EventBus` (from `src/engine/event_bus.py`)
-- Maintains its own display state, updated in response to events
-- Knows how to render itself in its assigned region (using `GameLayout` from `src/layout/`)
-
-**Example Components:**
-- `TopBarView` (owns and draws ScoreDisplay, LivesDisplayComponent, LevelDisplay, TimerDisplay, MessageDisplay, SpecialDisplay)
-- `ScoreDisplay` (subscribes to `ScoreChangedEvent`)
-- `LivesDisplayComponent` (subscribes to `LivesChangedEvent`)
-- `LevelDisplay` (subscribes to `LevelChangedEvent`)
-- `TimerDisplay` (subscribes to timer events)
-- `MessageDisplay` (subscribes to `MessageChangedEvent`)
-- `SpecialDisplay` (subscribes to special state events)
-- `GameView`, `InstructionsView`, `GameOverView`, etc. (content views managed by UIManager)
-
-### Event Flow
-- Game logic fires events (using the `EventBus`).
-- UI components update their internal state and redraw as needed in response to these events.
-- The main loop simply calls `ui_manager.draw_all(window.surface)` after updating game state.
-
-### UI Manager
-- The `UIManager` (in `src/ui/ui_manager.py`) acts as the central manager for all UI components, content views, overlays, and bars.
-- All content view management is now handled by `UIManager`.
-
-### Integration with GameLayout
-- UI components use `GameLayout` (from `src/layout/game_layout.py`) to determine their drawing regions.
-- The window hierarchy remains unchanged; only the update/draw logic is refactored.
-
-### 3.1. Class Diagram (Architecture Overview)
-
-```
-+-------------------+         +---------------------+
-|   Game Logic      |         |    UIManager        |
-+-------------------+         +---------------------+
-| - event_bus       |<------->| - event_bus         |
-| - game_state      |         | - views             |
-|                   |         | - top_bar           |
-| | fires events    |         | - bottom_bar        |
-+-------------------+         | - draw_all()        |
-         ^                    +---------------------+
-         |                            ^
-         |                            |
-         |                            |
-         |                    +---------------------+
-         |                    |  UI Components      |
-         |                    +---------------------+
-         |                    | ScoreDisplay        |
-         |                    | LivesDisplay        |
-         |                    | LevelDisplay        |
-         |                    | TimerDisplay        |
-         |                    | MessageDisplay      |
-         |                    | SpecialDisplay      |
-         |                    | ...                 |
-         |                    +---------------------+
-         |                            ^
-         |                            |
-         |                    +---------------------+
-         |                    |   Renderer(s)       |
-         |                    +---------------------+
-         |                            ^
-         |                            |
-         |                    +---------------------+
-         |                    |   GameLayout        |
-         |                    +---------------------+
-         |
-         |
-+--------------------+         +---------------------+
-| ControllerManager  |<------->|   Controller(s)     |
-+--------------------+         +---------------------+
-| - controllers      |         | GameController      |
-| - active_controller|         | InstructionsCtrl    |
-+--------------------+         | ...                 |
-                               +---------------------+
-
-+-------------------+
-|    EventBus       |
-+-------------------+
-| subscribe()       |
-| fire()            |
-+-------------------+
-
-+-------------------+
-|   GameState       |
-+-------------------+
-| score, lives, ... |
-| set_score(), ...  |
-+-------------------+
-```
-
-### 3.2. Event Handling Sequence Diagram
-
-```
-Game Logic         EventBus         UI Component (e.g., ScoreDisplay)
-    |                 |                        |
-    | set_score()     |                        |
-    |---------------->|                        |
-    |  (fires         |                        |
-    |  ScoreChanged)  |                        |
-    |                 |                        |
-    |                 |--fire(ScoreChanged)--> |
-    |                 |                        | on_score_changed()
-    |                 |                        | (updates state)
-    |                 |                        |
-    |                 |                        | draw(surface)
-    |                 |                        | (renders new score)
-    |                 |                        |
-```
-
-This sequence is similar for all UI components: game logic fires an event via the EventBus, the relevant UI component receives the event, updates its state, and redraws itself on the next frame.
+- Each UI region is a class/component that:
+  - Subscribes to relevant game events via the Pygame event queue.
+  - Maintains its own display state, updated in response to events.
+  - Renders itself in its assigned region (using `GameLayout`).
+- **UIManager**: Central manager for all UI components, content views, overlays, and bars. Handles view switching and event routing.
+- **All event handling** is via `handle_events(events)` methods, which process both Pygame and custom events.
 
 ---
 
-## 4. Renderer Utilities and Packaging (2024 Refactor)
+## 4. Renderer Utilities
 
-All stateless rendering utilities (e.g., for lives, digits, score, timer) are now located in the `src/renderers/` package. Each renderer is named `<Thing>Renderer` (e.g., `LivesRenderer`, `DigitRenderer`) and is responsible solely for drawing a specific visual element as a Pygame surface. UI components (in `src/ui/`) are stateful, subscribe to events, and use these renderers for their visual output.
-
-This separation ensures clarity, reusability, and testability, and aligns with our MVC-inspired, event-driven architecture. When adding new renderers, place them in `src/renderers/` and follow the `<Thing>Renderer` naming convention. Update UI components to use these renderers for all visual output, keeping state and event logic in the component layer.
-
-**Example:**
-- `LivesRenderer` (in `src/renderers/lives_renderer.py`): Stateless, draws lives as ball images.
-- `DigitRenderer` (in `src/renderers/digit_renderer.py`): Stateless, draws numbers/timers as digit sprites.
-- `LivesDisplayComponent` (in `src/ui/lives_display.py`): Stateful, subscribes to events, uses `LivesRenderer` for drawing.
-
-This approach replaces the previous pattern where some renderers were in `src/utils/` and clarifies the distinction between rendering logic and UI state/event management.
+- Stateless rendering utilities (e.g., for lives, digits) are in `src/renderers/` as `<Thing>Renderer` classes.
+- UI components in `src/ui/` are stateful, subscribe to events, and use these renderers for visual output.
 
 ---
 
 ## 5. Content View Management
 
-The play window region is managed by the `UIManager`, which is responsible for displaying one of several possible content views at any time. This enables the game to support multiple major UI screens, all occupying the same viewport:
-
-- WelcomeView: Title, logo, and start prompt
-- InstructionsView: Game instructions and rules
-- DemoView: Autoplay demonstration with overlays
-- LevelPreviewView: Shows the next level layout and info
-- GameView: The main gameplay area (blocks, paddle, balls, etc.)
-- GameKeysView: Shows game controls and key bindings
-- HighScoresView: Displays high scores and player names
-
-### Content View Responsibilities
-- Each content view is a class/component that subscribes to relevant events (if needed), renders itself in the play window region, and handles its own state and logic.
-- The `UIManager` manages which content view is active and handles view switching.
+- The play window region is managed by `UIManager`, which displays one of several content views:
+  - GameView, InstructionsView, GameOverView, LevelCompleteView, etc.
+- Each content view is a class/component that may subscribe to events, renders itself, and handles its own state/logic.
+- `UIManager` manages which content view is active and handles view switching.
 
 ---
 
 ## 6. Asset Management
+
 - All asset path helpers (in `src/utils/asset_paths.py`) resolve to the top-level `assets/` directory.
-- No code references or loads assets from `src/assets/`.
 - All images, sounds, and levels are loaded from the canonical `assets/` directory at the project root.
 
 ---
 
 ## 7. Layout Management
+
 - All window/region layout logic is handled by `GameLayout`, `GameWindow`, and `Rect` in `src/layout/game_layout.py`.
-- No layout logic remains in `src/utils/`.
 
 ---
 
 ## 8. Event System
-- The event system (including `EventBus` and all event classes) is located in `src/engine/`.
-- All UI and game logic components subscribe to and fire events using this system.
+
+- **All events** (user input, UI, game logic, custom game events) are routed through the Pygame event queue.
+- **Custom events** are defined using `pygame.USEREVENT` and posted with `pygame.event.post`.
+- **GameState and other models** no longer post events directly. Instead, methods that would have posted events now return a list of event instances representing state changes.
+- **Controllers** (e.g., `GameController`) are responsible for posting these returned events to the Pygame event queue, using a helper method (e.g., `post_game_state_events`).
+- **Handlers** (controllers, UI components, managers) implement `handle_events(events)` and check for both built-in and custom event types.
+- **No custom EventBus or protocol-based event handlers remain.**
 
 ---
 
 ## 9. Controllers, UIManager, and Model Roles
 
-### Overall Architecture
-
 - **UIManager**: Owns and coordinates all UI components, content views, overlays, and manages which view is active. Provides a single `draw_all(surface)` method for rendering the UI.
-- **ControllerManager**: (or as part of UIManager) Owns all controllers and switches the active controller based on the current view. Each controller handles input, updates, and transitions for its associated view.
-- **Controllers**: Each major view has a corresponding controller (e.g., `GameController`, `InstructionsController`, `LevelCompleteController`). The active controller is responsible for:
-  - Handling input/events
-  - Updating the model (e.g., GameState)
-  - Managing transitions (e.g., switching views)
-- **GameState**: The central model for all gameplay-related state (score, lives, level, timer, specials, game over, etc.).
-- **Other Models**: Specialized models (e.g., `LeaderBoard` for high scores) can be added as needed, either as properties of GameState or as separate classes.
+- **ControllerManager**: Owns all controllers and switches the active controller based on the current view.
+- **Controllers**: Each major view has a corresponding controller (e.g., `GameController`, `InstructionsController`, `LevelCompleteController`, `GameOverController`). The active controller handles input, updates, and transitions for its associated view. **Controllers are now responsible for posting events returned by model methods to the Pygame event queue.**
+- **GameState**: The central model for all gameplay-related state (score, lives, level, timer, specials, game over, etc.). **GameState methods return a list of event instances representing state changes, but do not post events directly.**
+- **Other Models**: Specialized models (e.g., `LeaderBoard` for high scores) can be added as needed.
 
-### Data Flow
-- Controllers read from and write to the model(s).
-- Views render based on the model state and/or events.
-- UIManager coordinates which view is active and handles all drawing.
-- ControllerManager ensures the correct controller is active for the current view.
+---
 
-### Example Main Loop
+## 10. Dependency Injection & Factories
+
+- **Dependency injection** is used via the `injector` library.
+- The `XBoingModule` (in `src/di_module.py`) provides all bindings for controllers, views, UIManager, UIFactory, and other core objects.
+- **UIFactory**: Centralizes UI instantiation and layout logic, returning all UI components and views.
+- **ControllerFactory**: Centralizes controller instantiation and registration, returning all controllers and the controller manager.
+- **AppCoordinator**: Synchronizes UIManager and ControllerManager, ensuring the correct controller is active for the current view.
+
+---
+
+## 11. Main Loop
+
 ```python
 while running:
     events = pygame.event.get()
+    input_manager.update(events)
     controller_manager.active_controller.handle_events(events)
-    controller_manager.active_controller.update(delta_time)
-    ui_manager.draw_all(surface)
+    audio_manager.handle_events(events)
+    ui_manager.handle_events(events)
+    controller_manager.active_controller.update(delta_time * 1000)
+    layout.draw(window.surface)
+    ui_manager.draw_all(window.surface)
     window.update()
 ```
 
-### Model Ownership Table
-
-```
-|-----------------|----------------------|-----------------------------|
-| Data/Model      | Owner/Location       | Accessed by                 |
-|-----------------|----------------------|-----------------------------|
-| Game state      | `GameState`          | All controllers/views       |
-| Level data      | `LevelManager`       | GameController, GameView    |
-| High scores     | `LeaderBoard`        | HighScoresController/View   |
-| Settings        | Settings model       | SettingsController/View     |
-| Instructions    | Static or minimal    | InstructionsController/View |
-|-----------------|----------------------|-----------------------------|
-```
 ---
 
-## 10. Event Routing: Unified Pygame Event System (2024 Redesign)
+## 12. Event Routing Table (Current)
 
-### Overview
+All events are posted as `pygame.event.Event(pygame.USEREVENT, {"event": <EventInstance>})` and handled by checking `event.type == pygame.USEREVENT` and the event type in `handle_events(events)` methods. **Events representing model state changes are now returned by model methods and posted by controllers.**
 
-- **All events** (user input, UI, game logic, custom game events) are routed through the Pygame event queue.
-- **Custom events** are defined using `pygame.USEREVENT + n` and posted with `pygame.event.post`.
-- **Handlers** (controllers, UI components, managers) implement a single `handle_events(events)` method and check for both built-in and custom event types.
-- **No custom EventBus or protocol-based event handlers.**
+| **Event**                    | **Fired By**                        | **Handled By**                        | **Notes**                                 |
+|------------------------------|-------------------------------------|---------------------------------------|--------------------------------------------|
+| ApplauseEvent                | GameController                      | AudioManager, UI                      | Applause sound, UI update                  |
+| BallLostEvent                | GameController                      | GameController, AudioManager, UI      | Life loss/game logic, sound, UI            |
+| BallShotEvent                | GameController                      | AudioManager, UI                      | Ball launch sound, UI update               |
+| BlockHitEvent                | GameController                      | AudioManager, UI                      | Block sound, UI update                     |
+| BombExplodedEvent            | GameController                      | AudioManager, UI                      | Bomb sound, UI update                      |
+| BonusCollectedEvent          | (not shown, but likely GameController) | AudioManager, UI                   | Bonus sound, UI update                     |
+| GameOverEvent                | GameController (from GameState)     | UIManager, AudioManager, UI           | Switch to game over view, sound            |
+| LevelChangedEvent            | GameController (from GameState)     | LevelDisplay, UI                      | UI update                                  |
+| LevelCompleteEvent           | GameController, LevelCompleteController | UIManager, AudioManager, UI        | Switch to level complete view, sound        |
+| LivesChangedEvent            | GameController (from GameState)     | LivesDisplayComponent, UI             | UI update                                  |
+| MessageChangedEvent          | GameController, GameState, etc.     | MessageDisplay, UI                    | UI update                                  |
+| PaddleHitEvent               | GameController                      | AudioManager, UI                      | Paddle sound, UI update                    |
+| PowerUpCollectedEvent        | GameController                      | AudioManager, UI                      | Power-up sound, UI update                  |
+| ScoreChangedEvent            | GameController (from GameState)     | ScoreDisplay, UI                      | UI update                                  |
+| Special*ChangedEvent         | GameController (from GameState)     | SpecialDisplay, UI                    | UI update                                  |
+| TimerUpdatedEvent            | GameController (from GameState)     | TimerDisplay, UI                      | UI update                                  |
+| UIButtonClickEvent           | LevelCompleteController, UI         | AudioManager, UI                      | Button click sound, UI update              |
+| WallHitEvent                 | GameController                      | AudioManager, UI                      | Wall sound, UI update                      |
+| **Pygame Events**            | User input, system events           | InputManager, controllers, UIManager  | Unified event loop                         |
 
-### Example: Defining and Posting Custom Events
+All event subscriptions and handling are via the Pygame event queue. All UI components, controllers, and managers use the same event loop and check for their relevant events in `handle_events(events)`.
 
+---
+
+## 13. Construction-Time Code
+
+- All construction and wiring of controllers, views, and managers is handled in `main.py` using UIFactory, ControllerFactory, and dependency injection via `injector`.
+- No direct instantiation of UI or controller classes occurs outside these factories or DI modules.
+
+---
+
+## 14. Adding a New Event: End-to-End Guide
+
+To add a new event to XBoing and handle it throughout the system, follow these steps:
+
+### 1. Define the Event Class
+Create a new class in `src/engine/events.py`:
 ```python
-MY_CUSTOM_EVENT = pygame.USEREVENT + 1
-pygame.event.post(pygame.event.Event(MY_CUSTOM_EVENT, {"score": 100}))
+class MyCustomEvent:
+    def __init__(self, value):
+        self.value = value
 ```
 
-### Example: Handling Events in a Controller or View
+### 2. Fire the Event
+**If the event is a result of a model state change (e.g., in GameState):**
+- Return the event instance from the model method (e.g., `return [MyCustomEvent(value)]`).
+- In the controller, call the model method, then post the returned events using a helper:
+```python
+changes = game_state.some_method()
+for event in changes:
+    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": event}))
+```
 
+**If the event is a pure controller/UI event:**
+- Post the event directly from the controller or UI component as before.
+
+### 3. Handle the Event
+In any component, controller, or manager that should respond to the event, add logic to its `handle_events(events)` method:
 ```python
 def handle_events(self, events):
     for event in events:
-        if event.type == pygame.KEYDOWN:
-            ... # handle input
-        elif event.type == MY_CUSTOM_EVENT:
-            print("Custom event received! Score:", event.score)
+        if event.type == pygame.USEREVENT and isinstance(event.event, MyCustomEvent):
+            # Handle the event (e.g., update state, UI, play sound)
+            print(f"Received MyCustomEvent with value: {event.event.value}")
 ```
 
-### Updated Event Routing Table
+### 4. (Optional) Add to AudioManager or UI
+If the event should trigger a sound, add it to the `event_sound_map` in `main.py` and ensure the sound file exists.
+If the event should update the UI, update the relevant UI component to handle the event as above.
 
-| **Event**                | **Fired By (Class/Method)**         | **Handler(s) (Class/Method)**                | **Notes**                                                                 |
-|--------------------------|-------------------------------------|----------------------------------------------|--------------------------------------------------------------------------|
-| `BlockHitEvent`          | `GameController.update_balls_and_collisions` | `AudioManager.handle_events`, etc.           | Sound/UI update                                                          |
-| `GameOverEvent`          | `GameState.lose_life`, `GameController.handle_life_loss` | `UIManager.handle_events`, etc.              | UI view switch, sound, etc.                                              |
-| `BallLostEvent`          | `GameController.update_balls_and_collisions` | `GameController.handle_events`               | Life loss/game logic                                                     |
-| `ScoreChangedEvent`      | `GameState.add_score`, `set_score`  | `ScoreDisplay.handle_events`                 | UI update                                                                |
-| ...                      | ...                                 | ...                                         | ...                                                                      |
-| **Pygame Events**        | User input, system events           | All controllers/views via `handle_events`    | Unified event loop                                                        |
+### 5. Test the Event
+Run the game and trigger the event to ensure it is fired and handled as expected.
 
-### Handler Class/Method Key
-- All handlers use `handle_events(events)` and check for both Pygame and custom event types.
-- No protocol-based or function-based event subscriptions.
+### Sequence Diagram
 
-### Notes on Routing
-- **All event subscriptions and handling are via the Pygame event queue.**
-- **No custom EventBus or protocol-based handlers remain.**
-- **UI components, controllers, and managers all use the same event loop.**
+```
+Controller/Model         Pygame Event Queue         UI/Manager/Component
+     |                          |                          |
+     |  model_method()          |                          |
+     |------------------------->|                          |
+     |  [returns event]         |                          |
+     |------------------------->|                          |
+     |  post(event)             |                          |
+     |------------------------->|                          |
+     |                          |  [event in queue]        |
+     |                          |------------------------->|
+     |                          |                          | handle_events(events):
+     |                          |                          |   if isinstance(event.event, MyCustomEvent):
+     |                          |                          |     ...handle...
+     |                          |                          |
+```
 
-### Pygame Events
-- **All events** (keyboard, mouse, custom) are handled in the same loop.
+This flow applies to all custom events in XBoing: define, return from model if appropriate, post from controller, and handle using the unified Pygame event system.
 
----
-
-## 11. Migration Plan: Event System Simplification (2024)
-
-### Step-by-Step Checklist
-
-1. **Remove EventBus and EventHandlerProtocol from the codebase.**
-2. **Update all event firing to use `pygame.event.post` with custom events.**
-3. **Update all event handlers to use only `handle_events(events)` and check for both Pygame and custom event types.**
-4. **Update UI components, controllers, and managers to subscribe to events via the Pygame event queue.**
-5. **Update tests and documentation.**
-
-### Migration Order (Class-by-Class)
-- [ ] Remove EventBus and protocol-based code from all modules.
-- [ ] Update GameController: move all event handling to `handle_events` and use Pygame custom events.
-- [ ] Update LevelCompleteController, GameOverController, InstructionsController: same as above.
-- [ ] Update UI components (ScoreDisplay, LivesDisplay, etc.): handle custom events in `handle_events`.
-- [ ] Update AudioManager: handle sound-triggering events in `handle_events`.
-- [ ] Update main loop: only use Pygame event queue.
-- [ ] Update tests and documentation.
-
----
-
-*This new design provides a single, unified event system for all game, UI, and input events, greatly simplifying the architecture and reducing confusion.*
-
-*This document provides a unified overview of both the visual layout and the event-driven, component-based UI architecture of XBoing Python. It is intended to guide both current development and future extensions.* 
