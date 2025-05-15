@@ -89,7 +89,7 @@ class ControllerFactory:
         # Create or use provided instructions controller
         if instructions_controller is None:
             instructions_controller = InstructionsController(
-                on_exit_callback=lambda: ui_manager.set_view("game"),
+                on_exit_callback=lambda: ui_manager.set_view(ui_manager.previous_view or "game"),
                 audio_manager=audio_manager,
                 quit_callback=quit_callback,
                 ui_manager=ui_manager,

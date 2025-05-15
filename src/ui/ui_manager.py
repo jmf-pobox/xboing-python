@@ -9,6 +9,7 @@ class UIManager:
         self.views = {}
         self.current_view = None
         self.current_name = None
+        self.previous_view = None  # Track previous view
         self._view_change_callbacks = []
 
     def register_top_bar(self, top_bar):
@@ -31,6 +32,9 @@ class UIManager:
                 self.current_view, "deactivate"
             ):
                 self.current_view.deactivate()
+            # Track previous view unless already in instructions
+            if self.current_name != "instructions":
+                self.previous_view = self.current_name
             self.current_view = self.views[name]
             self.current_name = name
             if hasattr(self.current_view, "activate"):
