@@ -16,7 +16,7 @@ class LevelDisplay:
 
     def handle_events(self, events):
         for event in events:
-            if hasattr(event, 'event') and isinstance(event.event, LevelChangedEvent):
+            if hasattr(event, "event") and isinstance(event.event, LevelChangedEvent):
                 self.level = event.event.level
 
     def draw(self, surface):

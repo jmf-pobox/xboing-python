@@ -16,6 +16,7 @@ from utils.asset_paths import get_balls_dir
 
 logger = logging.getLogger(__name__)
 
+
 class Ball:
     """A bouncing ball with physics and collision detection."""
 

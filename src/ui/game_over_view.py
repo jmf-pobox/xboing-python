@@ -4,10 +4,10 @@ from typing import Callable, Optional
 import pygame
 from injector import inject
 
-from .content_view import ContentView
+from .view import View
 
 
-class GameOverView(ContentView):
+class GameOverView(View):
     """
     Content view for the game over screen. Draws only within the play window region.
     Calls reset_game callback when Space is pressed.

@@ -170,5 +170,7 @@ class GameState:
         all_events += self.set_timer(level_manager.get_time_remaining())
         level_info = level_manager.get_level_info()
         level_title = level_info["title"]
-        all_events.append(MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left"))
+        all_events.append(
+            MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")
+        )
         return all_events

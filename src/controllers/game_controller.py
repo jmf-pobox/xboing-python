@@ -1,5 +1,6 @@
-import pygame
 import logging
+
+import pygame
 
 from engine.events import (
     ApplauseEvent,
@@ -7,7 +8,6 @@ from engine.events import (
     BallShotEvent,
     BlockHitEvent,
     BombExplodedEvent,
-    GameOverEvent,
     LevelCompleteEvent,
     MessageChangedEvent,
     PaddleHitEvent,
@@ -16,16 +16,14 @@ from engine.events import (
 )
 from game.ball import Ball
 
-from .base_controller import BaseController
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class GameController(BaseController):
+class GameController:
     """
     Handles gameplay input, updates, and transitions for the GameView.
-    Handles paddle, ball, block, and debug logic, as well as global controls via BaseController.
+    Handles paddle, ball, block, and debug logic.
 
     **Event decoupling pattern:**
     GameState and other model methods do not post events directly. Instead, they return a list of event instances
@@ -47,16 +45,8 @@ class GameController(BaseController):
         input_manager=None,
         layout=None,
         renderer=None,
-        audio_manager=None,
         event_sound_map=None,
-        quit_callback=None,
-        ui_manager=None,
     ):
-        super().__init__(
-            audio_manager=audio_manager,
-            quit_callback=quit_callback,
-            ui_manager=ui_manager,
-        )
         self.game_state = game_state
         self.level_manager = level_manager
         self.balls = balls
@@ -65,13 +55,11 @@ class GameController(BaseController):
         self.input_manager = input_manager
         self.layout = layout
         self.renderer = renderer
-        self.audio_manager = audio_manager
         self.event_sound_map = event_sound_map
         self.waiting_for_launch = True
         self.level_complete = False
 
     def handle_events(self, events):
-        super().handle_events(events)
         for event in events:
             # Launch balls from paddle when mouse button is clicked
             if event.type == 1025 and self.waiting_for_launch:  # pygame.MOUSEBUTTONDOWN
@@ -81,17 +69,32 @@ class GameController(BaseController):
                     ball.release_from_paddle()
                 self.waiting_for_launch = False
                 # GameState.set_timer now returns events, which must be posted by the controller
-                changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
+                changes = self.game_state.set_timer(
+                    self.level_manager.get_time_remaining()
+                )
                 self.post_game_state_events(changes)
                 self.level_manager.start_timer()
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()}))
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()})
+                )
                 level_info = self.level_manager.get_level_info()
                 level_title = level_info["title"]
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")}))
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT,
+                        {
+                            "event": MessageChangedEvent(
+                                level_title, color=(0, 255, 0), alignment="left"
+                            )
+                        },
+                    )
+                )
                 logger.debug("Ball(s) launched and timer started.")
 
             # Check for BallLostEvent in the correct way
-            if event.type == pygame.USEREVENT and isinstance(event.event, BallLostEvent):
+            if event.type == pygame.USEREVENT and isinstance(
+                event.event, BallLostEvent
+            ):
                 logger.debug("BallLostEvent detected in GameController.")
                 self.handle_life_loss()
 
@@ -118,9 +121,10 @@ class GameController(BaseController):
             paddle_direction = -1
         elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
             paddle_direction = 1
-        play_rect = self.layout.get_play_rect()
-        self.paddle.set_direction(paddle_direction)
-        self.paddle.update(delta_ms, play_rect.width, play_rect.x)
+        play_rect = self.layout.get_play_rect() if self.layout else None
+        if play_rect:
+            self.paddle.set_direction(paddle_direction)
+            self.paddle.update(delta_ms, play_rect.width, play_rect.x)
 
     def handle_mouse_paddle_control(self):
         """Handle mouse-based paddle movement."""
@@ -163,14 +167,20 @@ class GameController(BaseController):
                     changes = self.game_state.add_score(points)
                     self.post_game_state_events(changes)
                 if broken > 0:
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()}))
+                    pygame.event.post(
+                        pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
+                    )
                 for effect in effects:
                     if effect == getattr(self.block_manager, "TYPE_EXTRABALL", None):
                         new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                         new_ball.vx = -ball.vx
                         new_ball.vy = ball.vy
                         self.balls.append(new_ball)
-                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": PowerUpCollectedEvent()}))
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
                     elif effect == getattr(self.block_manager, "TYPE_MULTIBALL", None):
                         for _ in range(2):
                             new_ball = Ball(
@@ -180,9 +190,17 @@ class GameController(BaseController):
                             new_ball.vx = speed * (ball.vx / speed) * 0.8
                             new_ball.vy = speed * (ball.vy / speed) * 0.8
                             self.balls.append(new_ball)
-                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": PowerUpCollectedEvent()}))
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
                     elif effect == getattr(self.block_manager, "TYPE_BOMB", None):
-                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()}))
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": BombExplodedEvent()}
+                            )
+                        )
                     elif effect in [
                         getattr(self.block_manager, "TYPE_PAD_EXPAND", None),
                         getattr(self.block_manager, "TYPE_PAD_SHRINK", None),
@@ -198,25 +216,45 @@ class GameController(BaseController):
                                 max(self.paddle.width * 0.5, self.paddle.width / 2)
                             )
                         self.paddle.rect.width = self.paddle.width
-                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": PowerUpCollectedEvent()}))
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
                     elif effect == getattr(self.block_manager, "TYPE_TIMER", None):
                         self.level_manager.add_time(20)
-                        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": PowerUpCollectedEvent()}))
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
                 if hit_paddle:
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": PaddleHitEvent()}))
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT, {"event": PaddleHitEvent()}
+                        )
+                    )
                 if hit_wall:
-                    pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": WallHitEvent()}))
+                    pygame.event.post(
+                        pygame.event.Event(pygame.USEREVENT, {"event": WallHitEvent()})
+                    )
                 active_balls.append(ball)
             else:
-                logger.debug(f"Ball lost at position ({ball.x}, {ball.y}). Firing BallLostEvent.")
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BallLostEvent()}))
+                logger.debug(
+                    f"Ball lost at position ({ball.x}, {ball.y}). Firing BallLostEvent."
+                )
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": BallLostEvent()})
+                )
 
         # Log the number of active balls
         logger.debug(f"Active balls after update: {len(active_balls)}")
         self.balls[:] = active_balls
 
     def handle_life_loss(self, event=None):
-        logger.debug(f"handle_life_loss called. Current lives: {self.game_state.lives}, Balls in play: {len(self.balls)}")
+        logger.debug(
+            f"handle_life_loss called. Current lives: {self.game_state.lives}, Balls in play: {len(self.balls)}"
+        )
 
         if self.game_state.is_game_over():
             logger.debug("Game is already over, ignoring life loss.")
@@ -227,13 +265,24 @@ class GameController(BaseController):
         changes = self.game_state.lose_life()
         self.post_game_state_events(changes)
         logger.debug(f"Life lost. Remaining lives: {self.game_state.lives}")
-        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent("Balls Terminated!", color=(0, 255, 0), alignment="left")}))
+        pygame.event.post(
+            pygame.event.Event(
+                pygame.USEREVENT,
+                {
+                    "event": MessageChangedEvent(
+                        "Balls Terminated!", color=(0, 255, 0), alignment="left"
+                    )
+                },
+            )
+        )
 
         # If lives remain, add a new ball regardless of other balls in play
         if self.game_state.lives > 0:
             logger.debug(f"Lives remain ({self.game_state.lives}), adding a new ball.")
             new_ball = self.create_new_ball()
-            logger.debug(f"New ball created at position ({new_ball.x}, {new_ball.y}), stuck_to_paddle: {new_ball.stuck_to_paddle}")
+            logger.debug(
+                f"New ball created at position ({new_ball.x}, {new_ball.y}), stuck_to_paddle: {new_ball.stuck_to_paddle}"
+            )
             self.balls.append(new_ball)
             logger.debug(f"Total balls after adding new ball: {len(self.balls)}")
             self.waiting_for_launch = True
@@ -249,12 +298,16 @@ class GameController(BaseController):
         num_blocks = self.block_manager.remaining_blocks()
         level_complete = self.level_manager.is_level_complete()
         if level_complete and not self.level_complete:
-            self.logger.info(
+            logger.info(
                 "Level complete detected in GameController. Firing ApplauseEvent and LevelCompleteEvent."
             )
             self.level_complete = True
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": ApplauseEvent()}))
-            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": LevelCompleteEvent()}))
+            pygame.event.post(
+                pygame.event.Event(pygame.USEREVENT, {"event": ApplauseEvent()})
+            )
+            pygame.event.post(
+                pygame.event.Event(pygame.USEREVENT, {"event": LevelCompleteEvent()})
+            )
 
     def handle_debug_x_key(self):
         """Handle the debug 'x' key to break all breakable blocks and advance the level."""
@@ -271,18 +324,26 @@ class GameController(BaseController):
                         block.hit()
                         if getattr(block, "health", 0) == 0:
                             broken_count += 1
-                self.logger.info(
+                logger.info(
                     f"DEBUG: X key cheat used, broke {broken_count} blocks and triggered level complete."
                 )
                 self.level_complete = True
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()}))
-                pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": LevelCompleteEvent()}))
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
+                )
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT, {"event": LevelCompleteEvent()}
+                    )
+                )
 
     def create_new_ball(self):
         """
         Create a new ball stuck to the paddle, using the controller's paddle and BALL_RADIUS.
         """
-        logger.debug(f"Creating new ball at paddle position: ({self.paddle.rect.centerx}, {self.paddle.rect.top - self.BALL_RADIUS - 1})")
+        logger.debug(
+            f"Creating new ball at paddle position: ({self.paddle.rect.centerx}, {self.paddle.rect.top - self.BALL_RADIUS - 1})"
+        )
         ball = Ball(
             self.paddle.rect.centerx,
             self.paddle.rect.top - self.BALL_RADIUS - 1,
@@ -294,7 +355,9 @@ class GameController(BaseController):
         ball.birth_animation = True
         ball.animation_frame = 0
         ball.frame_counter = 0
-        logger.debug(f"New ball created with properties: stuck_to_paddle={ball.stuck_to_paddle}, paddle_offset={ball.paddle_offset}, birth_animation={ball.birth_animation}")
+        logger.debug(
+            f"New ball created with properties: stuck_to_paddle={ball.stuck_to_paddle}, paddle_offset={ball.paddle_offset}, birth_animation={ball.birth_animation}"
+        )
         return ball
 
     def handle_event(self, event):

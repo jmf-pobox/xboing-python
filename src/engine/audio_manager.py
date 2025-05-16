@@ -1,7 +1,9 @@
 import logging
 import os
-import pygame
 from typing import Any, Dict, Optional, Type
+
+import pygame
+
 
 class AudioManager:
     """
@@ -28,7 +30,7 @@ class AudioManager:
     def handle_events(self, events):
         for event in events:
             # Check if this is a pygame event with our custom event attribute
-            if hasattr(event, 'event') and event.type == pygame.USEREVENT:
+            if hasattr(event, "event") and event.type == pygame.USEREVENT:
                 event_type = type(event.event)
                 sound_name = self.event_sound_map.get(event_type)
                 if sound_name and not self.muted:

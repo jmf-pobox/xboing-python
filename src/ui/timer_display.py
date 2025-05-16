@@ -17,7 +17,7 @@ class TimerDisplay:
 
     def handle_events(self, events):
         for event in events:
-            if hasattr(event, 'event') and isinstance(event.event, TimerUpdatedEvent):
+            if hasattr(event, "event") and isinstance(event.event, TimerUpdatedEvent):
                 self.time_remaining = event.event.time_remaining
 
     def draw(self, surface):

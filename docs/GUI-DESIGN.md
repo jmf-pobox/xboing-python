@@ -205,3 +205,37 @@ Controller/Model         Pygame Event Queue         UI/Manager/Component
 
 This flow applies to all custom events in XBoing: define, return from model if appropriate, post from controller, and handle using the unified Pygame event system.
 
+## 15. Migration to View-Controller Pair Pattern (2024)
+
+We are migrating to a design where each active view has a corresponding active controller, and only that controller receives events and updates. A persistent WindowController (formerly BaseController) always receives global/system events (quit, volume, etc.).
+
+### Key Points
+- **UIManager** manages the active view.
+- **ControllerManager** manages the active controller, which is swapped in/out as views change.
+- **WindowController** is always active and handles global events.
+- **Per-View Controllers** (GameController, InstructionsController, etc.) only receive events when their view is active, and only take the dependencies they need.
+- **Main loop** routes events to WindowController and the active controller for the current view.
+
+### Example Main Loop
+```python
+while running:
+    events = pygame.event.get()
+    input_manager.update(events)
+    window_controller.handle_events(events)  # Always active
+    controller_manager.active_controller.handle_events(events)  # Only active view's controller
+    audio_manager.handle_events(events)
+    ui_manager.handle_events(events)
+    controller_manager.active_controller.update(delta_time * 1000)
+    layout.draw(window.surface)
+    ui_manager.draw_all(window.surface)
+    window.update()
+```
+
+### Benefits
+- Each controller only takes the dependencies it needs.
+- No unnecessary event handling by inactive controllers.
+- Global/system events are always handled.
+- Clean separation of concerns and easier testing.
+
+This migration will improve maintainability, testability, and clarity of the event-driven architecture.
+

@@ -47,7 +47,7 @@ class SpecialDisplay:
     def handle_events(self, events):
         for event in events:
             for key, event_cls in self.EVENT_MAP.items():
-                if hasattr(event, 'event') and isinstance(event.event, event_cls):
+                if hasattr(event, "event") and isinstance(event.event, event_cls):
                     self.state[key] = event.event.active
 
     def draw(self, surface):

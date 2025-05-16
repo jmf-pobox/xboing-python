@@ -63,7 +63,9 @@ class UIFactory:
 
         # UI Components
         score_display = ScoreDisplay(layout, digit_display, x=70, width=6)
-        lives_display_component = LivesDisplayComponent(layout, lives_display, x=365, max_lives=3)
+        lives_display_component = LivesDisplayComponent(
+            layout, lives_display, x=365, max_lives=3
+        )
         level_display_component = LevelDisplay(layout, digit_display, x=510)
         timer_display_component = TimerDisplay(layout, renderer, ui_font)
         message_display = MessageDisplay(layout, renderer, message_font)

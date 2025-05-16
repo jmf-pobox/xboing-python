@@ -1,25 +1,18 @@
 import logging
+
 import pygame
 
 
-class BaseController:
+class WindowController:
     """
-    Base class for all controllers in the XBoing game.
-    
-    Controllers handle input/events and update logic for their associated views.
-    This base implementation provides common functionality like:
-    - Global volume controls (+/- keys)
-    - Muting toggle (M key)
-    - Quit functionality (Q or Ctrl+Q/Cmd+Q)
-    - Instructions view shortcut (Shift+/)
-    
-    All game-specific controllers should inherit from this class.
+    Handles global/system events (quit, volume, mute, etc.) and is always active.
+    No longer a base class for per-view controllers.
     """
 
     def __init__(self, audio_manager=None, quit_callback=None, ui_manager=None):
         """
         Initialize the base controller.
-        
+
         Args:
             audio_manager: Manager for sound effects and volume control
             quit_callback: Function to call when quitting the game
@@ -33,14 +26,14 @@ class BaseController:
     def handle_events(self, events):
         """
         Handle input/events for this controller, including global controls.
-        
+
         Processes global controls:
         - +/= keys: Increase volume
         - - key: Decrease volume
         - M key: Toggle mute
         - Q/Ctrl+Q/Cmd+Q: Quit game
         - Shift+/: Show instructions
-        
+
         Args:
             events: List of pygame events to process
         """
@@ -48,18 +41,21 @@ class BaseController:
             if event.type == pygame.KEYDOWN:
                 # Volume up
                 if event.key in (pygame.K_PLUS, pygame.K_KP_PLUS, pygame.K_EQUALS):
-                    new_volume = min(1.0, self.audio_manager.get_volume() + 0.1)
-                    self.audio_manager.set_volume(new_volume)
+                    if self.audio_manager:
+                        new_volume = min(1.0, self.audio_manager.get_volume() + 0.1)
+                        self.audio_manager.set_volume(new_volume)
                 # Volume down
                 elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
-                    new_volume = max(0.0, self.audio_manager.get_volume() - 0.1)
-                    self.audio_manager.set_volume(new_volume)
+                    if self.audio_manager:
+                        new_volume = max(0.0, self.audio_manager.get_volume() - 0.1)
+                        self.audio_manager.set_volume(new_volume)
                 # Mute toggle
                 elif event.key == pygame.K_m:
-                    if self.audio_manager.is_muted():
-                        self.audio_manager.unmute()
-                    else:
-                        self.audio_manager.mute()
+                    if self.audio_manager:
+                        if self.audio_manager.is_muted():
+                            self.audio_manager.unmute()
+                        else:
+                            self.audio_manager.mute()
                 # Quit (Ctrl+Q or Q)
                 elif event.key == pygame.K_q and (
                     event.mod & pygame.KMOD_CTRL
@@ -70,15 +66,16 @@ class BaseController:
                         self.quit_callback()
                 # Instructions hotkey (Shift + / for '?')
                 elif event.key == pygame.K_SLASH and (event.mod & pygame.KMOD_SHIFT):
-                    self.ui_manager.set_view("instructions")
+                    if self.ui_manager:
+                        self.ui_manager.set_view("instructions")
 
     def update(self, delta_time):
         """
         Update logic for this controller.
-        
+
         This base implementation does nothing and should be overridden by subclasses
         that need to update game state or perform other actions each frame.
-        
+
         Args:
             delta_time: Time elapsed since the last update in seconds
         """
@@ -87,13 +84,13 @@ class BaseController:
     def quit_game(self):
         """
         Trigger the quit callback if provided.
-        
+
         Controllers should call this method instead of calling the quit_callback directly
         to ensure proper logging and consistent behavior.
-        
+
         Returns:
             None
         """
-        self.logger.info("quit_game called from controller.")
+        self.logger.info("quit_game called from WindowController.")
         if self.quit_callback:
             self.quit_callback()

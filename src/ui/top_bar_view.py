@@ -17,17 +17,17 @@ class TopBarView:
 
     def handle_events(self, events):
         # Forward events to all components that have a handle_events method
-        if hasattr(self.score_display, 'handle_events'):
+        if hasattr(self.score_display, "handle_events"):
             self.score_display.handle_events(events)
-        if hasattr(self.lives_display_component, 'handle_events'):
+        if hasattr(self.lives_display_component, "handle_events"):
             self.lives_display_component.handle_events(events)
-        if hasattr(self.level_display_component, 'handle_events'):
+        if hasattr(self.level_display_component, "handle_events"):
             self.level_display_component.handle_events(events)
-        if hasattr(self.timer_display_component, 'handle_events'):
+        if hasattr(self.timer_display_component, "handle_events"):
             self.timer_display_component.handle_events(events)
-        if hasattr(self.message_display_component, 'handle_events'):
+        if hasattr(self.message_display_component, "handle_events"):
             self.message_display_component.handle_events(events)
-        if hasattr(self.special_display_component, 'handle_events'):
+        if hasattr(self.special_display_component, "handle_events"):
             self.special_display_component.handle_events(events)
 
     def draw(self, surface):

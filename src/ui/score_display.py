@@ -18,7 +18,7 @@ class ScoreDisplay:
 
     def handle_events(self, events):
         for event in events:
-            if hasattr(event, 'event') and isinstance(event.event, ScoreChangedEvent):
+            if hasattr(event, "event") and isinstance(event.event, ScoreChangedEvent):
                 self.score = event.event.score
 
     def draw(self, surface):

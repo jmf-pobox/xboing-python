@@ -9,11 +9,11 @@ from ui.game_view import GameView
 class ControllerFactory:
     """
     Factory for creating and registering all controllers for XBoing.
-    
+
     This class centralizes controller instantiation and registration logic, keeping main.py clean and focused
     on high-level orchestration. All dependencies must be passed in; no direct imports
     of game state or event bus should occur here.
-    
+
     The factory creates four main controllers:
     - GameController: Handles the main gameplay
     - InstructionsController: Manages the instructions screen
@@ -40,10 +40,10 @@ class ControllerFactory:
     ):
         """
         Construct and register all controllers, returning the ControllerManager and controller references.
-        
+
         This method instantiates all necessary game controllers, registers them with the controller manager,
         and sets the initial active controller to "game".
-        
+
         Args:
             game_state: The current state of the game (score, lives, etc.)
             level_manager: Manager for loading and transitioning between levels
@@ -59,7 +59,7 @@ class ControllerFactory:
             quit_callback: Function to call when quitting the game
             reset_game_callback: Function to reset the game (used by game over controller)
             instructions_controller: Optional pre-configured instructions controller
-            
+
         Returns:
             dict: A dictionary containing:
                 - "controller_manager": The main controller manager
@@ -80,21 +80,20 @@ class ControllerFactory:
             input_manager=input_manager,
             layout=layout,
             renderer=renderer,
-            audio_manager=audio_manager,
             event_sound_map=event_sound_map,
-            quit_callback=quit_callback,
-            ui_manager=ui_manager,
         )
-        
+
         # Create or use provided instructions controller
         if instructions_controller is None:
             instructions_controller = InstructionsController(
-                on_exit_callback=lambda: ui_manager.set_view(ui_manager.previous_view or "game"),
+                on_exit_callback=lambda: ui_manager.set_view(
+                    ui_manager.previous_view or "game"
+                ),
                 audio_manager=audio_manager,
                 quit_callback=quit_callback,
                 ui_manager=ui_manager,
             )
-            
+
         # Create level complete controller
         level_complete_controller = LevelCompleteController(
             game_state,
@@ -112,7 +111,7 @@ class ControllerFactory:
             audio_manager=audio_manager,
             quit_callback=quit_callback,
         )
-        
+
         # Create game over controller
         game_over_controller = GameOverController(
             game_state=game_state,
@@ -129,7 +128,7 @@ class ControllerFactory:
             audio_manager=audio_manager,
             quit_callback=quit_callback,
         )
-        
+
         # Register all controllers with the controller manager
         controller_manager.register_controller("game", game_controller)
         controller_manager.register_controller("instructions", instructions_controller)
@@ -137,7 +136,7 @@ class ControllerFactory:
             "level_complete", level_complete_controller
         )
         controller_manager.register_controller("game_over", game_over_controller)
-        
+
         # Set the initial active controller
         controller_manager.set_controller("game")
 

@@ -17,7 +17,7 @@ class MessageDisplay:
 
     def handle_events(self, events):
         for event in events:
-            if hasattr(event, 'event') and isinstance(event.event, MessageChangedEvent):
+            if hasattr(event, "event") and isinstance(event.event, MessageChangedEvent):
                 self.message = event.event.message
                 self.alignment = event.event.alignment
 

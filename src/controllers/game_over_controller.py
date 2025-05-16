@@ -1,3 +1,4 @@
+import logging
 from typing import Callable
 
 import pygame
@@ -12,10 +13,10 @@ from layout.game_layout import GameLayout
 from ui.game_view import GameView
 from ui.ui_manager import UIManager
 
-from .base_controller import BaseController
+logger = logging.getLogger("xboing.GameOverController")
 
 
-class GameOverController(BaseController):
+class GameOverController:
     @inject
     def __init__(
         self,
@@ -29,11 +30,6 @@ class GameOverController(BaseController):
         audio_manager: AudioManager,
         quit_callback: Callable[[], None],
     ):
-        super().__init__(
-            audio_manager=audio_manager,
-            quit_callback=quit_callback,
-            ui_manager=ui_manager,
-        )
         self.game_state = game_state
         self.level_manager = level_manager
         self.balls = balls
@@ -41,23 +37,25 @@ class GameOverController(BaseController):
         self.game_view = game_view
         self.layout = layout
         self.reset_callback = self.reset_game
+        self.audio_manager = audio_manager
+        self.quit_callback = quit_callback
+        self.ui_manager = ui_manager
 
     def handle_events(self, events):
-        super().handle_events(events)
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if self.reset_callback:
                     self.reset_callback()
 
     def reset_game(self):
-        self.logger.info(
+        logger.info(
             "reset_game called: restarting game state and returning to gameplay view."
         )
         changes = self.game_state.full_restart(
             self.level_manager,
         )
         self.game_controller.post_game_state_events(changes)
-        self.logger.info(
+        logger.info(
             f"After full_restart: game_state.is_game_over() = {self.game_state.is_game_over()}"
         )
         if self.layout:
@@ -72,3 +70,6 @@ class GameOverController(BaseController):
 
     def handle_event(self, event):
         pass  # No EventBus events handled yet, but protocol is implemented for future use
+
+    def update(self, delta_ms):
+        pass  # GameOverController does not need to update per frame

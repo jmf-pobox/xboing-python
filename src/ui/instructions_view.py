@@ -7,10 +7,10 @@ from injector import inject
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir, get_images_dir
 
-from .content_view import ContentView
+from .view import View
 
 
-class InstructionsView(ContentView):
+class InstructionsView(View):
     @inject
     def __init__(
         self,

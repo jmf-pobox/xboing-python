@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pygame
 
-from src.controllers.base_controller import BaseController
+from src.controllers.window_controller import WindowController
 
 
 def make_key_event(key, mod=0):
@@ -16,7 +16,7 @@ def make_key_event(key, mod=0):
 def test_base_controller_volume_up():
     audio_manager = Mock()
     audio_manager.get_volume.return_value = 0.5
-    controller = BaseController(audio_manager=audio_manager)
+    controller = WindowController(audio_manager=audio_manager)
     event = make_key_event(pygame.K_PLUS)
     controller.handle_events([event])
     audio_manager.set_volume.assert_called_once_with(0.6)
@@ -25,7 +25,7 @@ def test_base_controller_volume_up():
 def test_base_controller_volume_down():
     audio_manager = Mock()
     audio_manager.get_volume.return_value = 0.5
-    controller = BaseController(audio_manager=audio_manager)
+    controller = WindowController(audio_manager=audio_manager)
     event = make_key_event(pygame.K_MINUS)
     controller.handle_events([event])
     audio_manager.set_volume.assert_called_once_with(0.4)
@@ -34,7 +34,7 @@ def test_base_controller_volume_down():
 def test_base_controller_mute_unmute():
     audio_manager = Mock()
     audio_manager.is_muted.return_value = False
-    controller = BaseController(audio_manager=audio_manager)
+    controller = WindowController(audio_manager=audio_manager)
     event = make_key_event(pygame.K_m)
     controller.handle_events([event])
     audio_manager.mute.assert_called_once()
@@ -45,7 +45,7 @@ def test_base_controller_mute_unmute():
 
 def test_base_controller_quit():
     quit_callback = Mock()
-    controller = BaseController(quit_callback=quit_callback)
+    controller = WindowController(quit_callback=quit_callback)
     event = make_key_event(pygame.K_q, mod=pygame.KMOD_CTRL)
     controller.handle_events([event])
     quit_callback.assert_called_once()

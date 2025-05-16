@@ -17,7 +17,7 @@ class LivesDisplayComponent:
 
     def handle_events(self, events):
         for event in events:
-            if hasattr(event, 'event') and isinstance(event.event, LivesChangedEvent):
+            if hasattr(event, "event") and isinstance(event.event, LivesChangedEvent):
                 self.lives = event.event.lives
 
     def draw(self, surface):

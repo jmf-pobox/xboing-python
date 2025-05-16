@@ -12,9 +12,11 @@ import time
 import pygame
 from injector import Injector
 
+from app_coordinator import AppCoordinator
 from controllers.controller_factory import ControllerFactory
 from controllers.game_over_controller import GameOverController
 from controllers.instructions_controller import InstructionsController
+from controllers.window_controller import WindowController
 from di_module import XBoingModule
 from engine.audio_manager import AudioManager
 from engine.events import (
@@ -25,7 +27,6 @@ from engine.events import (
     BombExplodedEvent,
     BonusCollectedEvent,
     GameOverEvent,
-    LevelCompleteEvent,
     PaddleHitEvent,
     PowerUpCollectedEvent,
     UIButtonClickEvent,
@@ -42,9 +43,8 @@ from ui.instructions_view import InstructionsView
 from ui.ui_factory import UIFactory
 from ui.ui_manager import UIManager
 from utils.asset_loader import create_font, load_image
-from utils.asset_paths import get_sounds_dir, get_asset_path
+from utils.asset_paths import get_asset_path, get_sounds_dir
 from utils.logging_config import setup_logging
-from app_coordinator import AppCoordinator
 
 # Setup logging
 setup_logging(logging.DEBUG)
@@ -88,6 +88,7 @@ event_sound_map = {
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 def main():
     """Main entry point for the game."""
     logger.info("Starting XBoing initialization...")
@@ -103,7 +104,7 @@ def main():
 
     window = Window(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE)
     # Set application icon
-    icon_path = get_asset_path('images/icon.png')
+    icon_path = get_asset_path("images/icon.png")
     icon_surface = load_image(icon_path, alpha=True)
     window.set_icon(icon_surface)
     renderer = Renderer(window.surface)
@@ -215,6 +216,11 @@ def main():
     # --- Game loop ---
     last_time = time.time()
     nonlocal_vars = {"running": True}
+    window_controller = WindowController(
+        audio_manager=audio_manager,
+        quit_callback=lambda: nonlocal_vars.update({"running": False}),
+        ui_manager=ui_manager,
+    )
     while nonlocal_vars["running"]:
         now = time.time()
         delta_time = now - last_time
@@ -222,6 +228,7 @@ def main():
 
         events = pygame.event.get()
         input_manager.update(events)
+        window_controller.handle_events(events)  # Handle global/system events
         controller_manager.active_controller.handle_events(events)
         audio_manager.handle_events(events)
         ui_manager.handle_events(events)

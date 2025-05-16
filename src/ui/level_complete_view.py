@@ -1,9 +1,9 @@
 import pygame
 
-from .content_view import ContentView
+from .view import View
 
 
-class LevelCompleteView(ContentView):
+class LevelCompleteView(View):
     def __init__(
         self,
         layout,

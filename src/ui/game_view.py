@@ -1,9 +1,9 @@
 import pygame
 
-from .content_view import ContentView
+from .view import View
 
 
-class GameView(ContentView):
+class GameView(View):
     def __init__(self, layout, block_manager, paddle, balls, renderer):
         self.layout = layout
         self.block_manager = block_manager

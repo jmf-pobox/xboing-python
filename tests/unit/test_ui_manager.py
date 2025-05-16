@@ -1,6 +1,6 @@
 from unittest.mock import Mock
-
-from src.ui.ui_manager import UIManager
+import pygame
+from ui.ui_manager import UIManager
 
 
 def test_ui_manager_registration_and_draw_order():
@@ -57,8 +57,14 @@ def test_ui_manager_setup_ui_and_event_handling():
     # Switch view
     ui_manager.set_view("instructions")
     assert ui_manager.current_view is view2
-    # Test handle_events
-    fake_events = ["event1", "event2"]
+    # Test handle_events with mock Pygame events
+    fake_event1 = Mock()
+    fake_event1.type = pygame.USEREVENT
+    fake_event1.event = None
+    fake_event2 = Mock()
+    fake_event2.type = pygame.KEYDOWN
+    fake_event2.event = None
+    fake_events = [fake_event1, fake_event2]
     ui_manager.handle_events(fake_events)
     # Should call handle_events on top_bar and bottom_bar
     top_bar.handle_events.assert_called_once_with(fake_events)
