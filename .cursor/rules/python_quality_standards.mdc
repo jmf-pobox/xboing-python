@@ -1,0 +1,27 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+- All code must comply with [PEP 8](mdc:https:/peps.python.org/pep-0008) (style guide) and [PEP 257](mdc:https:/peps.python.org/pep-0257) (docstrings).
+- Use modern, concise docstrings for all public classes, methods, and functions, following PEP 257 conventions.
+- Use [PEP 484](mdc:https:/peps.python.org/pep-0484) type hints everywhere: annotate all function/method arguments, return types, and class attributes.
+- Run `mypy --strict` on all modules before and after changes. Resolve all type errors and warnings, including missing annotations, incompatible types, and untyped attributes.
+- Use precise types (e.g., `List[pygame.event.Event]`, `Optional[Type]`, `Callable`, etc.), not just `Any`.
+- Cross-reference related modules to ensure correct types for arguments and attributes.
+- Use `# type: ignore` only as a last resort, and always with a comment explaining why.
+- Format all code with [black](mdc:https:/black.readthedocs.io/en/stable) before committing or running tests.
+- Do not manually adjust formatting that black would change.
+- Run `ruff check <module> --fix` after code changes to auto-fix style and import issues. Resolve all linter errors and warnings unless there is a strong, documented reason not to.
+- Run the full test suite (`pytest`) before and after every code change. All tests must pass (100% pass rate) before marking a task as complete.
+- For each module:
+  1. Run `mypy --strict` and resolve all type issues.
+  2. Add/update type annotations and docstrings.
+  3. Format with black.
+  4. Run `pytest` to ensure all tests pass.
+  5. Run `mypy --strict` again to confirm type safety.
+  6. Run `ruff check <module> --fix` to resolve style issues.
+  7. Update `TODO.md` to reflect completed work.
+- Do not attempt to fix linter errors more than 3 times in a row; ask for help if issues persist.
+- Update or create docstrings for all public-facing code.
+- Keep `TODO.md` up to date with action items and mark tasks as complete when finished.
