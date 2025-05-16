@@ -1,4 +1,3 @@
-
 # XBoing Python Port
 
 A Python reimplementation of the classic XBoing game originally written for X11 in C. This modernized port maintains the gameplay and charm of the original while offering improved compatibility with modern systems.
@@ -70,16 +69,28 @@ This Python port is currently in active development. Current features:
 ### Project Structure
 
 ```
-xboing-py/
+xboing-python/
 ├── assets/               # Game assets (images, sounds, levels)
-├── docs/                 # Documentation
+│   ├── images/           # All game images (balls, blocks, backgrounds, etc.)
+│   ├── sounds/           # Sound effects (WAV, AU)
+│   └── levels/           # Level data files
+├── docs/                 # Documentation and design docs
 ├── scripts/              # Utility scripts for asset conversion, etc.
 ├── src/                  # Source code
-│   ├── engine/           # Game engine (graphics, audio, input)
-│   ├── game/             # Game logic (ball, blocks, paddle, collision)
-│   ├── ui/               # User interface components
+│   ├── app_coordinator.py# App entry coordination
+│   ├── controllers/      # Controllers for game, window, UI, etc.
+│   ├── di_module.py      # Dependency injection setup
+│   ├── engine/           # Game engine (graphics, audio, input, window)
+│   ├── game/             # Game logic (ball, blocks, paddle, collision, state)
+│   ├── layout/           # Layout helpers and game layout logic
+│   ├── main.py           # Main entry point
+│   ├── renderers/        # Rendering helpers (digits, lives, etc.)
+│   ├── ui/               # User interface components (views, displays)
 │   └── utils/            # Utility functions and helpers
-└── tests/                # Test scripts
+├── tests/                # Test scripts
+│   ├── integration/      # Integration tests
+│   └── unit/             # Unit tests
+└── xboing2.4-clang/      # Original XBoing C source/assets (reference)
 ```
 
 ### Asset Management
@@ -115,6 +126,13 @@ See the `docs/` directory for detailed information:
 - [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
 - [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
 - [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
+- [Dependency Injection Design](docs/DI-DESIGN.md) – Dependency injection and modularity
+- [Logging Design](docs/LOGGING-DESIGN.md) – Logging system and best practices
+- [Scripts Design](docs/SCRIPTS-DESIGN.md) – Utility and asset conversion scripts
+- [Game Controller Tests](docs/GAME-CONTROLLER-TESTS.md) – Game controller test strategy
+- [Highscore Design](docs/HIGHSCORE-DESIGN.md) – High score system design
+- [MVC Refactor](docs/MVC-REFACTOR.md) – Notes on MVC refactor
+- [Design Feedback](docs/DESIGN-FEEDBACK.md) – Design review and feedback
 
 ### Contributing
 

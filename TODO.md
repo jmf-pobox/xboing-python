@@ -7,3 +7,4 @@
 - [ ] Update all tests to use injector-based setup, providing mocks/stubs via test modules as needed.
 - [ ] Incrementally migrate remaining manual constructions (e.g., asset loaders, configuration) to DI as appropriate.
 - [ ] Refactor background image loading out of GameLayout (src/layout/game_layout.py) into a dedicated asset loader module for stricter separation of layout and asset management.
+- [ ] Keep the Project Structure section in README.md up to date with any future directory changes
