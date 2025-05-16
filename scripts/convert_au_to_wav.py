@@ -14,16 +14,16 @@ Usage:
 """
 
 import argparse
+import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List
-import logging
+from typing import Dict, List, Optional
 
 logger = logging.getLogger("xboing.scripts.convert_au_to_wav")
 
 
-def check_ffmpeg():
+def check_ffmpeg() -> bool:
     """Check if ffmpeg is available in PATH."""
     try:
         subprocess.run(
@@ -36,7 +36,9 @@ def check_ffmpeg():
         return False
 
 
-def convert_au_to_wav(input_file, output_file=None, dry_run=False):
+def convert_au_to_wav(
+    input_file: Path, output_file: Optional[Path] = None, dry_run: bool = False
+) -> Optional[bool]:
     """
     Convert an .au file to .wav format using ffmpeg.
     Args:
@@ -44,7 +46,7 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
         output_file (Path): Path for the output .wav file (optional)
         dry_run (bool): If True, do not convert
     Returns:
-        bool: True if converted, False if failed or skipped
+        bool: True if converted, False if failed, None if skipped
     """
     if output_file is None:
         output_file = input_file.with_suffix(".wav")
@@ -76,7 +78,9 @@ def convert_au_to_wav(input_file, output_file=None, dry_run=False):
         return False
 
 
-def convert_directory(input_dir, output_dir, dry_run=False):
+def convert_directory(
+    input_dir: Path, output_dir: Path, dry_run: bool = False
+) -> Dict[str, List[str]]:
     """
     Convert all .au files in a directory to .wav format.
     Args:
@@ -101,7 +105,12 @@ def convert_directory(input_dir, output_dir, dry_run=False):
     return results
 
 
-def main():
+def main() -> int:
+    """
+    Main entry point for the audio conversion script.
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
     parser = argparse.ArgumentParser(
         description="Convert .au audio files from legacy XBoing to .wav for Python port. Requires ffmpeg."
     )

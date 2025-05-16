@@ -7,14 +7,14 @@ Usage:
   (Defaults: input=xboing2.4-clang/sounds/balllost.au, output=assets/sounds/balllost.wav)
 """
 import argparse
+import logging
 import wave
 from pathlib import Path
-import logging
 
 logger = logging.getLogger("xboing.scripts.fix_balllost")
 
 
-def fix_balllost_au(input_path, output_path):
+def fix_balllost_au(input_path: str, output_path: str) -> bool:
     """
     Fix and convert the balllost.au file that has a corrupted header.
 
@@ -103,7 +103,12 @@ def fix_balllost_au(input_path, output_path):
         return False
 
 
-def main():
+def main() -> int:
+    """
+    Main entry point for the balllost.au fix/conversion script.
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
     parser = argparse.ArgumentParser(
         description="Fix and convert the balllost.au file to .wav format."
     )

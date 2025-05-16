@@ -10,20 +10,25 @@ Usage:
   (Defaults: input=xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm, output=assets/images/bgrnds/bgrnd.png)
 """
 import argparse
+import logging
 import sys
 from pathlib import Path
-import logging
 
 from PIL import Image
 
 logger = logging.getLogger("xboing.scripts.fix_background")
 
 
-def create_background_from_xpm(xpm_path, png_path):
+def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
     """
     Convert the XBoing background XPM to a PNG file.
 
     This function is specifically designed for the bgrnd.xpm file.
+    Args:
+        xpm_path (str): Path to the input XPM file.
+        png_path (str): Path to the output PNG file.
+    Returns:
+        bool: True if successful, False otherwise.
     """
     # Define the colors directly from the XPM file
     colors = {
@@ -75,7 +80,12 @@ def create_background_from_xpm(xpm_path, png_path):
     return True
 
 
-def main():
+def main() -> int:
+    """
+    Main entry point for the background XPM to PNG conversion script.
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
     parser = argparse.ArgumentParser(
         description="Convert bgrnd.xpm to PNG for XBoing Python port."
     )

@@ -17,12 +17,12 @@ Usage:
 """
 
 import argparse
+import logging
 import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List
-import logging
+from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 
@@ -86,7 +86,9 @@ X11_COLORS = {
 logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
 
 
-def parse_xpm(xpm_file):
+def parse_xpm(
+    xpm_file: str,
+) -> Optional[Tuple[int, int, List[List[Tuple[int, int, int, int]]]]]:
     """
     Parse an XPM file and extract image data.
 
@@ -265,7 +267,7 @@ def parse_xpm(xpm_file):
     return width, height, pixels
 
 
-def convert_xpm_to_png(xpm_path, png_path):
+def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
     """
     Convert an XPM file to a PNG file.
 
@@ -394,7 +396,9 @@ def convert_xpm_to_png(xpm_path, png_path):
     return True
 
 
-def convert_directory(input_dir, output_dir, dry_run=False):
+def convert_directory(
+    input_dir: Path, output_dir: Path, dry_run: bool = False
+) -> Dict[str, List[str]]:
     """
     Convert all XPM files in a directory tree to PNG, preserving
     the subdirectory structure.
@@ -441,7 +445,12 @@ def convert_directory(input_dir, output_dir, dry_run=False):
     return results
 
 
-def main():
+def main() -> int:
+    """
+    Main entry point for the XPM to PNG conversion script.
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
     parser = argparse.ArgumentParser(
         description="Convert XBoing XPM files to PNG format. Requires Pillow."
     )
