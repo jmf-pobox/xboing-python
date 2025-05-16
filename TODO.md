@@ -96,3 +96,7 @@ Continue with main.py compliance refactor, starting with moving UIManager/Contro
 - [x] Resolve all mypy --strict errors in src/ui/game_over_view.py with PEP-compliant typing and docstrings
 
 - [x] Resolve all mypy --strict errors in src/ui/ui_factory.py with PEP-compliant typing and docstrings
+
+- [x] src/renderers/digit_renderer.py: mypy strict, PEP-compliant type annotations, modern docstrings, tests pass, ruff clean
+
+- [x] src/renderers/lives_renderer.py: mypy strict, PEP-compliant type annotations, modern docstrings, tests pass, ruff clean
