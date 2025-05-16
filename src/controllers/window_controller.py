@@ -1,6 +1,10 @@
 import logging
+from typing import Callable, List, Optional
 
 import pygame
+
+from engine.audio_manager import AudioManager
+from ui.ui_manager import UIManager
 
 
 class WindowController:
@@ -9,21 +13,26 @@ class WindowController:
     No longer a base class for per-view controllers.
     """
 
-    def __init__(self, audio_manager=None, quit_callback=None, ui_manager=None):
+    def __init__(
+        self,
+        audio_manager: Optional[AudioManager] = None,
+        quit_callback: Optional[Callable[[], None]] = None,
+        ui_manager: Optional[UIManager] = None,
+    ) -> None:
         """
-        Initialize the base controller.
+        Initialize the WindowController.
 
         Args:
-            audio_manager: Manager for sound effects and volume control
-            quit_callback: Function to call when quitting the game
-            ui_manager: Manager for UI views and transitions
+            audio_manager: Manager for sound effects and volume control.
+            quit_callback: Function to call when quitting the game.
+            ui_manager: Manager for UI views and transitions.
         """
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
         self.ui_manager = ui_manager
         self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
 
-    def handle_events(self, events):
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         """
         Handle input/events for this controller, including global controls.
 
@@ -35,7 +44,7 @@ class WindowController:
         - Shift+/: Show instructions
 
         Args:
-            events: List of pygame events to process
+            events: List of pygame events to process.
         """
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -69,7 +78,7 @@ class WindowController:
                     if self.ui_manager:
                         self.ui_manager.set_view("instructions")
 
-    def update(self, delta_time):
+    def update(self, delta_time: float) -> None:
         """
         Update logic for this controller.
 
@@ -77,19 +86,16 @@ class WindowController:
         that need to update game state or perform other actions each frame.
 
         Args:
-            delta_time: Time elapsed since the last update in seconds
+            delta_time: Time elapsed since the last update in seconds.
         """
         pass
 
-    def quit_game(self):
+    def quit_game(self) -> None:
         """
         Trigger the quit callback if provided.
 
         Controllers should call this method instead of calling the quit_callback directly
         to ensure proper logging and consistent behavior.
-
-        Returns:
-            None
         """
         self.logger.info("quit_game called from WindowController.")
         if self.quit_callback:

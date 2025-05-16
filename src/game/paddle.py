@@ -28,7 +28,9 @@ class Paddle:
     # Distance from bottom of play area to paddle (original XBoing value)
     DIST_BASE = 30  # Matches the original C code's DIST_BASE constant
 
-    def __init__(self, x: int, y: int, width: int, height: int, speed: int = 10) -> None:
+    def __init__(
+        self, x: int, y: int, width: int, height: int, speed: int = 10
+    ) -> None:
         """
         Initialize the paddle.
 

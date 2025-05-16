@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from controllers.controller_manager import ControllerManager
 from controllers.game_controller import GameController
 from controllers.game_over_controller import GameOverController
@@ -23,21 +25,21 @@ class ControllerFactory:
 
     @staticmethod
     def create_and_register_controllers(
-        game_state,
-        level_manager,
-        balls,
-        paddle,
-        block_manager,
-        input_manager,
-        layout,
-        renderer,
-        audio_manager,
-        event_sound_map,
-        ui_manager,
-        quit_callback,
-        reset_game_callback=None,
-        instructions_controller=None,
-    ):
+        game_state: Any,
+        level_manager: Any,
+        balls: Any,
+        paddle: Any,
+        block_manager: Any,
+        input_manager: Any,
+        layout: Any,
+        renderer: Any,
+        audio_manager: Any,
+        event_sound_map: Any,
+        ui_manager: Any,
+        quit_callback: Any,
+        reset_game_callback: Optional[Any] = None,
+        instructions_controller: Optional[Any] = None,
+    ) -> Dict[str, Any]:
         """
         Construct and register all controllers, returning the ControllerManager and controller references.
 

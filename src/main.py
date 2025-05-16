@@ -119,7 +119,6 @@ def main() -> None:
     balls = game_objects["balls"]
     block_manager = game_objects["block_manager"]
     level_manager = game_objects["level_manager"]
-    bg_color = (40, 44, 52)
     # Set the timer in GameState to match the loaded level
     game_state.set_timer(level_manager.get_time_remaining())
 
@@ -137,7 +136,6 @@ def main() -> None:
     top_bar_view = ui_elements["top_bar"]
     bottom_bar_view = ui_elements["bottom_bar"]
     game_view = ui_elements["game_view"]
-    instructions_view = ui_elements["instructions_view"]
     game_over_view = ui_elements["game_over_view"]
     level_complete_view = ui_elements["level_complete_view"]
 
@@ -170,14 +168,13 @@ def main() -> None:
     )
     controller_manager = controller_elements["controller_manager"]
     game_controller = controller_elements["game_controller"]
-    instructions_controller = controller_elements["instructions_controller"]
     level_complete_controller = controller_elements["level_complete_controller"]
 
     # Add an initial ball to start the game in the correct state
     balls.append(game_controller.create_new_ball())
 
     # --- AppCoordinator: sync UIManager and ControllerManager ---
-    coordinator = AppCoordinator(ui_manager, controller_manager)
+    AppCoordinator(ui_manager, controller_manager)
 
     # --- DI for GameOverController, GameOverView, InstructionsView, InstructionsController ---
     font = create_font(24)
@@ -206,8 +203,8 @@ def main() -> None:
     injector = Injector([xboing_module])
     game_over_controller = injector.get(GameOverController)
     game_over_view = injector.get(GameOverView)
-    instructions_view = injector.get(InstructionsView)
-    instructions_controller = injector.get(InstructionsController)
+    injector.get(InstructionsView)
+    injector.get(InstructionsController)
 
     # Now wire up the correct callbacks and event subscriptions
     level_complete_view.on_advance_callback = (
