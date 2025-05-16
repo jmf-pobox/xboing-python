@@ -22,6 +22,7 @@ class XBoingModule(Module):
     Dependency injection module for XBoing, providing all core controllers and views.
     Binds game state, managers, controllers, UI, and callback dependencies for injection.
     """
+
     def __init__(
         self,
         game_state: GameState,

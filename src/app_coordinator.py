@@ -12,7 +12,9 @@ class AppCoordinator:
     Ensures the active controller matches the current view.
     """
 
-    def __init__(self, ui_manager: 'UIManager', controller_manager: 'ControllerManager') -> None:
+    def __init__(
+        self, ui_manager: "UIManager", controller_manager: "ControllerManager"
+    ) -> None:
         """
         Initialize the AppCoordinator and register the view change callback.
 
