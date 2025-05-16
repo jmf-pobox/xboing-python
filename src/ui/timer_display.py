@@ -3,11 +3,13 @@ TimerDisplay: UI component for displaying the remaining time in the timer window
 Subscribes to TimerUpdatedEvent and renders itself using the renderer.
 """
 
-from typing import Any
+from typing import List
 
 import pygame
 
 from engine.events import TimerUpdatedEvent
+from engine.graphics import Renderer
+from layout.game_layout import GameLayout
 
 
 class TimerDisplay:
@@ -16,7 +18,9 @@ class TimerDisplay:
     Subscribes to TimerUpdatedEvent and renders itself using the renderer.
     """
 
-    def __init__(self, layout: Any, renderer: Any, font: Any) -> None:
+    def __init__(
+        self, layout: GameLayout, renderer: Renderer, font: pygame.font.Font
+    ) -> None:
         """
         Initialize the TimerDisplay.
 
@@ -30,7 +34,7 @@ class TimerDisplay:
         self.font = font
         self.time_remaining = 0
 
-    def handle_events(self, events):
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         """
         Handle timer update events and update the displayed time.
 
@@ -43,7 +47,7 @@ class TimerDisplay:
             ):
                 self.time_remaining = event.event.time_remaining
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw the timer onto the given surface.
 

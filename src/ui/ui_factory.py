@@ -3,10 +3,11 @@ UIFactory: Factory for creating and wiring up all UI components, views, and bars
 Centralizes UI instantiation and layout logic.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from engine.graphics import Renderer
 from game.ball import Ball
+from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
@@ -38,7 +39,7 @@ class UIFactory:
 
     @staticmethod
     def create_ui_components(
-        game_state: Any,
+        game_state: GameState,
         layout: GameLayout,
         renderer: Renderer,
         balls: List[Ball],
@@ -91,9 +92,6 @@ class UIFactory:
             score_display,
             lives_display_component,
             level_display_component,
-            timer_display_component,
-            message_display,
-            special_display,
         )
         bottom_bar_view = BottomBarView(
             message_display,

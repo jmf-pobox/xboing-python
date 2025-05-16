@@ -3,9 +3,13 @@ BottomBarView: UI bar at the bottom of the XBoing window.
 Displays message, special status, and timer.
 """
 
-from typing import Any, List
+from typing import List
 
 import pygame
+
+from ui.message_display import MessageDisplay
+from ui.special_display import SpecialDisplay
+from ui.timer_display import TimerDisplay
 
 
 class BottomBarView:
@@ -16,9 +20,9 @@ class BottomBarView:
 
     def __init__(
         self,
-        message_display_component: Any,
-        special_display_component: Any,
-        timer_display_component: Any,
+        message_display_component: MessageDisplay,
+        special_display_component: SpecialDisplay,
+        timer_display_component: TimerDisplay,
     ) -> None:
         """
         Initialize the BottomBarView.
