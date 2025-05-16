@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 class BlockHitEvent:
     """Event: Ball hit a block."""
 
@@ -67,79 +70,115 @@ class WallHitEvent:
 class ScoreChangedEvent:
     """Event: Score changed (for UI updates)."""
 
-    def __init__(self, score):
-        self.score = score
+    def __init__(self, score: int) -> None:
+        """Initialize with the new score value."""
+        self.score: int = score
 
 
 class LivesChangedEvent:
     """Event: Lives changed (gain or loss, for UI updates)."""
 
-    def __init__(self, lives):
-        self.lives = lives
+    def __init__(self, lives: int) -> None:
+        """Initialize with the new lives value."""
+        self.lives: int = lives
 
 
 class LevelChangedEvent:
     """Event: Level changed (for UI updates)."""
 
-    def __init__(self, level):
-        self.level = level
+    def __init__(self, level: int) -> None:
+        """Initialize with the new level value."""
+        self.level: int = level
 
 
 class TimerUpdatedEvent:
     """Event: Timer updated (for UI updates)."""
 
-    def __init__(self, time_remaining):
-        self.time_remaining = time_remaining
+    def __init__(self, time_remaining: int) -> None:
+        """Initialize with the new time remaining value."""
+        self.time_remaining: int = time_remaining
 
 
 class MessageChangedEvent:
     """Event: Message window content changed (for UI updates)."""
 
-    def __init__(self, message, color=(0, 255, 0), alignment="left"):
-        self.message = message
-        self.color = color
-        self.alignment = alignment
+    def __init__(
+        self,
+        message: str,
+        color: Tuple[int, int, int] = (0, 255, 0),
+        alignment: str = "left",
+    ) -> None:
+        """Initialize with the message, color, and alignment."""
+        self.message: str = message
+        self.color: Tuple[int, int, int] = color
+        self.alignment: str = alignment
 
 
 class SpecialReverseChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'reverse' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialStickyChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'sticky' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialSaveChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'save' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialFastGunChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'fastgun' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialNoWallChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'nowall' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialKillerChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'killer' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialX2ChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'x2' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class SpecialX4ChangedEvent:
-    def __init__(self, active: bool):
-        self.active = active
+    """Event: Special 'x4' state changed."""
+
+    def __init__(self, active: bool) -> None:
+        """Initialize with the active state."""
+        self.active: bool = active
 
 
 class LevelCompleteEvent:
+    """Event: Level completed."""
+
     pass

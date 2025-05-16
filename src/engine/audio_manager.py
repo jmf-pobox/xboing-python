@@ -27,7 +27,13 @@ class AudioManager:
         self.muted: bool = False
         self.event_sound_map = event_sound_map or {}
 
-    def handle_events(self, events):
+    def handle_events(self, events: Any) -> None:
+        """
+        Handle a sequence of events, playing sounds for mapped custom events.
+
+        Args:
+            events: A sequence of pygame events to process.
+        """
         for event in events:
             # Check if this is a pygame event with our custom event attribute
             if hasattr(event, "event") and event.type == pygame.USEREVENT:
