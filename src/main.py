@@ -8,6 +8,7 @@ engine and runs the main game loop.
 
 import logging
 import time
+from typing import Any, Dict
 
 import pygame
 from injector import Injector
@@ -89,7 +90,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def main():
+def main() -> None:
     """Main entry point for the game."""
     logger.info("Starting XBoing initialization...")
 
@@ -123,7 +124,7 @@ def main():
     game_state.set_timer(level_manager.get_time_remaining())
 
     # --- UI Setup via UIFactory ---
-    ui_elements = UIFactory.create_ui_components(
+    ui_elements: Dict[str, Any] = UIFactory.create_ui_components(
         game_state=game_state,
         layout=layout,
         renderer=renderer,
@@ -132,7 +133,7 @@ def main():
         block_manager=block_manager,
         level_manager=level_manager,
     )
-    views = ui_elements["views"]
+    views: Dict[str, Any] = ui_elements["views"]
     top_bar_view = ui_elements["top_bar"]
     bottom_bar_view = ui_elements["bottom_bar"]
     game_view = ui_elements["game_view"]
@@ -150,20 +151,22 @@ def main():
     )
 
     # --- Controller Setup via ControllerFactory ---
-    controller_elements = ControllerFactory.create_and_register_controllers(
-        game_state=game_state,
-        level_manager=level_manager,
-        balls=balls,
-        paddle=paddle,
-        block_manager=block_manager,
-        input_manager=input_manager,
-        layout=layout,
-        renderer=renderer,
-        audio_manager=audio_manager,
-        event_sound_map=event_sound_map,
-        ui_manager=ui_manager,
-        quit_callback=lambda: nonlocal_vars.update({"running": False}),
-        reset_game_callback=lambda: None,  # Placeholder for real callback
+    controller_elements: Dict[str, Any] = (
+        ControllerFactory.create_and_register_controllers(
+            game_state=game_state,
+            level_manager=level_manager,
+            balls=balls,
+            paddle=paddle,
+            block_manager=block_manager,
+            input_manager=input_manager,
+            layout=layout,
+            renderer=renderer,
+            audio_manager=audio_manager,
+            event_sound_map=event_sound_map,
+            ui_manager=ui_manager,
+            quit_callback=lambda: nonlocal_vars.update({"running": False}),
+            reset_game_callback=lambda: None,  # Placeholder for real callback
+        )
     )
     controller_manager = controller_elements["controller_manager"]
     game_controller = controller_elements["game_controller"]
@@ -215,7 +218,7 @@ def main():
 
     # --- Game loop ---
     last_time = time.time()
-    nonlocal_vars = {"running": True}
+    nonlocal_vars: Dict[str, bool] = {"running": True}
     window_controller = WindowController(
         audio_manager=audio_manager,
         quit_callback=lambda: nonlocal_vars.update({"running": False}),
