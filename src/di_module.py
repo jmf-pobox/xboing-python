@@ -1,5 +1,6 @@
-from typing import Any, Callable, List
+from typing import Callable, List, Optional
 
+import pygame
 from injector import Module, provider
 
 from controllers.game_controller import GameController
@@ -17,6 +18,10 @@ from ui.ui_manager import UIManager
 
 
 class XBoingModule(Module):
+    """
+    Dependency injection module for XBoing, providing all core controllers and views.
+    Binds game state, managers, controllers, UI, and callback dependencies for injection.
+    """
     def __init__(
         self,
         game_state: GameState,
@@ -29,14 +34,36 @@ class XBoingModule(Module):
         audio_manager: AudioManager,
         quit_callback: Callable[[], None],
         get_score_callback: Callable[[], int],
-        font: Any,
-        small_font: Any,
-        reset_game_callback: Callable[[], None],
-        instructions_font: Any,
-        instructions_headline_font: Any,
-        instructions_text_font: Any,
-        on_exit_callback: Callable[[], None],
+        font: pygame.font.Font,
+        small_font: pygame.font.Font,
+        reset_game_callback: Optional[Callable[[], None]],
+        instructions_font: pygame.font.Font,
+        instructions_headline_font: pygame.font.Font,
+        instructions_text_font: pygame.font.Font,
+        on_exit_callback: Optional[Callable[[], None]],
     ):
+        """
+        Initialize the XBoingModule with all dependencies for DI.
+
+        Args:
+            game_state: The main GameState instance.
+            level_manager: The LevelManager instance.
+            balls: List of Ball objects in play.
+            game_controller: The main GameController instance.
+            game_view: The main GameView instance.
+            layout: The GameLayout instance.
+            ui_manager: The UIManager instance.
+            audio_manager: The AudioManager instance.
+            quit_callback: Callback to quit the game.
+            get_score_callback: Callback to get the current score.
+            font: Main font for UI and overlays.
+            small_font: Secondary font for UI and overlays.
+            reset_game_callback: Callback to reset the game (optional).
+            instructions_font: Font for instructions view.
+            instructions_headline_font: Headline font for instructions view.
+            instructions_text_font: Text font for instructions view.
+            on_exit_callback: Callback to exit instructions (optional).
+        """
         self._game_state = game_state
         self._level_manager = level_manager
         self._balls = balls
