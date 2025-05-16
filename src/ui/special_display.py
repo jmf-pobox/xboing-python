@@ -1,3 +1,12 @@
+"""
+SpecialDisplay: UI component for displaying the status of special power-ups in the special window region.
+Subscribes to special events and renders their state as colored labels.
+"""
+
+from typing import Any, Dict, List, Tuple
+
+import pygame
+
 from engine.events import (
     SpecialFastGunChangedEvent,
     SpecialKillerChangedEvent,
@@ -8,6 +17,8 @@ from engine.events import (
     SpecialX2ChangedEvent,
     SpecialX4ChangedEvent,
 )
+from engine.graphics import Renderer
+from layout.game_layout import GameLayout
 
 
 class SpecialDisplay:
@@ -16,7 +27,7 @@ class SpecialDisplay:
     Subscribes to events for each special and renders their state as colored labels.
     """
 
-    LABELS = [
+    LABELS: List[Tuple[str, str]] = [
         ("Reverse", "reverse"),
         ("Save", "save"),
         ("NoWall", "nowall"),
@@ -26,7 +37,7 @@ class SpecialDisplay:
         ("Killer", "killer"),
         ("x4", "x4"),
     ]
-    EVENT_MAP = {
+    EVENT_MAP: Dict[str, Any] = {
         "reverse": SpecialReverseChangedEvent,
         "sticky": SpecialStickyChangedEvent,
         "save": SpecialSaveChangedEvent,
@@ -37,20 +48,47 @@ class SpecialDisplay:
         "x4": SpecialX4ChangedEvent,
     }
 
-    def __init__(self, layout, renderer, font):
-        self.layout = layout
-        self.renderer = renderer
-        self.font = font
-        # State for each special (all off by default)
-        self.state = {key: False for _, key in self.LABELS}
+    def __init__(
+        self,
+        layout: GameLayout,
+        renderer: Renderer,
+        font: pygame.font.Font,
+    ) -> None:
+        """
+        Initialize the SpecialDisplay.
 
-    def handle_events(self, events):
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            renderer (Renderer): The renderer instance.
+            font (pygame.font.Font): The font to use for labels.
+        """
+        self.layout: GameLayout = layout
+        self.renderer: Renderer = renderer
+        self.font: pygame.font.Font = font
+        # State for each special (all off by default)
+        self.state: Dict[str, bool] = {key: False for _, key in self.LABELS}
+
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
+        """
+        Handle special power-up events and update state.
+
+        Args:
+            events (List[pygame.event.Event]): List of Pygame events to handle.
+        """
         for event in events:
             for key, event_cls in self.EVENT_MAP.items():
-                if hasattr(event, "event") and isinstance(event.event, event_cls):
+                if event.type == pygame.USEREVENT and isinstance(
+                    event.event, event_cls
+                ):
                     self.state[key] = event.event.active
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the special power-up labels and their states.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         special_rect = self.layout.special_window.rect.rect
         x0, y0 = special_rect.x + 5, special_rect.y + 3
         col_width = 49

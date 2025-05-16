@@ -37,17 +37,17 @@ def get_asset_path(relative_path, create_dirs=False):
     return asset_path
 
 
-def get_images_dir():
+def get_images_dir() -> str:
     """Get the path to the images directory."""
     return get_asset_path("images", create_dirs=True)
 
 
-def get_sounds_dir():
+def get_sounds_dir() -> str:
     """Get the path to the sounds directory."""
     return get_asset_path("sounds", create_dirs=True)
 
 
-def get_levels_dir():
+def get_levels_dir() -> str:
     """Get the path to the levels directory."""
     # First try the original XBoing levels directory
     original_levels = os.path.join(PROJECT_DIR, "..", "levels")
@@ -58,26 +58,26 @@ def get_levels_dir():
     return get_asset_path("levels", create_dirs=True)
 
 
-def get_blocks_dir():
+def get_blocks_dir() -> str:
     """Get the path to the blocks directory."""
     return get_asset_path("images/blocks", create_dirs=True)
 
 
-def get_backgrounds_dir():
+def get_backgrounds_dir() -> str:
     """Get the path to the backgrounds directory."""
     return get_asset_path("images/bgrnds", create_dirs=True)
 
 
-def get_paddles_dir():
+def get_paddles_dir() -> str:
     """Get the path to the paddle graphics directory."""
     return get_asset_path("images/paddle", create_dirs=True)
 
 
-def get_digits_dir():
+def get_digits_dir() -> str:
     """Get the path to the digit images directory."""
     return get_asset_path("images/digits", create_dirs=True)
 
 
-def get_balls_dir():
+def get_balls_dir() -> str:
     """Get the path to the ball images directory."""
     return get_asset_path("images/balls", create_dirs=True)

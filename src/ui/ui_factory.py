@@ -1,3 +1,16 @@
+"""
+UIFactory: Factory for creating and wiring up all UI components, views, and bars for XBoing.
+Centralizes UI instantiation and layout logic.
+"""
+
+from typing import Any, Dict, List, Optional
+
+from engine.graphics import Renderer
+from game.ball import Ball
+from game.level_manager import LevelManager
+from game.paddle import Paddle
+from game.sprite_block import SpriteBlockManager
+from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer
 from renderers.lives_renderer import LivesRenderer
 from ui.bottom_bar_view import BottomBarView
@@ -25,28 +38,30 @@ class UIFactory:
 
     @staticmethod
     def create_ui_components(
-        game_state,
-        layout,
-        renderer,
-        balls,
-        paddle,
-        block_manager,
-        level_manager,
-        instructions_view=None,
-    ):
+        game_state: Any,
+        layout: GameLayout,
+        renderer: Renderer,
+        balls: List[Ball],
+        paddle: Paddle,
+        block_manager: SpriteBlockManager,
+        level_manager: LevelManager,
+        instructions_view: Optional[InstructionsView] = None,
+    ) -> Dict[str, object]:
         """
         Construct and return all UI components, views, and bars.
+
         Args:
             game_state: The game state instance
-            layout: The GameLayout instance
-            renderer: The main Renderer instance
-            balls: The list of Ball objects
-            paddle: The Paddle instance
-            block_manager: The SpriteBlockManager instance
-            level_manager: The LevelManager instance
-            instructions_view: The InstructionsView instance (optional)
+            layout (GameLayout): The GameLayout instance
+            renderer (Renderer): The main Renderer instance
+            balls (List[Ball]): The list of Ball objects
+            paddle (Paddle): The Paddle instance
+            block_manager (SpriteBlockManager): The SpriteBlockManager instance
+            level_manager (LevelManager): The LevelManager instance
+            instructions_view (Optional[InstructionsView]): The InstructionsView instance (optional)
+
         Returns:
-            dict: A dictionary containing all created UI elements (views, top_bar, bottom_bar, etc.)
+            Dict[str, object]: A dictionary containing all created UI elements (views, top_bar, bottom_bar, etc.)
         """
         # Fonts
         font = create_font(24)

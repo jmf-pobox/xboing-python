@@ -218,7 +218,7 @@ class Paddle:
         """Check if the paddle is sticky."""
         return self.sticky
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw the paddle.
 

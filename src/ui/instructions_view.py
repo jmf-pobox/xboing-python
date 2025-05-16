@@ -1,9 +1,11 @@
 import os
-from typing import Any
+from typing import List, Tuple
 
 import pygame
 from injector import inject
 
+from engine.graphics import Renderer
+from layout.game_layout import GameLayout
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir, get_images_dir
 
@@ -14,21 +16,32 @@ class InstructionsView(View):
     @inject
     def __init__(
         self,
-        layout: Any,
-        renderer: Any,
-        font: Any,
-        headline_font: Any,
-        text_font: Any,
-        amber_color: tuple = (255, 191, 63),
-    ):
-        self.layout = layout
-        self.renderer = renderer
-        self.font = font
-        self.headline_font = headline_font
-        self.text_font = text_font
-        self.amber_color = amber_color
+        layout: GameLayout,
+        renderer: Renderer,
+        font: pygame.font.Font,
+        headline_font: pygame.font.Font,
+        text_font: pygame.font.Font,
+        amber_color: Tuple[int, int, int] = (255, 191, 63),
+    ) -> None:
+        """
+        Initialize the InstructionsView.
+
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            renderer (Renderer): The renderer instance.
+            font (pygame.font.Font): The main font.
+            headline_font (pygame.font.Font): The font for headlines.
+            text_font (pygame.font.Font): The font for instructions text.
+            amber_color (Tuple[int, int, int], optional): Amber color for the bottom line. Defaults to (255, 191, 63).
+        """
+        self.layout: GameLayout = layout
+        self.renderer: Renderer = renderer
+        self.font: pygame.font.Font = font
+        self.headline_font: pygame.font.Font = headline_font
+        self.text_font: pygame.font.Font = text_font
+        self.amber_color: Tuple[int, int, int] = amber_color
         # Manually broken lines to match the original game's style
-        self.lines = [
+        self.lines: List[str] = [
             # Paragraph 1 (3 lines)
             "XBoing is a blockout game where you use a paddle to bounce",
             "a proton ball around an arena full of nasties while keeping",
@@ -62,7 +75,13 @@ class InstructionsView(View):
         logo_path = os.path.join(images_dir, "xboing.png")
         self.logo_image = load_image(logo_path, alpha=True)
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the instructions view onto the given surface.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         play_rect = self.layout.get_play_rect()
 
         # Create a temporary surface for the play window
@@ -138,11 +157,23 @@ class InstructionsView(View):
         # Blit the play window surface to the main surface at play_rect.topleft
         surface.blit(play_surf, play_rect.topleft)
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single Pygame event (currently a stub).
+
+        Args:
+            event (pygame.event.Event): The Pygame event to handle.
+        """
         pass  # InstructionsView may handle events in the future
 
-    def activate(self):
+    def activate(self) -> None:
+        """
+        Activate the view (currently a stub).
+        """
         pass
 
-    def deactivate(self):
+    def deactivate(self) -> None:
+        """
+        Deactivate the view (currently a stub).
+        """
         pass

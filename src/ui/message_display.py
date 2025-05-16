@@ -1,4 +1,15 @@
+"""
+MessageDisplay: UI component for displaying messages in the message window region.
+Subscribes to MessageChangedEvent and renders itself using the renderer.
+"""
+
+from typing import List
+
+import pygame
+
 from engine.events import MessageChangedEvent
+from engine.graphics import Renderer
+from layout.game_layout import GameLayout
 
 
 class MessageDisplay:
@@ -8,20 +19,47 @@ class MessageDisplay:
     Style matches the timer: bright green, same font size.
     """
 
-    def __init__(self, layout, renderer, font):
+    def __init__(
+        self,
+        layout: GameLayout,
+        renderer: Renderer,
+        font: pygame.font.Font,
+    ) -> None:
+        """
+        Initialize the MessageDisplay.
+
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            renderer (Renderer): The renderer instance.
+            font (pygame.font.Font): The font to use for messages.
+        """
         self.layout = layout
         self.renderer = renderer
         self.font = font
-        self.message = ""
-        self.alignment = "left"
+        self.message: str = ""
+        self.alignment: str = "left"
 
-    def handle_events(self, events):
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
+        """
+        Handle message update events and update the displayed message.
+
+        Args:
+            events (List[pygame.event.Event]): List of Pygame events to handle.
+        """
         for event in events:
-            if hasattr(event, "event") and isinstance(event.event, MessageChangedEvent):
+            if event.type == pygame.USEREVENT and isinstance(
+                event.event, MessageChangedEvent
+            ):
                 self.message = event.event.message
                 self.alignment = event.event.alignment
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the message onto the given surface.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         message_rect = self.layout.get_message_rect()
         y = message_rect.y + (message_rect.height // 2)
         if self.alignment == "center":

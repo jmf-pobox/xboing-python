@@ -24,7 +24,7 @@ class DigitRenderer:
 
     logger = logging.getLogger("xboing.DigitRenderer")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the DigitRenderer with loaded digit sprites."""
         self.digits = {}
         self._load_digits()
@@ -47,13 +47,27 @@ class DigitRenderer:
 
     def render_number(
         self,
-        number,
-        spacing=2,
-        scale=1.0,
-        color=None,
-        width=None,
-        right_justified=False,
-    ):
+        number: int,
+        spacing: int = 2,
+        scale: float = 1.0,
+        color: tuple[int, int, int] | None = None,
+        width: int | None = None,
+        right_justified: bool = False,
+    ) -> pygame.Surface:
+        """
+        Render a number as a surface using digit sprites.
+
+        Args:
+            number (int): The number to render.
+            spacing (int, optional): Spacing between digits. Defaults to 2.
+            scale (float, optional): Scale factor for digit size. Defaults to 1.0.
+            color (tuple[int, int, int] | None, optional): Color to tint digits. Defaults to None.
+            width (int | None, optional): Minimum width (pads with spaces). Defaults to None.
+            right_justified (bool, optional): Right-justify the number. Defaults to False.
+
+        Returns:
+            pygame.Surface: The rendered number as a surface.
+        """
         number_str = str(number)
         if width is not None and len(number_str) < width:
             number_str = " " * (width - len(number_str)) + number_str

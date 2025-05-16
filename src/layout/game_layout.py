@@ -197,17 +197,25 @@ class GameLayout:
     def draw(self, surface):
         self.main_window.draw(surface)
 
-    def get_play_rect(self):
+    def get_play_rect(self) -> pygame.Rect:
+        """Return the play window rectangle as a pygame.Rect."""
         return self.play_window.rect.rect
 
-    def get_score_rect(self):
+    def get_score_rect(self) -> pygame.Rect:
+        """Return the score window rectangle as a pygame.Rect."""
         return self.score_window.rect.rect
 
-    def get_level_rect(self):
+    def get_level_rect(self) -> pygame.Rect:
+        """Return the level window rectangle as a pygame.Rect."""
         return self.level_window.rect.rect
 
-    def get_message_rect(self):
+    def get_message_rect(self) -> pygame.Rect:
+        """Return the message window rectangle as a pygame.Rect."""
         return self.mess_window.rect.rect
+
+    def get_timer_rect(self) -> pygame.Rect:
+        """Return the timer window rectangle as a pygame.Rect."""
+        return self.time_window.rect.rect
 
     def set_play_background(self, bg_type):
         backgrounds_dir = get_backgrounds_dir()

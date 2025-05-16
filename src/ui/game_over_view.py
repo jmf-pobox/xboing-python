@@ -4,6 +4,9 @@ from typing import Callable, Optional
 import pygame
 from injector import inject
 
+from engine.graphics import Renderer
+from layout.game_layout import GameLayout
+
 from .view import View
 
 
@@ -16,29 +19,52 @@ class GameOverView(View):
     @inject
     def __init__(
         self,
-        layout,
-        renderer,
-        font,
-        small_font,
+        layout: GameLayout,
+        renderer: Renderer,
+        font: pygame.font.Font,
+        small_font: pygame.font.Font,
         get_score_callback: Callable[[], int],
         reset_game_callback: Optional[Callable[[], None]] = None,
-    ):
-        self.layout = layout
-        self.renderer = renderer
-        self.font = font
-        self.small_font = small_font
-        self.get_score = get_score_callback
+    ) -> None:
+        """
+        Initialize the GameOverView.
+
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            renderer (Renderer): The renderer instance.
+            font (pygame.font.Font): The main font.
+            small_font (pygame.font.Font): The font for secondary text.
+            get_score_callback (Callable[[], int]): Callback to get the final score.
+            reset_game_callback (Optional[Callable[[], None]]): Callback to reset the game.
+        """
+        self.layout: GameLayout = layout
+        self.renderer: Renderer = renderer
+        self.font: pygame.font.Font = font
+        self.small_font: pygame.font.Font = small_font
+        self.get_score: Callable[[], int] = get_score_callback
         self.reset_game: Optional[Callable[[], None]] = reset_game_callback
-        self.active = False
+        self.active: bool = False
         self.logger = logging.getLogger("xboing.GameOverView")
 
-    def activate(self):
+    def activate(self) -> None:
+        """
+        Activate the view.
+        """
         self.active = True
 
-    def deactivate(self):
+    def deactivate(self) -> None:
+        """
+        Deactivate the view.
+        """
         self.active = False
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single Pygame event. Calls reset_game if Space is pressed.
+
+        Args:
+            event (pygame.event.Event): The Pygame event to handle.
+        """
         self.logger.debug(f"handle_event called with event: {event}")
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             self.logger.info("Spacebar pressed in GameOverView.")
@@ -46,7 +72,13 @@ class GameOverView(View):
                 self.logger.info("Calling reset_game from GameOverView.")
                 self.reset_game()
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the game over overlay and final score onto the given surface.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         play_rect = self.layout.get_play_rect()
         self.logger.debug(f"draw called. Drawing overlay in play_rect: {play_rect}")
         # Overlay only in play window

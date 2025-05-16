@@ -196,8 +196,29 @@ class Renderer:
         """Draw a line."""
         pygame.draw.line(self.surface, color, start_pos, end_pos, width)
 
-    def draw_text(self, text, font, color, x, y, centered=False):
-        """Draw text to the renderer."""
+    def draw_text(
+        self,
+        text: str,
+        font: pygame.font.Font,
+        color: tuple[int, int, int],
+        x: int,
+        y: int,
+        centered: bool = False,
+    ) -> pygame.Rect:
+        """
+        Draw text to the renderer.
+
+        Args:
+            text (str): The text to render.
+            font (pygame.font.Font): The font to use.
+            color (tuple[int, int, int]): The color of the text.
+            x (int): The x position.
+            y (int): The y position.
+            centered (bool, optional): Whether to center the text. Defaults to False.
+
+        Returns:
+            pygame.Rect: The rectangle of the rendered text.
+        """
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
 

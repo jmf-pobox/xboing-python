@@ -230,12 +230,12 @@ class LevelManager:
             return self.block_manager.get_breakable_count() == 0
         return False
 
-    def get_level_info(self):
+    def get_level_info(self) -> dict[str, int | str]:
         """
         Get current level information.
 
         Returns:
-            dict: Dictionary with level info (level_num, title, time_bonus, time_remaining)
+            dict[str, int | str]: Dictionary with level info (level_num, title, time_bonus, time_remaining)
         """
         return {
             "level_num": self.current_level,
@@ -244,7 +244,7 @@ class LevelManager:
             "time_remaining": int(self.time_remaining),
         }
 
-    def get_time_remaining(self):
+    def get_time_remaining(self) -> int:
         """
         Get remaining time in seconds.
 

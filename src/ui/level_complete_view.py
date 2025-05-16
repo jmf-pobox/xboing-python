@@ -1,36 +1,70 @@
+from typing import Callable, Optional
+
 import pygame
+
+from engine.graphics import Renderer
+from game.game_state import GameState
+from game.level_manager import LevelManager
+from layout.game_layout import GameLayout
 
 from .view import View
 
 
 class LevelCompleteView(View):
+    """
+    View for displaying the level complete overlay, including bonus breakdown and final score.
+    Draws only within the play window region.
+    """
+
     def __init__(
         self,
-        layout,
-        renderer,
-        font,
-        small_font,
-        game_state,
-        level_manager,
-        on_advance_callback=None,
-    ):
-        self.layout = layout
-        self.renderer = renderer
-        self.font = font
-        self.small_font = small_font
-        self.game_state = game_state
-        self.level_manager = level_manager
-        self.on_advance_callback = on_advance_callback
-        self._compute_bonuses()
-        self.active = False
+        layout: GameLayout,
+        renderer: Renderer,
+        font: pygame.font.Font,
+        small_font: pygame.font.Font,
+        game_state: GameState,
+        level_manager: LevelManager,
+        on_advance_callback: Optional[Callable[[], None]] = None,
+    ) -> None:
+        """
+        Initialize the LevelCompleteView.
 
-    def _compute_bonuses(self):
-        # Gather stats and compute bonuses (stub, to be filled in with real logic)
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            renderer (Renderer): The main Renderer instance.
+            font (pygame.font.Font): The main font for headlines.
+            small_font (pygame.font.Font): The font for bonus breakdown.
+            game_state (GameState): The current game state.
+            level_manager (LevelManager): The level manager instance.
+            on_advance_callback (Optional[Callable[[], None]]): Callback for advancing to the next level.
+        """
+        self.layout: GameLayout = layout
+        self.renderer: Renderer = renderer
+        self.font: pygame.font.Font = font
+        self.small_font: pygame.font.Font = small_font
+        self.game_state: GameState = game_state
+        self.level_manager: LevelManager = level_manager
+        self.on_advance_callback: Optional[Callable[[], None]] = on_advance_callback
+        self.active: bool = False
+        self.level_num: int
+        self.level_title: str
+        self.coin_bonus: int
+        self.super_bonus: bool
+        self.level_bonus: int
+        self.bullet_bonus: int
+        self.time_bonus: int
+        self.total_bonus: int
+        self.final_score: int
+        self._compute_bonuses()
+
+    def _compute_bonuses(self) -> None:
+        """
+        Gather stats and compute bonuses for the level complete screen.
+        """
         self.level_num = self.game_state.level
-        self.level_title = self.level_manager.get_level_info().get(
-            "title", f"Level {self.level_num}"
+        self.level_title = str(
+            self.level_manager.get_level_info().get("title", f"Level {self.level_num}")
         )
-        # Example stats (replace with real calculations)
         self.coin_bonus = 0  # TODO: integrate real coin bonus logic
         self.super_bonus = False
         self.level_bonus = self.level_num * 100  # Example
@@ -45,19 +79,37 @@ class LevelCompleteView(View):
         )
         self.final_score = self.game_state.score + self.total_bonus
 
-    def activate(self):
+    def activate(self) -> None:
+        """
+        Activate the view and recompute bonuses.
+        """
         self.active = True
         self._compute_bonuses()
 
-    def deactivate(self):
+    def deactivate(self) -> None:
+        """
+        Deactivate the view.
+        """
         self.active = False
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single Pygame event (advance on SPACE).
+
+        Args:
+            event (pygame.event.Event): The Pygame event to handle.
+        """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if self.on_advance_callback:
                 self.on_advance_callback()
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the level complete overlay, bonus breakdown, and final score.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         play_rect = self.layout.get_play_rect()
         overlay = pygame.Surface((play_rect.width, play_rect.height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 150))  # Semi-transparent black

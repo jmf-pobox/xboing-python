@@ -19,7 +19,7 @@ class LivesRenderer:
 
     logger = logging.getLogger("xboing.LivesRenderer")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the LivesRenderer with a loaded ball image."""
         self.ball_image = self._load_ball_image()
         if self.ball_image:
@@ -41,7 +41,25 @@ class LivesRenderer:
         self.logger.warning("Could not load ball image for lives display")
         return None
 
-    def render(self, num_lives, spacing=4, scale=1.0, max_lives=3):
+    def render(
+        self,
+        num_lives: int,
+        spacing: int = 4,
+        scale: float = 1.0,
+        max_lives: int = 3,
+    ) -> pygame.Surface:
+        """
+        Render the number of lives as ball images.
+
+        Args:
+            num_lives (int): Number of lives to display.
+            spacing (int, optional): Spacing between balls. Defaults to 4.
+            scale (float, optional): Scale factor for ball size. Defaults to 1.0.
+            max_lives (int, optional): Maximum number of lives to display. Defaults to 3.
+
+        Returns:
+            pygame.Surface: The rendered lives as a surface.
+        """
         cache_key = (num_lives, spacing, scale, max_lives)
         if cache_key in self._surface_cache:
             return self._surface_cache[cache_key]

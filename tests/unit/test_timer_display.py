@@ -42,6 +42,9 @@ class DummyLayout:
 
     time_window = DummyTimeWindow()
 
+    def get_timer_rect(self):
+        return self.time_window.rect.rect
+
 
 def test_timer_display_initial_state():
     layout = DummyLayout()

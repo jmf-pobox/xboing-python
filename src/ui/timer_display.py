@@ -1,46 +1,67 @@
+"""
+TimerDisplay: UI component for displaying the remaining time in the timer window region.
+Subscribes to TimerUpdatedEvent and renders itself using the renderer.
+"""
+
+from typing import Any
+
+import pygame
+
 from engine.events import TimerUpdatedEvent
 
 
 class TimerDisplay:
     """
-    UI component for displaying the level timer in MM:SS format using a yellow font.
-    Subscribes to TimerUpdatedEvent and renders itself in the time window region.
-    Uses renderer.draw_text, not digit sprites.
+    UI component for displaying the remaining time in the timer window region.
+    Subscribes to TimerUpdatedEvent and renders itself using the renderer.
     """
 
-    def __init__(self, layout, renderer, font, x=0):
+    def __init__(self, layout: Any, renderer: Any, font: Any) -> None:
+        """
+        Initialize the TimerDisplay.
+
+        Args:
+            layout: The GameLayout instance.
+            renderer: The renderer instance.
+            font: The font to use for the timer.
+        """
         self.layout = layout
         self.renderer = renderer
         self.font = font
         self.time_remaining = 0
-        self.x = x
 
     def handle_events(self, events):
+        """
+        Handle timer update events and update the displayed time.
+
+        Args:
+            events: List of Pygame events to handle.
+        """
         for event in events:
-            if hasattr(event, "event") and isinstance(event.event, TimerUpdatedEvent):
+            if event.type == pygame.USEREVENT and isinstance(
+                event.event, TimerUpdatedEvent
+            ):
                 self.time_remaining = event.event.time_remaining
 
     def draw(self, surface):
-        # Get the time window rect from layout
-        time_rect = self.layout.time_window.rect.rect
+        """
+        Draw the timer onto the given surface.
 
-        # Format time as MM:SS
+        Args:
+            surface: The Pygame surface to draw on.
+        """
+        timer_rect = self.layout.get_timer_rect()
+        y = timer_rect.y + (timer_rect.height // 2)
+        x = timer_rect.x + (timer_rect.width // 2)
+        color = (0, 255, 0)
         minutes = self.time_remaining // 60
         seconds = self.time_remaining % 60
-        time_str = f"{minutes:02d}:{seconds:02d}"
-
-        # Render as green if the timer is high, red if low
-        if self.time_remaining > 10:
-            timer_color = (0, 255, 0)
-        else:
-            timer_color = (255, 50, 50)
-
-        # Draw the timer text centered in the time window
+        timer_str = f"{minutes:02}:{seconds:02}"
         self.renderer.draw_text(
-            time_str,
+            timer_str,
             self.font,
-            timer_color,
-            time_rect.x + (time_rect.width // 2),
-            time_rect.y + (time_rect.height // 2),
+            color,
+            x,
+            y,
             centered=True,
         )

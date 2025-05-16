@@ -1,3 +1,10 @@
+"""
+UIManager: Central manager for all UI components, content views, overlays, and bars in XBoing.
+Handles view switching, event routing, and drawing of the UI.
+"""
+
+from typing import Any, Callable, Dict, List, Optional
+
 import pygame
 
 
@@ -13,12 +20,6 @@ class UIManager:
     - Drawing all registered UI components onto the main surface.
     - Providing a unified interface for UI setup and event handling.
 
-    Typical usage:
-        ui_manager = UIManager(window_controller, view_controller_map)
-        ui_manager.setup_ui(views=..., top_bar=..., bottom_bar=..., initial_view=...)
-        ui_manager.handle_events(events)
-        ui_manager.draw_all(surface)
-
     Attributes:
         top_bar: The top UI bar component.
         bottom_bar: The bottom UI bar component.
@@ -30,7 +31,11 @@ class UIManager:
         view_controller_map: Mapping of view names to their controllers.
     """
 
-    def __init__(self, window_controller=None, view_controller_map=None):
+    def __init__(
+        self,
+        window_controller: Any = None,
+        view_controller_map: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """
         Initialize the UIManager.
 
@@ -38,17 +43,17 @@ class UIManager:
             window_controller: The always-active controller for global events.
             view_controller_map: Mapping of view names to their controllers.
         """
-        self.top_bar = None
-        self.bottom_bar = None
-        self.views = {}
-        self.current_view = None
-        self.current_name = None
-        self.previous_view = None  # Track previous view
-        self._view_change_callbacks = []
-        self.window_controller = window_controller
-        self.view_controller_map = view_controller_map or {}
+        self.top_bar: Any = None
+        self.bottom_bar: Any = None
+        self.views: Dict[str, Any] = {}
+        self.current_view: Any = None
+        self.current_name: Optional[str] = None
+        self.previous_view: Optional[str] = None  # Track previous view
+        self._view_change_callbacks: List[Callable[[str], None]] = []
+        self.window_controller: Any = window_controller
+        self.view_controller_map: Dict[str, Any] = view_controller_map or {}
 
-    def register_top_bar(self, top_bar):
+    def register_top_bar(self, top_bar: Any) -> None:
         """
         Register the top UI bar component.
 
@@ -57,7 +62,7 @@ class UIManager:
         """
         self.top_bar = top_bar
 
-    def register_bottom_bar(self, bottom_bar):
+    def register_bottom_bar(self, bottom_bar: Any) -> None:
         """
         Register the bottom UI bar component.
 
@@ -66,33 +71,33 @@ class UIManager:
         """
         self.bottom_bar = bottom_bar
 
-    def register_view(self, name, view):
+    def register_view(self, name: str, view: Any) -> None:
         """
         Register a content view with a given name.
 
         Args:
-            name: The name of the view.
+            name (str): The name of the view.
             view: The view object to register.
         """
         self.views[name] = view
         if self.current_view is None:
             self.set_view(name)
 
-    def register_view_change_callback(self, callback):
+    def register_view_change_callback(self, callback: Callable[[str], None]) -> None:
         """
         Register a callback to be called when the view changes.
 
         Args:
-            callback: A callable that takes the new view name as its argument.
+            callback (Callable[[str], None]): A callable that takes the new view name as its argument.
         """
         self._view_change_callbacks.append(callback)
 
-    def set_view(self, name):
+    def set_view(self, name: str) -> None:
         """
         Set the active view by name.
 
         Args:
-            name: The name of the view to activate.
+            name (str): The name of the view to activate.
 
         Raises:
             ValueError: If the view name is not registered.
@@ -111,12 +116,12 @@ class UIManager:
         else:
             raise ValueError(f"View '{name}' not registered.")
 
-    def draw_all(self, surface):
+    def draw_all(self, surface: pygame.Surface) -> None:
         """
         Draw the current view, top bar, and bottom bar onto the given surface.
 
         Args:
-            surface: The Pygame surface to draw on.
+            surface (pygame.Surface): The Pygame surface to draw on.
         """
         if self.current_view:
             self.current_view.draw(surface)
@@ -125,15 +130,22 @@ class UIManager:
         if self.bottom_bar:
             self.bottom_bar.draw(surface)
 
-    def setup_ui(self, *, views=None, top_bar=None, bottom_bar=None, initial_view=None):
+    def setup_ui(
+        self,
+        *,
+        views: Optional[Dict[str, Any]] = None,
+        top_bar: Any = None,
+        bottom_bar: Any = None,
+        initial_view: Optional[str] = None,
+    ) -> None:
         """
         Register all UI components in one place. Accepts dict of views, top/bottom bars, and initial view name.
 
         Args:
-            views: Dictionary of view names to view objects.
+            views (Optional[Dict[str, Any]]): Dictionary of view names to view objects.
             top_bar: The top bar UI component.
             bottom_bar: The bottom bar UI component.
-            initial_view: The name of the initial view to activate.
+            initial_view (Optional[str]): The name of the initial view to activate.
         """
         if top_bar:
             self.register_top_bar(top_bar)
@@ -145,12 +157,12 @@ class UIManager:
         if initial_view:
             self.set_view(initial_view)
 
-    def handle_events(self, events):
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
         """
         Handle and dispatch events to the window controller, active view's controller, and UI bars.
 
         Args:
-            events: List of Pygame events to handle.
+            events (List[pygame.event.Event]): List of Pygame events to handle.
         """
         from engine.events import GameOverEvent, LevelCompleteEvent
 

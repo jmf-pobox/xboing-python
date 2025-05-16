@@ -1,17 +1,58 @@
+"""
+GameView: Main gameplay content view for XBoing.
+Handles rendering of blocks, paddle, balls, and play area walls.
+"""
+
+from typing import List
+
 import pygame
+
+from engine.graphics import Renderer
+from game.ball import Ball
+from game.paddle import Paddle
+from game.sprite_block import SpriteBlockManager
+from layout.game_layout import GameLayout
 
 from .view import View
 
 
 class GameView(View):
-    def __init__(self, layout, block_manager, paddle, balls, renderer):
-        self.layout = layout
-        self.block_manager = block_manager
-        self.paddle = paddle
-        self.balls = balls
-        self.renderer = renderer
+    """
+    Main gameplay content view.
+    Renders blocks, paddle, balls, and play area walls.
+    """
 
-    def draw(self, surface):
+    def __init__(
+        self,
+        layout: GameLayout,
+        block_manager: SpriteBlockManager,
+        paddle: Paddle,
+        balls: List[Ball],
+        renderer: Renderer,
+    ) -> None:
+        """
+        Initialize the GameView.
+
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            block_manager (SpriteBlockManager): The block manager for the current level.
+            paddle (Paddle): The player paddle object.
+            balls (List[Ball]): List of active ball objects.
+            renderer (Renderer): The main renderer instance.
+        """
+        self.layout: GameLayout = layout
+        self.block_manager: SpriteBlockManager = block_manager
+        self.paddle: Paddle = paddle
+        self.balls: List[Ball] = balls
+        self.renderer: Renderer = renderer
+
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the blocks, paddle, balls, and play area walls.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         # Draw the blocks
         self.block_manager.draw(surface)
 
@@ -43,11 +84,23 @@ class GameView(View):
             ),
         )  # Right
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
+        """
+        Handle a single Pygame event (currently a stub).
+
+        Args:
+            event (pygame.event.Event): The Pygame event to handle.
+        """
         pass  # GameView may handle events in the future
 
-    def activate(self):
+    def activate(self) -> None:
+        """
+        Activate the view (currently a stub).
+        """
         pass
 
-    def deactivate(self):
+    def deactivate(self) -> None:
+        """
+        Deactivate the view (currently a stub).
+        """
         pass

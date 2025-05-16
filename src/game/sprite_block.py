@@ -863,7 +863,7 @@ class SpriteBlockManager:
 
         return points, broken_blocks, effects
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw all blocks.
 

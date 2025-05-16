@@ -1,4 +1,15 @@
+"""
+LivesDisplayComponent: UI component for displaying the player's remaining lives as ball images.
+Subscribes to LivesChangedEvent and renders itself in the lives window region.
+"""
+
+from typing import List
+
+import pygame
+
 from engine.events import LivesChangedEvent
+from layout.game_layout import GameLayout
+from renderers.lives_renderer import LivesRenderer
 
 
 class LivesDisplayComponent:
@@ -8,19 +19,48 @@ class LivesDisplayComponent:
     Allows manual x positioning for layout compatibility.
     """
 
-    def __init__(self, layout, lives_display_util, x=365, max_lives=3):
+    def __init__(
+        self,
+        layout: GameLayout,
+        lives_display_util: LivesRenderer,
+        x: int = 365,
+        max_lives: int = 3,
+    ) -> None:
+        """
+        Initialize the LivesDisplayComponent.
+
+        Args:
+            layout (GameLayout): The GameLayout instance.
+            lives_display_util (LivesRenderer): The LivesRenderer instance.
+            x (int, optional): The x position for the lives display. Defaults to 365.
+            max_lives (int, optional): The maximum number of lives to display. Defaults to 3.
+        """
         self.layout = layout
         self.lives_display_util = lives_display_util
-        self.lives = max_lives
-        self.max_lives = max_lives
-        self.x = x
+        self.lives: int = max_lives
+        self.max_lives: int = max_lives
+        self.x: int = x
 
-    def handle_events(self, events):
+    def handle_events(self, events: List[pygame.event.Event]) -> None:
+        """
+        Handle lives update events and update the displayed lives.
+
+        Args:
+            events (List[pygame.event.Event]): List of Pygame events to handle.
+        """
         for event in events:
-            if hasattr(event, "event") and isinstance(event.event, LivesChangedEvent):
+            if event.type == pygame.USEREVENT and isinstance(
+                event.event, LivesChangedEvent
+            ):
                 self.lives = event.event.lives
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """
+        Draw the lives as ball images onto the given surface.
+
+        Args:
+            surface (pygame.Surface): The Pygame surface to draw on.
+        """
         score_rect = self.layout.get_score_rect()
         # Render the lives using the utility
         lives_surf = self.lives_display_util.render(

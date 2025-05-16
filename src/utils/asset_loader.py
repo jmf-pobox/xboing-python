@@ -13,14 +13,16 @@ import pygame
 logger = logging.getLogger("xboing.AssetLoader")
 
 
-def load_image(filename, alpha=True, scale=None):
+def load_image(
+    filename: str, alpha: bool = True, scale: tuple[int, int] | None = None
+) -> pygame.Surface:
     """
     Load an image and convert it for optimal display.
 
     Args:
         filename (str): Path to the image file
         alpha (bool): Whether the image has alpha transparency
-        scale (tuple): Optional (width, height) to scale the image to
+        scale (tuple[int, int] | None): Optional (width, height) to scale the image to
 
     Returns:
         pygame.Surface: The loaded image surface
@@ -47,7 +49,9 @@ def load_image(filename, alpha=True, scale=None):
     return surface
 
 
-def load_image_sequence(directory, pattern, num_frames, alpha=True):
+def load_image_sequence(
+    directory: str, pattern: str, num_frames: int, alpha: bool = True
+) -> list[pygame.Surface]:
     """
     Load a sequence of images for animation.
 
@@ -58,7 +62,7 @@ def load_image_sequence(directory, pattern, num_frames, alpha=True):
         alpha (bool): Whether the images have alpha transparency
 
     Returns:
-        list: List of pygame.Surface objects
+        list[pygame.Surface]: List of loaded image surfaces
     """
     frames = []
     for i in range(num_frames):
@@ -68,12 +72,11 @@ def load_image_sequence(directory, pattern, num_frames, alpha=True):
     return frames
 
 
-def create_font(size):
+def create_font(size: int) -> pygame.font.Font:
     """
     Create a pygame font object.
 
     Args:
-        font_name (str): Font name or path to font file, or None for default
         size (int): Font size in points
 
     Returns:

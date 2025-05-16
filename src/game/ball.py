@@ -259,7 +259,7 @@ class Ball:
         self.vx = speed * speed_factor * math.cos(angle)
         self.vy = -speed * speed_factor * math.sin(angle)  # Negative for upward
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw the ball.
 
