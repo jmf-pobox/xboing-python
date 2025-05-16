@@ -223,7 +223,9 @@ def main() -> None:
     nonlocal_vars: Dict[str, bool] = {"running": True}
     window_controller = WindowController(
         audio_manager=audio_manager,
-        quit_callback=lambda: nonlocal_vars.update({"running": False}),  # Callback to stop the game loop
+        quit_callback=lambda: nonlocal_vars.update(
+            {"running": False}
+        ),  # Callback to stop the game loop
         ui_manager=ui_manager,
     )
 
@@ -239,7 +241,7 @@ def main() -> None:
         # Handle input events
         input_manager.update(events)
 
-        # Handle global/system events  
+        # Handle global/system events
         window_controller.handle_events(events)
 
         # Handle events for the active controller
