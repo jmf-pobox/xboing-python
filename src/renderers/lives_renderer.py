@@ -5,6 +5,7 @@ Used by UI components for visual output.
 
 import logging
 import os
+from typing import Any, Dict, Optional
 
 import pygame
 
@@ -19,18 +20,24 @@ class LivesRenderer:
 
     logger = logging.getLogger("xboing.LivesRenderer")
 
+    ball_image: Optional[pygame.Surface]
+    ball_width: int
+    ball_height: int
+    _surface_cache: Dict[Any, pygame.Surface]
+
     def __init__(self) -> None:
         """Initialize the LivesRenderer with a loaded ball image."""
-        self.ball_image = self._load_ball_image()
+        self.ball_image: Optional[pygame.Surface] = self._load_ball_image()
         if self.ball_image:
             self.ball_width = self.ball_image.get_width()
             self.ball_height = self.ball_image.get_height()
         else:
             self.ball_width = 16
             self.ball_height = 16
-        self._surface_cache = {}
+        self._surface_cache: Dict[Any, pygame.Surface] = {}
 
-    def _load_ball_image(self):
+    def _load_ball_image(self) -> Optional[pygame.Surface]:
+        """Load the ball image for displaying lives."""
         balls_dir = get_balls_dir()
         life_path = os.path.join(balls_dir, "life.png")
         if os.path.exists(life_path):
@@ -52,13 +59,13 @@ class LivesRenderer:
         Render the number of lives as ball images.
 
         Args:
-            num_lives (int): Number of lives to display.
-            spacing (int, optional): Spacing between balls. Defaults to 4.
-            scale (float, optional): Scale factor for ball size. Defaults to 1.0.
-            max_lives (int, optional): Maximum number of lives to display. Defaults to 3.
+            num_lives: Number of lives to display.
+            spacing: Spacing between balls. Defaults to 4.
+            scale: Scale factor for ball size. Defaults to 1.0.
+            max_lives: Maximum number of lives to display. Defaults to 3.
 
         Returns:
-            pygame.Surface: The rendered lives as a surface.
+            The rendered lives as a pygame.Surface.
         """
         cache_key = (num_lives, spacing, scale, max_lives)
         if cache_key in self._surface_cache:

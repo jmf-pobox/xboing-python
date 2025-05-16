@@ -16,7 +16,7 @@ PROJECT_DIR = os.path.dirname(
 ASSETS_DIR = os.path.join(PROJECT_DIR, "assets")
 
 
-def get_asset_path(relative_path, create_dirs=False):
+def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
     """
     Get the absolute path to an asset.
 

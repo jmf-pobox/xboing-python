@@ -5,13 +5,14 @@ Used by UI components for visual output.
 
 import logging
 import os
+from typing import Any, Dict, Optional, Tuple
 
 import pygame
 
 from utils.asset_paths import get_asset_path
 
 
-def get_digits_dir():
+def get_digits_dir() -> str:
     """Get the path to the digit images directory."""
     return get_asset_path("images/digits", create_dirs=True)
 
@@ -24,11 +25,16 @@ class DigitRenderer:
 
     logger = logging.getLogger("xboing.DigitRenderer")
 
+    digits: Dict[int, pygame.Surface]
+    _surface_cache: Dict[Any, pygame.Surface]
+    digit_width: int
+    digit_height: int
+
     def __init__(self) -> None:
         """Initialize the DigitRenderer with loaded digit sprites."""
-        self.digits = {}
+        self.digits: Dict[int, pygame.Surface] = {}
         self._load_digits()
-        self._surface_cache = {}
+        self._surface_cache: Dict[Any, pygame.Surface] = {}
         if self.digits:
             self.digit_width = self.digits[0].get_width()
             self.digit_height = self.digits[0].get_height()
@@ -36,7 +42,8 @@ class DigitRenderer:
             self.digit_width = 30
             self.digit_height = 40
 
-    def _load_digits(self):
+    def _load_digits(self) -> None:
+        """Load digit images into the digits dictionary."""
         digits_dir = get_digits_dir()
         for i in range(10):
             digit_path = os.path.join(digits_dir, f"digit{i}.png")
@@ -50,23 +57,23 @@ class DigitRenderer:
         number: int,
         spacing: int = 2,
         scale: float = 1.0,
-        color: tuple[int, int, int] | None = None,
-        width: int | None = None,
+        color: Optional[Tuple[int, int, int]] = None,
+        width: Optional[int] = None,
         right_justified: bool = False,
     ) -> pygame.Surface:
         """
         Render a number as a surface using digit sprites.
 
         Args:
-            number (int): The number to render.
-            spacing (int, optional): Spacing between digits. Defaults to 2.
-            scale (float, optional): Scale factor for digit size. Defaults to 1.0.
-            color (tuple[int, int, int] | None, optional): Color to tint digits. Defaults to None.
-            width (int | None, optional): Minimum width (pads with spaces). Defaults to None.
-            right_justified (bool, optional): Right-justify the number. Defaults to False.
+            number: The number to render.
+            spacing: Spacing between digits. Defaults to 2.
+            scale: Scale factor for digit size. Defaults to 1.0.
+            color: Color to tint digits. Defaults to None.
+            width: Minimum width (pads with spaces). Defaults to None.
+            right_justified: Right-justify the number. Defaults to False.
 
         Returns:
-            pygame.Surface: The rendered number as a surface.
+            The rendered number as a pygame.Surface.
         """
         number_str = str(number)
         if width is not None and len(number_str) < width:
@@ -110,7 +117,27 @@ class DigitRenderer:
         self._surface_cache[cache_key] = surface
         return surface
 
-    def render_time(self, seconds, spacing=2, scale=1.0, colon_width=8, color=None):
+    def render_time(
+        self,
+        seconds: int,
+        spacing: int = 2,
+        scale: float = 1.0,
+        colon_width: int = 8,
+        color: Optional[Tuple[int, int, int]] = None,
+    ) -> pygame.Surface:
+        """
+        Render a time value as MM:SS using digit sprites and a colon.
+
+        Args:
+            seconds: Time in seconds to render.
+            spacing: Spacing between digits. Defaults to 2.
+            scale: Scale factor for digit size. Defaults to 1.0.
+            colon_width: Width of the colon separator. Defaults to 8.
+            color: Color to tint digits and colon. Defaults to None (yellow colon).
+
+        Returns:
+            The rendered time as a pygame.Surface.
+        """
         minutes = seconds // 60
         secs = seconds % 60
         time_str = f"{minutes:02d}:{secs:02d}"
