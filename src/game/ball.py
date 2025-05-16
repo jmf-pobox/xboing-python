@@ -9,6 +9,7 @@ import logging
 import math
 import os
 import random
+from typing import Any, ClassVar, List, Optional, Tuple
 
 import pygame
 
@@ -21,11 +22,12 @@ class Ball:
     """A bouncing ball with physics and collision detection."""
 
     # Class variables for sprites
-    sprites = None
-    animation_frames = None
+    sprites: ClassVar[Optional[List[pygame.Surface]]] = None
+    animation_frames: ClassVar[Optional[List[pygame.Surface]]] = None
+    logger: ClassVar[logging.Logger] = logging.getLogger("xboing.Ball")
 
     @classmethod
-    def load_sprites(cls):
+    def load_sprites(cls) -> None:
         """Load the ball sprites once for all balls."""
         if cls.sprites is None:
             cls.sprites = []
@@ -54,7 +56,13 @@ class Ball:
                 except (pygame.error, FileNotFoundError) as e:
                     cls.logger.warning(f"Failed to load ball animation frame {i}: {e}")
 
-    def __init__(self, x, y, radius=8, color=(255, 255, 255)):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        radius: int = 8,
+        color: Tuple[int, int, int] = (255, 255, 255),
+    ) -> None:
         """
         Initialize a new ball.
 
@@ -64,38 +72,40 @@ class Ball:
             radius (int): Ball radius
             color (tuple): RGB color tuple
         """
-        self.x = float(x)
-        self.y = float(y)
-        self.radius = radius
-        self.color = color
+        self.x: float = float(x)
+        self.y: float = float(y)
+        self.radius: int = radius
+        self.color: Tuple[int, int, int] = color
 
         # Initial velocity
         angle = random.uniform(math.pi / 4, 3 * math.pi / 4)  # Start with upward angle
         speed = 5.0
-        self.vx = speed * math.cos(angle)
-        self.vy = -speed * math.sin(angle)  # Negative because Y increases downward
+        self.vx: float = speed * math.cos(angle)
+        self.vy: float = -speed * math.sin(
+            angle
+        )  # Negative because Y increases downward
 
         # State
-        self.active = True
-        self.stuck_to_paddle = False
-        self.paddle_offset = 0
+        self.active: bool = True
+        self.stuck_to_paddle: bool = False
+        self.paddle_offset: float = 0.0
 
         # Animation state
-        self.animation_frame = 0
-        self.frame_counter = 0
-        self.birth_animation = False
+        self.animation_frame: int = 0
+        self.frame_counter: int = 0
+        self.birth_animation: bool = False
 
         # Ensure sprites are loaded
         if Ball.sprites is None:
             Ball.load_sprites()
 
         # Select a random ball sprite from the available ones
-        self.sprite_index = (
+        self.sprite_index: int = (
             random.randint(0, len(Ball.sprites) - 1) if Ball.sprites else 0
         )
 
         # Create the collision rect
-        self.rect = pygame.Rect(
+        self.rect: pygame.Rect = pygame.Rect(
             int(self.x - self.radius),
             int(self.y - self.radius),
             self.radius * 2,
@@ -103,8 +113,14 @@ class Ball:
         )
 
     def update(
-        self, delta_ms, screen_width, screen_height, paddle=None, offset_x=0, offset_y=0
-    ):
+        self,
+        delta_ms: float,
+        screen_width: int,
+        screen_height: int,
+        paddle: Optional[Any] = None,
+        offset_x: int = 0,
+        offset_y: int = 0,
+    ) -> Tuple[bool, bool, bool]:
         """
         Update ball position and handle collisions.
 
@@ -184,12 +200,12 @@ class Ball:
 
         return (True, hit_paddle, hit_wall)
 
-    def _update_rect(self):
+    def _update_rect(self) -> None:
         """Update the collision rectangle based on current position."""
         self.rect.x = int(self.x - self.radius)
         self.rect.y = int(self.y - self.radius)
 
-    def _check_paddle_collision(self, paddle):
+    def _check_paddle_collision(self, paddle: Any) -> bool:
         """
         Check for collision with the paddle and handle bouncing.
 
@@ -238,12 +254,12 @@ class Ball:
 
         return True
 
-    def release_from_paddle(self):
+    def release_from_paddle(self) -> None:
         """Release the ball if it's stuck to the paddle."""
         logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
         self.stuck_to_paddle = False
 
-    def _add_random_factor(self):
+    def _add_random_factor(self) -> None:
         """Add a slight randomness to prevent predictable patterns."""
         # Apply up to 5% random variance to speed
         speed = math.sqrt(self.vx * self.vx + self.vy * self.vy)
@@ -305,15 +321,15 @@ class Ball:
                 sprite_rect.center = (int(self.x), int(self.y))
                 surface.blit(sprite, sprite_rect)
 
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         """Get the ball's collision rectangle."""
         return self.rect
 
-    def get_position(self):
+    def get_position(self) -> Tuple[float, float]:
         """Get the ball's current position."""
         return (self.x, self.y)
 
-    def set_position(self, x, y):
+    def set_position(self, x: float, y: float) -> None:
         """
         Set the ball's position.
 
@@ -325,7 +341,7 @@ class Ball:
         self.y = float(y)
         self._update_rect()
 
-    def set_velocity(self, vx, vy):
+    def set_velocity(self, vx: float, vy: float) -> None:
         """
         Set the ball's velocity.
 
@@ -336,6 +352,6 @@ class Ball:
         self.vx = float(vx)
         self.vy = float(vy)
 
-    def is_active(self):
+    def is_active(self) -> bool:
         """Check if the ball is still active."""
         return self.active

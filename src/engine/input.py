@@ -6,6 +6,7 @@ abstracting the underlying pygame implementation.
 """
 
 import logging
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import pygame
 
@@ -15,21 +16,25 @@ class InputManager:
 
     logger = logging.getLogger("xboing.InputManager")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the input manager."""
         # Keyboard state
-        self.keys_pressed = {}
-        self.keys_down = set()
-        self.keys_up = set()
+        self.keys_pressed: Dict[int, bool] = {}
+        self.keys_down: Set[int] = set()
+        self.keys_up: Set[int] = set()
 
         # Mouse state
-        self.mouse_pos = (0, 0)
-        self.mouse_buttons_pressed = [False, False, False]  # Left, middle, right
-        self.mouse_buttons_down = [False, False, False]
-        self.mouse_buttons_up = [False, False, False]
-        self.mouse_motion = (0, 0)
+        self.mouse_pos: Tuple[int, int] = (0, 0)
+        self.mouse_buttons_pressed: List[bool] = [
+            False,
+            False,
+            False,
+        ]  # Left, middle, right
+        self.mouse_buttons_down: List[bool] = [False, False, False]
+        self.mouse_buttons_up: List[bool] = [False, False, False]
+        self.mouse_motion: Tuple[int, int] = (0, 0)
 
-    def update(self, events=None):
+    def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
         """
         Update input state for the current frame.
         Should be called at the beginning of each frame.
@@ -44,7 +49,7 @@ class InputManager:
         self.mouse_motion = (0, 0)
 
         # Process events
-        for event in events:  # Use the same events list!
+        for event in events:
             if event.type == pygame.QUIT:
                 return False  # Signal to quit
 
@@ -74,27 +79,27 @@ class InputManager:
 
         return True  # Continue
 
-    def is_key_pressed(self, key):
+    def is_key_pressed(self, key: int) -> bool:
         """Check if a key is currently pressed."""
         return self.keys_pressed.get(key, False)
 
-    def is_key_down(self, key):
+    def is_key_down(self, key: int) -> bool:
         """Check if a key was pressed this frame."""
         return key in self.keys_down
 
-    def is_key_up(self, key):
+    def is_key_up(self, key: int) -> bool:
         """Check if a key was released this frame."""
         return key in self.keys_up
 
-    def get_mouse_position(self):
+    def get_mouse_position(self) -> Tuple[int, int]:
         """Get the current mouse position."""
         return self.mouse_pos
 
-    def get_mouse_motion(self):
+    def get_mouse_motion(self) -> Tuple[int, int]:
         """Get the mouse movement delta for this frame."""
         return self.mouse_motion
 
-    def is_mouse_button_pressed(self, button):
+    def is_mouse_button_pressed(self, button: int) -> bool:
         """
         Check if a mouse button is currently pressed.
 
@@ -105,7 +110,7 @@ class InputManager:
             return self.mouse_buttons_pressed[button]
         return False
 
-    def is_mouse_button_down(self, button):
+    def is_mouse_button_down(self, button: int) -> bool:
         """
         Check if a mouse button was pressed this frame.
 
@@ -116,7 +121,7 @@ class InputManager:
             return self.mouse_buttons_down[button]
         return False
 
-    def is_mouse_button_up(self, button):
+    def is_mouse_button_up(self, button: int) -> bool:
         """
         Check if a mouse button was released this frame.
 

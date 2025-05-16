@@ -6,6 +6,7 @@ that handles interactions between game objects.
 """
 
 import logging
+from typing import Any, Dict, Tuple
 
 
 class CollisionSystem:
@@ -19,7 +20,7 @@ class CollisionSystem:
     - Powerups and paddle
     """
 
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width: int, screen_height: int) -> None:
         """
         Initialize the collision system.
 
@@ -32,12 +33,12 @@ class CollisionSystem:
         self.screen_height = screen_height
         self.logger.info(f"CollisionSystem initialized: {screen_width}x{screen_height}")
 
-    def update_boundaries(self, width, height):
+    def update_boundaries(self, width: int, height: int) -> None:
         """Update the screen boundaries."""
         self.screen_width = width
         self.screen_height = height
 
-    def check_ball_wall_collisions(self, ball):
+    def check_ball_wall_collisions(self, ball: Any) -> Dict[str, Any]:
         """
         Check and handle collisions between a ball and the walls.
 
@@ -45,9 +46,12 @@ class CollisionSystem:
             ball (Ball): The ball to check
 
         Returns:
-            dict: Collision information
+            Dict[str, Any]: Collision information
         """
-        result = {"collision": False, "side": None}  # 'left', 'right', 'top', 'bottom'
+        result: Dict[str, Any] = {
+            "collision": False,
+            "side": None,
+        }  # 'left', 'right', 'top', 'bottom'
 
         # Get ball position and size
         x, y = ball.get_position()
@@ -83,7 +87,7 @@ class CollisionSystem:
 
         return result
 
-    def check_ball_paddle_collision(self, ball, paddle):
+    def check_ball_paddle_collision(self, ball: Any, paddle: Any) -> Dict[str, Any]:
         """
         Check and handle collisions between a ball and the paddle.
 
@@ -92,9 +96,12 @@ class CollisionSystem:
             paddle (Paddle): The paddle to check against
 
         Returns:
-            dict: Collision information
+            Dict[str, Any]: Collision information
         """
-        result = {"collision": False, "position": 0.0}  # -1.0 (left) to 1.0 (right)
+        result: Dict[str, Any] = {
+            "collision": False,
+            "position": 0.0,
+        }  # -1.0 (left) to 1.0 (right)
 
         # Simple rectangle collision check
         if not ball.get_rect().colliderect(paddle.get_rect()):
@@ -117,7 +124,9 @@ class CollisionSystem:
 
         return result
 
-    def check_circle_rect_collision(self, circle_x, circle_y, circle_radius, rect):
+    def check_circle_rect_collision(
+        self, circle_x: float, circle_y: float, circle_radius: float, rect: Any
+    ) -> bool:
         """
         Check collision between a circle and a rectangle.
 
@@ -140,11 +149,16 @@ class CollisionSystem:
 
         # If the distance is less than the circle's radius, an intersection occurs
         distance_squared = (distance_x * distance_x) + (distance_y * distance_y)
-        return distance_squared < (circle_radius * circle_radius)
+        return bool(distance_squared < (circle_radius * circle_radius))
 
     def get_circle_rect_collision_normal(
-        self, circle_x, circle_y, prev_x, prev_y, rect
-    ):
+        self,
+        circle_x: float,
+        circle_y: float,
+        prev_x: float,
+        prev_y: float,
+        rect: Any,
+    ) -> Tuple[int, int]:
         """
         Calculate the collision normal vector for a circle-rectangle collision.
 

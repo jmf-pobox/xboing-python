@@ -7,6 +7,7 @@ creating, rendering, and managing breakable blocks.
 
 import logging
 import random
+from typing import Any, List, Tuple
 
 import pygame
 
@@ -36,8 +37,15 @@ class Block:
     }
 
     def __init__(
-        self, x, y, width, height, block_type=TYPE_NORMAL, color_name="blue", points=100
-    ):
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        block_type: int = TYPE_NORMAL,
+        color_name: str = "blue",
+        points: int = 100,
+    ) -> None:
         """
         Initialize a block.
 
@@ -50,40 +58,40 @@ class Block:
             color_name (str): Name of the color from the COLORS dictionary
             points (int): Points awarded for breaking this block
         """
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.type = block_type
-        self.color_name = color_name
-        self.points = points
+        self.x: int = x
+        self.y: int = y
+        self.width: int = width
+        self.height: int = height
+        self.type: int = block_type
+        self.color_name: str = color_name
+        self.points: int = points
 
         # Get color from name
         if color_name in self.COLORS:
-            self.color = self.COLORS[color_name]
+            self.color: Tuple[int, int, int] = self.COLORS[color_name]
         else:
             self.color = self.COLORS["blue"]  # Default
 
         # Create the collision rectangle
-        self.rect = pygame.Rect(x, y, width, height)
+        self.rect: pygame.Rect = pygame.Rect(x, y, width, height)
 
         # Health depends on block type
         if block_type == self.TYPE_HARD:
-            self.health = 2
+            self.health: int = 2
         elif block_type == self.TYPE_UNBREAKABLE:
             self.health = -1  # Infinite
         else:
             self.health = 1
 
         # Animation state
-        self.animation_frame = 0
-        self.is_hit = False
-        self.hit_timer = 0
+        self.animation_frame: int = 0
+        self.is_hit: bool = False
+        self.hit_timer: float = 0.0
         self.logger.info(
             f"Block created at ({x}, {y}) type={block_type} color={color_name}"
         )
 
-    def update(self, delta_ms):
+    def update(self, delta_ms: float) -> None:
         """
         Update the block's state.
 
@@ -96,7 +104,7 @@ class Block:
             if self.hit_timer <= 0:
                 self.is_hit = False
 
-    def hit(self):
+    def hit(self) -> Tuple[bool, int]:
         """
         Handle the block being hit by a ball.
 
@@ -123,7 +131,7 @@ class Block:
 
         return (False, 0)
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw the block.
 
@@ -197,11 +205,11 @@ class Block:
             text_rect = text.get_rect(center=self.rect.center)
             surface.blit(text, text_rect)
 
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         """Get the block's collision rectangle."""
         return self.rect
 
-    def is_broken(self):
+    def is_broken(self) -> bool:
         """Check if the block is broken."""
         return self.health == 0
 
@@ -210,8 +218,13 @@ class BlockManager:
     """Manages all blocks in the game."""
 
     def __init__(
-        self, brick_width=50, brick_height=20, margin=2, offset_x=0, offset_y=0
-    ):
+        self,
+        brick_width: int = 50,
+        brick_height: int = 20,
+        margin: int = 2,
+        offset_x: int = 0,
+        offset_y: int = 0,
+    ) -> None:
         """
         Initialize the block manager.
 
@@ -222,14 +235,16 @@ class BlockManager:
             offset_x (int): X offset for all blocks (for positioning within play area)
             offset_y (int): Y offset for all blocks (for positioning within play area)
         """
-        self.brick_width = brick_width
-        self.brick_height = brick_height
-        self.margin = margin
-        self.offset_x = offset_x
-        self.offset_y = offset_y
-        self.blocks = []
+        self.brick_width: int = brick_width
+        self.brick_height: int = brick_height
+        self.margin: int = margin
+        self.offset_x: int = offset_x
+        self.offset_y: int = offset_y
+        self.blocks: List[Block] = []
 
-    def create_level(self, level_num=1, width=800, top_margin=100):
+    def create_level(
+        self, level_num: int = 1, width: int = 800, top_margin: int = 100
+    ) -> List[Block]:
         """
         Create a level with blocks arranged in a pattern.
 
@@ -400,7 +415,7 @@ class BlockManager:
 
         return self.blocks
 
-    def update(self, delta_ms):
+    def update(self, delta_ms: float) -> None:
         """
         Update all blocks.
 
@@ -410,7 +425,7 @@ class BlockManager:
         for block in self.blocks:
             block.update(delta_ms)
 
-    def check_collisions(self, ball):
+    def check_collisions(self, ball: Any) -> Tuple[int, int]:
         """
         Check for collisions between a ball and all blocks.
 
@@ -482,7 +497,7 @@ class BlockManager:
 
         return points, broken_blocks
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw all blocks.
 
@@ -492,10 +507,10 @@ class BlockManager:
         for block in self.blocks:
             block.draw(surface)
 
-    def get_block_count(self):
+    def get_block_count(self) -> int:
         """Get the number of remaining blocks."""
         return len(self.blocks)
 
-    def get_breakable_count(self):
+    def get_breakable_count(self) -> int:
         """Get the number of breakable blocks (excluding unbreakable ones)."""
         return sum(1 for block in self.blocks if block.type != Block.TYPE_UNBREAKABLE)

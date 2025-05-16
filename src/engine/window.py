@@ -6,23 +6,37 @@ abstracting the underlying SDL2/pygame implementation.
 """
 
 import pygame
+from typing import Any, Optional
 
 
 class Window:
     """Window management for the game, abstracting pygame's display system."""
 
+    surface: pygame.Surface
+    width: int
+    height: int
+    fullscreen: bool
+    running: bool
+    clock: pygame.time.Clock
+    target_fps: int
+
     def __init__(
-        self, width, height, title="- XBoing II -", fullscreen=False, resizable=False
-    ):
+        self,
+        width: int,
+        height: int,
+        title: str = "- XBoing II -",
+        fullscreen: bool = False,
+        resizable: bool = False,
+    ) -> None:
         """
         Initialize the game window.
 
         Args:
-            width (int): Window width in pixels
-            height (int): Window height in pixels
-            title (str): Window title
-            fullscreen (bool): Whether to start in fullscreen mode
-            resizable (bool): Whether the window is resizable
+            width: Window width in pixels
+            height: Window height in pixels
+            title: Window title
+            fullscreen: Whether to start in fullscreen mode
+            resizable: Whether the window is resizable
         """
         pygame.init()
 
@@ -47,11 +61,11 @@ class Window:
         self.clock = pygame.time.Clock()
         self.target_fps = 60
 
-    def set_icon(self, icon_surface):
+    def set_icon(self, icon_surface: pygame.Surface) -> None:
         """Set the window icon."""
         pygame.display.set_icon(icon_surface)
 
-    def toggle_fullscreen(self):
+    def toggle_fullscreen(self) -> None:
         """Toggle between fullscreen and windowed mode."""
         self.fullscreen = not self.fullscreen
         if self.fullscreen:
@@ -61,27 +75,29 @@ class Window:
         else:
             self.surface = pygame.display.set_mode((self.width, self.height))
 
-    def clear(self, color=(0, 0, 0)):
+    def clear(self, color: Any = (0, 0, 0)) -> None:
         """Clear the window with the specified color."""
         self.surface.fill(color)
 
-    def update(self):
+    def update(self) -> None:
         """Update the display and control framerate."""
         pygame.display.flip()
         self.clock.tick(self.target_fps)
 
-    def set_fps(self, fps):
+    def set_fps(self, fps: int) -> None:
         """Set the target framerate."""
         self.target_fps = fps
 
-    def get_fps(self):
+    def get_fps(self) -> float:
         """Get the current framerate."""
         return self.clock.get_fps()
 
-    def handle_events(self, events=None):
+    def handle_events(self, events: Optional[Any] = None) -> bool:
         """
         Process window events.
 
+        Args:
+            events: Optional list of pygame events to process. If None, gets events from pygame.
         Returns:
             bool: False if the window should close, True otherwise
         """
@@ -98,6 +114,6 @@ class Window:
 
         return self.running
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up resources and shut down pygame."""
         pygame.quit()

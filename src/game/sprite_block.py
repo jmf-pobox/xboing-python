@@ -8,6 +8,7 @@ with proper rounded edges and spacing matching the original game.
 import logging
 import os
 import random
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pygame
 
@@ -20,47 +21,47 @@ class SpriteBlock:
     logger = logging.getLogger("xboing.SpriteBlock")
 
     # Block types (matching original XBoing)
-    TYPE_RED = 0
-    TYPE_BLUE = 1
-    TYPE_GREEN = 2
-    TYPE_TAN = 3
-    TYPE_YELLOW = 4
-    TYPE_PURPLE = 5
-    TYPE_BULLET = 6
-    TYPE_BLACK = 7
-    TYPE_COUNTER = 8
-    TYPE_BOMB = 9
-    TYPE_DEATH = 10
-    TYPE_REVERSE = 11
-    TYPE_HYPERSPACE = 12
-    TYPE_EXTRABALL = 13
-    TYPE_MGUN = 14
-    TYPE_WALLOFF = 15
-    TYPE_MULTIBALL = 16
-    TYPE_STICKY = 17
-    TYPE_PAD_SHRINK = 18
-    TYPE_PAD_EXPAND = 19
-    TYPE_DROP = 20
-    TYPE_MAXAMMO = 21
-    TYPE_ROAMER = 22
-    TYPE_TIMER = 23
-    TYPE_RANDOM = 24
-    TYPE_DYNAMITE = 25
-    TYPE_BONUSX2 = 26
-    TYPE_BONUSX4 = 27
-    TYPE_BONUS = 28
-    TYPE_BLACKHIT = 29
+    TYPE_RED: int = 0
+    TYPE_BLUE: int = 1
+    TYPE_GREEN: int = 2
+    TYPE_TAN: int = 3
+    TYPE_YELLOW: int = 4
+    TYPE_PURPLE: int = 5
+    TYPE_BULLET: int = 6
+    TYPE_BLACK: int = 7
+    TYPE_COUNTER: int = 8
+    TYPE_BOMB: int = 9
+    TYPE_DEATH: int = 10
+    TYPE_REVERSE: int = 11
+    TYPE_HYPERSPACE: int = 12
+    TYPE_EXTRABALL: int = 13
+    TYPE_MGUN: int = 14
+    TYPE_WALLOFF: int = 15
+    TYPE_MULTIBALL: int = 16
+    TYPE_STICKY: int = 17
+    TYPE_PAD_SHRINK: int = 18
+    TYPE_PAD_EXPAND: int = 19
+    TYPE_DROP: int = 20
+    TYPE_MAXAMMO: int = 21
+    TYPE_ROAMER: int = 22
+    TYPE_TIMER: int = 23
+    TYPE_RANDOM: int = 24
+    TYPE_DYNAMITE: int = 25
+    TYPE_BONUSX2: int = 26
+    TYPE_BONUSX4: int = 27
+    TYPE_BONUS: int = 28
+    TYPE_BLACKHIT: int = 29
 
     # Block behaviors - subclasses could implement these
-    BEHAVIOR_NORMAL = 0  # Regular breakable block
-    BEHAVIOR_UNBREAKABLE = 1  # Black wall blocks
-    BEHAVIOR_COUNTER = 2  # Blocks that require multiple hits
-    BEHAVIOR_SPECIAL = 3  # Special effect when broken (power-ups)
-    BEHAVIOR_DAMAGE = 4  # Harmful to the player (death blocks)
-    BEHAVIOR_DYNAMIC = 5  # Blocks that move or change (roamer)
+    BEHAVIOR_NORMAL: int = 0  # Regular breakable block
+    BEHAVIOR_UNBREAKABLE: int = 1  # Black wall blocks
+    BEHAVIOR_COUNTER: int = 2  # Blocks that require multiple hits
+    BEHAVIOR_SPECIAL: int = 3  # Special effect when broken (power-ups)
+    BEHAVIOR_DAMAGE: int = 4  # Harmful to the player (death blocks)
+    BEHAVIOR_DYNAMIC: int = 5  # Blocks that move or change (roamer)
 
     # Maps block types to image filenames, point values, and behaviors
-    BLOCK_IMAGES = {
+    BLOCK_IMAGES: Dict[int, Tuple[str, int, int]] = {
         TYPE_RED: ("redblk.png", 100, BEHAVIOR_NORMAL),
         TYPE_BLUE: ("blueblk.png", 100, BEHAVIOR_NORMAL),
         TYPE_GREEN: ("grnblk.png", 100, BEHAVIOR_NORMAL),
@@ -94,7 +95,7 @@ class SpriteBlock:
     }
 
     # Animation frames for special blocks
-    ANIMATION_FRAMES = {
+    ANIMATION_FRAMES: Dict[int, Union[List[str], Dict[str, str]]] = {
         TYPE_COUNTER: [
             "cntblk.png",
             "cntblk1.png",
@@ -123,10 +124,10 @@ class SpriteBlock:
     }
 
     # Cache for loaded block images
-    _image_cache = {}
+    _image_cache: Dict[str, pygame.Surface] = {}
 
     # Define vibrant XBoing-style colors for blocks with 3D effect
-    XBOING_COLORS = {
+    XBOING_COLORS: Dict[int, List[Tuple[int, int, int]]] = {
         TYPE_RED: [(255, 40, 40), (220, 20, 20), (180, 0, 0)],  # Main, dark, shadow
         TYPE_BLUE: [(40, 120, 255), (20, 80, 220), (0, 40, 180)],
         TYPE_GREEN: [
@@ -140,7 +141,7 @@ class SpriteBlock:
     }
 
     @classmethod
-    def preload_images(cls, blocks_dir):
+    def preload_images(cls, blocks_dir: str) -> None:
         """
         Preload all block images to avoid loading during gameplay.
 
@@ -191,7 +192,7 @@ class SpriteBlock:
                             )
                             failed_count += 1
             elif isinstance(frames, dict):
-                for _, frame in frames.items():
+                for frame in frames.values():
                     image_path = os.path.join(blocks_dir, frame)
                     if os.path.exists(image_path) and frame not in cls._image_cache:
                         try:
@@ -209,7 +210,7 @@ class SpriteBlock:
             f"Block image loading complete: {loaded_count} loaded, {failed_count} failed"
         )
 
-    def __init__(self, x, y, block_type=TYPE_BLUE):
+    def __init__(self, x: int, y: int, block_type: int = TYPE_BLUE) -> None:
         """
         Initialize a sprite-based block.
 
@@ -218,16 +219,16 @@ class SpriteBlock:
             y (int): Y position
             block_type (int): Type of block (from TYPE_* constants)
         """
-        self.x = x
-        self.y = y
-        self.type = block_type
+        self.x: int = x
+        self.y: int = y
+        self.type: int = block_type
 
         # Original XBoing block dimensions
-        self.width = 40
-        self.height = 20
+        self.width: int = 40
+        self.height: int = 20
 
         # Create the collision rectangle
-        self.rect = pygame.Rect(x, y, self.width, self.height)
+        self.rect: pygame.Rect = pygame.Rect(x, y, self.width, self.height)
 
         # Get image file, points, and behavior from mapping
         if block_type in self.BLOCK_IMAGES:
@@ -240,56 +241,66 @@ class SpriteBlock:
 
         # Block state - set initial health based on behavior
         if self.behavior == self.BEHAVIOR_COUNTER:
-            self.health = 6  # Counter blocks take multiple hits
-            self.counter_value = 5  # Default to 5 count for regular counter blocks
+            self.health: float = 6.0  # Counter blocks take multiple hits
+            self.counter_value: int = 5  # Default to 5 count for regular counter blocks
         elif self.behavior == self.BEHAVIOR_UNBREAKABLE:
             self.health = float("inf")  # Unbreakable blocks can't be destroyed
         else:
-            self.health = 1  # Normal blocks take 1 hit
+            self.health = 1.0  # Normal blocks take 1 hit
 
-        self.is_hit = False
-        self.hit_timer = 0
+        self.is_hit: bool = False
+        self.hit_timer: float = 0.0
 
         # Animation state for special blocks
-        self.animation_frame = 0
-        self.animation_timer = 0
-        self.animation_speed = 200  # ms per frame
-        self.animation_frames = None
+        self.animation_frame: int = 0
+        self.animation_timer: float = 0.0
+        self.animation_speed: int = 200  # ms per frame
+        self.animation_frames: Optional[Union[List[str], Dict[str, str]]] = None
 
         # For special blocks, set up animation frames
+        image_override: Optional[pygame.Surface] = None
         if block_type in self.ANIMATION_FRAMES:
             self.animation_frames = self.ANIMATION_FRAMES[block_type]
 
             # For counter blocks, initialize with appropriate frame based on counter_value
             if block_type == self.TYPE_COUNTER and hasattr(self, "counter_value"):
-                if self.counter_value == 0 and len(self.animation_frames) > 0:
+                if (
+                    self.counter_value == 0
+                    and isinstance(self.animation_frames, list)
+                    and len(self.animation_frames) > 0
+                ):
                     # Use the base counter block image (without a number)
                     if self.animation_frames[0] in self._image_cache:
-                        self.image = self._image_cache[self.animation_frames[0]]
+                        image_override = self._image_cache[self.animation_frames[0]]
                     # Disable animation for these blocks
                     self.animation_frames = None
+                self.animation_frame = 0
 
         # For roamer blocks which move
-        self.direction = None
-        self.move_timer = 0
-        self.move_interval = 1000  # ms between movements
+        self.direction: Optional[str] = None
+        self.move_timer: float = 0.0
+        self.move_interval: int = 1000  # ms between movements
         if self.behavior == self.BEHAVIOR_DYNAMIC:
             self.direction = "idle"
 
         # Use the loaded PNG image for this block type
-        if self.image_file in self._image_cache:
+        self.image: Optional[pygame.Surface] = None
+        if image_override is not None:
+            self.image = image_override
+        elif self.image_file in self._image_cache:
             self.image = self._image_cache[self.image_file]
         else:
             # If image is not available, log error and use a placeholder
             self.logger.warning(
                 f"Error: Missing block image '{self.image_file}' for block type {block_type}"
             )
-            self.image = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            img = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             pygame.draw.rect(
-                self.image, (255, 0, 255), pygame.Rect(0, 0, self.width, self.height)
+                img, (255, 0, 255), pygame.Rect(0, 0, self.width, self.height)
             )
+            self.image = img
 
-    def _create_block_image(self, block_type):
+    def _create_block_image(self, block_type: int) -> pygame.Surface:
         """
         Create a proper XBoing-style block image with 3D effects and rounded corners.
 
@@ -371,7 +382,7 @@ class SpriteBlock:
 
         return img
 
-    def update(self, delta_ms):
+    def update(self, delta_ms: float) -> None:
         """
         Update the block's state.
 
@@ -398,13 +409,13 @@ class SpriteBlock:
             self.animation_timer += delta_ms
             if self.animation_timer >= self.animation_speed:
                 self.animation_timer = 0
-                self.animation_frame = (self.animation_frame + 1) % len(
-                    self.animation_frames
-                )
+                frame_index = (self.animation_frame + 1) % len(self.animation_frames)
+                self.animation_frame = int(frame_index)
                 # Update the image to the current animation frame
-                frame_file = self.animation_frames[self.animation_frame]
-                if frame_file in self._image_cache:
-                    self.image = self._image_cache[frame_file]
+                if 0 <= self.animation_frame < len(self.animation_frames):
+                    frame_file = self.animation_frames[self.animation_frame]
+                    if frame_file in self._image_cache:
+                        self.image = self._image_cache[frame_file]
 
         # Update roamer movement
         if self.type == self.TYPE_ROAMER and self.direction:
@@ -414,18 +425,23 @@ class SpriteBlock:
                 # Change direction randomly
                 self.set_random_direction()
 
-    def set_random_direction(self):
+    def set_random_direction(self) -> None:
         """Set a random direction for roamer blocks."""
         directions = ["idle", "up", "down", "left", "right"]
         self.direction = random.choice(directions)
         # Update the image based on direction
         if self.type == self.TYPE_ROAMER:
-            frames = self.ANIMATION_FRAMES[self.TYPE_ROAMER]
-            frame_file = frames[self.direction]
-            if frame_file in self._image_cache:
-                self.image = self._image_cache[frame_file]
+            frames_raw = self.ANIMATION_FRAMES[self.TYPE_ROAMER]
+            if (
+                isinstance(frames_raw, dict)
+                and isinstance(self.direction, str)
+                and self.direction in frames_raw
+            ):
+                frame_file = frames_raw[self.direction]
+                if frame_file in self._image_cache:
+                    self.image = self._image_cache[frame_file]
 
-    def hit(self):
+    def hit(self) -> Tuple[bool, int, Optional[Any]]:
         """
         Handle the block being hit by a ball.
 
@@ -455,10 +471,14 @@ class SpriteBlock:
                 return (False, 0, None)
 
             # Normal counter blocks - update the counter image to show how many hits left
-            if self.health > 0 and self.animation_frames:
+            if (
+                self.health > 0
+                and self.animation_frames
+                and isinstance(self.animation_frames, list)
+            ):
                 # Use the correct frame for the current health
                 frame_index = max(
-                    0, min(5 - self.health, len(self.animation_frames) - 1)
+                    0, min(5 - int(self.health), len(self.animation_frames) - 1)
                 )
                 if self.image_file in self._image_cache:
                     self.image = self._image_cache[self.animation_frames[frame_index]]
@@ -508,30 +528,32 @@ class SpriteBlock:
 
             return (False, 0, None)
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
         """
         Draw the block.
 
         Args:
             surface (pygame.Surface): Surface to draw on
         """
-        # Apply hit effect (flash)
-        if self.is_hit:
-            # Create a temporary copy of the image and brighten it
-            bright_image = self.image.copy()
-            bright_mask = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
-            bright_mask.fill((100, 100, 100, 0))  # Semi-transparent white
-            bright_image.blit(bright_mask, (0, 0), special_flags=pygame.BLEND_RGB_ADD)
-            surface.blit(bright_image, (self.x, self.y))
-        else:
-            # Draw normal image
-            surface.blit(self.image, (self.x, self.y))
+        if self.image is not None:
+            if self.is_hit:
+                # Create a temporary copy of the image and brighten it
+                bright_image = self.image.copy()
+                bright_mask = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
+                bright_mask.fill((100, 100, 100, 0))  # Semi-transparent white
+                bright_image.blit(
+                    bright_mask, (0, 0), special_flags=pygame.BLEND_RGB_ADD
+                )
+                surface.blit(bright_image, (self.x, self.y))
+            else:
+                # Draw normal image
+                surface.blit(self.image, (self.x, self.y))
 
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         """Get the block's collision rectangle."""
         return self.rect
 
-    def is_broken(self):
+    def is_broken(self) -> bool:
         """Check if the block is broken."""
         return self.health <= 0
 
@@ -539,7 +561,7 @@ class SpriteBlock:
 class SpriteBlockManager:
     """Manages sprite-based blocks in the game."""
 
-    def __init__(self, offset_x=0, offset_y=0):
+    def __init__(self, offset_x: int = 0, offset_y: int = 0) -> None:
         """
         Initialize the sprite block manager.
 
@@ -562,7 +584,7 @@ class SpriteBlockManager:
 
         self.offset_x = offset_x
         self.offset_y = offset_y
-        self.blocks = []
+        self.blocks: List[SpriteBlock] = []
 
         # Get blocks directory using asset path utility
         blocks_dir = get_blocks_dir()
@@ -571,7 +593,9 @@ class SpriteBlockManager:
         # Preload all block images for better performance
         SpriteBlock.preload_images(blocks_dir)
 
-    def create_level(self, level_num=1, width=495, top_margin=60):
+    def create_level(
+        self, level_num: int = 1, width: int = 495, top_margin: int = 60
+    ) -> List[SpriteBlock]:
         """
         Create a level with blocks arranged in a pattern based on the original XBoing.
 
@@ -581,7 +605,7 @@ class SpriteBlockManager:
             top_margin (int): Top margin for blocks
 
         Returns:
-            list: The created blocks
+            List[SpriteBlock]: The created blocks
         """
         self.blocks = []
 
@@ -769,7 +793,7 @@ class SpriteBlockManager:
 
         return self.blocks
 
-    def update(self, delta_ms):
+    def update(self, delta_ms: float) -> None:
         """
         Update all blocks.
 
@@ -779,7 +803,7 @@ class SpriteBlockManager:
         for block in self.blocks:
             block.update(delta_ms)
 
-    def check_collisions(self, ball):
+    def check_collisions(self, ball: Any) -> Tuple[int, int, List[Any]]:
         """
         Check for collisions between a ball and all blocks.
 
@@ -787,11 +811,11 @@ class SpriteBlockManager:
             ball (Ball): The ball to check collisions with
 
         Returns:
-            tuple: (points, broken_blocks, effects) - Points earned, number of blocks broken, and any special effects
+            Tuple[int, int, List[Any]]: Points earned, number of blocks broken, and any special effects
         """
         points = 0
         broken_blocks = 0
-        effects = []
+        effects: List[Any] = []
 
         # Get ball position and previous position
         ball_rect = ball.get_rect()
@@ -873,14 +897,15 @@ class SpriteBlockManager:
         for block in self.blocks:
             block.draw(surface)
 
-    def get_block_count(self):
+    def get_block_count(self) -> int:
         """Get the number of remaining blocks."""
         return len(self.blocks)
 
-    def get_breakable_count(self):
+    def get_breakable_count(self) -> int:
         """Get the number of breakable blocks (excluding unbreakable ones)."""
         return sum(1 for block in self.blocks if block.type != SpriteBlock.TYPE_BLACK)
 
-    def remaining_blocks(self):
-        count = len([b for b in self.blocks if not b.is_broken()])
+    def remaining_blocks(self) -> int:
+        """Return the number of blocks that are not broken."""
+        count: int = len([b for b in self.blocks if not b.is_broken()])
         return count

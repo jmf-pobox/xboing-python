@@ -6,6 +6,7 @@ This is the authoritative source for all UI region positions and backgrounds.
 import logging
 import os
 from dataclasses import dataclass
+from typing import Any, List, Optional, Tuple
 
 import pygame
 
@@ -15,7 +16,9 @@ from utils.asset_paths import get_backgrounds_dir
 
 @dataclass
 class Rect:
-    """A simple rectangle class representing a window or region."""
+    """
+    A simple rectangle class representing a window or region.
+    """
 
     x: int
     y: int
@@ -23,19 +26,23 @@ class Rect:
     height: int
 
     @property
-    def rect(self):
+    def rect(self) -> pygame.Rect:
+        """Return a pygame.Rect representation of this rectangle."""
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
     @property
-    def center(self):
+    def center(self) -> Tuple[int, int]:
+        """Return the center (x, y) of the rectangle."""
         return (self.x + self.width // 2, self.y + self.height // 2)
 
     @property
-    def centerx(self):
+    def centerx(self) -> int:
+        """Return the x-coordinate of the center of the rectangle."""
         return self.x + self.width // 2
 
     @property
-    def centery(self):
+    def centery(self) -> int:
+        """Return the y-coordinate of the center of the rectangle."""
         return self.y + self.height // 2
 
 
@@ -44,7 +51,30 @@ class GameWindow:
     Represents a game window or region within the main surface.
     """
 
-    def __init__(self, rect, name="", parent=None, bg_color=None):
+    rect: Rect
+    name: str
+    parent: Optional["GameWindow"]
+    bg_color: Optional[Tuple[int, int, int]]
+    bg_surface: Optional[pygame.Surface]
+    children: List["GameWindow"]
+    visible: bool
+
+    def __init__(
+        self,
+        rect: Rect,
+        name: str = "",
+        parent: Optional["GameWindow"] = None,
+        bg_color: Optional[Tuple[int, int, int]] = None,
+    ) -> None:
+        """
+        Initialize a GameWindow.
+
+        Args:
+            rect: The rectangle defining the window's position and size.
+            name: The name of the window.
+            parent: The parent GameWindow, if any.
+            bg_color: The background color as an (R, G, B) tuple, if any.
+        """
         self.rect = rect
         self.name = name
         self.parent = parent
@@ -55,17 +85,20 @@ class GameWindow:
         if parent:
             parent.add_child(self)
 
-    def add_child(self, child):
+    def add_child(self, child: "GameWindow") -> None:
+        """Add a child GameWindow to this window."""
         self.children.append(child)
 
-    def set_background(self, bg):
+    def set_background(self, bg: Any) -> None:
+        """Set the background color or surface for this window."""
         if isinstance(bg, tuple) and len(bg) >= 3:
             self.bg_color = bg
             self.bg_surface = None
         elif isinstance(bg, pygame.Surface):
             self.bg_surface = bg
 
-    def set_background_pixmap(self, pixmap):
+    def set_background_pixmap(self, pixmap: Optional[pygame.Surface]) -> None:
+        """Set a tiled background pixmap for this window."""
         if not pixmap:
             return
         bg = pygame.Surface((self.rect.width, self.rect.height))
@@ -74,7 +107,8 @@ class GameWindow:
                 bg.blit(pixmap, (x, y))
         self.bg_surface = bg
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draw this window and its children onto the given surface."""
         if not self.visible:
             return
         if self.bg_surface:
@@ -87,10 +121,13 @@ class GameWindow:
 
 class GameLayout:
     """
-    Manages the game window layout.
+    Manages the game window layout and provides access to all UI region rectangles.
     """
 
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int) -> None:
+        """
+        Initialize the GameLayout with the given width and height.
+        """
         self.logger = logging.getLogger("xboing.GameLayout")
         self.width = width
         self.height = height
@@ -100,7 +137,8 @@ class GameLayout:
         self.MAIN_HEIGHT = 130
         self._create_windows()
 
-    def _create_windows(self):
+    def _create_windows(self) -> None:
+        """Create all GameWindow regions for the layout."""
         self.main_window = GameWindow(
             Rect(0, 0, self.width, self.height),
             name="mainWindow",
@@ -166,7 +204,10 @@ class GameLayout:
             bg_color=None,
         )
 
-    def load_backgrounds(self, background_dir=None):
+    def load_backgrounds(self, background_dir: Optional[str] = None) -> None:
+        """
+        Load background images for the main and play windows.
+        """
         if background_dir is None:
             background_dir = get_backgrounds_dir()
         self.logger.info(f"Loading backgrounds from: {background_dir}")
@@ -194,7 +235,8 @@ class GameLayout:
         except Exception as e:
             self.logger.error(f"Error loading background images: {e}")
 
-    def draw(self, surface):
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draw the entire layout onto the given surface."""
         self.main_window.draw(surface)
 
     def get_play_rect(self) -> pygame.Rect:
@@ -217,7 +259,10 @@ class GameLayout:
         """Return the timer window rectangle as a pygame.Rect."""
         return self.time_window.rect.rect
 
-    def set_play_background(self, bg_type):
+    def set_play_background(self, bg_type: int) -> None:
+        """
+        Set the play area background to a specific type by loading the corresponding image.
+        """
         backgrounds_dir = get_backgrounds_dir()
         bg_file = f"bgrnd{bg_type+2}.png"
         bg_path = os.path.join(backgrounds_dir, bg_file)

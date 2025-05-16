@@ -7,6 +7,7 @@ and its interactions with the game, matching the original XBoing implementation.
 
 import logging
 import os
+from typing import Any, Dict, Optional
 
 import pygame
 
@@ -27,7 +28,7 @@ class Paddle:
     # Distance from bottom of play area to paddle (original XBoing value)
     DIST_BASE = 30  # Matches the original C code's DIST_BASE constant
 
-    def __init__(self, x, y, width, height, speed=10):
+    def __init__(self, x: int, y: int, width: int, height: int, speed: int = 10) -> None:
         """
         Initialize the paddle.
 
@@ -40,7 +41,7 @@ class Paddle:
         """
         self.x = x
         self.y = y
-        self.width = width
+        self.width = int(width)
         self.height = height
         self.speed = speed
         self.size = (
@@ -57,7 +58,7 @@ class Paddle:
         # Get the current paddle sprite and dimensions
         self._update_rect_size()
 
-    def _load_sprites(self):
+    def _load_sprites(self) -> None:
         """Load paddle sprites from assets."""
         paddle_dir = get_paddles_dir()
         logger.info(f"Loading paddle sprites from: {paddle_dir}")
@@ -81,7 +82,7 @@ class Paddle:
                 logger.error(f"Large paddle sprite not found: {large_path}")
 
             # Load the paddle images
-            self.paddle_images = {
+            self.paddle_images: Optional[Dict[int, pygame.Surface]] = {
                 self.SIZE_SMALL: pygame.image.load(small_path).convert_alpha(),
                 self.SIZE_MEDIUM: pygame.image.load(medium_path).convert_alpha(),
                 self.SIZE_LARGE: pygame.image.load(large_path).convert_alpha(),
@@ -114,7 +115,7 @@ class Paddle:
                 self.SIZE_LARGE: (70, 15),  # padhuge.xpm: 70x15
             }
 
-    def _update_rect_size(self):
+    def _update_rect_size(self) -> None:
         """Update the rectangle size based on current paddle size."""
         width, height = self.paddle_dimensions[self.size]
         self.rect = pygame.Rect(
@@ -123,9 +124,9 @@ class Paddle:
             width,
             height,
         )
-        self.width = width
+        self.width = int(width)
 
-    def update(self, delta_ms, play_width, offset_x=0):
+    def update(self, delta_ms: float, play_width: int, offset_x: int = 0) -> None:
         """
         Update paddle position.
 
@@ -141,7 +142,7 @@ class Paddle:
             move_amount = self.speed * (delta_ms / 16.67)  # Normalized for 60 FPS
 
             # Update position
-            self.x += self.direction * move_amount
+            self.x += int(self.direction * move_amount)
         else:
             self.moving = False
 
@@ -159,7 +160,7 @@ class Paddle:
         self.rect.x = int(self.x - paddle_half_width)
         self.rect.y = int(self.y)
 
-    def set_direction(self, direction):
+    def set_direction(self, direction: int) -> None:
         """
         Set paddle movement direction.
 
@@ -168,7 +169,7 @@ class Paddle:
         """
         self.direction = direction
 
-    def move_to(self, x, play_width, offset_x=0):
+    def move_to(self, x: int, play_width: int, offset_x: int = 0) -> None:
         """
         Move paddle to a specific x position.
 
@@ -192,7 +193,7 @@ class Paddle:
         # Update rectangle
         self.rect.x = int(self.x - paddle_half_width)
 
-    def set_size(self, size):
+    def set_size(self, size: int) -> None:
         """
         Set paddle size.
 
@@ -210,11 +211,11 @@ class Paddle:
             self._update_rect_size()
             self.rect.x = int(center_x - self.rect.width // 2)
 
-    def toggle_sticky(self):
+    def toggle_sticky(self) -> None:
         """Toggle sticky paddle state."""
         self.sticky = not self.sticky
 
-    def is_sticky(self):
+    def is_sticky(self) -> bool:
         """Check if the paddle is sticky."""
         return self.sticky
 
@@ -253,10 +254,10 @@ class Paddle:
             indicator_rect = pygame.Rect(self.rect.centerx - 5, self.rect.y - 5, 10, 5)
             pygame.draw.rect(surface, (255, 255, 0), indicator_rect)
 
-    def get_rect(self):
+    def get_rect(self) -> pygame.Rect:
         """Get the paddle's rectangle for collision detection."""
         return self.rect
 
-    def get_center(self):
+    def get_center(self) -> Any:
         """Get the center position of the paddle."""
         return self.rect.center

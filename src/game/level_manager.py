@@ -7,6 +7,7 @@ It interfaces with the SpriteBlockManager to create the appropriate block layout
 
 import logging
 import os
+from typing import Any, Dict, List, Optional, Union
 
 from game.sprite_block import SpriteBlock
 from utils.asset_paths import get_levels_dir
@@ -67,7 +68,9 @@ class LevelManager:
         "+": SpriteBlock.TYPE_ROAMER,  # Roamer block
     }
 
-    def __init__(self, levels_dir=None, layout=None):
+    def __init__(
+        self, levels_dir: Optional[str] = None, layout: Optional[Any] = None
+    ) -> None:
         """
         Initialize the level manager.
 
@@ -81,7 +84,7 @@ class LevelManager:
         self.level_title = ""
         self.time_bonus = 0
         self.block_manager = None
-        self.time_remaining = 0
+        self.time_remaining: float = 0.0
         self.timer_active = False
         self.layout = layout
 
@@ -95,7 +98,7 @@ class LevelManager:
 
         self.logger.info(f"Using levels directory: {self.levels_dir}")
 
-    def set_block_manager(self, block_manager):
+    def set_block_manager(self, block_manager: Any) -> None:
         """
         Set the block manager to use for creating blocks.
 
@@ -104,7 +107,7 @@ class LevelManager:
         """
         self.block_manager = block_manager
 
-    def set_layout(self, layout):
+    def set_layout(self, layout: Any) -> None:
         """
         Set the game layout to use for backgrounds.
 
@@ -113,7 +116,7 @@ class LevelManager:
         """
         self.layout = layout
 
-    def load_level(self, level_num=None):
+    def load_level(self, level_num: Optional[int] = None) -> bool:
         """
         Load a specific level.
 
@@ -144,7 +147,7 @@ class LevelManager:
             if level_data:
                 self.level_title = level_data["title"]
                 self.time_bonus = level_data["time_bonus"]
-                self.time_remaining = level_data["time_bonus"]
+                self.time_remaining = float(level_data["time_bonus"])
 
                 # Create blocks based on level data using block manager
                 if self.block_manager:
@@ -164,7 +167,7 @@ class LevelManager:
             self.logger.error(f"Error loading level {self.current_level}: {e}")
             return False
 
-    def get_next_level(self):
+    def get_next_level(self) -> bool:
         """
         Advance to the next level.
 
@@ -185,7 +188,7 @@ class LevelManager:
 
         return self.load_level()
 
-    def update(self, delta_ms):
+    def update(self, delta_ms: float) -> None:
         """
         Update level timer and state.
 
@@ -202,24 +205,24 @@ class LevelManager:
                 self.time_remaining = 0
                 # Could trigger "times up" event here
 
-    def add_time(self, seconds):
+    def add_time(self, seconds: int) -> None:
         """
         Add time to the level timer (for power-ups).
 
         Args:
             seconds (int): Seconds to add
         """
-        self.time_remaining += seconds
+        self.time_remaining += float(seconds)
 
-    def start_timer(self):
+    def start_timer(self) -> None:
         """Start the level timer."""
         self.timer_active = True
 
-    def stop_timer(self):
+    def stop_timer(self) -> None:
         """Stop the level timer."""
         self.timer_active = False
 
-    def is_level_complete(self):
+    def is_level_complete(self) -> bool:
         """
         Check if the level is complete (all breakable blocks destroyed).
 
@@ -230,7 +233,7 @@ class LevelManager:
             return self.block_manager.get_breakable_count() == 0
         return False
 
-    def get_level_info(self) -> dict[str, int | str]:
+    def get_level_info(self) -> Dict[str, Union[int, str]]:
         """
         Get current level information.
 
@@ -253,7 +256,7 @@ class LevelManager:
         """
         return int(self.time_remaining)
 
-    def get_score_multiplier(self):
+    def get_score_multiplier(self) -> int:
         """
         Get score multiplier based on remaining time.
 
@@ -281,7 +284,7 @@ class LevelManager:
         else:
             return 1
 
-    def _create_blocks_from_layout(self, layout):
+    def _create_blocks_from_layout(self, layout: List[str]) -> None:
         """
         Create blocks based on the level layout.
 
@@ -373,7 +376,7 @@ class LevelManager:
                 # Add block to manager
                 self.block_manager.blocks.append(block)
 
-    def _set_level_background(self):
+    def _set_level_background(self) -> None:
         """
         Set the appropriate background for the current level.
         In the original XBoing, backgrounds rotate between levels.
@@ -404,7 +407,7 @@ class LevelManager:
         # Set the play area background
         self.layout.set_play_background(bg_index)
 
-    def _get_level_file_path(self, level_num):
+    def _get_level_file_path(self, level_num: int) -> str:
         """
         Get the file path for a specific level number.
 
@@ -418,7 +421,7 @@ class LevelManager:
         level_file = f"level{level_num:02d}.data"
         return os.path.join(self.levels_dir, level_file)
 
-    def _parse_level_file(self, file_path):
+    def _parse_level_file(self, file_path: str) -> Optional[Dict[str, Any]]:
         """
         Parse an XBoing level file.
 

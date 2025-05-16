@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, List
 
 from engine.events import (
     GameOverEvent,
@@ -19,7 +20,22 @@ from engine.events import (
 
 
 class GameState:
-    def __init__(self):
+    """
+    Manages the current state of the game, including score, lives, level, timer, and special flags.
+    Provides methods to update state and generate corresponding events.
+    """
+
+    logger: logging.Logger
+    score: int
+    lives: int
+    level: int
+    timer: int
+    game_over: bool
+    specials: Dict[str, bool]
+    _event_map: Dict[str, Any]
+
+    def __init__(self) -> None:
+        """Initialize the GameState with default values and event mappings."""
         self.logger = logging.getLogger("xboing.GameState")
         self.score = 0
         self.lives = 3
@@ -47,7 +63,7 @@ class GameState:
             "x4": SpecialX4ChangedEvent,
         }
 
-    def add_score(self, points):
+    def add_score(self, points: int) -> List[Any]:
         """
         Add points to the score and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -56,7 +72,7 @@ class GameState:
         self.logger.info(f"Score increased by {points}, new score: {self.score}")
         return [ScoreChangedEvent(self.score)]
 
-    def set_score(self, score):
+    def set_score(self, score: int) -> List[Any]:
         """
         Set the score and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -65,7 +81,7 @@ class GameState:
         self.logger.info(f"Score set to {self.score}")
         return [ScoreChangedEvent(self.score)]
 
-    def lose_life(self):
+    def lose_life(self) -> List[Any]:
         """
         Decrement lives and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -78,7 +94,7 @@ class GameState:
         else:
             return [LivesChangedEvent(self.lives)]
 
-    def set_lives(self, lives):
+    def set_lives(self, lives: int) -> List[Any]:
         """
         Set the number of lives and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -87,7 +103,7 @@ class GameState:
         self.logger.info(f"Lives set to {self.lives}")
         return [LivesChangedEvent(self.lives)]
 
-    def set_level(self, level):
+    def set_level(self, level: int) -> List[Any]:
         """
         Set the level and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -96,7 +112,7 @@ class GameState:
         self.logger.info(f"Level set to {self.level}")
         return [LevelChangedEvent(self.level)]
 
-    def set_timer(self, time_remaining):
+    def set_timer(self, time_remaining: int) -> List[Any]:
         """
         Set the timer and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -105,7 +121,7 @@ class GameState:
         self.logger.debug(f"Timer set to {self.timer}")
         return [TimerUpdatedEvent(self.timer)]
 
-    def set_special(self, name, value):
+    def set_special(self, name: str, value: bool) -> List[Any]:
         """
         Set a special flag and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -116,10 +132,13 @@ class GameState:
             return [self._event_map[name](value)]
         return []
 
-    def get_special(self, name):
+    def get_special(self, name: str) -> bool:
+        """
+        Get the value of a special flag.
+        """
         return self.specials.get(name, False)
 
-    def set_game_over(self, value: bool):
+    def set_game_over(self, value: bool) -> List[Any]:
         """
         Set the game over flag and return a list of change events.
         Does not fire events directly (side-effect free).
@@ -131,10 +150,13 @@ class GameState:
                 return [GameOverEvent()]
         return []
 
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
+        """
+        Return True if the game is over, False otherwise.
+        """
         return self.game_over
 
-    def restart(self):
+    def restart(self) -> List[Any]:
         """
         Reset the game state and return a list of all change events.
         Does not fire events directly (side-effect free).
@@ -151,7 +173,7 @@ class GameState:
             all_events += self.set_special(name, False)
         return all_events
 
-    def full_restart(self, level_manager):
+    def full_restart(self, level_manager: Any) -> List[Any]:
         """
         Reset all game state, load the level, set timer from level manager, and return all change events.
         Does not fire events directly (side-effect free).
