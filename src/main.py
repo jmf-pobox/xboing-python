@@ -215,23 +215,43 @@ def main() -> None:
 
     # --- Game loop ---
     last_time = time.time()
+
+    # Use a mutable dictionary to hold the 'running' state. This allows nested functions and
+    # callbacks (such as quit callbacks) to modify the running state and exit the main loop.
+    # This pattern works around Python's scoping rules, which prevent assignment to nonlocal
+    # variables from within lambdas or nested functions unless using 'nonlocal' or 'global'.
     nonlocal_vars: Dict[str, bool] = {"running": True}
     window_controller = WindowController(
         audio_manager=audio_manager,
-        quit_callback=lambda: nonlocal_vars.update({"running": False}),
+        quit_callback=lambda: nonlocal_vars.update({"running": False}),  # Callback to stop the game loop
         ui_manager=ui_manager,
     )
+
+    # Main game loop runs as long as 'nonlocal_vars["running"]' is True.
     while nonlocal_vars["running"]:
         now = time.time()
         delta_time = now - last_time
         last_time = now
 
+        # Get all events from the event queue once
         events = pygame.event.get()
+
+        # Handle input events
         input_manager.update(events)
-        window_controller.handle_events(events)  # Handle global/system events
+
+        # Handle global/system events  
+        window_controller.handle_events(events)
+
+        # Handle events for the active controller
         controller_manager.active_controller.handle_events(events)
+
+        # Handle events for the audio manager
         audio_manager.handle_events(events)
+
+        # Handle events for the UI manager
         ui_manager.handle_events(events)
+
+        # Update the active controller
         controller_manager.active_controller.update(delta_time * 1000)
 
         # Clear/redraw the background and window hierarchy before drawing UI
