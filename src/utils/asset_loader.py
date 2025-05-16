@@ -7,6 +7,7 @@ images and converting them for use with pygame.
 
 import logging
 import os
+from typing import List, Optional, Tuple
 
 import pygame
 
@@ -14,7 +15,7 @@ logger = logging.getLogger("xboing.AssetLoader")
 
 
 def load_image(
-    filename: str, alpha: bool = True, scale: tuple[int, int] | None = None
+    filename: str, alpha: bool = True, scale: Optional[Tuple[int, int]] = None
 ) -> pygame.Surface:
     """
     Load an image and convert it for optimal display.
@@ -51,7 +52,7 @@ def load_image(
 
 def load_image_sequence(
     directory: str, pattern: str, num_frames: int, alpha: bool = True
-) -> list[pygame.Surface]:
+) -> List[pygame.Surface]:
     """
     Load a sequence of images for animation.
 
