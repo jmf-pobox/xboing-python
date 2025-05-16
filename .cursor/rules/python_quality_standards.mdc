@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.py
 alwaysApply: false
 ---
 - All code must comply with [PEP 8](mdc:https:/peps.python.org/pep-0008) (style guide) and [PEP 257](mdc:https:/peps.python.org/pep-0257) (docstrings).
