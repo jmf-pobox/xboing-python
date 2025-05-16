@@ -1,12 +1,13 @@
 import logging
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 import pygame
 from injector import inject
 
+from controllers.controller import Controller
+from controllers.controller_manager import ControllerManager
 from controllers.game_controller import GameController
 from engine.audio_manager import AudioManager
-from game.ball import Ball
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from layout.game_layout import GameLayout
@@ -16,9 +17,10 @@ from ui.ui_manager import UIManager
 logger = logging.getLogger("xboing.GameOverController")
 
 
-class GameOverController:
+class GameOverController(Controller):
     """
     Controller for handling the game over state, including resetting the game and handling input events.
+    The controller_manager attribute is set after construction to avoid DI circular dependency.
     """
 
     @inject
@@ -26,7 +28,6 @@ class GameOverController:
         self,
         game_state: GameState,
         level_manager: LevelManager,
-        balls: List[Ball],
         game_controller: GameController,
         game_view: GameView,
         layout: GameLayout,
@@ -40,7 +41,6 @@ class GameOverController:
         Args:
             game_state: The current game state.
             level_manager: The level manager instance.
-            balls: List of Ball objects in play.
             game_controller: The main game controller instance.
             game_view: The main game view instance.
             layout: The game layout instance.
@@ -50,7 +50,6 @@ class GameOverController:
         """
         self.game_state = game_state
         self.level_manager = level_manager
-        self.balls = balls
         self.game_controller = game_controller
         self.game_view = game_view
         self.layout = layout
@@ -58,6 +57,9 @@ class GameOverController:
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
         self.ui_manager = ui_manager
+        self.controller_manager: Optional[ControllerManager] = (
+            None  # Set after construction
+        )
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """
@@ -74,7 +76,11 @@ class GameOverController:
     def reset_game(self) -> None:
         """
         Reset the game state and return to gameplay view.
+        Note: controller_manager must be set before calling this method.
         """
+        logger.debug(
+            f"[reset_game] ENTER id(self)={id(self)}, id(self.game_controller)={id(self.game_controller)}, id(self.game_controller.ball_manager)={id(self.game_controller.ball_manager)}"
+        )
         logger.info(
             "reset_game called: restarting game state and returning to gameplay view."
         )
@@ -85,15 +91,35 @@ class GameOverController:
         logger.info(
             f"After full_restart: game_state.is_game_over() = {self.game_state.is_game_over()}"
         )
+
         if self.layout:
             self.layout.get_play_rect()
-        self.balls.clear()
-        self.balls.append(self.game_controller.create_new_ball())
-        self.game_view.balls = self.balls
-        self.game_controller.waiting_for_launch = True
-        # If waiting_for_launch is needed, it should be handled by main or passed in
-        if self.ui_manager:
+        self.game_controller.ball_manager.clear()
+        new_ball = self.game_controller.create_new_ball()
+        self.game_controller.ball_manager.add_ball(new_ball)
+        logger.debug(
+            f"[reset_game] New ball created: id={id(new_ball)}, stuck_to_paddle={new_ball.stuck_to_paddle}"
+        )
+
+        # Assert ball state
+        balls = self.game_controller.ball_manager.balls
+        assert len(balls) == 1, f"Expected 1 ball after reset, got {len(balls)}"
+        assert balls[0].stuck_to_paddle, "Ball should be stuck to paddle after reset"
+
+        # Switch active controller to 'game'
+        if self.controller_manager is not None:
+            self.controller_manager.set_controller("game")
+        else:
+            logger.error("[reset_game] controller_manager is not set or None!")
+
+        # Switch UI view to 'game'
+        if self.ui_manager is not None:
             self.ui_manager.set_view("game")
+        else:
+            logger.error("[reset_game] ui_manager is not set or None!")
+        logger.debug(
+            f"[reset_game] EXIT id(self)={id(self)}, id(self.game_controller)={id(self.game_controller)}, id(self.game_controller.ball_manager)={id(self.game_controller.ball_manager)}"
+        )
 
     def handle_event(self, event: Any) -> None:
         """

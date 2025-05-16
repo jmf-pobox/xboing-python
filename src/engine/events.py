@@ -1,73 +1,82 @@
 from typing import Tuple
 
 
-class BlockHitEvent:
+class XBoingEvent:
+    """
+    Base class for all XBoing game events.
+    All custom event types should inherit from this class for type safety and event handling consistency.
+    """
+
+    pass
+
+
+class BlockHitEvent(XBoingEvent):
     """Event: Ball hit a block."""
 
     pass
 
 
-class UIButtonClickEvent:
+class UIButtonClickEvent(XBoingEvent):
     """Event: UI button or menu click."""
 
     pass
 
 
-class PowerUpCollectedEvent:
+class PowerUpCollectedEvent(XBoingEvent):
     """Event: Power-up collected."""
 
     pass
 
 
-class GameOverEvent:
+class GameOverEvent(XBoingEvent):
     """Event: Game over."""
 
     pass
 
 
-class BallShotEvent:
+class BallShotEvent(XBoingEvent):
     """Event: Ball launched from paddle."""
 
     pass
 
 
-class BallLostEvent:
+class BallLostEvent(XBoingEvent):
     """Event: Ball lost (missed by paddle)."""
 
     pass
 
 
-class BombExplodedEvent:
+class BombExplodedEvent(XBoingEvent):
     """Event: Bomb block exploded."""
 
     pass
 
 
-class ApplauseEvent:
+class ApplauseEvent(XBoingEvent):
     """Event: Level complete, applause sound."""
 
     pass
 
 
-class BonusCollectedEvent:
+class BonusCollectedEvent(XBoingEvent):
     """Event: Bonus collected."""
 
     pass
 
 
-class PaddleHitEvent:
+class PaddleHitEvent(XBoingEvent):
     """Event: Ball hit the paddle."""
 
     pass
 
 
-class WallHitEvent:
+class WallHitEvent(XBoingEvent):
     """Event: Ball hit the wall (for special wall collision sound handling)."""
 
     pass
 
 
-class ScoreChangedEvent:
+class ScoreChangedEvent(XBoingEvent):
     """Event: Score changed (for UI updates)."""
 
     def __init__(self, score: int) -> None:
@@ -75,7 +84,7 @@ class ScoreChangedEvent:
         self.score: int = score
 
 
-class LivesChangedEvent:
+class LivesChangedEvent(XBoingEvent):
     """Event: Lives changed (gain or loss, for UI updates)."""
 
     def __init__(self, lives: int) -> None:
@@ -83,7 +92,7 @@ class LivesChangedEvent:
         self.lives: int = lives
 
 
-class LevelChangedEvent:
+class LevelChangedEvent(XBoingEvent):
     """Event: Level changed (for UI updates)."""
 
     def __init__(self, level: int) -> None:
@@ -91,7 +100,7 @@ class LevelChangedEvent:
         self.level: int = level
 
 
-class TimerUpdatedEvent:
+class TimerUpdatedEvent(XBoingEvent):
     """Event: Timer updated (for UI updates)."""
 
     def __init__(self, time_remaining: int) -> None:
@@ -99,7 +108,7 @@ class TimerUpdatedEvent:
         self.time_remaining: int = time_remaining
 
 
-class MessageChangedEvent:
+class MessageChangedEvent(XBoingEvent):
     """Event: Message window content changed (for UI updates)."""
 
     def __init__(
@@ -114,7 +123,7 @@ class MessageChangedEvent:
         self.alignment: str = alignment
 
 
-class SpecialReverseChangedEvent:
+class SpecialReverseChangedEvent(XBoingEvent):
     """Event: Special 'reverse' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -122,7 +131,7 @@ class SpecialReverseChangedEvent:
         self.active: bool = active
 
 
-class SpecialStickyChangedEvent:
+class SpecialStickyChangedEvent(XBoingEvent):
     """Event: Special 'sticky' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -130,7 +139,7 @@ class SpecialStickyChangedEvent:
         self.active: bool = active
 
 
-class SpecialSaveChangedEvent:
+class SpecialSaveChangedEvent(XBoingEvent):
     """Event: Special 'save' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -138,7 +147,7 @@ class SpecialSaveChangedEvent:
         self.active: bool = active
 
 
-class SpecialFastGunChangedEvent:
+class SpecialFastGunChangedEvent(XBoingEvent):
     """Event: Special 'fastgun' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -146,7 +155,7 @@ class SpecialFastGunChangedEvent:
         self.active: bool = active
 
 
-class SpecialNoWallChangedEvent:
+class SpecialNoWallChangedEvent(XBoingEvent):
     """Event: Special 'nowall' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -154,7 +163,7 @@ class SpecialNoWallChangedEvent:
         self.active: bool = active
 
 
-class SpecialKillerChangedEvent:
+class SpecialKillerChangedEvent(XBoingEvent):
     """Event: Special 'killer' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -162,7 +171,7 @@ class SpecialKillerChangedEvent:
         self.active: bool = active
 
 
-class SpecialX2ChangedEvent:
+class SpecialX2ChangedEvent(XBoingEvent):
     """Event: Special 'x2' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -170,7 +179,7 @@ class SpecialX2ChangedEvent:
         self.active: bool = active
 
 
-class SpecialX4ChangedEvent:
+class SpecialX4ChangedEvent(XBoingEvent):
     """Event: Special 'x4' state changed."""
 
     def __init__(self, active: bool) -> None:
@@ -178,7 +187,7 @@ class SpecialX4ChangedEvent:
         self.active: bool = active
 
 
-class LevelCompleteEvent:
+class LevelCompleteEvent(XBoingEvent):
     """Event: Level completed."""
 
     pass

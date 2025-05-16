@@ -1,8 +1,10 @@
 import logging
 import os
-from typing import Any, Dict, Optional, Type
+from typing import Dict, Optional, Sequence, Type
 
 import pygame
+
+from engine.events import XBoingEvent
 
 
 class AudioManager:
@@ -13,7 +15,7 @@ class AudioManager:
     def __init__(
         self,
         sound_dir: str = "assets/sounds",
-        event_sound_map: Optional[Dict[Type[Any], str]] = None,
+        event_sound_map: Optional[Dict[Type[XBoingEvent], str]] = None,
     ):
         """
         Args:
@@ -22,12 +24,12 @@ class AudioManager:
         """
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
-        self.sounds: Dict[str, Any] = {}  # str -> pygame.mixer.Sound
+        self.sounds: Dict[str, pygame.mixer.Sound] = {}
         self.volume: float = 0.05
         self.muted: bool = False
-        self.event_sound_map = event_sound_map or {}
+        self.event_sound_map: Dict[Type[XBoingEvent], str] = event_sound_map or {}
 
-    def handle_events(self, events: Any) -> None:
+    def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
         """
         Handle a sequence of events, playing sounds for mapped custom events.
 

@@ -2,18 +2,20 @@ from unittest.mock import Mock, patch
 
 import pygame
 
-from src.controllers.game_controller import GameController
 from engine.events import (
-    BallShotEvent,
-    MessageChangedEvent,
-    PowerUpCollectedEvent,
-    BombExplodedEvent,
     BallLostEvent,
-    PaddleHitEvent,
-    WallHitEvent,
-    LivesChangedEvent,
+    BallShotEvent,
+    BombExplodedEvent,
     GameOverEvent,
+    LivesChangedEvent,
+    MessageChangedEvent,
+    PaddleHitEvent,
+    PowerUpCollectedEvent,
+    WallHitEvent,
 )
+from src.controllers.game_controller import GameController
+from game.ball_manager import BallManager
+from game.sprite_block import SpriteBlock
 
 
 def make_key_event(key, mod=0):
@@ -79,18 +81,19 @@ def test_ball_launch_logic():
     create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
+    ball_manager = BallManager()
+    for b in balls:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
-    controller.waiting_for_launch = True
     # Patch pygame.event.post
     with patch("pygame.event.post") as mock_post:
         # Simulate mouse button down event
@@ -102,7 +105,6 @@ def test_ball_launch_logic():
         controller.handle_events([event])
         for ball in balls:
             ball.release_from_paddle.assert_called_once()
-        assert controller.waiting_for_launch is False
         # Check BallShotEvent and MessageChangedEvent fired (by class name)
         assert any(
             call.args[0].type == pygame.USEREVENT
@@ -142,14 +144,10 @@ def test_update_balls_and_collisions_bomb(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
-    # Use a unique object for TYPE_BOMB
-    bomb_effect = object()
-    block_manager.TYPE_BOMB = bomb_effect
-    # Only return the effect on the first call
-    block_manager.check_collisions.side_effect = [(0, 0, [bomb_effect])] + [
+    # Use SpriteBlock.TYPE_BOMB for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_BOMB])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -160,16 +158,18 @@ def test_update_balls_and_collisions_bomb(mock_ball):
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -194,16 +194,12 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    balls = [ball]
     paddle = Mock()
     paddle.width = 10
     paddle.rect.width = 10
     block_manager = Mock()
-    # Use a unique object for TYPE_PAD_EXPAND
-    expand_effect = object()
-    block_manager.TYPE_PAD_EXPAND = expand_effect
-    # Only return the effect on the first call
-    block_manager.check_collisions.side_effect = [(0, 0, [expand_effect])] + [
+    # Use SpriteBlock.TYPE_PAD_EXPAND for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_PAD_EXPAND])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -214,16 +210,18 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -251,16 +249,12 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    balls = [ball]
     paddle = Mock()
     paddle.width = 20
     paddle.rect.width = 20
     block_manager = Mock()
-    # Use a unique object for TYPE_PAD_SHRINK
-    shrink_effect = object()
-    block_manager.TYPE_PAD_SHRINK = shrink_effect
-    # Only return the effect on the first call
-    block_manager.check_collisions.side_effect = [(0, 0, [shrink_effect])] + [
+    # Use SpriteBlock.TYPE_PAD_SHRINK for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_PAD_SHRINK])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -271,16 +265,18 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -308,14 +304,10 @@ def test_update_balls_and_collisions_timer(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
-    # Use a unique object for TYPE_TIMER
-    timer_effect = object()
-    block_manager.TYPE_TIMER = timer_effect
-    # Only return the effect on the first call
-    block_manager.check_collisions.side_effect = [(0, 0, [timer_effect])] + [
+    # Use SpriteBlock.TYPE_TIMER for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_TIMER])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -326,16 +318,18 @@ def test_update_balls_and_collisions_timer(mock_ball):
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -361,7 +355,6 @@ def test_update_balls_and_collisions_ball_lost():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (False, False, False)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
@@ -373,21 +366,23 @@ def test_update_balls_and_collisions_ball_lost():
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
         # Ball should be removed from balls list
-        assert len(controller.balls) == 0
+        assert len(controller.ball_manager.balls) == 0
         # Should have fired BallLostEvent
         assert any(
             call.args[0].type == pygame.USEREVENT
@@ -408,7 +403,6 @@ def test_update_balls_and_collisions_paddle_hit():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, True, False)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
@@ -420,21 +414,23 @@ def test_update_balls_and_collisions_paddle_hit():
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
         # Ball should remain in balls list
-        assert len(controller.balls) == 1
+        assert len(controller.ball_manager.balls) == 1
         # Should have fired PaddleHitEvent
         assert any(
             call.args[0].type == pygame.USEREVENT
@@ -455,7 +451,6 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, True)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
@@ -468,21 +463,23 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     # Set event_sound_map but no audio_manager
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         game_state,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
         # Ball should remain in balls list
-        assert len(controller.balls) == 1
+        assert len(controller.ball_manager.balls) == 1
         # Should have fired WallHitEvent
         assert any(
             call.args[0].type == pygame.USEREVENT
@@ -497,7 +494,6 @@ def test_lives_display_and_game_over_event_order():
     When the last ball is lost, LivesChangedEvent(0) should be posted before GameOverEvent.
     """
     from src.game.game_state import GameState
-    from engine.events import LivesChangedEvent, GameOverEvent
 
     level_manager = Mock()
     # Start with one ball that will be lost
@@ -508,7 +504,6 @@ def test_lives_display_and_game_over_event_order():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (False, False, False)
-    balls = [ball]
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
@@ -522,16 +517,18 @@ def test_lives_display_and_game_over_event_order():
     layout.get_play_rect.return_value = play_rect
     real_gamestate = GameState()
     real_gamestate.lives = 1
+    ball_manager = BallManager()
+    for b in [ball]:
+        ball_manager.add_ball(b)
     controller = GameController(
         real_gamestate,
         level_manager,
-        balls,
+        ball_manager,
         paddle,
         block_manager,
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
-        event_sound_map=event_sound_map,
     )
     with patch("pygame.event.post") as mock_post:
         controller.handle_life_loss()

@@ -1,24 +1,26 @@
 from unittest.mock import MagicMock
 import pygame
+from typing import Type, Dict
 
 from engine.audio_manager import AudioManager
+from engine.events import XBoingEvent
 
 
-class BallLostEvent:
+class BallLostEvent(XBoingEvent):
     pass
 
 
-class BlockHitEvent:
+class BlockHitEvent(XBoingEvent):
     pass
 
 
-class UnrelatedEvent:
+class UnrelatedEvent(XBoingEvent):
     pass
 
 
 def make_manager():
     pygame.init()  # Initialize pygame for events
-    event_sound_map = {BallLostEvent: "ball_lost", BlockHitEvent: "block_hit"}
+    event_sound_map: Dict[Type[XBoingEvent], str] = {BallLostEvent: "ball_lost", BlockHitEvent: "block_hit"}
     mgr = AudioManager(sound_dir="/fake/dir", event_sound_map=event_sound_map)
     return mgr
 

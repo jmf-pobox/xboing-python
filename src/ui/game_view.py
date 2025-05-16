@@ -3,12 +3,10 @@ GameView: Main gameplay content view for XBoing.
 Handles rendering of blocks, paddle, balls, and play area walls.
 """
 
-from typing import List
-
 import pygame
 
 from engine.graphics import Renderer
-from game.ball import Ball
+from game.ball_manager import BallManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
@@ -27,7 +25,7 @@ class GameView(View):
         layout: GameLayout,
         block_manager: SpriteBlockManager,
         paddle: Paddle,
-        balls: List[Ball],
+        ball_manager: BallManager,
         renderer: Renderer,
     ) -> None:
         """
@@ -37,13 +35,13 @@ class GameView(View):
             layout (GameLayout): The GameLayout instance.
             block_manager (SpriteBlockManager): The block manager for the current level.
             paddle (Paddle): The player paddle object.
-            balls (List[Ball]): List of active ball objects.
+            ball_manager (BallManager): The BallManager instance managing all balls.
             renderer (Renderer): The main renderer instance.
         """
         self.layout: GameLayout = layout
         self.block_manager: SpriteBlockManager = block_manager
         self.paddle: Paddle = paddle
-        self.balls: List[Ball] = balls
+        self.ball_manager = ball_manager
         self.renderer: Renderer = renderer
 
     def draw(self, surface: pygame.Surface) -> None:
@@ -60,7 +58,7 @@ class GameView(View):
         self.paddle.draw(surface)
 
         # Draw all balls
-        for ball in self.balls:
+        for ball in self.ball_manager.balls:
             ball.draw(surface)
 
         # Draw the walls inside the play area

@@ -7,10 +7,9 @@ Scans each module in each src package and outputs which packages depend upon whi
 Usage:
   python scripts/dep_grep.py
 """
-import os
 import re
 from pathlib import Path
-from typing import Dict, Set, List
+from typing import Dict, Set
 
 SRC_DIR = Path(__file__).parent.parent / "src"
 PACKAGES = [
@@ -35,7 +34,7 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
         if not pkg_dir.exists():
             continue
         for py_file in pkg_dir.glob("*.py"):
-            with open(py_file, "r", encoding="utf-8") as fh:
+            with open(py_file, encoding="utf-8") as fh:
                 for line in fh:
                     m = re.match(r"from (\w+)\.", line) or re.match(r"import (\w+)\.", line)
                     if m:

@@ -3,6 +3,7 @@ from typing import Any, Callable, List, Optional
 
 import pygame
 
+from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from engine.events import MessageChangedEvent
 from ui.ui_manager import UIManager
@@ -10,7 +11,7 @@ from ui.ui_manager import UIManager
 logger = logging.getLogger("xboing.LevelCompleteController")
 
 
-class LevelCompleteController:
+class LevelCompleteController(Controller):
     """
     Handles input and transitions for the LevelCompleteView.
     Handles spacebar to advance to next level.

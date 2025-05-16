@@ -258,6 +258,7 @@ class Ball:
         """Release the ball if it's stuck to the paddle."""
         logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
         self.stuck_to_paddle = False
+        logger.debug(f"[release_from_paddle] Ball released: vx={self.vx}, vy={self.vy}")
 
     def _add_random_factor(self) -> None:
         """Add a slight randomness to prevent predictable patterns."""
