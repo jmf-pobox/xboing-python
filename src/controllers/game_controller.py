@@ -234,7 +234,7 @@ class GameController(Controller):
                 if points != 0:
                     changes = self.game_state.add_score(points)
                     self.post_game_state_events(changes)
-                if broken > 0 and not (
+                if broken > 0 and not any(
                     effect in SPECIAL_BLOCK_TYPES for effect in effects
                 ):
                     pygame.event.post(
