@@ -7,6 +7,7 @@ init-hook='import sys; sys.path.append("src")'
 
 [MESSAGES CONTROL]
 disable=
+    C0301,  # line-too-long
     # Accept black's formatting
 
 [FORMAT]
