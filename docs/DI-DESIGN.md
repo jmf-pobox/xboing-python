@@ -1,87 +1,56 @@
-# Dependency Injection Design Proposal for XBoing
+# Dependency Injection Design for XBoing
 
 ## Overview
 
-This document proposes the adoption of the [injector](https://injector.readthedocs.io/) dependency injection (DI) framework to simplify and standardize the construction and wiring of UI components, controllers, views, and game state in XBoing. The goal is to reduce manual dependency management, improve testability, and make the codebase more maintainable and extensible.
+XBoing uses the [injector](https://injector.readthedocs.io/) dependency injection (DI) framework as the exclusive mechanism for constructing and wiring all controllers, views, UI components, and core game objects. This approach eliminates manual dependency management and factory-based construction, resulting in a codebase that is more maintainable, testable, and extensible.
 
----
+## How Dependency Injection Works in XBoing
 
-## Current Construction Pattern
+### 1. **Injectable Classes**
 
-Currently, the construction and wiring of core objects (UI, controllers, views, game state, etc.) is handled manually in `main.py`, `ui_factory.py`, and `controller_factory.py`. Dependencies are passed explicitly through constructors, and factories are used to centralize setup logic. For example:
+All classes that require dependencies should use type-annotated constructor arguments. The `@inject` decorator from `injector` is optional if all arguments are type-annotated, but recommended for clarity.
 
-- `main.py` creates the event bus, game state, audio manager, window, renderer, input manager, layout, and then passes these to factories.
-- `UIFactory` and `ControllerFactory` are responsible for instantiating and wiring up UI components and controllers, respectively.
-- Each controller and view receives its dependencies via constructor arguments, which are manually threaded through the call stack.
-
-While this approach is explicit, it leads to:
-- Boilerplate code for passing dependencies.
-- Difficulty in swapping implementations (e.g., for testing or feature changes).
-- Tight coupling between construction logic and application logic.
-
----
-
-## Proposed DI Approach with `injector`
-
-### 1. **Define Injectable Classes**
-
-Annotate constructors with `@injector.inject` and use type hints for dependencies. For example:
-
+Example:
 ```python
 from injector import inject
-
-class GameState:
-    @inject
-    def __init__(self, event_bus: EventBus):
-        self.event_bus = event_bus
+from game.game_state import GameState
 
 class GameController:
     @inject
-    def __init__(self, game_state: GameState, level_manager: LevelManager, ...):
-        ...
+    def __init__(self, game_state: GameState, ...):
+        self.game_state = game_state
 ```
 
-### 2. **Create an Injector Module**
+### 2. **DI Module and Providers**
 
-Define a module that binds interfaces to implementations and configures singletons or factories as needed:
+The `XBoingModule` defines all providers for controllers, views, UI components, and core objects. Each provider method returns an instance of the required class, with all dependencies injected.
 
+Example:
 ```python
-from injector import Module, singleton, provider
+from injector import Module, provider
+from controllers.game_controller import GameController
 
 class XBoingModule(Module):
-    @singleton
     @provider
-    def provide_event_bus(self) -> EventBus:
-        return EventBus()
-
-    @singleton
-    @provider
-    def provide_game_state(self, event_bus: EventBus) -> GameState:
-        return GameState(event_bus)
-
-    # Add providers for controllers, UIManager, UIFactory, etc.
+    def provide_game_controller(self, game_state: GameState, ... ) -> GameController:
+        return GameController(game_state, ...)
 ```
 
 ### 3. **Application Composition**
 
-In `main.py`, replace manual construction with injector-based resolution:
+In `xboing.py`, the application is composed by creating an injector and resolving all required components:
 
 ```python
 from injector import Injector
-from my_di_module import XBoingModule
+from di_module import XBoingModule
 
-injector = Injector([XBoingModule()])
+injector = Injector([XBoingModule(...)])
 game_controller = injector.get(GameController)
 ui_manager = injector.get(UIManager)
 # ...
 ```
 
-The injector will automatically resolve and inject all dependencies, including nested ones, according to the bindings in the module.
-
-### 4. **Wiring UI and Controllers**
-
-- Factories like `UIFactory` and `ControllerFactory` can be replaced or refactored to use DI, or retained for grouping logic but with dependencies injected.
-- Views and UI components can be injected with their dependencies (e.g., event bus, game state, renderers) without manual wiring.
+The injector automatically resolves and injects all dependencies, including nested ones, according to the bindings in the module.
 
 ---
 
@@ -90,39 +59,66 @@ The injector will automatically resolve and inject all dependencies, including n
 - **Easier Mocking:** Dependencies can be overridden in test modules, allowing for easy injection of mocks or stubs.
 - **Isolated Tests:** Each test can create an injector with only the required bindings, reducing test setup complexity.
 - **No Manual Threading:** Tests do not need to manually construct deep dependency graphs; the injector handles it.
-- **Example:**
 
+Example:
 ```python
 from injector import Injector, Module, provider
 from unittest.mock import Mock
 
 class TestModule(Module):
     @provider
-    def provide_event_bus(self) -> EventBus:
-        return Mock(spec=EventBus)
+    def provide_game_state(self) -> GameState:
+        return Mock(spec=GameState)
 
 injector = Injector([TestModule()])
 game_controller = injector.get(GameController)
-# game_controller.event_bus is now a mock
+# game_controller.game_state is now a mock
 ```
 
 ---
 
-## Migration Considerations
+## How to Add New Dependencies or Components with DI
 
-- **Incremental Adoption:** DI can be introduced gradually, starting with controllers and game state, then expanding to UI and views.
-- **Refactoring Required:** Constructors must use type hints and (optionally) the `@inject` decorator.
-- **Factory Classes:** May be retained for grouping, but should delegate instantiation to the injector.
-- **Configuration:** Global settings, asset paths, and other configuration can be provided via DI as well.
+To add a new injectable class or component using the DI system:
 
----
+1. **Annotate the Constructor**
+   - Use `@injector.inject` (optional if all arguments are type-annotated) and provide precise type hints for all dependencies.
+   - Example:
+     ```python
+     from injector import inject
+     from game.game_state import GameState
 
-## Open Questions for Feedback
+     class MyComponent:
+         @inject
+         def __init__(self, game_state: GameState):
+             self.game_state = game_state
+     ```
 
-- Should all controllers and views be managed by DI, or only core game logic? All controllers and views.
-- Should UIFactory/ControllerFactory be refactored or removed? Refactored.
-- Are there any components that should remain manually constructed? No.
-- Preferences for singleton vs. factory scope for certain objects?  Factory scope.
+2. **Add a Provider to the DI Module**
+   - In `src/di_module.py`, add a `@provider` method to the `XBoingModule` for your new class.
+   - Example:
+     ```python
+     from injector import provider
+     from my_module import MyComponent
+
+     class XBoingModule(Module):
+         @provider
+         def provide_my_component(self, game_state: GameState) -> MyComponent:
+             return MyComponent(game_state)
+     ```
+
+3. **Request the Dependency Where Needed**
+   - In any class that needs your new component, add it as a constructor argument with the correct type hint.
+   - The injector will resolve and inject it automatically.
+
+4. **(Optional) Override in Tests**
+   - In your test modules, you can provide a test-specific provider for your component to inject mocks or stubs.
+
+**Tips:**
+- Always use precise type hints for all dependencies.
+- Avoid using `Any` or `Optional` unless truly necessary.
+- Do not use mutable default arguments.
+- Register all new injectable classes in the DI module for consistency.
 
 ---
 
@@ -130,7 +126,7 @@ game_controller = injector.get(GameController)
 
 When using dependency injection, it is critical to:
 
-- **Use precise types for all constructor parameters.** Avoid using `Any`—always specify the actual class or interface expected (e.g., `game_state: GameState`, `balls: list[Ball]`).
+- **Use precise types for all constructor parameters.** Avoid using `Any`—always specify the actual class or interface expected (e.g., `game_state: GameState`).
 - **Do not declare required dependencies as `Optional` or default them to `None`.** Only use `Optional[...] = None` for parameters that are truly optional for the logic of the class.
 - **Do not use mutable default arguments (like `[]` or `{}`) in constructors.**
 - **Required dependencies should always be required in the constructor signature.** This ensures the DI framework can resolve and inject them, and makes the contract of the class clear.
@@ -139,19 +135,17 @@ When using dependency injection, it is critical to:
 ```python
 from injector import inject
 from game.game_state import GameState
-from game.ball import Ball
 
 class MyController:
     @inject
-    def __init__(self, game_state: GameState, balls: list[Ball]):
+    def __init__(self, game_state: GameState):
         self.game_state = game_state
-        self.balls = balls
 ```
 
 **Example (What to Avoid):**
 ```python
 # Avoid this!
-def __init__(self, game_state: Any = None, balls: list[Any] = []):
+def __init__(self, game_state: Any = None):
     ...
 ```
 
@@ -162,5 +156,3 @@ This approach ensures type safety, better documentation, and full compatibility 
 ## References
 - [injector documentation](https://injector.readthedocs.io/)
 - [Dependency Injection in Python (Real Python)](https://realpython.com/dependency-injection-python/)
-
----

@@ -1,4 +1,5 @@
 import pygame
+
 from engine.events import LevelChangedEvent
 from ui.level_display import LevelDisplay
 

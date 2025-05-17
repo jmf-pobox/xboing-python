@@ -1,25 +1,28 @@
 from unittest.mock import MagicMock
+
 import pygame
 
 from engine.audio_manager import AudioManager
+from engine.events import XBoingEvent
 
 
-class BallLostEvent:
+class BallLostEvent(XBoingEvent):
+    sound_effect = "ball_lost"
     pass
 
 
-class BlockHitEvent:
+class BlockHitEvent(XBoingEvent):
+    sound_effect = "block_hit"
     pass
 
 
-class UnrelatedEvent:
+class UnrelatedEvent(XBoingEvent):
     pass
 
 
 def make_manager():
     pygame.init()  # Initialize pygame for events
-    event_sound_map = {BallLostEvent: "ball_lost", BlockHitEvent: "block_hit"}
-    mgr = AudioManager(sound_dir="/fake/dir", event_sound_map=event_sound_map)
+    mgr = AudioManager(sound_dir="/fake/dir")
     return mgr
 
 
@@ -79,7 +82,13 @@ def test_load_sounds_from_map(monkeypatch):
         called[name] = filename
 
     mgr.load_sound = fake_load_sound
-    mgr.load_sounds_from_map()
+
+    # Patch __subclasses__ to only return the test event classes
+    monkeypatch.setattr(
+        XBoingEvent, "__subclasses__", lambda: [BallLostEvent, BlockHitEvent]
+    )
+
+    mgr.load_sounds_from_events()
     assert called == {"ball_lost": "ball_lost.wav", "block_hit": "block_hit.wav"}
 
 

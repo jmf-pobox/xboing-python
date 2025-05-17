@@ -7,10 +7,9 @@ Scans each module in each src package and outputs which packages depend upon whi
 Usage:
   python scripts/dep_grep.py
 """
-import os
 import re
 from pathlib import Path
-from typing import Dict, Set, List
+from typing import Dict, Set
 
 SRC_DIR = Path(__file__).parent.parent / "src"
 PACKAGES = [
@@ -22,6 +21,7 @@ PACKAGES = [
     "ui",
     "utils",
 ]
+
 
 def find_package_dependencies() -> Dict[str, Set[str]]:
     """
@@ -35,14 +35,17 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
         if not pkg_dir.exists():
             continue
         for py_file in pkg_dir.glob("*.py"):
-            with open(py_file, "r", encoding="utf-8") as fh:
+            with open(py_file, encoding="utf-8") as fh:
                 for line in fh:
-                    m = re.match(r"from (\w+)\.", line) or re.match(r"import (\w+)\.", line)
+                    m = re.match(r"from (\w+)\.", line) or re.match(
+                        r"import (\w+)\.", line
+                    )
                     if m:
                         dep = m.group(1)
                         if dep in PACKAGES and dep != pkg:
                             deps[pkg].add(dep)
     return deps
+
 
 def print_dependencies(deps: Dict[str, Set[str]]) -> None:
     """
@@ -55,6 +58,7 @@ def print_dependencies(deps: Dict[str, Set[str]]) -> None:
         dep_list = sorted(deps[pkg])
         print(f"{pkg}: {dep_list}")
 
+
 def main() -> None:
     """
     Main entry point for the dependency grepper script.
@@ -62,5 +66,6 @@ def main() -> None:
     deps = find_package_dependencies()
     print_dependencies(deps)
 
+
 if __name__ == "__main__":
-    main() 
+    main()

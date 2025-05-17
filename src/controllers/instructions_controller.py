@@ -3,11 +3,12 @@ from typing import Any, Callable, List, Optional
 import pygame
 from injector import inject
 
+from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from ui.ui_manager import UIManager
 
 
-class InstructionsController:
+class InstructionsController(Controller):
     """
     Handles input and transitions for the InstructionsView.
     Handles spacebar to exit instructions.

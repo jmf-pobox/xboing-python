@@ -1,0 +1,15 @@
+---
+description: Addressing bugs
+globs: 
+alwaysApply: false
+---
+- Run tests first
+- Read game_debug.log
+- If bug is not evidenced in log, suggest adding more logging
+- Run the app or request user to run app and trigger bug
+- Read game_debug.log again to pinpoint issue
+- Suggest narrow fix to resolve bug
+- Make fix
+- Run tests after making fix
+- Follow general python rules for linting, formatting
+

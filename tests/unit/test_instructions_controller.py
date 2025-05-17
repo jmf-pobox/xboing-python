@@ -1,4 +1,4 @@
-from src.controllers.instructions_controller import InstructionsController
+from controllers.instructions_controller import InstructionsController
 
 
 def test_instructions_controller_instantiation_and_methods():

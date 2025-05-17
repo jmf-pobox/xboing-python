@@ -3,11 +3,12 @@ from typing import Callable, List, Optional
 
 import pygame
 
+from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from ui.ui_manager import UIManager
 
 
-class WindowController:
+class WindowController(Controller):
     """
     Handles global/system events (quit, volume, mute, etc.) and is always active.
     No longer a base class for per-view controllers.

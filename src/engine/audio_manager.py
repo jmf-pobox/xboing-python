@@ -1,33 +1,33 @@
 import logging
 import os
-from typing import Any, Dict, Optional, Type
+from typing import Dict, Sequence
 
 import pygame
+
+from engine.events import XBoingEvent
 
 
 class AudioManager:
     """
     Event-driven audio manager that listens for game events and plays sounds.
+    Only handles custom events posted as pygame.USEREVENT with an 'event' attribute (XBoingEvent instance).
     """
 
     def __init__(
         self,
         sound_dir: str = "assets/sounds",
-        event_sound_map: Optional[Dict[Type[Any], str]] = None,
     ):
         """
         Args:
             sound_dir: Directory containing sound files.
-            event_sound_map: Optional mapping from event type to sound name.
         """
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
-        self.sounds: Dict[str, Any] = {}  # str -> pygame.mixer.Sound
+        self.sounds: Dict[str, pygame.mixer.Sound] = {}
         self.volume: float = 0.05
         self.muted: bool = False
-        self.event_sound_map = event_sound_map or {}
 
-    def handle_events(self, events: Any) -> None:
+    def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
         """
         Handle a sequence of events, playing sounds for mapped custom events.
 
@@ -35,13 +35,12 @@ class AudioManager:
             events: A sequence of pygame events to process.
         """
         for event in events:
-            # Check if this is a pygame event with our custom event attribute
-            if hasattr(event, "event") and event.type == pygame.USEREVENT:
-                event_type = type(event.event)
-                sound_name = self.event_sound_map.get(event_type)
+            if event.type == pygame.USEREVENT:
+                event_data = getattr(event, "event", None)
+                sound_name = getattr(event_data, "sound_effect", None) if event_data else None
                 if sound_name and not self.muted:
                     self.logger.debug(
-                        f"Handling event: {event_type.__name__}, playing sound: {sound_name}"
+                        f"Handling event: {type(event.event).__name__}, playing sound: {sound_name}"
                     )
                     self.play_sound(sound_name)
 
@@ -100,9 +99,14 @@ class AudioManager:
             pygame.mixer.stop()
         self.logger.info("AudioManager cleanup called")
 
-    def load_sounds_from_map(self) -> None:
-        """Load all sounds referenced in the event_sound_map."""
-        for sound_name in set(self.event_sound_map.values()):
+    def load_sounds_from_events(self) -> None:
+        """Load all sounds referenced by XBoingEvent subclasses."""
+        sound_names = set()
+        for cls in XBoingEvent.__subclasses__():
+            sound = getattr(cls, "sound_effect", None)
+            if sound:
+                sound_names.add(sound)
+        for sound_name in sound_names:
             filename = f"{sound_name}.wav"
             self.load_sound(sound_name, filename)
 

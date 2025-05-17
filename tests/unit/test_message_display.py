@@ -1,5 +1,6 @@
 import pygame
 import pytest
+
 from engine.events import MessageChangedEvent
 from ui.message_display import MessageDisplay
 
@@ -44,7 +45,10 @@ def test_message_display_updates_on_event():
     comp = MessageDisplay(layout, renderer, font)
 
     # Create a pygame event with a MessageChangedEvent
-    event = pygame.event.Event(pygame.USEREVENT, {"event": MessageChangedEvent("Hello World", alignment="center")})
+    event = pygame.event.Event(
+        pygame.USEREVENT,
+        {"event": MessageChangedEvent("Hello World", alignment="center")},
+    )
     comp.handle_events([event])
 
     assert comp.message == "Hello World"

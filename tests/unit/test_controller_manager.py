@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+
 from controllers.controller_manager import ControllerManager
 
 

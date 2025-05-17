@@ -1,4 +1,4 @@
-from src.controllers.level_complete_controller import LevelCompleteController
+from controllers.level_complete_controller import LevelCompleteController
 
 
 class Dummy:

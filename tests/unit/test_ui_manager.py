@@ -1,5 +1,7 @@
 from unittest.mock import Mock
+
 import pygame
+
 from ui.ui_manager import UIManager
 
 

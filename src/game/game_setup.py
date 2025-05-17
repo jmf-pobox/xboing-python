@@ -1,17 +1,18 @@
-from typing import Any, Dict, List
+from typing import Any, Dict
 
+from game.ball_manager import BallManager
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
 
-# Constants (should match those in main.py)
+# Constants (should match those in xboing.py)
 PADDLE_WIDTH = 70
 PADDLE_HEIGHT = 15
 
 
 def create_game_objects(layout: Any) -> Dict[str, Any]:
     """
-    Create and initialize core game objects (paddle, balls, block manager, level manager).
+    Create and initialize core game objects (paddle, ball manager, block manager, level manager).
 
     Args:
         layout: The game layout object (must have get_play_rect method)
@@ -23,7 +24,7 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     paddle_x = play_rect.x + (play_rect.width // 2) - (PADDLE_WIDTH // 2)
     paddle_y = play_rect.y + play_rect.height - Paddle.DIST_BASE
     paddle: Paddle = Paddle(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
-    balls: List[Any] = []
+    ball_manager: BallManager = BallManager()
     block_manager: SpriteBlockManager = SpriteBlockManager(play_rect.x, play_rect.y)
     level_manager: LevelManager = LevelManager()
     level_manager.set_block_manager(block_manager)
@@ -31,7 +32,7 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     level_manager.load_level(1)
     return {
         "paddle": paddle,
-        "balls": balls,
+        "ball_manager": ball_manager,
         "block_manager": block_manager,
         "level_manager": level_manager,
     }

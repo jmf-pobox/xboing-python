@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional
+from typing import Callable
 
 import pygame
 from injector import inject
@@ -13,7 +13,7 @@ from .view import View
 class GameOverView(View):
     """
     Content view for the game over screen. Draws only within the play window region.
-    Calls reset_game callback when Space is pressed.
+    Calls GameOverController.reset_game when Space is pressed.
     """
 
     @inject
@@ -24,7 +24,6 @@ class GameOverView(View):
         font: pygame.font.Font,
         small_font: pygame.font.Font,
         get_score_callback: Callable[[], int],
-        reset_game_callback: Optional[Callable[[], None]] = None,
     ) -> None:
         """
         Initialize the GameOverView.
@@ -35,14 +34,12 @@ class GameOverView(View):
             font (pygame.font.Font): The main font.
             small_font (pygame.font.Font): The font for secondary text.
             get_score_callback (Callable[[], int]): Callback to get the final score.
-            reset_game_callback (Optional[Callable[[], None]]): Callback to reset the game.
         """
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
         self.font: pygame.font.Font = font
         self.small_font: pygame.font.Font = small_font
         self.get_score: Callable[[], int] = get_score_callback
-        self.reset_game: Optional[Callable[[], None]] = reset_game_callback
         self.active: bool = False
         self.logger = logging.getLogger("xboing.GameOverView")
 
@@ -60,17 +57,12 @@ class GameOverView(View):
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """
-        Handle a single Pygame event. Calls reset_game if Space is pressed.
+        Handle a single Pygame event. Calls controller.reset_game if Space is pressed.
 
         Args:
             event (pygame.event.Event): The Pygame event to handle.
         """
-        self.logger.debug(f"handle_event called with event: {event}")
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            self.logger.info("Spacebar pressed in GameOverView.")
-            if self.reset_game:
-                self.logger.info("Calling reset_game from GameOverView.")
-                self.reset_game()
+        pass
 
     def draw(self, surface: pygame.Surface) -> None:
         """

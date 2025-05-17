@@ -1,4 +1,5 @@
 import pygame
+
 from engine.events import ScoreChangedEvent
 from ui.score_display import ScoreDisplay
 
@@ -71,7 +72,9 @@ def test_score_display_right_justification():
     assert digit_display.last_kwargs["right_justified"] is True
 
     # Create a pygame event with a ScoreChangedEvent for a large number
-    event_large = pygame.event.Event(pygame.USEREVENT, {"event": ScoreChangedEvent(999999)})
+    event_large = pygame.event.Event(
+        pygame.USEREVENT, {"event": ScoreChangedEvent(999999)}
+    )
     score_display.handle_events([event_large])
 
     score_display.draw(pygame.Surface((200, 40)))
