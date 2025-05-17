@@ -1,7 +1,4 @@
-"""
-Stateless renderer for displaying the number of lives as ball images.
-Used by UI components for visual output.
-"""
+"""Stateless renderer for displaying the number of lives as ball images."""
 
 import logging
 import os
@@ -13,10 +10,7 @@ from utils.asset_paths import get_balls_dir
 
 
 class LivesRenderer:
-    """
-    Stateless renderer for displaying the number of lives as ball images.
-    Used by UI components for visual output.
-    """
+    """Stateless renderer for displaying the number of lives as ball images."""
 
     logger = logging.getLogger("xboing.LivesRenderer")
 
@@ -55,8 +49,7 @@ class LivesRenderer:
         scale: float = 1.0,
         max_lives: int = 3,
     ) -> pygame.Surface:
-        """
-        Render the number of lives as ball images.
+        """Render the number of lives as ball images.
 
         Args:
             num_lives: Number of lives to display.
@@ -66,6 +59,7 @@ class LivesRenderer:
 
         Returns:
             The rendered lives as a pygame.Surface.
+
         """
         cache_key = (num_lives, spacing, scale, max_lives)
         if cache_key in self._surface_cache:

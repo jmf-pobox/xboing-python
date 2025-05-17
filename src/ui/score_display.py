@@ -65,7 +65,7 @@ class ScoreDisplay:
         score_rect = self.layout.get_score_rect()
         # Render the score as a fixed-width, right-justified number
         score_surf = self.digit_display.render_number(
-            self.score, spacing=2, scale=1.0, width=self.width, right_justified=True
+            self.score, width=self.width, right_justified=True
         )
         y = score_rect.y + (score_rect.height - score_surf.get_height()) // 2
         surface.blit(score_surf, (self.x, y))

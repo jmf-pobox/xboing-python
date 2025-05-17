@@ -60,6 +60,6 @@ class LevelDisplay:
         """
         score_rect = self.layout.get_score_rect()
         # Render the level using DigitRenderer
-        level_surf = self.digit_display.render_number(self.level, spacing=2, scale=1.0)
+        level_surf = self.digit_display.render_number(self.level)
         y = score_rect.y + (score_rect.height - level_surf.get_height()) // 2
         surface.blit(level_surf, (self.x, y))
