@@ -10,15 +10,17 @@ from engine.events import (
     GameOverEvent,
     LivesChangedEvent,
     MessageChangedEvent,
+    PaddleGrowEvent,
     PaddleHitEvent,
+    PaddleShrinkEvent,
     PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
+    SpecialStickyChangedEvent,
     WallHitEvent,
-    PaddleSizeChangedEvent,
 )
 from game.ball_manager import BallManager
-from game.sprite_block import SpriteBlock
 from game.paddle import Paddle
+from game.sprite_block import SpriteBlock
 
 
 def make_key_event(key, mod=0):
@@ -181,7 +183,7 @@ def test_update_balls_and_collisions_bomb(mock_ball):
 
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_expand(mock_ball):
-    """Test that hitting a pad expand block increases paddle size and fires PaddleSizeChangedEvent."""
+    """Test that hitting a pad expand block increases paddle size and fires PaddleGrowEvent."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -220,20 +222,21 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
         # Paddle size should have increased
         assert paddle.size == Paddle.SIZE_LARGE
         assert paddle.width == paddle.rect.width
-        # Should have fired PaddleSizeChangedEvent with at_max True
+        # Should have fired PaddleGrowEvent with at_max True and sound_effect 'wzzz'
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleGrowEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_max is True
+            and call.args[0].event.__class__.sound_effect == "wzzz"
             for call in mock_post.call_args_list
         )
 
 
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_shrink(mock_ball):
-    """Test that hitting a pad shrink block decreases paddle size and fires PaddleSizeChangedEvent."""
+    """Test that hitting a pad shrink block decreases paddle size and fires PaddleShrinkEvent."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -272,13 +275,14 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
         # Paddle size should have decreased
         assert paddle.size == Paddle.SIZE_SMALL
         assert paddle.width == paddle.rect.width
-        # Should have fired PaddleSizeChangedEvent with at_min True
+        # Should have fired PaddleShrinkEvent with at_min True and sound_effect 'wzzz2'
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleShrinkEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_min is True
+            and call.args[0].event.__class__.sound_effect == "wzzz2"
             for call in mock_post.call_args_list
         )
 
@@ -648,7 +652,7 @@ def test_mouse_movement_reversed():
 
 
 def test_paddle_expand_event_fired():
-    """Test PaddleSizeChangedEvent is fired with correct size and flags when expanding."""
+    """Test PaddleGrowEvent is fired with correct size and flags when expanding."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -686,11 +690,11 @@ def test_paddle_expand_event_fired():
         controller.update_balls_and_collisions(0.016)
         # Paddle should now be large
         assert paddle.size == Paddle.SIZE_LARGE
-        # Should have fired PaddleSizeChangedEvent with at_max True
+        # Should have fired PaddleGrowEvent with at_max True
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleGrowEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_max is True
             for call in mock_post.call_args_list
@@ -698,7 +702,7 @@ def test_paddle_expand_event_fired():
 
 
 def test_paddle_expand_at_max():
-    """Test PaddleSizeChangedEvent is fired with at_max True and no size change when already at max size."""
+    """Test PaddleGrowEvent is fired with at_max True and no size change when already at max size."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -735,19 +739,20 @@ def test_paddle_expand_at_max():
         controller.update_balls_and_collisions(0.016)
         # Paddle should still be large
         assert paddle.size == Paddle.SIZE_LARGE
-        # Should have fired PaddleSizeChangedEvent with at_max True
+        # Should have fired PaddleGrowEvent with at_max True and sound_effect 'wzzz'
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleGrowEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_max is True
+            and call.args[0].event.__class__.sound_effect == "wzzz"
             for call in mock_post.call_args_list
         )
 
 
 def test_paddle_shrink_event_fired():
-    """Test PaddleSizeChangedEvent is fired with correct size and flags when shrinking."""
+    """Test PaddleShrinkEvent is fired with correct size and flags when shrinking."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -784,11 +789,11 @@ def test_paddle_shrink_event_fired():
         controller.update_balls_and_collisions(0.016)
         # Paddle should now be small
         assert paddle.size == Paddle.SIZE_SMALL
-        # Should have fired PaddleSizeChangedEvent with at_min True
+        # Should have fired PaddleShrinkEvent with at_min True
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleShrinkEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_min is True
             for call in mock_post.call_args_list
@@ -796,7 +801,7 @@ def test_paddle_shrink_event_fired():
 
 
 def test_paddle_shrink_at_min():
-    """Test PaddleSizeChangedEvent is fired with at_min True and no size change when already at min size."""
+    """Test PaddleShrinkEvent is fired with at_min True and no size change when already at min size."""
     game_state = Mock()
     level_manager = Mock()
     ball = Mock()
@@ -833,12 +838,164 @@ def test_paddle_shrink_at_min():
         controller.update_balls_and_collisions(0.016)
         # Paddle should still be small
         assert paddle.size == Paddle.SIZE_SMALL
-        # Should have fired PaddleSizeChangedEvent with at_min True
+        # Should have fired PaddleShrinkEvent with at_min True and sound_effect 'wzzz2'
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and isinstance(call.args[0].event, PaddleShrinkEvent)
             and call.args[0].event.size == paddle.width
             and call.args[0].event.at_min is True
+            and call.args[0].event.__class__.sound_effect == "wzzz2"
             for call in mock_post.call_args_list
         )
+
+
+@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+def test_sticky_paddle_activation_event(mock_ball):
+    """Test sticky paddle activates and fires event when sticky block is hit."""
+    game_state = Mock()
+    level_manager = Mock()
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_STICKY]),  # Sticky block hit
+        (0, 0, []),
+    ]
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball = make_mock_ball()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        assert controller.sticky is True
+        assert paddle.sticky is True
+        # Check SpecialStickyChangedEvent fired
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, SpecialStickyChangedEvent)
+            and call.args[0].event.active is True
+            for call in mock_post.call_args_list
+        )
+
+
+def test_sticky_paddle_deactivation_on_ball_lost():
+    """Test sticky paddle deactivates and fires event on ball lost."""
+    game_state = Mock()
+    game_state.is_game_over.return_value = False
+    game_state.lose_life.return_value = []  # Fix: ensure iterable
+    game_state.lives = 1  # Fix: ensure int for comparison
+    level_manager = Mock()
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    ball_manager = BallManager()
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    controller.sticky = True
+    paddle.sticky = True
+    with patch("pygame.event.post") as mock_post:
+        controller.handle_life_loss()
+        assert controller.sticky is False
+        assert paddle.sticky is False
+        # Check SpecialStickyChangedEvent fired (deactivation)
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, SpecialStickyChangedEvent)
+            and call.args[0].event.active is False
+            for call in mock_post.call_args_list
+        )
+
+
+def test_sticky_paddle_deactivation_on_new_level():
+    """Test sticky paddle deactivates and fires event on new level loaded."""
+    game_state = Mock()
+    level_manager = Mock()
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    ball_manager = BallManager()
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    controller.sticky = True
+    paddle.sticky = True
+    with patch("pygame.event.post") as mock_post:
+        controller.on_new_level_loaded()
+        assert controller.sticky is False
+        assert paddle.sticky is False
+        # Check SpecialStickyChangedEvent fired (deactivation)
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, SpecialStickyChangedEvent)
+            and call.args[0].event.active is False
+            for call in mock_post.call_args_list
+        )
+
+
+def test_ball_sticks_to_paddle_when_sticky():
+    """Test that ball sticks to paddle when sticky is active."""
+    import pygame
+
+    pygame.display.init()
+    pygame.display.set_mode((1, 1))  # Fix: allow rect/collision logic
+    from game.ball import Ball
+
+    # Place paddle at y=100, width=40, ball at y=107 (radius=8), x=60 (centered)
+    paddle = Paddle(x=60, y=100, width=40, height=15)
+    paddle.sticky = True
+    ball = Ball(x=60, y=107, radius=8)  # Ball overlaps paddle
+    ball.vy = 1  # Ensure downward movement
+    # Simulate collision
+    collided = ball._check_paddle_collision(paddle)
+    assert collided is True
+    assert ball.stuck_to_paddle is True
+    assert ball.paddle_offset == 0.0
+
+
+def test_ball_releases_from_paddle():
+    """Test that ball releases from paddle on release_from_paddle call."""
+    from game.ball import Ball
+
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.sticky = True
+    ball = Ball(x=60, y=80)
+    ball.stuck_to_paddle = True
+    ball.paddle_offset = 0.0
+    ball.release_from_paddle()
+    assert ball.stuck_to_paddle is False

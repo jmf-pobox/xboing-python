@@ -125,13 +125,17 @@ class MessageChangedEvent(XBoingEvent):
 class SpecialReverseChangedEvent(XBoingEvent):
     """Event: Special 'reverse' state changed."""
 
+    sound_effect = "warp"
+
     def __init__(self, active: bool) -> None:
         """Initialize with the active state."""
         self.active: bool = active
 
 
 class SpecialStickyChangedEvent(XBoingEvent):
-    """Event: Special 'sticky' state changed."""
+    """Event: Special 'sticky' state changed (for UI and sound)."""
+
+    sound_effect = "sticky"
 
     def __init__(self, active: bool) -> None:
         """Initialize with the active state."""
@@ -192,18 +196,33 @@ class LevelCompleteEvent(XBoingEvent):
     # No-op for now
 
 
-class PaddleSizeChangedEvent(XBoingEvent):
-    """Event: Paddle size changed (for UI updates and feedback)."""
+class PaddleGrowEvent(XBoingEvent):
+    """Event: Paddle grew (expanded) in size (for UI updates, feedback, and sound).
 
-    def __init__(self, size: int, at_min: bool = False, at_max: bool = False) -> None:
-        """Initialize with the new paddle size and min/max flags.
+    Args:
+        size (int): The new paddle size (e.g., width or enum/int).
+        at_max (bool): True if the paddle is at its maximum size.
 
-        Args:
-            size (int): The new paddle size (e.g., width or enum/int).
-            at_min (bool): True if the paddle is at its minimum size.
-            at_max (bool): True if the paddle is at its maximum size.
+    """
 
-        """
+    sound_effect = "wzzz"
+
+    def __init__(self, size: int, at_max: bool = False) -> None:
+        self.size: int = size
+        self.at_max: bool = at_max
+
+
+class PaddleShrinkEvent(XBoingEvent):
+    """Event: Paddle shrank (reduced) in size (for UI updates, feedback, and sound).
+
+    Args:
+        size (int): The new paddle size (e.g., width or enum/int).
+        at_min (bool): True if the paddle is at its minimum size.
+
+    """
+
+    sound_effect = "wzzz2"
+
+    def __init__(self, size: int, at_min: bool = False) -> None:
         self.size: int = size
         self.at_min: bool = at_min
-        self.at_max: bool = at_max

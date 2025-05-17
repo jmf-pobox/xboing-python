@@ -251,12 +251,6 @@ class Paddle:
             # Draw a border around the paddle for better visibility
             pygame.draw.rect(surface, (255, 255, 255), self.rect, 1)
 
-        # If sticky, add a visual indicator
-        if self.sticky:
-            # Draw a small indicator that the paddle is sticky
-            indicator_rect = pygame.Rect(self.rect.centerx - 5, self.rect.y - 5, 10, 5)
-            pygame.draw.rect(surface, (255, 255, 0), indicator_rect)
-
     def get_rect(self) -> pygame.Rect:
         """Get the paddle's rectangle for collision detection."""
         return self.rect

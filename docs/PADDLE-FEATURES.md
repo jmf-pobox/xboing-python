@@ -63,7 +63,7 @@ This document tracks the status and design of paddle-related features in the Pyt
 - **Original C Game:**
   - Sound triggers in `audio.c` and `paddle.c` (see `PlayPaddleSound`, `stickyOn`, `reverseOn`).
 - **Python Status:** Missing
-- **Feature Gap:** No sound triggers for paddle events.
+- **Feature Gap:** Done for grow, shrink, reverse, sticky
 - **Next Steps:** Integrate with audio manager and add/expand tests for sound triggers.
 
 ---

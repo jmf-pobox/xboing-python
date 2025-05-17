@@ -14,10 +14,12 @@ from engine.events import (
     BombExplodedEvent,
     LevelCompleteEvent,
     MessageChangedEvent,
+    PaddleGrowEvent,
     PaddleHitEvent,
-    PaddleSizeChangedEvent,
+    PaddleShrinkEvent,
     PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
+    SpecialStickyChangedEvent,
     WallHitEvent,
 )
 from engine.graphics import Renderer
@@ -85,6 +87,7 @@ class GameController(Controller):
         self.level_complete: bool = False
         self._last_mouse_x: Optional[int] = None
         self.reverse: bool = False  # Reverse paddle control state
+        self.sticky: bool = False  # Sticky paddle state
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -231,7 +234,9 @@ class GameController(Controller):
                 if points != 0:
                     changes = self.game_state.add_score(points)
                     self.post_game_state_events(changes)
-                if broken > 0:
+                if broken > 0 and not (
+                    effect in SPECIAL_BLOCK_TYPES for effect in effects
+                ):
                     pygame.event.post(
                         pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
                     )
@@ -271,7 +276,6 @@ class GameController(Controller):
                         if old_size < Paddle.SIZE_LARGE:
                             self.paddle.set_size(old_size + 1)
                             at_max = self.paddle.size == Paddle.SIZE_LARGE
-                            at_min = self.paddle.size == Paddle.SIZE_SMALL
                             logger.debug(
                                 f"Paddle expanded to size {self.paddle.size} (width={self.paddle.width})"
                             )
@@ -279,8 +283,8 @@ class GameController(Controller):
                                 pygame.event.Event(
                                     pygame.USEREVENT,
                                     {
-                                        "event": PaddleSizeChangedEvent(
-                                            self.paddle.width, at_min, at_max
+                                        "event": PaddleGrowEvent(
+                                            self.paddle.width, at_max=at_max
                                         )
                                     },
                                 )
@@ -293,8 +297,8 @@ class GameController(Controller):
                                 pygame.event.Event(
                                     pygame.USEREVENT,
                                     {
-                                        "event": PaddleSizeChangedEvent(
-                                            self.paddle.width, False, True
+                                        "event": PaddleGrowEvent(
+                                            self.paddle.width, at_max=True
                                         )
                                     },
                                 )
@@ -303,7 +307,6 @@ class GameController(Controller):
                         old_size = self.paddle.size
                         if old_size > Paddle.SIZE_SMALL:
                             self.paddle.set_size(old_size - 1)
-                            at_max = self.paddle.size == Paddle.SIZE_LARGE
                             at_min = self.paddle.size == Paddle.SIZE_SMALL
                             logger.debug(
                                 f"Paddle shrunk to size {self.paddle.size} (width={self.paddle.width})"
@@ -312,8 +315,8 @@ class GameController(Controller):
                                 pygame.event.Event(
                                     pygame.USEREVENT,
                                     {
-                                        "event": PaddleSizeChangedEvent(
-                                            self.paddle.width, at_min, at_max
+                                        "event": PaddleShrinkEvent(
+                                            self.paddle.width, at_min=at_min
                                         )
                                     },
                                 )
@@ -326,8 +329,8 @@ class GameController(Controller):
                                 pygame.event.Event(
                                     pygame.USEREVENT,
                                     {
-                                        "event": PaddleSizeChangedEvent(
-                                            self.paddle.width, True, False
+                                        "event": PaddleShrinkEvent(
+                                            self.paddle.width, at_min=True
                                         )
                                     },
                                 )
@@ -353,6 +356,9 @@ class GameController(Controller):
                                 pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                             )
                         )
+                    elif effect == SpriteBlock.TYPE_STICKY:
+                        logger.debug("Sticky block hit: enabling sticky paddle mode.")
+                        self.enable_sticky()
                 if hit_paddle:
                     pygame.event.post(
                         pygame.event.Event(
@@ -381,6 +387,9 @@ class GameController(Controller):
         logger.debug(
             f"handle_life_loss called. Current lives: {self.game_state.lives}, Balls in play: {len(self.ball_manager.balls)}"
         )
+
+        # Always disable sticky on life loss
+        self.disable_sticky()
 
         if self.game_state.is_game_over():
             logger.debug("Game is already over, ignoring life loss.")
@@ -532,3 +541,41 @@ class GameController(Controller):
     def set_reverse(self, value: bool) -> None:
         """Set the reverse paddle control state explicitly."""
         self.reverse = value
+
+    def enable_sticky(self) -> None:
+        """Enable sticky paddle and fire event."""
+        self.sticky = True
+        self.paddle.sticky = True
+        pygame.event.post(
+            pygame.event.Event(
+                pygame.USEREVENT, {"event": SpecialStickyChangedEvent(True)}
+            )
+        )
+
+    def disable_sticky(self) -> None:
+        """Disable sticky paddle and fire event."""
+        self.sticky = False
+        self.paddle.sticky = False
+        pygame.event.post(
+            pygame.event.Event(
+                pygame.USEREVENT, {"event": SpecialStickyChangedEvent(False)}
+            )
+        )
+
+    def on_new_level_loaded(self) -> None:
+        """Call this when a new level is loaded to reset sticky state."""
+        self.disable_sticky()
+
+
+# Define the set of special block types
+SPECIAL_BLOCK_TYPES = {
+    SpriteBlock.TYPE_PAD_EXPAND,
+    SpriteBlock.TYPE_PAD_SHRINK,
+    SpriteBlock.TYPE_STICKY,
+    SpriteBlock.TYPE_REVERSE,
+    SpriteBlock.TYPE_TIMER,
+    SpriteBlock.TYPE_BOMB,
+    SpriteBlock.TYPE_EXTRABALL,
+    SpriteBlock.TYPE_MULTIBALL,
+    # Add any other special types as needed
+}

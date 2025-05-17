@@ -29,7 +29,7 @@ class AudioManager:
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
         self.sounds: Dict[str, pygame.mixer.Sound] = {}
-        self.volume: float = 0.05
+        self.volume: float = 0.75
         self.muted: bool = False
 
     def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
