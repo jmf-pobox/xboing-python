@@ -1,3 +1,3 @@
 """Defines the version of the XBoing package."""
 
-__version__ = "0.2.3"
+__version__ = "0.2.5"
