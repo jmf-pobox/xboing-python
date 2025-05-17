@@ -125,7 +125,7 @@ class LevelCompleteController(Controller):
         )
         self.ui_manager.set_view("level_complete")
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ms: float) -> None:
         """Update logic for level complete view (usually minimal).
 
         Args:

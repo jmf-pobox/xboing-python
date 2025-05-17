@@ -125,27 +125,14 @@ line-length = 88
 target-version = "py38"
 
 [tool.ruff.lint]
-# Maximum strictness: enable all major rulesets, including pylint, docstring, naming, complexity, etc.
-# Docstring style: PEP 257-aligned (D211, D212 enforced; D203, D213 ignored)
 select = [
-    "E",    # pycodestyle errors
-    "F",    # pyflakes
-    "B",    # flake8-bugbear
-    "I",    # isort
-    "UP",   # pyupgrade
-    "PL",   # pylint ruleset
-    "D",    # pydocstyle (docstring style)
-    "N",    # pep8-naming
-    "C4",   # flake8-comprehensions
-    "SIM",  # flake8-simplify
-    "A",    # flake8-builtins
-    "C90",  # mccabe (complexity)
+    "E", "F", "B", "I", "UP", "PL", "D", "N", "C4", "SIM", "A", "C90",
 ]
 ignore = [
-    "E203",  # Whitespace before ':' (black compatibility)
-    "E501",  # Line too long (handled by black)
-    "D203",  # Ignore: prefer D211 (no blank line before class docstring)
-    "D213",  # Ignore: prefer D212 (multi-line summary on first line)
+    "E203", "E501", "D203", "D213",
+    "D100", "D101", "D102", "D103", "D107", "D205", "D212",
+    "PLR2004", "C408",
+    "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417"
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
 

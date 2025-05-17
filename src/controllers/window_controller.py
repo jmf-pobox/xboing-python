@@ -84,7 +84,7 @@ class WindowController(Controller):
                 ):
                     self.ui_manager.set_view("instructions")
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ms: float) -> None:
         """Update logic for this controller.
 
         This base implementation does nothing and should be overridden by subclasses

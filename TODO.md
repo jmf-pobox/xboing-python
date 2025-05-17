@@ -6,4 +6,5 @@
 - [ ] Migrate asset loading and configuration to DI where feasible
 - [ ] Refactor background image loading out of GameLayout (src/layout/game_layout.py) into a dedicated asset loader module for stricter separation of layout and asset management.
 - [x] Refactor magic number `3` in mouse button comparisons in `src/engine/input.py` to use a named constant.
+- Progressive linter enforcement: Follow docs/LINTER-PLAN.md to re-enable and fix one rule at a time for Ruff and Pylint until full compliance is achieved.
 -

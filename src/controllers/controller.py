@@ -13,6 +13,6 @@ class Controller(Protocol):
         """Handle a list of Pygame events."""
         raise NotImplementedError()
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ms: float) -> None:
         """Update the controller state for the given time delta."""
         raise NotImplementedError()

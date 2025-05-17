@@ -53,7 +53,7 @@ class InstructionsController(Controller):
             ):
                 self.on_exit_callback()
 
-    def update(self, delta_time: float) -> None:
+    def update(self, delta_ms: float) -> None:
         """Update logic for instructions view (usually minimal).
 
         Args:
