@@ -5,7 +5,7 @@ This module provides window creation, management, and event handling,
 abstracting the underlying SDL2/pygame implementation.
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 import pygame
 
@@ -93,17 +93,15 @@ class Window:
         """Get the current framerate."""
         return self.clock.get_fps()
 
-    def handle_events(self, events: Optional[Any] = None) -> bool:
+    def handle_events(self, events: Sequence[pygame.event.Event]) -> bool:
         """
         Process window events.
 
         Args:
-            events: Optional list of pygame events to process. If None, gets events from pygame.
+            events: Sequence of pygame events to process.
         Returns:
             bool: False if the window should close, True otherwise
         """
-        if events is None:
-            events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
