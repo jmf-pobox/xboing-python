@@ -130,42 +130,47 @@ class LevelManager:
             bool: True if level was loaded successfully, False otherwise
 
         """
-        result = False
         if level_num is not None:
             self.current_level = level_num
 
-        # Ensure level number is within bounds
+        self._clamp_level_number()
+        level_file = self._get_level_file_path(self.current_level)
+
+        result = False
+
+        if not self._level_file_exists(level_file):
+            self.logger.warning(f"Level file not found: {level_file}")
+        else:
+            level_data = self._safe_parse_level_file(level_file)
+            if level_data is None:
+                self.logger.warning(f"Failed to parse level file: {level_file}")
+            elif not self.block_manager:
+                self.logger.error("Error: Block manager not set")
+            else:
+                self.level_title = level_data["title"]
+                self.time_bonus = level_data["time_bonus"]
+                self.time_remaining = float(level_data["time_bonus"])
+                self._create_blocks_from_layout(level_data["layout"])
+                self._set_level_background()
+                result = True
+
+        return result
+
+    def _clamp_level_number(self) -> None:
         if self.current_level < 1:
             self.current_level = 1
         elif self.current_level > self.MAX_LEVELS:
             self.current_level = self.MAX_LEVELS
 
-        # Get level file path
-        level_file = self._get_level_file_path(self.current_level)
+    def _level_file_exists(self, level_file: str) -> bool:
+        return os.path.exists(level_file)
 
-        if not os.path.exists(level_file):
-            self.logger.warning(f"Level file not found: {level_file}")
-        else:
-            try:
-                level_data = self._parse_level_file(level_file)
-                if level_data:
-                    self.level_title = level_data["title"]
-                    self.time_bonus = level_data["time_bonus"]
-                    self.time_remaining = float(level_data["time_bonus"])
-
-                    # Create blocks based on level data using block manager
-                    if self.block_manager:
-                        self._create_blocks_from_layout(level_data["layout"])
-                        # Set appropriate background for this level
-                        self._set_level_background()
-                        result = True
-                    else:
-                        self.logger.error("Error: Block manager not set")
-                else:
-                    self.logger.warning(f"Failed to parse level file: {level_file}")
-            except Exception as e:
-                self.logger.error(f"Error loading level {self.current_level}: {e}")
-        return result
+    def _safe_parse_level_file(self, level_file: str) -> Optional[Dict[str, Any]]:
+        try:
+            return self._parse_level_file(level_file)
+        except Exception as e:
+            self.logger.error(f"Error loading level {self.current_level}: {e}")
+            return None
 
     def get_next_level(self) -> bool:
         """Advance to the next level, or reset if at the last level."""
@@ -260,27 +265,19 @@ class LevelManager:
         Returns
         -------
             int: Score multiplier (1, 2, 3, 4, or 5)
-
         """
-        # In original XBoing, time remaining affects final score
-        if self.time_remaining <= 0:
-            return 1
-
-        if self.time_bonus == 0:
-            return 1
-
-        # Calculate percentage of time remaining
-        percent = self.time_remaining / self.time_bonus
-
-        if percent > 0.8:
-            return 5
-        if percent > 0.6:
-            return 4
-        if percent > 0.4:
-            return 3
-        if percent > 0.2:
-            return 2
-        return 1
+        multiplier = 1
+        if self.time_remaining > 0 and self.time_bonus != 0:
+            percent = self.time_remaining / self.time_bonus
+            if percent > 0.8:
+                multiplier = 5
+            elif percent > 0.6:
+                multiplier = 4
+            elif percent > 0.4:
+                multiplier = 3
+            elif percent > 0.2:
+                multiplier = 2
+        return multiplier
 
     def _create_blocks_from_layout(self, layout: List[str]) -> None:
         """Create blocks based on the level layout.

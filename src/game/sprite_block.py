@@ -452,84 +452,71 @@ class SpriteBlock:
             tuple: (broken, points, effect) - Whether the block was broken, points earned, and any special effect
 
         """
+        broken = False
+        points = 0
+        effect = None
+
         # Start hit animation (except for unbreakable blocks)
         if self.behavior != self.BEHAVIOR_UNBREAKABLE:
             self.is_hit = True
             self.hit_timer = 200  # ms
 
-        # Different behavior based on block type
         if self.behavior == self.BEHAVIOR_UNBREAKABLE:
             # Unbreakable blocks (black wall) - ball just bounces off
-            return (False, 0, None)
+            pass
 
-        if self.behavior == self.BEHAVIOR_COUNTER:
-            # Counter blocks - takes multiple hits
+        elif self.behavior == self.BEHAVIOR_COUNTER:
             self.health -= 1
-
-            # Handle the special case for counter blocks with counter_value of 0
-            # In the original C code, these don't show a counter and break in one hit
             if hasattr(self, "counter_value") and self.counter_value == 0:
                 # '0' counter blocks break in one hit and don't show a counter
                 if self.health <= 0:
-                    return (True, self.points, None)
-                return (False, 0, None)
+                    broken = True
+                    points = self.points
+            else:
+                # Normal counter blocks - update the counter image to show how many hits left
+                if (
+                    self.health > 0
+                    and self.animation_frames
+                    and isinstance(self.animation_frames, list)
+                ):
+                    frame_index = max(
+                        0, min(5 - int(self.health), len(self.animation_frames) - 1)
+                    )
+                    if self.image_file in self._image_cache:
+                        self.image = self._image_cache[self.animation_frames[frame_index]]
+                if self.health <= 0:
+                    broken = True
+                    points = self.points
 
-            # Normal counter blocks - update the counter image to show how many hits left
-            if (
-                self.health > 0
-                and self.animation_frames
-                and isinstance(self.animation_frames, list)
-            ):
-                # Use the correct frame for the current health
-                frame_index = max(
-                    0, min(5 - int(self.health), len(self.animation_frames) - 1)
-                )
-                if self.image_file in self._image_cache:
-                    self.image = self._image_cache[self.animation_frames[frame_index]]
-
-            # Check if broken
-            if self.health <= 0:
-                return (True, self.points, None)
-
-            return (False, 0, None)
-
-        if self.behavior == self.BEHAVIOR_SPECIAL:
-            # Special blocks have effects when broken
+        elif self.behavior == self.BEHAVIOR_SPECIAL:
             self.health -= 1
-
-            # Special effects only happen when the block is broken
             if self.health <= 0:
-                # Return the block type as the effect
-                return (True, self.points, self.type)
+                broken = True
+                points = self.points
+                effect = self.type
 
-            return (False, 0, None)
-
-        if self.behavior == self.BEHAVIOR_DAMAGE:
-            # Damage blocks hurt the player (e.g., death blocks)
+        elif self.behavior == self.BEHAVIOR_DAMAGE:
             self.health -= 1
-
             if self.health <= 0:
-                # Death blocks cause the ball to be lost
-                return (True, 0, "death")
+                broken = True
+                points = 0
+                effect = "death"
 
-            return (False, 0, None)
-
-        if self.behavior == self.BEHAVIOR_DYNAMIC:
-            # Dynamic blocks like roamers - special handling
+        elif self.behavior == self.BEHAVIOR_DYNAMIC:
             self.health -= 1
-
             if self.health <= 0:
-                return (True, self.points, self.type)
+                broken = True
+                points = self.points
+                effect = self.type
 
-            return (False, 0, None)
+        else:
+            # Normal blocks (regular colored blocks)
+            self.health -= 1
+            if self.health <= 0:
+                broken = True
+                points = self.points
 
-        # Normal blocks (regular colored blocks)
-        self.health -= 1
-
-        if self.health <= 0:
-            return (True, self.points, None)
-
-        return (False, 0, None)
+        return broken, points, effect
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the block.
