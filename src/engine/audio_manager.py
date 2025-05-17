@@ -16,19 +16,16 @@ class AudioManager:
     def __init__(
         self,
         sound_dir: str = "assets/sounds",
-        event_sound_map: Optional[Dict[Type[XBoingEvent], str]] = None,
     ):
         """
         Args:
             sound_dir: Directory containing sound files.
-            event_sound_map: Optional mapping from event type to sound name.
         """
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
         self.sounds: Dict[str, pygame.mixer.Sound] = {}
         self.volume: float = 0.05
         self.muted: bool = False
-        self.event_sound_map: Dict[Type[XBoingEvent], str] = event_sound_map or {}
 
     def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
         """
@@ -39,11 +36,10 @@ class AudioManager:
         """
         for event in events:
             if event.type == pygame.USEREVENT:
-                event_type = type(event.event)
-                sound_name = self.event_sound_map.get(event_type)
+                sound_name = getattr(event.event, "sound_effect", None)
                 if sound_name and not self.muted:
                     self.logger.debug(
-                        f"Handling event: {event_type.__name__}, playing sound: {sound_name}"
+                        f"Handling event: {type(event.event).__name__}, playing sound: {sound_name}"
                     )
                     self.play_sound(sound_name)
 
@@ -102,9 +98,14 @@ class AudioManager:
             pygame.mixer.stop()
         self.logger.info("AudioManager cleanup called")
 
-    def load_sounds_from_map(self) -> None:
-        """Load all sounds referenced in the event_sound_map."""
-        for sound_name in set(self.event_sound_map.values()):
+    def load_sounds_from_events(self) -> None:
+        """Load all sounds referenced by XBoingEvent subclasses."""
+        sound_names = set()
+        for cls in XBoingEvent.__subclasses__():
+            sound = getattr(cls, "sound_effect", None)
+            if sound:
+                sound_names.add(sound)
+        for sound_name in sound_names:
             filename = f"{sound_name}.wav"
             self.load_sound(sound_name, filename)
 

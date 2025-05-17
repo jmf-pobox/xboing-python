@@ -11,7 +11,7 @@
 
 ## Overview
 
-This document describes the event-driven audio architecture for XBoing. The goal is to decouple game logic from audio playback, making the system more maintainable, testable, and extensible. The design leverages the Pygame event queue, allowing game objects and controllers to post custom events that are handled by an `AudioManager`. This same event system is used for GUI updates and other MVC-style decoupling.
+This document describes the event-driven audio architecture for XBoing. The goal is to decouple game logic from audio playback, making the system more maintainable, testable, and extensible. The design leverages the Pygame event queue, allowing game objects and controllers to post custom events that are handled by an `AudioManager`. Each event class that triggers a sound now declares its sound name as a `sound_effect` class attribute. This same event system is used for GUI updates and other MVC-style decoupling.
 
 ---
 
@@ -31,6 +31,7 @@ This document describes the event-driven audio architecture for XBoing. The goal
 
 - **Custom Events:**
   - All custom game events (e.g., `BallLostEvent`, `BlockHitEvent`, etc.) inherit from `XBoingEvent`.
+  - Events that trigger a sound define a `sound_effect` class attribute with the sound name (e.g., `sound_effect = "boing"`).
   - These are posted to the Pygame event queue as `pygame.event.Event(pygame.USEREVENT, {"event": XBoingEventInstance})`.
   - **Strict contract:** All handlers (including AudioManager) expect that any event with `type == pygame.USEREVENT` will have an `event` attribute containing an `XBoingEvent` instance. If not, an AttributeError will be raised (fail fast).
 - **Event Posting:**
@@ -42,7 +43,8 @@ This document describes the event-driven audio architecture for XBoing. The goal
 
 - **Responsibilities:**
   - Listens for custom events in the Pygame event queue.
-  - Maps event types to sound effects using an `event_sound_map`.
+  - For each event, checks for a `sound_effect` class attribute on the event instance.
+  - If present, plays the corresponding sound.
   - Manages volume, mute/unmute, and sound resource loading.
 - **API:**
   - `set_volume(float)`
@@ -100,6 +102,16 @@ import pygame
 pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": BallLostEvent()}))
 ```
 
+### Event Class with Sound Effect
+
+```python
+class BlockHitEvent(XBoingEvent):
+    sound_effect = "boing"
+
+class BallLostEvent(XBoingEvent):
+    sound_effect = "balllost"
+```
+
 ### AudioManager Event Handling
 
 ```python
@@ -107,10 +119,23 @@ class AudioManager:
     def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
         for event in events:
             if event.type == pygame.USEREVENT:
-                event_type = type(event.event)
-                sound_name = self.event_sound_map.get(event_type)
+                sound_name = getattr(event.event, "sound_effect", None)
                 if sound_name and not self.muted:
                     self.play_sound(sound_name)
+```
+
+### Sound Loading
+
+```python
+def load_sounds_from_events(self) -> None:
+    sound_names = set()
+    for cls in XBoingEvent.__subclasses__():
+        sound = getattr(cls, "sound_effect", None)
+        if sound:
+            sound_names.add(sound)
+    for sound_name in sound_names:
+        filename = f"{sound_name}.wav"
+        self.load_sound(sound_name, filename)
 ```
 
 ### Main Loop Integration
@@ -142,11 +167,11 @@ while running:
 ## Integration Plan: Event-Driven AudioManager with Pygame Events
 
 ### 1. Define Event Classes
-For each sound trigger in the game (e.g., "boing", "click", "powerup", etc.), define a corresponding event class inheriting from `XBoingEvent`.
+For each sound trigger in the game (e.g., "boing", "click", "powerup", etc.), define a corresponding event class inheriting from `XBoingEvent` and set its `sound_effect` class attribute.
 
-### 2. Create AudioManager and Event-to-Sound Mapping
-- Define an `event_sound_map` that maps each event class to the appropriate sound name (e.g., `BlockHitEvent: "boing"`).
-- Instantiate `AudioManager` with the mapping, and call `audio_manager.load_sounds_from_map()`.
+### 2. Create AudioManager and Load Sounds
+- Instantiate `AudioManager`.
+- Call `audio_manager.load_sounds_from_events()` to load all referenced sounds.
 - Use dependency injection for setup (see `di_module.py` and `xboing.py`).
 
 ### 3. Refactor Sound Triggers
@@ -158,22 +183,6 @@ For each sound trigger in the game (e.g., "boing", "click", "powerup", etc.), de
 
 ### 5. Volume and Mute Controls
 - Use `audio_manager.set_volume()` and `audio_manager.mute()/unmute()` for volume control.
-
-### 6. Example Event-to-Sound Mapping
-```python
-from engine.audio_manager import AudioManager
-from engine.events import BlockHitEvent, BallLostEvent, XBoingEvent
-from typing import Type, Dict
-
-event_sound_map: Dict[Type[XBoingEvent], str] = {
-    BlockHitEvent: "boing",
-    BallLostEvent: "balllost",
-    # ...
-}
-
-audio_manager = AudioManager(sound_dir="assets/sounds", event_sound_map=event_sound_map)
-audio_manager.load_sounds_from_map()
-```
 
 ---
 

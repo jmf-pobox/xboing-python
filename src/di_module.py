@@ -329,7 +329,7 @@ class XBoingModule(Module):
 
     @provider
     def provide_audio_manager(self) -> AudioManager:
-        return self._audio_manager
+        return AudioManager(sound_dir=self._audio_manager.sound_dir)
 
     @provider
     def provide_ui_manager(self) -> UIManager:

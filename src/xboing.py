@@ -76,21 +76,6 @@ BLOCK_HEIGHT: int = 20  # Original block height
 BLOCK_MARGIN: int = 7  # Original spacing (SPACE constant)
 GAME_TITLE: str = "- XBoing II -"
 
-# Definition of event to sound mapping
-event_sound_map: Dict[Type[XBoingEvent], str] = {
-    BlockHitEvent: "boing",
-    UIButtonClickEvent: "click",
-    PowerUpCollectedEvent: "powerup",
-    GameOverEvent: "game_over",
-    BallShotEvent: "ballshot",
-    BallLostEvent: "balllost",
-    BombExplodedEvent: "bomb",
-    ApplauseEvent: "applause",
-    BonusCollectedEvent: "bonus",
-    PaddleHitEvent: "paddle",
-    WallHitEvent: "boing",
-}
-
 logger: logging.Logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -136,9 +121,9 @@ class XBoingApp:
         self.game_state = GameState()
         pygame.mixer.init()
         self.audio_manager = AudioManager(
-            sound_dir=get_sounds_dir(), event_sound_map=event_sound_map
+            sound_dir=get_sounds_dir()
         )
-        self.audio_manager.load_sounds_from_map()
+        self.audio_manager.load_sounds_from_events()
 
         # --- Window and Renderer Setup ---
         self.window = Window(WINDOW_WIDTH, WINDOW_HEIGHT, GAME_TITLE)

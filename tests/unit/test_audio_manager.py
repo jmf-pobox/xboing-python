@@ -7,10 +7,12 @@ from engine.events import XBoingEvent
 
 
 class BallLostEvent(XBoingEvent):
+    sound_effect = "ball_lost"
     pass
 
 
 class BlockHitEvent(XBoingEvent):
+    sound_effect = "block_hit"
     pass
 
 
@@ -20,8 +22,7 @@ class UnrelatedEvent(XBoingEvent):
 
 def make_manager():
     pygame.init()  # Initialize pygame for events
-    event_sound_map: Dict[Type[XBoingEvent], str] = {BallLostEvent: "ball_lost", BlockHitEvent: "block_hit"}
-    mgr = AudioManager(sound_dir="/fake/dir", event_sound_map=event_sound_map)
+    mgr = AudioManager(sound_dir="/fake/dir")
     return mgr
 
 
@@ -81,7 +82,7 @@ def test_load_sounds_from_map(monkeypatch):
         called[name] = filename
 
     mgr.load_sound = fake_load_sound
-    mgr.load_sounds_from_map()
+    mgr.load_sounds_from_events()
     assert called == {"ball_lost": "ball_lost.wav", "block_hit": "block_hit.wav"}
 
 

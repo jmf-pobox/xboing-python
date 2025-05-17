@@ -12,68 +12,57 @@ class XBoingEvent:
 
 class BlockHitEvent(XBoingEvent):
     """Event: Ball hit a block."""
-
-    pass
+    sound_effect = "boing"
 
 
 class UIButtonClickEvent(XBoingEvent):
     """Event: UI button or menu click."""
-
-    pass
+    sound_effect = "click"
 
 
 class PowerUpCollectedEvent(XBoingEvent):
     """Event: Power-up collected."""
-
-    pass
+    sound_effect = "powerup"
 
 
 class GameOverEvent(XBoingEvent):
     """Event: Game over."""
-
-    pass
+    sound_effect = "game_over"
 
 
 class BallShotEvent(XBoingEvent):
     """Event: Ball launched from paddle."""
-
-    pass
+    sound_effect = "ballshot"
 
 
 class BallLostEvent(XBoingEvent):
     """Event: Ball lost (missed by paddle)."""
-
-    pass
+    sound_effect = "balllost"
 
 
 class BombExplodedEvent(XBoingEvent):
     """Event: Bomb block exploded."""
-
-    pass
+    sound_effect = "bomb"
 
 
 class ApplauseEvent(XBoingEvent):
     """Event: Level complete, applause sound."""
-
-    pass
+    sound_effect = "applause"
 
 
 class BonusCollectedEvent(XBoingEvent):
     """Event: Bonus collected."""
-
-    pass
+    sound_effect = "bonus"
 
 
 class PaddleHitEvent(XBoingEvent):
     """Event: Ball hit the paddle."""
-
-    pass
+    sound_effect = "paddle"
 
 
 class WallHitEvent(XBoingEvent):
     """Event: Ball hit the wall (for special wall collision sound handling)."""
-
-    pass
+    sound_effect = "boing"
 
 
 class ScoreChangedEvent(XBoingEvent):
