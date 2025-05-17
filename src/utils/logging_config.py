@@ -1,3 +1,5 @@
+"""Set up logging configuration for the application."""
+
 import logging
 import os
 

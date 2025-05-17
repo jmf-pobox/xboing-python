@@ -37,10 +37,7 @@ def load_image(
         return surface
 
     # Convert the surface for faster blitting
-    if alpha:
-        surface = surface.convert_alpha()
-    else:
-        surface = surface.convert()
+    surface = surface.convert_alpha() if alpha else surface.convert()
 
     # Scale if needed
     if scale:
