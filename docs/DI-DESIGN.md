@@ -4,18 +4,6 @@
 
 XBoing uses the [injector](https://injector.readthedocs.io/) dependency injection (DI) framework as the exclusive mechanism for constructing and wiring all controllers, views, UI components, and core game objects. This approach eliminates manual dependency management and factory-based construction, resulting in a codebase that is more maintainable, testable, and extensible.
 
----
-
-## Current Status (as of 2024-06)
-
-- **All controllers, views, and UI components are constructed via DI.**
-- The `XBoingModule` (in `src/di_module.py`) provides all bindings for controllers, views, UIManager, and other core objects.
-- The main application (`xboing.py`) composes the app using DI, resolving all dependencies through the injector.
-- There are **no remaining factories** (such as UIFactory or ControllerFactory) or manual construction of core components.
-- All new features and components should be added via DI.
-
----
-
 ## How Dependency Injection Works in XBoing
 
 ### 1. **Injectable Classes**

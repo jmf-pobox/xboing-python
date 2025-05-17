@@ -4,7 +4,7 @@
 
 - **Faithful recreation** of the original XBoing window layout and visual regions.
 - **Modern, event-driven, component-based UI architecture** for maintainability and testability.
-- **All events** (game, UI, input) are routed through the Pygame event queue. No custom EventBus remains.
+- **All events** (game, UI, input) are routed through the Pygame event queue.
 
 ---
 
@@ -61,10 +61,9 @@
 
 - **All events** (user input, UI, game logic, custom game events) are routed through the Pygame event queue.
 - **Custom events** are defined using `pygame.USEREVENT` and posted with `pygame.event.post`.
-- **GameState and other models** no longer post events directly. Instead, methods that would have posted events now return a list of event instances representing state changes.
+- **GameState and other models** return a list of typed event instances representing state changes.
 - **Controllers** (e.g., `GameController`) are responsible for posting these returned events to the Pygame event queue, using a helper method (e.g., `post_game_state_events`).
 - **Handlers** (controllers, UI components, managers) implement `handle_events(events)` and check for both built-in and custom event types.
-- **No custom EventBus or protocol-based event handlers remain.**
 
 ---
 
@@ -81,9 +80,8 @@
 ## 10. Dependency Injection & Factories
 
 - **Dependency injection** is used via the `injector` library.
-- The `XBoingModule` (in `src/di_module.py`) provides all bindings for controllers, views, UIManager, UIFactory, and other core objects.
-- **UIFactory**: Centralizes UI instantiation and layout logic, returning all UI components and views.
-- **ControllerFactory**: Centralizes controller instantiation and registration, returning all controllers and the controller manager.
+- The `XBoingModule` (in `src/di_module.py`) provides all bindings for controllers, views, UIManager, and other core objects.
+- **UIFactory and ControllerFactory logic is now implemented as DI providers in `XBoingModule`, not as separate factory classes.**
 - **AppCoordinator**: Synchronizes UIManager and ControllerManager, ensuring the correct controller is active for the current view.
 
 ---
@@ -137,8 +135,8 @@ All event subscriptions and handling are via the Pygame event queue. All UI comp
 
 ## 13. Construction-Time Code
 
-- All construction and wiring of controllers, views, and managers is handled in `main.py` using UIFactory, ControllerFactory, and dependency injection via `injector`.
-- No direct instantiation of UI or controller classes occurs outside these factories or DI modules.
+- All construction and wiring of controllers, views, and managers is handled in `xboing.py` using DI providers in `XBoingModule`.
+- No direct instantiation of UI or controller classes occurs outside these providers or DI modules.
 
 ---
 
@@ -178,7 +176,7 @@ def handle_events(self, events):
 ```
 
 ### 4. (Optional) Add to AudioManager or UI
-If the event should trigger a sound, add it to the `event_sound_map` in `main.py` and ensure the sound file exists.
+If the event should trigger a sound, **add a `sound_effect` class attribute to the event class** (property-based mapping). AudioManager will automatically load and play the sound for any event with this attribute. Ensure the sound file exists.
 If the event should update the UI, update the relevant UI component to handle the event as above.
 
 ### 5. Test the Event
@@ -205,9 +203,11 @@ Controller/Model         Pygame Event Queue         UI/Manager/Component
 
 This flow applies to all custom events in XBoing: define, return from model if appropriate, post from controller, and handle using the unified Pygame event system.
 
-## 15. Migration to View-Controller Pair Pattern (2024)
+---
 
-We are migrating to a design where each active view has a corresponding active controller, and only that controller receives events and updates. A persistent WindowController (formerly BaseController) always receives global/system events (quit, volume, etc.).
+## 15. View-Controller Pair Pattern (Current Architecture)
+
+XBoing now uses a design where each active view has a corresponding active controller, and only that controller receives events and updates. A persistent WindowController (formerly BaseController) always receives global/system events (quit, volume, etc.).
 
 ### Key Points
 - **UIManager** manages the active view.
@@ -219,12 +219,15 @@ We are migrating to a design where each active view has a corresponding active c
 ### Example Main Loop
 ```python
 while running:
+    # Process Events
     events = pygame.event.get()
     input_manager.update(events)
     window_controller.handle_events(events)  # Always active
     controller_manager.active_controller.handle_events(events)  # Only active view's controller
     audio_manager.handle_events(events)
     ui_manager.handle_events(events)
+    
+    # Update for time and re-render
     controller_manager.active_controller.update(delta_time * 1000)
     layout.draw(window.surface)
     ui_manager.draw_all(window.surface)
@@ -237,5 +240,4 @@ while running:
 - Global/system events are always handled.
 - Clean separation of concerns and easier testing.
 
-This migration will improve maintainability, testability, and clarity of the event-driven architecture.
-
+This architecture improves maintainability, testability, and clarity of the event-driven design.
