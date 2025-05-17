@@ -14,9 +14,11 @@ from engine.events import (
     PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
     WallHitEvent,
+    PaddleSizeChangedEvent,
 )
 from game.ball_manager import BallManager
 from game.sprite_block import SpriteBlock
+from game.paddle import Paddle
 
 
 def make_key_event(key, mod=0):
@@ -179,9 +181,9 @@ def test_update_balls_and_collisions_bomb(mock_ball):
 
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_expand(mock_ball):
+    """Test that hitting a pad expand block increases paddle size and fires PaddleSizeChangedEvent."""
     game_state = Mock()
     level_manager = Mock()
-    # Start with one ball
     ball = Mock()
     ball.x = 10
     ball.y = 20
@@ -189,11 +191,10 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    paddle = Mock()
-    paddle.width = 10
-    paddle.rect.width = 10
+    # Use a real Paddle for size logic
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    # Use SpriteBlock.TYPE_PAD_EXPAND for the effect
     block_manager.check_collisions.side_effect = [
         (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
     ] + [(0, 0, [])] * 10
@@ -203,8 +204,7 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
-    for b in [ball]:
-        ball_manager.add_ball(b)
+    ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
         level_manager,
@@ -217,23 +217,25 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
-        # Paddle width should have increased
-        assert paddle.width > 10
-        assert paddle.rect.width == paddle.width
-        # Should have fired PowerUpCollectedEvent
+        # Paddle size should have increased
+        assert paddle.size == Paddle.SIZE_LARGE
+        assert paddle.width == paddle.rect.width
+        # Should have fired PaddleSizeChangedEvent with at_max True
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PowerUpCollectedEvent)
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_max is True
             for call in mock_post.call_args_list
         )
 
 
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_shrink(mock_ball):
+    """Test that hitting a pad shrink block decreases paddle size and fires PaddleSizeChangedEvent."""
     game_state = Mock()
     level_manager = Mock()
-    # Start with one ball
     ball = Mock()
     ball.x = 10
     ball.y = 20
@@ -241,11 +243,10 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    paddle = Mock()
-    paddle.width = 20
-    paddle.rect.width = 20
+    # Use a real Paddle for size logic
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    # Use SpriteBlock.TYPE_PAD_SHRINK for the effect
     block_manager.check_collisions.side_effect = [
         (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
     ] + [(0, 0, [])] * 10
@@ -255,8 +256,7 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
-    for b in [ball]:
-        ball_manager.add_ball(b)
+    ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
         level_manager,
@@ -269,14 +269,16 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
-        # Paddle width should have decreased
-        assert paddle.width < 20
-        assert paddle.rect.width == paddle.width
-        # Should have fired PowerUpCollectedEvent
+        # Paddle size should have decreased
+        assert paddle.size == Paddle.SIZE_SMALL
+        assert paddle.width == paddle.rect.width
+        # Should have fired PaddleSizeChangedEvent with at_min True
         assert any(
             call.args[0].type == pygame.USEREVENT
             and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PowerUpCollectedEvent)
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_min is True
             for call in mock_post.call_args_list
         )
 
@@ -643,3 +645,200 @@ def test_mouse_movement_reversed():
         controller.handle_paddle_mouse_movement()
         # local_x = mirrored_x - play_rect.x - paddle.width // 2 = 20 - 0 - 10 = 10
         move_to.assert_called_with(10, 100, 0)
+
+
+def test_paddle_expand_event_fired():
+    """Test PaddleSizeChangedEvent is fired with correct size and flags when expanding."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball = Mock()
+    ball.x = 10
+    ball.y = 20
+    ball.radius = 5
+    ball.vx = 1
+    ball.vy = 2
+    ball.update.return_value = (True, False, False)
+    # Use a real Paddle for size logic
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_MEDIUM)
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
+    ] + [(0, 0, [])] * 10
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        # Paddle should now be large
+        assert paddle.size == Paddle.SIZE_LARGE
+        # Should have fired PaddleSizeChangedEvent with at_max True
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_max is True
+            for call in mock_post.call_args_list
+        )
+
+
+def test_paddle_expand_at_max():
+    """Test PaddleSizeChangedEvent is fired with at_max True and no size change when already at max size."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball = Mock()
+    ball.x = 10
+    ball.y = 20
+    ball.radius = 5
+    ball.vx = 1
+    ball.vy = 2
+    ball.update.return_value = (True, False, False)
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_LARGE)
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
+    ] + [(0, 0, [])] * 10
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        # Paddle should still be large
+        assert paddle.size == Paddle.SIZE_LARGE
+        # Should have fired PaddleSizeChangedEvent with at_max True
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_max is True
+            for call in mock_post.call_args_list
+        )
+
+
+def test_paddle_shrink_event_fired():
+    """Test PaddleSizeChangedEvent is fired with correct size and flags when shrinking."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball = Mock()
+    ball.x = 10
+    ball.y = 20
+    ball.radius = 5
+    ball.vx = 1
+    ball.vy = 2
+    ball.update.return_value = (True, False, False)
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_MEDIUM)
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
+    ] + [(0, 0, [])] * 10
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        # Paddle should now be small
+        assert paddle.size == Paddle.SIZE_SMALL
+        # Should have fired PaddleSizeChangedEvent with at_min True
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_min is True
+            for call in mock_post.call_args_list
+        )
+
+
+def test_paddle_shrink_at_min():
+    """Test PaddleSizeChangedEvent is fired with at_min True and no size change when already at min size."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball = Mock()
+    ball.x = 10
+    ball.y = 20
+    ball.radius = 5
+    ball.vx = 1
+    ball.vy = 2
+    ball.update.return_value = (True, False, False)
+    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle.set_size(Paddle.SIZE_SMALL)
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
+    ] + [(0, 0, [])] * 10
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        # Paddle should still be small
+        assert paddle.size == Paddle.SIZE_SMALL
+        # Should have fired PaddleSizeChangedEvent with at_min True
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, PaddleSizeChangedEvent)
+            and call.args[0].event.size == paddle.width
+            and call.args[0].event.at_min is True
+            for call in mock_post.call_args_list
+        )

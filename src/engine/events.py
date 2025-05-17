@@ -190,3 +190,20 @@ class LevelCompleteEvent(XBoingEvent):
     """Event: Level completed."""
 
     # No-op for now
+
+
+class PaddleSizeChangedEvent(XBoingEvent):
+    """Event: Paddle size changed (for UI updates and feedback)."""
+
+    def __init__(self, size: int, at_min: bool = False, at_max: bool = False) -> None:
+        """Initialize with the new paddle size and min/max flags.
+
+        Args:
+            size (int): The new paddle size (e.g., width or enum/int).
+            at_min (bool): True if the paddle is at its minimum size.
+            at_max (bool): True if the paddle is at its maximum size.
+
+        """
+        self.size: int = size
+        self.at_min: bool = at_min
+        self.at_max: bool = at_max

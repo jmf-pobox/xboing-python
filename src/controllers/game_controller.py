@@ -15,6 +15,7 @@ from engine.events import (
     LevelCompleteEvent,
     MessageChangedEvent,
     PaddleHitEvent,
+    PaddleSizeChangedEvent,
     PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
     WallHitEvent,
@@ -265,24 +266,72 @@ class GameController(Controller):
                                 pygame.USEREVENT, {"event": BombExplodedEvent()}
                             )
                         )
-                    elif effect in [
-                        SpriteBlock.TYPE_PAD_EXPAND,
-                        SpriteBlock.TYPE_PAD_SHRINK,
-                    ]:
-                        if effect == SpriteBlock.TYPE_PAD_EXPAND:
-                            self.paddle.width = int(
-                                min(self.paddle.width * 1.5, self.paddle.width * 2)
+                    elif effect == SpriteBlock.TYPE_PAD_EXPAND:
+                        old_size = self.paddle.size
+                        if old_size < Paddle.SIZE_LARGE:
+                            self.paddle.set_size(old_size + 1)
+                            at_max = self.paddle.size == Paddle.SIZE_LARGE
+                            at_min = self.paddle.size == Paddle.SIZE_SMALL
+                            logger.debug(
+                                f"Paddle expanded to size {self.paddle.size} (width={self.paddle.width})"
+                            )
+                            pygame.event.post(
+                                pygame.event.Event(
+                                    pygame.USEREVENT,
+                                    {
+                                        "event": PaddleSizeChangedEvent(
+                                            self.paddle.width, at_min, at_max
+                                        )
+                                    },
+                                )
                             )
                         else:
-                            self.paddle.width = int(
-                                max(self.paddle.width * 0.5, self.paddle.width / 2)
+                            logger.debug(
+                                "Paddle already at maximum size; cannot expand further."
                             )
-                        self.paddle.rect.width = self.paddle.width
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            pygame.event.post(
+                                pygame.event.Event(
+                                    pygame.USEREVENT,
+                                    {
+                                        "event": PaddleSizeChangedEvent(
+                                            self.paddle.width, False, True
+                                        )
+                                    },
+                                )
                             )
-                        )
+                    elif effect == SpriteBlock.TYPE_PAD_SHRINK:
+                        old_size = self.paddle.size
+                        if old_size > Paddle.SIZE_SMALL:
+                            self.paddle.set_size(old_size - 1)
+                            at_max = self.paddle.size == Paddle.SIZE_LARGE
+                            at_min = self.paddle.size == Paddle.SIZE_SMALL
+                            logger.debug(
+                                f"Paddle shrunk to size {self.paddle.size} (width={self.paddle.width})"
+                            )
+                            pygame.event.post(
+                                pygame.event.Event(
+                                    pygame.USEREVENT,
+                                    {
+                                        "event": PaddleSizeChangedEvent(
+                                            self.paddle.width, at_min, at_max
+                                        )
+                                    },
+                                )
+                            )
+                        else:
+                            logger.debug(
+                                "Paddle already at minimum size; cannot shrink further."
+                            )
+                            pygame.event.post(
+                                pygame.event.Event(
+                                    pygame.USEREVENT,
+                                    {
+                                        "event": PaddleSizeChangedEvent(
+                                            self.paddle.width, True, False
+                                        )
+                                    },
+                                )
+                            )
                     elif effect == SpriteBlock.TYPE_TIMER:
                         self.level_manager.add_time(20)
                         pygame.event.post(

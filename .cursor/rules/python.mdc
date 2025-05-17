@@ -15,13 +15,11 @@ alwaysApply: false
 - Run `ruff check <module> --fix` after code changes to auto-fix style and import issues. Resolve all linter errors and warnings unless there is a strong, documented reason not to.
 - Run the full test suite (`pytest`) before and after every code change. All tests must pass (100% pass rate) before marking a task as complete.
 - For each module:
-  1. Run `mypy --strict` and resolve all type issues.
+  1. Run `hatch run lint-fix` and resolve all type issues.
   2. Add/update type annotations and docstrings.
   3. Format with black.
   4. Run `pytest` to ensure all tests pass.
-  5. Run `mypy --strict` again to confirm type safety.
-  6. Run `ruff check <module> --fix` to resolve style issues.
-  7. Update `TODO.md` to reflect completed work.
+  5. Run `hatch run lint-fix` again to confirm type safety.
+  6. Update `TODO.md` to reflect completed work.
 - Do not attempt to fix linter errors more than 3 times in a row; ask for help if issues persist.
 - Update or create docstrings for all public-facing code.
-- Keep `TODO.md` up to date with action items and mark tasks as complete when finished.
