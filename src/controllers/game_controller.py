@@ -359,6 +359,11 @@ class GameController(Controller):
                     elif effect == SpriteBlock.TYPE_STICKY:
                         logger.debug("Sticky block hit: enabling sticky paddle mode.")
                         self.enable_sticky()
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
                 if hit_paddle:
                     pygame.event.post(
                         pygame.event.Event(
