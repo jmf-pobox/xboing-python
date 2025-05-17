@@ -214,7 +214,6 @@ class XBoingModule(Module):
             font=self._font,
             small_font=self._small_font,
             get_score_callback=self._get_score_callback,
-            controller=game_over_controller,
         )
 
     @provider

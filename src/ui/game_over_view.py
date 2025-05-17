@@ -4,7 +4,6 @@ from typing import Callable
 import pygame
 from injector import inject
 
-from controllers.game_over_controller import GameOverController
 from engine.graphics import Renderer
 from layout.game_layout import GameLayout
 
@@ -25,7 +24,6 @@ class GameOverView(View):
         font: pygame.font.Font,
         small_font: pygame.font.Font,
         get_score_callback: Callable[[], int],
-        controller: GameOverController,
     ) -> None:
         """
         Initialize the GameOverView.
@@ -36,14 +34,12 @@ class GameOverView(View):
             font (pygame.font.Font): The main font.
             small_font (pygame.font.Font): The font for secondary text.
             get_score_callback (Callable[[], int]): Callback to get the final score.
-            controller (GameOverController): The controller for game over logic.
         """
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
         self.font: pygame.font.Font = font
         self.small_font: pygame.font.Font = small_font
         self.get_score: Callable[[], int] = get_score_callback
-        self.controller: GameOverController = controller
         self.active: bool = False
         self.logger = logging.getLogger("xboing.GameOverView")
 
@@ -66,10 +62,7 @@ class GameOverView(View):
         Args:
             event (pygame.event.Event): The Pygame event to handle.
         """
-        self.logger.debug(f"handle_event called with event: {event}")
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            self.logger.info("Spacebar pressed in GameOverView.")
-            self.controller.reset_game()
+        pass
 
     def draw(self, surface: pygame.Surface) -> None:
         """
