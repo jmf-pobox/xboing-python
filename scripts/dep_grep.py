@@ -22,6 +22,7 @@ PACKAGES = [
     "utils",
 ]
 
+
 def find_package_dependencies() -> Dict[str, Set[str]]:
     """
     Scan each package for imports of other packages and return a dependency map.
@@ -36,12 +37,15 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
         for py_file in pkg_dir.glob("*.py"):
             with open(py_file, encoding="utf-8") as fh:
                 for line in fh:
-                    m = re.match(r"from (\w+)\.", line) or re.match(r"import (\w+)\.", line)
+                    m = re.match(r"from (\w+)\.", line) or re.match(
+                        r"import (\w+)\.", line
+                    )
                     if m:
                         dep = m.group(1)
                         if dep in PACKAGES and dep != pkg:
                             deps[pkg].add(dep)
     return deps
+
 
 def print_dependencies(deps: Dict[str, Set[str]]) -> None:
     """
@@ -54,6 +58,7 @@ def print_dependencies(deps: Dict[str, Set[str]]) -> None:
         dep_list = sorted(deps[pkg])
         print(f"{pkg}: {dep_list}")
 
+
 def main() -> None:
     """
     Main entry point for the dependency grepper script.
@@ -61,5 +66,6 @@ def main() -> None:
     deps = find_package_dependencies()
     print_dependencies(deps)
 
+
 if __name__ == "__main__":
-    main() 
+    main()
