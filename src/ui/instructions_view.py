@@ -4,9 +4,8 @@ import os
 from typing import List, Tuple
 
 import pygame
-from injector import inject
-
 from engine.graphics import Renderer
+from injector import inject
 from layout.game_layout import GameLayout
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir, get_images_dir
@@ -30,6 +29,7 @@ class InstructionsView(View):
         """Initialize the InstructionsView.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The main font.
@@ -79,33 +79,18 @@ class InstructionsView(View):
         logo_path = os.path.join(images_dir, "xboing.png")
         self.logo_image = load_image(logo_path, alpha=True)
 
-    def draw(self, surface: pygame.Surface) -> None:
-        """Draw the instructions view onto the given surface.
-
-        Args:
-            surface (pygame.Surface): The Pygame surface to draw on.
-
-        """
-        play_rect = self.layout.get_play_rect()
-
-        # Create a temporary surface for the play window
-        play_surf = pygame.Surface((play_rect.width, play_rect.height))
-        # Draw the mnbgrnd.png background, tiled, to play_surf
+    def _draw_background(self, play_surf: pygame.Surface) -> None:
         if self.bg_image:
             img_w, img_h = self.bg_image.get_width(), self.bg_image.get_height()
-            for y in range(0, play_rect.height, img_h):
-                for x in range(0, play_rect.width, img_w):
+            for y in range(0, play_surf.get_height(), img_h):
+                for x in range(0, play_surf.get_width(), img_w):
                     play_surf.blit(self.bg_image, (x, y))
         else:
-            # fallback: fill with dark color
             play_surf.fill((40, 40, 50))
-        centerx = play_rect.width // 2
 
-        # Draw XBoing logo image if available
-        y = 20
+    def _draw_logo(self, play_surf: pygame.Surface, centerx: int, y: int) -> int:
         if self.logo_image:
-            # Scale logo to fit nicely (max width 320, max height 100)
-            max_logo_width = min(320, play_rect.width - 40)
+            max_logo_width = min(320, play_surf.get_width() - 40)
             max_logo_height = 100
             logo_w, logo_h = self.logo_image.get_width(), self.logo_image.get_height()
             scale = min(max_logo_width / logo_w, max_logo_height / logo_h, 1.0)
@@ -115,56 +100,73 @@ class InstructionsView(View):
             )
             logo_rect = logo_surf.get_rect(center=(centerx, y + scaled_h // 2))
             play_surf.blit(logo_surf, logo_rect)
-            y = logo_rect.bottom + 10
+            return logo_rect.bottom + 10
         else:
-            # fallback: text logo
             logo_font = self.headline_font
             logo_text = "XBoing"
             logo_surf = logo_font.render(logo_text, True, (255, 255, 255))
             logo_rect = logo_surf.get_rect(center=(centerx, 40))
             play_surf.blit(logo_surf, logo_rect)
-            y = logo_rect.bottom + 10
+            return logo_rect.bottom + 10
 
-        # Draw red headline
+    def _draw_headline(self, play_surf: pygame.Surface, centerx: int, y: int) -> int:
         headline = " - Instructions - "
         headline_surf = self.headline_font.render(headline, True, (255, 0, 0))
         headline_rect = headline_surf.get_rect(center=(centerx, y))
         play_surf.blit(headline_surf, headline_rect)
-        y = headline_rect.bottom + 20
-        # Calculate total height of all lines
+        return headline_rect.bottom + 20
+
+    def _draw_text_block(self, play_surf: pygame.Surface, centerx: int, start_y: int) -> int:
         line_height = self.text_font.get_height()
         total_lines = len(self.lines)
         total_text_height = total_lines * line_height + (total_lines - 1) * 6
-        # Vertically center the block of text in the remaining play area
-        text_start_y = (play_rect.height - total_text_height) // 2
-        # Adjust so it doesn't overlap the headline/logo
-        text_start_y = max(text_start_y, y)
-        # Draw each line centered, with extra space between paragraphs
+        text_start_y = (play_surf.get_height() - total_text_height) // 2
+        text_start_y = max(text_start_y, start_y)
         green1 = (0, 255, 0)
         green2 = (0, 200, 0)
-        paragraph_ends = [2, 6, 8, 12, 14]  # Indices after which to add a blank line
+        paragraph_ends = [2, 6, 8, 12, 14]
         y_offset = 0
         for i, line in enumerate(self.lines):
-            color = green1 if (i // 3) % 2 == 0 else green2  # Alternate by paragraph
+            color = green1 if (i // 3) % 2 == 0 else green2
             line_surf = self.text_font.render(line, True, color)
             line_rect = line_surf.get_rect(center=(centerx, text_start_y + y_offset))
             play_surf.blit(line_surf, line_rect)
             y_offset += line_height + 6
             if i in paragraph_ends:
-                y_offset += 18  # Extra space between paragraphs
-        # Draw amber line at bottom
+                y_offset += 18
+        return text_start_y + y_offset
+
+    def _draw_amber_line(self, play_surf: pygame.Surface, centerx: int) -> None:
         amber = self.amber_color
         amber_text = "Insert coin to start the game"
         amber_surf = self.text_font.render(amber_text, True, amber)
-        amber_rect = amber_surf.get_rect(center=(centerx, play_rect.height - 40))
+        amber_rect = amber_surf.get_rect(center=(centerx, play_surf.get_height() - 40))
         play_surf.blit(amber_surf, amber_rect)
-        # Blit the play window surface to the main surface at play_rect.topleft
+
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draw the instructions view onto the given surface.
+
+        Args:
+        ----
+            surface (pygame.Surface): The Pygame surface to draw on.
+
+        """
+        play_rect = self.layout.get_play_rect()
+        play_surf = pygame.Surface((play_rect.width, play_rect.height))
+        self._draw_background(play_surf)
+        centerx = play_rect.width // 2
+        y = 20
+        y = self._draw_logo(play_surf, centerx, y)
+        y = self._draw_headline(play_surf, centerx, y)
+        self._draw_text_block(play_surf, centerx, y)
+        self._draw_amber_line(play_surf, centerx)
         surface.blit(play_surf, play_rect.topleft)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         """Handle a single Pygame event (currently a stub).
 
         Args:
+        ----
             event (pygame.event.Event): The Pygame event to handle.
 
         """
