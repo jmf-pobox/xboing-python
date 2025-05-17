@@ -82,6 +82,12 @@ def test_load_sounds_from_map(monkeypatch):
         called[name] = filename
 
     mgr.load_sound = fake_load_sound
+
+    # Patch __subclasses__ to only return the test event classes
+    monkeypatch.setattr(
+        XBoingEvent, "__subclasses__", lambda: [BallLostEvent, BlockHitEvent]
+    )
+
     mgr.load_sounds_from_events()
     assert called == {"ball_lost": "ball_lost.wav", "block_hit": "block_hit.wav"}
 
