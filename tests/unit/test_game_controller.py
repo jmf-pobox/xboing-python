@@ -193,9 +193,9 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     paddle.rect.width = 10
     block_manager = Mock()
     # Use SpriteBlock.TYPE_PAD_EXPAND for the effect
-    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_PAD_EXPAND])] + [
-        (0, 0, [])
-    ] * 10
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
+    ] + [(0, 0, [])] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -245,9 +245,9 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     paddle.rect.width = 20
     block_manager = Mock()
     # Use SpriteBlock.TYPE_PAD_SHRINK for the effect
-    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_PAD_SHRINK])] + [
-        (0, 0, [])
-    ] * 10
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
+    ] + [(0, 0, [])] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()

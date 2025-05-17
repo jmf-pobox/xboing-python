@@ -24,7 +24,7 @@ from game.game_state import GameState
 @pytest.fixture
 def game_state():
     pygame.init()  # Initialize pygame for events
-    with patch('pygame.event.post') as mock_post:
+    with patch("pygame.event.post") as mock_post:
         state = GameState()
         yield state, mock_post
 

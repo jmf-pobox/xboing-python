@@ -106,9 +106,7 @@ class XBoingApp:
         # --- Logging and Pygame/Audio Initialization ---
         self.game_state = GameState()
         pygame.mixer.init()
-        self.audio_manager = AudioManager(
-            sound_dir=get_sounds_dir()
-        )
+        self.audio_manager = AudioManager(sound_dir=get_sounds_dir())
         self.audio_manager.load_sounds_from_events()
 
         # --- Window and Renderer Setup ---

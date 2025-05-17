@@ -55,5 +55,5 @@ def test_game_view_draw():
     view.draw(surface)
     assert block_manager.drawn
     assert paddle.drawn
-    assert all(getattr(ball, 'drawn', False) for ball in ball_manager.balls)  # type: ignore  # test mock
+    assert all(getattr(ball, "drawn", False) for ball in ball_manager.balls)  # type: ignore  # test mock
     pygame.quit()
