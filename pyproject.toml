@@ -64,8 +64,7 @@ dependencies = [
     "black",
     "pylint",
     # Dev tools
-    "pillow",
-    "pyinstaller",
+    "pillow"
 ]
 path = ".venv"
 
@@ -97,7 +96,6 @@ fix = [
 ]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
-build-exe = "python scripts/build_executable.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

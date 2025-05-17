@@ -1,3 +1,17 @@
+# PyInstaller Troubleshooting & Outcome (2025-05-17)
+
+## Summary
+- Multiple attempts were made to bundle XBoing with PyInstaller (both onefile and onedir modes) on macOS.
+- All asset files (images, sounds, levels) were matched and included via glob patterns in the .spec file.
+- The build process completed without error, but at runtime, the executable could not find assets (e.g., `assets/images/icon.png`).
+- Directory structure preservation was attempted using various `datas` tuple forms, including `(f, os.path.dirname(f))`.
+- Diagnostic logging confirmed the code was looking for the correct paths, but the files were not present in the PyInstaller temp directory at runtime.
+- The root cause appears to be a mismatch between PyInstaller's asset extraction and the expected directory structure, possibly platform-specific.
+- As of this writing, **PyInstaller asset bundling for this project is not working reliably on macOS**.
+- PyInstaller and its configuration have been removed from the project until a robust solution is found.
+
+---
+
 # PyInstaller for PyGame Distribution
 
 PyInstaller is an excellent choice for packaging your PyGame project into a standalone executable. Here's a detailed overview:
