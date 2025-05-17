@@ -1,14 +1,5 @@
 # AUDIO-DESIGN.md
 
-## Status
-
-- The event-driven AudioManager and event-driven architecture are now fully integrated into the game.
-- All sound triggers are now event-driven and decoupled from game logic.
-- The old audio modules (`audio_player.py` and `audio.py`) have been removed as they are no longer used.
-- All planned TODOs for the audio system refactor are complete.
-
----
-
 ## Overview
 
 This document describes the event-driven audio architecture for XBoing. The goal is to decouple game logic from audio playback, making the system more maintainable, testable, and extensible. The design leverages the Pygame event queue, allowing game objects and controllers to post custom events that are handled by an `AudioManager`. Each event class that triggers a sound now declares its sound name as a `sound_effect` class attribute. This same event system is used for GUI updates and other MVC-style decoupling.
