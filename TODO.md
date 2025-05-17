@@ -1,6 +1,6 @@
 # TODO.md
 
-- [ ] Add type hints for all tests and making sure hatch run 
+- [ ] Add type hints for all tests and making sure mypy --strict, ruff check, and black run clean
 - [ ] Update all tests to use injector-based setup, providing mocks/stubs via test modules as needed
 - [ ] Add or update tests to assert on log output using caplog.
 - [ ] Migrate asset loading and configuration to DI where feasible
