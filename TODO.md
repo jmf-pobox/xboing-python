@@ -14,4 +14,10 @@
     - Reset the `stuck_since` timestamp when the ball is released (by user or auto-launch).
     - Ensure this works for all cases where a ball becomes stuck (new level, after losing a ball, sticky paddle, etc.).
     - Add/adjust tests to verify the auto-launch behavior.
+- [x] Integrate PyInstaller into the build process to create standalone executables for the game.
+    - Add PyInstaller as a development dependency.
+    - Create a PyInstaller spec file for the project.
+    - Add a build script or Makefile target for building the executable.
+    - Test the generated executable on supported platforms (macOS, Windows, Linux).
+    - Update documentation (e.g., PYINSTALLER-GUIDE.md, README.md) with build and usage instructions.
 -

@@ -126,3 +126,42 @@ pyinstaller --onefile --windowed --upx-dir=/path/to/upx your_game_main.py
 ## Testing Your Distribution
 
 Always test your PyInstaller package on a clean system without Python installed to ensure all dependencies are correctly bundled.
+
+# Building XBoing Executable with PyInstaller
+
+## Prerequisites
+- Python 3.7+
+- PyInstaller (`pip install pyinstaller`)
+
+## Build Steps
+
+1. Install dependencies:
+   ```sh
+   pip install -r requirements.txt
+   pip install pyinstaller
+   ```
+
+2. Build the executable:
+   ```sh
+   python scripts/build_executable.py
+   # or directly:
+   pyinstaller --onefile --name xboing src/xboing.py
+   ```
+
+3. The executable will be in the `dist/` directory.
+
+## Platform Notes
+- **macOS:** You may need to allow the app in Security & Privacy settings.
+- **Windows:** The `.exe` will be in `dist\xboing.exe`.
+- **Linux:** The binary will be in `dist/xboing`.
+
+## Including Assets
+- Edit `xboing.spec` to include assets (images, sounds, etc.) in the build.
+- Example:
+  ```python
+  datas=[('assets/images', 'assets/images'), ('assets/sounds', 'assets/sounds')]
+  ```
+
+## Troubleshooting
+- If you see missing module errors, add them to `hiddenimports` in `xboing.spec`.
+- For more advanced options, see the [PyInstaller documentation](https://pyinstaller.org/).

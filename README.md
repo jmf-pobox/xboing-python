@@ -163,3 +163,13 @@ This project is licensed under the same terms as the original XBoing - see the L
 
 The original source code is available in the subdirectory: xboing2.4-clang
 
+## Building a Standalone Executable
+
+You can build a standalone executable for XBoing using PyInstaller:
+
+1. Install PyInstaller: `pip install pyinstaller`
+2. Run the build script: `python scripts/build_executable.py`
+3. The executable will be in the `dist/` directory.
+
+See [docs/PYINSTALLER-GUIDE.md](docs/PYINSTALLER-GUIDE.md) for full details and troubleshooting.
+
