@@ -81,6 +81,8 @@ class LevelCompleteController(Controller):
             "advance_to_next_level called: advancing to next level and switching to game view/controller."
         )
         self.game_controller.level_complete = False  # Reset for new level
+        # Disable sticky paddle on new level
+        self.game_controller.on_new_level_loaded()
         # Get the events returned by set_level and post them
         level_changed_events = self.game_state.set_level(self.game_state.level + 1)
         self.post_game_state_events(level_changed_events)

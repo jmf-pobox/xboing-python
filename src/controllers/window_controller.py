@@ -85,6 +85,10 @@ class WindowController(Controller):
                     and self.ui_manager
                 ):
                     self.ui_manager.set_view("instructions")
+            elif event.type == pygame.WINDOWENTER:
+                pygame.mouse.set_visible(False)
+            elif event.type == pygame.WINDOWLEAVE:
+                pygame.mouse.set_visible(True)
 
     def update(self, delta_ms: float) -> None:
         """Update logic for this controller.

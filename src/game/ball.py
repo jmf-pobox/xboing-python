@@ -254,7 +254,7 @@ class Ball:
         # Handle sticky paddle
         if paddle.is_sticky():
             self.stuck_to_paddle = True
-            self.paddle_offset = self.x - paddle.rect.centerx
+            self.paddle_offset = 0.0
 
         return True
 

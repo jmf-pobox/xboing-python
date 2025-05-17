@@ -4,10 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Xboing"
-version = "0.2.0"
 description = "XBoing - A classic breakout-style game modernized with Python and Pygame"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "X Consortium License"}
 authors = [
     {name = "Original: Justin C. Kibell"},
@@ -17,11 +16,10 @@ dependencies = [
     "pygame",
     "injector>=0.21.0",
 ]
+dynamic = ["version"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -66,7 +64,7 @@ dependencies = [
     "black",
     "pylint",
     # Dev tools
-    "pillow",
+    "pillow"
 ]
 path = ".venv"
 
@@ -175,3 +173,10 @@ test-publish = [
 targets = ["src", "tests", "scripts"]
 formatter = "black"
 linter = "isort"
+
+# If using Poetry:
+# [tool.poetry.dev-dependencies]
+# pyinstaller = "^6.0.0"
+#
+# If not using Poetry, add to requirements-dev.txt or install manually:
+# pyinstaller
