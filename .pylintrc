@@ -11,7 +11,7 @@ disable=
     # Accept black's formatting
 
 [FORMAT]
-max-line-length=88
+max-line-length=200
 indent-string='    '
 
 [DESIGN]
@@ -41,13 +41,6 @@ additional-builtins=pytest
 
 [EXCEPTIONS]
 overgeneral-exceptions=builtins.Exception
-
-[PYTHON3]
-python-version=3.8
-
-[REFACTORING]
-# Accept black's formatting, so don't warn about bad-continuation, etc.
-disable=bad-continuation
 
 [IMPORTS]
 # Accept ruff/isort's import order, so don't warn about import-order-style

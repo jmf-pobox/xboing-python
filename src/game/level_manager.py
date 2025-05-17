@@ -1,5 +1,4 @@
-"""
-Level Manager for XBoing.
+"""Level Manager for XBoing.
 
 This module handles loading, parsing, and managing XBoing level files.
 It interfaces with the SpriteBlockManager to create the appropriate block layout.
@@ -7,7 +6,7 @@ It interfaces with the SpriteBlockManager to create the appropriate block layout
 
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from game.sprite_block import SpriteBlock
 from utils.asset_paths import get_levels_dir
@@ -71,13 +70,13 @@ class LevelManager:
     def __init__(
         self, levels_dir: Optional[str] = None, layout: Optional[Any] = None
     ) -> None:
-        """
-        Initialize the level manager.
+        """Initialize the level manager.
 
         Args:
             levels_dir (str): Directory containing level data files.
                 If None, tries to find the default levels directory.
             layout (GameLayout): The game layout to set backgrounds on.
+
         """
         self.logger = logging.getLogger("xboing.LevelManager")
         self.current_level = 1
@@ -99,32 +98,32 @@ class LevelManager:
         self.logger.info(f"Using levels directory: {self.levels_dir}")
 
     def set_block_manager(self, block_manager: Any) -> None:
-        """
-        Set the block manager to use for creating blocks.
+        """Set the block manager to use for creating blocks.
 
         Args:
             block_manager (SpriteBlockManager): The block manager to use
+
         """
         self.block_manager = block_manager
 
     def set_layout(self, layout: Any) -> None:
-        """
-        Set the game layout to use for backgrounds.
+        """Set the game layout to use for backgrounds.
 
         Args:
             layout (GameLayout): The game layout to use
+
         """
         self.layout = layout
 
     def load_level(self, level_num: Optional[int] = None) -> bool:
-        """
-        Load a specific level.
+        """Load a specific level.
 
         Args:
             level_num (int): Level number to load. If None, uses current_level.
 
         Returns:
             bool: True if level was loaded successfully, False otherwise
+
         """
         if level_num is not None:
             self.current_level = level_num
@@ -157,27 +156,19 @@ class LevelManager:
                     self._set_level_background()
 
                     return True
-                else:
-                    self.logger.error("Error: Block manager not set")
-                    return False
-            else:
-                self.logger.warning(f"Failed to parse level file: {level_file}")
+                self.logger.error("Error: Block manager not set")
                 return False
+            self.logger.warning(f"Failed to parse level file: {level_file}")
+            return False
         except Exception as e:
             self.logger.error(f"Error loading level {self.current_level}: {e}")
             return False
 
     def get_next_level(self) -> bool:
-        """
-        Advance to the next level.
-
-        Returns:
-            bool: True if next level was loaded successfully, False otherwise
-        """
-        self.current_level += 1
-
-        # Wrap around to level 1 after reaching MAX_LEVELS
-        if self.current_level > self.MAX_LEVELS:
+        """Advance to the next level, or reset if at the last level."""
+        if self.current_level < self.MAX_LEVELS:
+            self.current_level += 1
+        else:
             self.current_level = 1
 
         # Update the background cycle (same logic as original XBoing)
@@ -189,11 +180,11 @@ class LevelManager:
         return self.load_level()
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update level timer and state.
+        """Update level timer and state.
 
         Args:
             delta_ms (float): Time since last frame in milliseconds
+
         """
         # Update time bonus if timer is active
         if self.timer_active and self.time_remaining > 0:
@@ -201,16 +192,15 @@ class LevelManager:
             self.time_remaining -= delta_ms / 1000
 
             # Ensure time doesn't go below zero
-            if self.time_remaining < 0:
-                self.time_remaining = 0
-                # Could trigger "times up" event here
+            self.time_remaining = max(self.time_remaining, 0)
+            # Could trigger "times up" event here
 
     def add_time(self, seconds: int) -> None:
-        """
-        Add time to the level timer (for power-ups).
+        """Add time to the level timer (for power-ups).
 
         Args:
             seconds (int): Seconds to add
+
         """
         self.time_remaining += float(seconds)
 
@@ -223,22 +213,22 @@ class LevelManager:
         self.timer_active = False
 
     def is_level_complete(self) -> bool:
-        """
-        Check if the level is complete (all breakable blocks destroyed).
+        """Check if the level is complete (all breakable blocks destroyed).
 
         Returns:
             bool: True if level is complete, False otherwise
+
         """
         if self.block_manager:
             return self.block_manager.get_breakable_count() == 0
         return False
 
-    def get_level_info(self) -> Dict[str, Union[int, str]]:
-        """
-        Get current level information.
+    def get_level_info(self) -> dict:
+        """Get current level information.
 
         Returns:
-            dict[str, int | str]: Dictionary with level info (level_num, title, time_bonus, time_remaining)
+            dict: Dictionary with level info (level_num, title, time_bonus, time_remaining)
+
         """
         return {
             "level_num": self.current_level,
@@ -248,20 +238,20 @@ class LevelManager:
         }
 
     def get_time_remaining(self) -> int:
-        """
-        Get remaining time in seconds.
+        """Get remaining time in seconds.
 
         Returns:
             int: Remaining time in seconds
+
         """
         return int(self.time_remaining)
 
     def get_score_multiplier(self) -> int:
-        """
-        Get score multiplier based on remaining time.
+        """Get score multiplier based on remaining time.
 
         Returns:
             int: Score multiplier (1, 2, 3, 4, or 5)
+
         """
         # In original XBoing, time remaining affects final score
         if self.time_remaining <= 0:
@@ -275,21 +265,20 @@ class LevelManager:
 
         if percent > 0.8:
             return 5
-        elif percent > 0.6:
+        if percent > 0.6:
             return 4
-        elif percent > 0.4:
+        if percent > 0.4:
             return 3
-        elif percent > 0.2:
+        if percent > 0.2:
             return 2
-        else:
-            return 1
+        return 1
 
     def _create_blocks_from_layout(self, layout: List[str]) -> None:
-        """
-        Create blocks based on the level layout.
+        """Create blocks based on the level layout.
 
         Args:
             layout (list): List of rows, each a string of characters representing blocks
+
         """
         if not self.block_manager:
             self.logger.error("Block manager not set")
@@ -377,8 +366,8 @@ class LevelManager:
                 self.block_manager.blocks.append(block)
 
     def _set_level_background(self) -> None:
-        """
-        Set the appropriate background for the current level.
+        """Set the appropriate background for the current level.
+
         In the original XBoing, backgrounds rotate between levels.
         """
         if self.layout is None:
@@ -408,22 +397,21 @@ class LevelManager:
         self.layout.set_play_background(bg_index)
 
     def _get_level_file_path(self, level_num: int) -> str:
-        """
-        Get the file path for a specific level number.
+        """Get the file path for a specific level number.
 
         Args:
             level_num (int): Level number (1-80)
 
         Returns:
             str: Path to the level file
+
         """
         # Format level number with leading zeros (level01.data)
         level_file = f"level{level_num:02d}.data"
         return os.path.join(self.levels_dir, level_file)
 
     def _parse_level_file(self, file_path: str) -> Optional[Dict[str, Any]]:
-        """
-        Parse an XBoing level file.
+        """Parse an XBoing level file.
 
         Args:
             file_path (str): Path to the level file
@@ -431,6 +419,7 @@ class LevelManager:
         Returns:
             dict: Dictionary with level data (title, time_bonus, layout)
                   or None if parsing failed
+
         """
         try:
             with open(file_path) as f:

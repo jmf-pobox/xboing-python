@@ -1,5 +1,4 @@
-"""
-Paddle implementation for XBoing.
+"""Paddle implementation for XBoing.
 
 This module contains the paddle class that manages the player-controlled paddle
 and its interactions with the game, matching the original XBoing implementation.
@@ -31,8 +30,7 @@ class Paddle:
     def __init__(
         self, x: int, y: int, width: int, height: int, speed: int = 10
     ) -> None:
-        """
-        Initialize the paddle.
+        """Initialize the paddle.
 
         Args:
             x (int): Starting X position
@@ -40,6 +38,7 @@ class Paddle:
             width (int): Paddle width
             height (int): Paddle height
             speed (int): Movement speed in pixels per frame
+
         """
         self.x = x
         self.y = y
@@ -129,13 +128,13 @@ class Paddle:
         self.width = int(width)
 
     def update(self, delta_ms: float, play_width: int, offset_x: int = 0) -> None:
-        """
-        Update paddle position.
+        """Update paddle position.
 
         Args:
             delta_ms (float): Time since last frame in milliseconds
             play_width (int): Play area width for boundary checking
             offset_x (int): X offset of the play area
+
         """
         if self.direction != 0:
             self.moving = True
@@ -153,32 +152,30 @@ class Paddle:
 
         # Boundary checking within play area
         # Keep the paddle within the play area bounds (matching original logic)
-        if self.x < paddle_half_width + offset_x:
-            self.x = paddle_half_width + offset_x
-        if self.x > offset_x + play_width - paddle_half_width:
-            self.x = offset_x + play_width - paddle_half_width
+        self.x = max(self.x, paddle_half_width + offset_x)
+        self.x = min(self.x, offset_x + play_width - paddle_half_width)
 
         # Update rectangle
         self.rect.x = int(self.x - paddle_half_width)
         self.rect.y = int(self.y)
 
     def set_direction(self, direction: int) -> None:
-        """
-        Set paddle movement direction.
+        """Set paddle movement direction.
 
         Args:
             direction (int): -1 for left, 0 for none, 1 for right
+
         """
         self.direction = direction
 
     def move_to(self, x: int, play_width: int, offset_x: int = 0) -> None:
-        """
-        Move paddle to a specific x position.
+        """Move paddle to a specific x position.
 
         Args:
             x (int): Target X position relative to play area
             play_width (int): Play area width for boundary checking
             offset_x (int): X offset of the play area
+
         """
         # Replicate original XBoing logic for paddle positioning
         self.x = offset_x + x
@@ -187,20 +184,18 @@ class Paddle:
         paddle_half_width = self.paddle_dimensions[self.size][0] // 2
 
         # Boundary checking
-        if self.x < paddle_half_width + offset_x:
-            self.x = paddle_half_width + offset_x
-        if self.x > offset_x + play_width - paddle_half_width:
-            self.x = offset_x + play_width - paddle_half_width
+        self.x = max(self.x, paddle_half_width + offset_x)
+        self.x = min(self.x, offset_x + play_width - paddle_half_width)
 
         # Update rectangle
         self.rect.x = int(self.x - paddle_half_width)
 
     def set_size(self, size: int) -> None:
-        """
-        Set paddle size.
+        """Set paddle size.
 
         Args:
             size (int): SIZE_SMALL, SIZE_MEDIUM, or SIZE_LARGE
+
         """
         if size in self.paddle_dimensions:
             # Store center position
@@ -222,11 +217,11 @@ class Paddle:
         return self.sticky
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the paddle.
+        """Draw the paddle.
 
         Args:
             surface (pygame.Surface): Surface to draw on
+
         """
         # Check if we have paddle images loaded
         if self.paddle_images:

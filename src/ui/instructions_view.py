@@ -1,3 +1,5 @@
+"""UI view for displaying game instructions in XBoing."""
+
 import os
 from typing import List, Tuple
 
@@ -13,6 +15,8 @@ from .view import View
 
 
 class InstructionsView(View):
+    """View for displaying game instructions in the XBoing UI."""
+
     @inject
     def __init__(
         self,
@@ -23,8 +27,7 @@ class InstructionsView(View):
         text_font: pygame.font.Font,
         amber_color: Tuple[int, int, int] = (255, 191, 63),
     ) -> None:
-        """
-        Initialize the InstructionsView.
+        """Initialize the InstructionsView.
 
         Args:
             layout (GameLayout): The GameLayout instance.
@@ -33,6 +36,7 @@ class InstructionsView(View):
             headline_font (pygame.font.Font): The font for headlines.
             text_font (pygame.font.Font): The font for instructions text.
             amber_color (Tuple[int, int, int], optional): Amber color for the bottom line. Defaults to (255, 191, 63).
+
         """
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
@@ -76,11 +80,11 @@ class InstructionsView(View):
         self.logo_image = load_image(logo_path, alpha=True)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the instructions view onto the given surface.
+        """Draw the instructions view onto the given surface.
 
         Args:
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         play_rect = self.layout.get_play_rect()
 
@@ -158,22 +162,18 @@ class InstructionsView(View):
         surface.blit(play_surf, play_rect.topleft)
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        """
-        Handle a single Pygame event (currently a stub).
+        """Handle a single Pygame event (currently a stub).
 
         Args:
             event (pygame.event.Event): The Pygame event to handle.
+
         """
-        pass  # InstructionsView may handle events in the future
+        # No-op for now
 
     def activate(self) -> None:
-        """
-        Activate the view (currently a stub).
-        """
-        pass
+        """Activate the view (currently a stub)."""
+        # No-op for now
 
     def deactivate(self) -> None:
-        """
-        Deactivate the view (currently a stub).
-        """
-        pass
+        """Deactivate the view (currently a stub)."""
+        # No-op for now

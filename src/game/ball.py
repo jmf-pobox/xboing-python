@@ -1,5 +1,4 @@
-"""
-Ball implementation for XBoing.
+"""Ball implementation for XBoing.
 
 This module contains the ball class that handles physics, movement,
 and collision detection with walls and the paddle.
@@ -63,14 +62,14 @@ class Ball:
         radius: int = 8,
         color: Tuple[int, int, int] = (255, 255, 255),
     ) -> None:
-        """
-        Initialize a new ball.
+        """Initialize a new ball.
 
         Args:
             x (float): Starting X position
             y (float): Starting Y position
             radius (int): Ball radius
             color (tuple): RGB color tuple
+
         """
         self.x: float = float(x)
         self.y: float = float(y)
@@ -121,8 +120,7 @@ class Ball:
         offset_x: int = 0,
         offset_y: int = 0,
     ) -> Tuple[bool, bool, bool]:
-        """
-        Update ball position and handle collisions.
+        """Update ball position and handle collisions.
 
         Args:
             delta_ms (float): Time since last frame in milliseconds
@@ -134,6 +132,7 @@ class Ball:
 
         Returns:
             tuple: (is_active, hit_paddle, hit_wall) - ball status and collision info
+
         """
         if not self.active:
             return (False, False, False)
@@ -206,14 +205,14 @@ class Ball:
         self.rect.y = int(self.y - self.radius)
 
     def _check_paddle_collision(self, paddle: Any) -> bool:
-        """
-        Check for collision with the paddle and handle bouncing.
+        """Check for collision with the paddle and handle bouncing.
 
         Args:
             paddle (Paddle): The paddle object
 
         Returns:
             bool: True if collision occurred, False otherwise
+
         """
         # Simple rectangle collision check
         if not pygame.Rect(self.rect).colliderect(paddle.rect):
@@ -277,13 +276,13 @@ class Ball:
         self.vy = -speed * speed_factor * math.sin(angle)  # Negative for upward
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the ball.
+        """Draw the ball.
 
         Args:
             surface (pygame.Surface): Surface to draw on
+
         """
-        if not Ball.sprites or len(Ball.sprites) == 0:
+        if Ball.sprites is None or len(Ball.sprites) == 0:
             # Fallback to circle drawing if sprites failed to load
             pygame.draw.circle(
                 surface, self.color, (int(self.x), int(self.y)), self.radius
@@ -298,29 +297,31 @@ class Ball:
             pygame.draw.circle(
                 surface, (255, 255, 255), highlight_pos, highlight_radius
             )
-        else:
-            # Draw sprite
-            if self.birth_animation and Ball.animation_frames:
-                # Draw birth animation frames
-                current_frame = Ball.animation_frames[self.animation_frame]
-                frame_rect = current_frame.get_rect()
-                frame_rect.center = (int(self.x), int(self.y))
-                surface.blit(current_frame, frame_rect)
+        elif self.birth_animation and Ball.animation_frames is not None:
+            # Draw birth animation frames
+            assert Ball.animation_frames is not None
+            current_frame = Ball.animation_frames[self.animation_frame]
+            frame_rect = current_frame.get_rect()
+            frame_rect.center = (int(self.x), int(self.y))
+            surface.blit(current_frame, frame_rect)
 
-                # Update animation frame
-                self.frame_counter += 1
-                if self.frame_counter >= 4:  # Speed of animation
-                    self.frame_counter = 0
-                    self.animation_frame += 1
-                    if self.animation_frame >= len(Ball.animation_frames):
-                        self.animation_frame = 0
-                        self.birth_animation = False
-            else:
-                # Draw regular ball sprite
-                sprite = Ball.sprites[self.sprite_index]
-                sprite_rect = sprite.get_rect()
-                sprite_rect.center = (int(self.x), int(self.y))
-                surface.blit(sprite, sprite_rect)
+            # Update animation frame
+            self.frame_counter += 1
+            if self.frame_counter >= 4:  # Speed of animation
+                self.frame_counter = 0
+                self.animation_frame += 1
+                if Ball.animation_frames is not None and self.animation_frame >= len(
+                    Ball.animation_frames
+                ):
+                    self.animation_frame = 0
+                    self.birth_animation = False
+        else:
+            # Draw regular ball sprite
+            assert Ball.sprites is not None
+            sprite = Ball.sprites[self.sprite_index]
+            sprite_rect = sprite.get_rect()
+            sprite_rect.center = (int(self.x), int(self.y))
+            surface.blit(sprite, sprite_rect)
 
     def get_rect(self) -> pygame.Rect:
         """Get the ball's collision rectangle."""
@@ -331,24 +332,24 @@ class Ball:
         return (self.x, self.y)
 
     def set_position(self, x: float, y: float) -> None:
-        """
-        Set the ball's position.
+        """Set the ball's position.
 
         Args:
             x (float): New X position
             y (float): New Y position
+
         """
         self.x = float(x)
         self.y = float(y)
         self._update_rect()
 
     def set_velocity(self, vx: float, vy: float) -> None:
-        """
-        Set the ball's velocity.
+        """Set the ball's velocity.
 
         Args:
             vx (float): X velocity component
             vy (float): Y velocity component
+
         """
         self.vx = float(vx)
         self.vy = float(vy)

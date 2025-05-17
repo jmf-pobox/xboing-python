@@ -1,5 +1,5 @@
-"""
-SpecialDisplay: UI component for displaying the status of special power-ups in the special window region.
+"""SpecialDisplay: UI component for displaying the status of special power-ups in the special window region.
+
 Subscribes to special events and renders their state as colored labels.
 """
 
@@ -22,8 +22,8 @@ from layout.game_layout import GameLayout
 
 
 class SpecialDisplay:
-    """
-    UI component for displaying the status of special power-ups in the special window region.
+    """UI component for displaying the status of special power-ups in the special window region.
+
     Subscribes to events for each special and renders their state as colored labels.
     """
 
@@ -54,13 +54,13 @@ class SpecialDisplay:
         renderer: Renderer,
         font: pygame.font.Font,
     ) -> None:
-        """
-        Initialize the SpecialDisplay.
+        """Initialize the SpecialDisplay.
 
         Args:
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The font to use for labels.
+
         """
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
@@ -69,11 +69,11 @@ class SpecialDisplay:
         self.state: Dict[str, bool] = {key: False for _, key in self.LABELS}
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Handle special power-up events and update state.
+        """Handle special power-up events and update state.
 
         Args:
             events (List[pygame.event.Event]): List of Pygame events to handle.
+
         """
         for event in events:
             for key, event_cls in self.EVENT_MAP.items():
@@ -82,12 +82,12 @@ class SpecialDisplay:
                 ):
                     self.state[key] = event.event.active
 
-    def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the special power-up labels and their states.
+    def draw(self, _surface: pygame.Surface) -> None:
+        """Draw the special power-up labels and their states.
 
         Args:
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         special_rect = self.layout.special_window.rect.rect
         x0, y0 = special_rect.x + 5, special_rect.y + 3

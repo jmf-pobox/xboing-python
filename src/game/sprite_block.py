@@ -1,5 +1,4 @@
-"""
-Sprite-based Block implementation for XBoing.
+"""Sprite-based Block implementation for XBoing.
 
 This module implements blocks using the original XBoing styling,
 with proper rounded edges and spacing matching the original game.
@@ -142,11 +141,11 @@ class SpriteBlock:
 
     @classmethod
     def preload_images(cls, blocks_dir: str) -> None:
-        """
-        Preload all block images to avoid loading during gameplay.
+        """Preload all block images to avoid loading during gameplay.
 
         Args:
             blocks_dir (str): Directory containing block images
+
         """
         loaded_count = 0
         failed_count = 0
@@ -211,13 +210,13 @@ class SpriteBlock:
         )
 
     def __init__(self, x: int, y: int, block_type: int = TYPE_BLUE) -> None:
-        """
-        Initialize a sprite-based block.
+        """Initialize a sprite-based block.
 
         Args:
             x (int): X position
             y (int): Y position
             block_type (int): Type of block (from TYPE_* constants)
+
         """
         self.x: int = x
         self.y: int = y
@@ -301,14 +300,14 @@ class SpriteBlock:
             self.image = img
 
     def _create_block_image(self, block_type: int) -> pygame.Surface:
-        """
-        Create a proper XBoing-style block image with 3D effects and rounded corners.
+        """Create a proper XBoing-style block image with 3D effects and rounded corners.
 
         Args:
             block_type (int): Type of block to create
 
         Returns:
             pygame.Surface: The block image surface
+
         """
         # Create a surface for the block
         img = pygame.Surface((40, 20), pygame.SRCALPHA)
@@ -316,25 +315,24 @@ class SpriteBlock:
         # Get appropriate colors based on block type
         if block_type in self.XBOING_COLORS:
             main_color, edge_color, shadow_color = self.XBOING_COLORS[block_type]
+        # Default colors for block types not explicitly mapped
+        elif block_type == self.TYPE_BLACK:
+            main_color = (40, 40, 40)
+            edge_color = (20, 20, 20)
+            shadow_color = (0, 0, 0)
+        elif block_type == self.TYPE_BULLET:
+            main_color = (220, 100, 100)
+            edge_color = (180, 60, 60)
+            shadow_color = (140, 20, 20)
+        elif block_type >= self.TYPE_BONUSX2:
+            main_color = (255, 215, 0)  # Gold for bonus blocks
+            edge_color = (220, 180, 0)
+            shadow_color = (180, 140, 0)
         else:
-            # Default colors for block types not explicitly mapped
-            if block_type == self.TYPE_BLACK:
-                main_color = (40, 40, 40)
-                edge_color = (20, 20, 20)
-                shadow_color = (0, 0, 0)
-            elif block_type == self.TYPE_BULLET:
-                main_color = (220, 100, 100)
-                edge_color = (180, 60, 60)
-                shadow_color = (140, 20, 20)
-            elif block_type >= self.TYPE_BONUSX2:
-                main_color = (255, 215, 0)  # Gold for bonus blocks
-                edge_color = (220, 180, 0)
-                shadow_color = (180, 140, 0)
-            else:
-                # Default to blue
-                main_color = (40, 120, 255)  # Vibrant blue
-                edge_color = (20, 80, 220)  # Medium blue
-                shadow_color = (0, 40, 180)  # Dark blue
+            # Default to blue
+            main_color = (40, 120, 255)  # Vibrant blue
+            edge_color = (20, 80, 220)  # Medium blue
+            shadow_color = (0, 40, 180)  # Dark blue
 
         # Calculate highlight color
         highlight_color = (
@@ -383,11 +381,11 @@ class SpriteBlock:
         return img
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update the block's state.
+        """Update the block's state.
 
         Args:
             delta_ms (float): Time since last frame in milliseconds
+
         """
         # Update hit animation
         if self.is_hit:
@@ -442,11 +440,11 @@ class SpriteBlock:
                     self.image = self._image_cache[frame_file]
 
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
-        """
-        Handle the block being hit by a ball.
+        """Handle the block being hit by a ball.
 
         Returns:
             tuple: (broken, points, effect) - Whether the block was broken, points earned, and any special effect
+
         """
         # Start hit animation (except for unbreakable blocks)
         if self.behavior != self.BEHAVIOR_UNBREAKABLE:
@@ -458,7 +456,7 @@ class SpriteBlock:
             # Unbreakable blocks (black wall) - ball just bounces off
             return (False, 0, None)
 
-        elif self.behavior == self.BEHAVIOR_COUNTER:
+        if self.behavior == self.BEHAVIOR_COUNTER:
             # Counter blocks - takes multiple hits
             self.health -= 1
 
@@ -489,7 +487,7 @@ class SpriteBlock:
 
             return (False, 0, None)
 
-        elif self.behavior == self.BEHAVIOR_SPECIAL:
+        if self.behavior == self.BEHAVIOR_SPECIAL:
             # Special blocks have effects when broken
             self.health -= 1
 
@@ -500,7 +498,7 @@ class SpriteBlock:
 
             return (False, 0, None)
 
-        elif self.behavior == self.BEHAVIOR_DAMAGE:
+        if self.behavior == self.BEHAVIOR_DAMAGE:
             # Damage blocks hurt the player (e.g., death blocks)
             self.health -= 1
 
@@ -510,7 +508,7 @@ class SpriteBlock:
 
             return (False, 0, None)
 
-        elif self.behavior == self.BEHAVIOR_DYNAMIC:
+        if self.behavior == self.BEHAVIOR_DYNAMIC:
             # Dynamic blocks like roamers - special handling
             self.health -= 1
 
@@ -519,21 +517,20 @@ class SpriteBlock:
 
             return (False, 0, None)
 
-        else:
-            # Normal blocks (regular colored blocks)
-            self.health -= 1
+        # Normal blocks (regular colored blocks)
+        self.health -= 1
 
-            if self.health <= 0:
-                return (True, self.points, None)
+        if self.health <= 0:
+            return (True, self.points, None)
 
-            return (False, 0, None)
+        return (False, 0, None)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the block.
+        """Draw the block.
 
         Args:
             surface (pygame.Surface): Surface to draw on
+
         """
         if self.image is not None:
             if self.is_hit:
@@ -562,12 +559,12 @@ class SpriteBlockManager:
     """Manages sprite-based blocks in the game."""
 
     def __init__(self, offset_x: int = 0, offset_y: int = 0) -> None:
-        """
-        Initialize the sprite block manager.
+        """Initialize the sprite block manager.
 
         Args:
             offset_x (int): X offset for all blocks (for positioning within play area)
             offset_y (int): Y offset for all blocks (for positioning within play area)
+
         """
         self.logger = logging.getLogger("xboing.SpriteBlockManager")
         # Original XBoing block dimensions and spacing
@@ -596,8 +593,7 @@ class SpriteBlockManager:
     def create_level(
         self, level_num: int = 1, width: int = 495, top_margin: int = 60
     ) -> List[SpriteBlock]:
-        """
-        Create a level with blocks arranged in a pattern based on the original XBoing.
+        """Create a level with blocks arranged in a pattern based on the original XBoing.
 
         Args:
             level_num (int): Level number to determine difficulty
@@ -606,6 +602,7 @@ class SpriteBlockManager:
 
         Returns:
             List[SpriteBlock]: The created blocks
+
         """
         self.blocks = []
 
@@ -794,24 +791,24 @@ class SpriteBlockManager:
         return self.blocks
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update all blocks.
+        """Update all blocks.
 
         Args:
             delta_ms (float): Time since last frame in milliseconds
+
         """
         for block in self.blocks:
             block.update(delta_ms)
 
     def check_collisions(self, ball: Any) -> Tuple[int, int, List[Any]]:
-        """
-        Check for collisions between a ball and all blocks.
+        """Check for collisions between a ball and all blocks.
 
         Args:
             ball (Ball): The ball to check collisions with
 
         Returns:
             Tuple[int, int, List[Any]]: Points earned, number of blocks broken, and any special effects
+
         """
         points = 0
         broken_blocks = 0
@@ -888,11 +885,11 @@ class SpriteBlockManager:
         return points, broken_blocks, effects
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw all blocks.
+        """Draw all blocks.
 
         Args:
             surface (pygame.Surface): Surface to draw on
+
         """
         for block in self.blocks:
             block.draw(surface)
@@ -909,3 +906,10 @@ class SpriteBlockManager:
         """Return the number of blocks that are not broken."""
         count: int = len([b for b in self.blocks if not b.is_broken()])
         return count
+
+    def get_block_by_id(self, block_id: int) -> Optional["SpriteBlock"]:
+        """Return the SpriteBlock with the given ID, or None if not found."""
+        for block in self.blocks:
+            if hasattr(block, "id") and block.id == block_id:  # type: ignore[attr-defined]  # SpriteBlock.id is dynamic
+                return block
+        return None

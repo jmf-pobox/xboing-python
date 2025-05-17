@@ -1,9 +1,11 @@
+"""BlockManager: Manages block objects and their interactions in XBoing."""
+
 import logging
 from typing import Any, List
 
 
 class BlockManager:
-    """Manages the collection of blocks in the game."""
+    """Manages block objects and their interactions in XBoing."""
 
     def __init__(self) -> None:
         """Initialize the block manager."""

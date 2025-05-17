@@ -121,10 +121,10 @@ class GameLayout:
         self.logger = logging.getLogger("xboing.GameLayout")
         self.width = width
         self.height = height
-        self.PLAY_WIDTH = 495
-        self.PLAY_HEIGHT = 580
-        self.MAIN_WIDTH = 70
-        self.MAIN_HEIGHT = 130
+        self.play_width = 495
+        self.play_height = 580
+        self.main_width = 70
+        self.main_height = 130
         self._create_windows()
 
     def _create_windows(self) -> None:
@@ -134,7 +134,7 @@ class GameLayout:
             name="mainWindow",
             bg_color=(0, 0, 0),
         )
-        offset_x = self.MAIN_WIDTH // 2
+        offset_x = self.main_width // 2
         score_width = 224
         mess_height = 30
         self.score_window = GameWindow(
@@ -147,7 +147,7 @@ class GameLayout:
             Rect(
                 score_width + offset_x + 25,
                 5,
-                self.PLAY_WIDTH + offset_x - 20 - score_width,
+                self.play_width + offset_x - 20 - score_width,
                 52,
             ),
             name="levelWindow",
@@ -155,7 +155,7 @@ class GameLayout:
             bg_color=None,
         )
         self.play_window = GameWindow(
-            Rect(offset_x, 60, self.PLAY_WIDTH, self.PLAY_HEIGHT),
+            Rect(offset_x, 60, self.play_width, self.play_height),
             name="playWindow",
             parent=self.main_window,
             bg_color=(0, 0, 0),
@@ -163,8 +163,8 @@ class GameLayout:
         self.mess_window = GameWindow(
             Rect(
                 offset_x + 35,
-                50 + self.PLAY_HEIGHT + 10,
-                self.PLAY_WIDTH // 2,
+                50 + self.play_height + 10,
+                self.play_width // 2,
                 mess_height,
             ),
             name="messWindow",
@@ -173,8 +173,8 @@ class GameLayout:
         )
         self.special_window = GameWindow(
             Rect(
-                offset_x + self.PLAY_WIDTH // 2 + 10,
-                65 + self.PLAY_HEIGHT + 10,
+                offset_x + self.play_width // 2 + 10,
+                65 + self.play_height + 10,
                 180,
                 mess_height + 5,
             ),
@@ -184,9 +184,9 @@ class GameLayout:
         )
         self.time_window = GameWindow(
             Rect(
-                offset_x - 5 + self.PLAY_WIDTH // 2 + 10 + 180 + 5,
-                65 + self.PLAY_HEIGHT + 10,
-                self.PLAY_WIDTH // 8,
+                offset_x - 5 + self.play_width // 2 + 10 + 180 + 5,
+                65 + self.play_height + 10,
+                self.play_width // 8,
                 mess_height + 5,
             ),
             name="timeWindow",

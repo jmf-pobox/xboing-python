@@ -6,7 +6,7 @@ from typing import Tuple
 class XBoingEvent:
     """Base class for all XBoing game events."""
 
-    pass
+    # No-op for now
 
 
 class BlockHitEvent(XBoingEvent):
@@ -189,4 +189,4 @@ class SpecialX4ChangedEvent(XBoingEvent):
 class LevelCompleteEvent(XBoingEvent):
     """Event: Level completed."""
 
-    pass
+    # No-op for now

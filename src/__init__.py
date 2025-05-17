@@ -1,1 +1,1 @@
-"""XBoing package root.""" 
+"""XBoing package root."""

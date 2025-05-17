@@ -1,3 +1,5 @@
+"""Defines the GameState class for managing XBoing's game state and transitions."""
+
 import logging
 from typing import Any, Dict, List
 
@@ -20,8 +22,8 @@ from engine.events import (
 
 
 class GameState:
-    """
-    Manages the current state of the game, including score, lives, level, timer, and special flags.
+    """Manages the current state of the game, including score, lives, level, timer, and special flags.
+
     Provides methods to update state and generate corresponding events.
     """
 
@@ -64,8 +66,8 @@ class GameState:
         }
 
     def add_score(self, points: int) -> List[Any]:
-        """
-        Add points to the score and return a list of change events.
+        """Add points to the score and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.score += points
@@ -73,8 +75,8 @@ class GameState:
         return [ScoreChangedEvent(self.score)]
 
     def set_score(self, score: int) -> List[Any]:
-        """
-        Set the score and return a list of change events.
+        """Set the score and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.score = score
@@ -82,8 +84,8 @@ class GameState:
         return [ScoreChangedEvent(self.score)]
 
     def lose_life(self) -> List[Any]:
-        """
-        Decrement lives and return a list of change events.
+        """Decrement lives and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.lives -= 1
@@ -91,12 +93,11 @@ class GameState:
         if self.lives <= 0:
             self.set_game_over(True)
             return [LivesChangedEvent(0), GameOverEvent()]
-        else:
-            return [LivesChangedEvent(self.lives)]
+        return [LivesChangedEvent(self.lives)]
 
     def set_lives(self, lives: int) -> List[Any]:
-        """
-        Set the number of lives and return a list of change events.
+        """Set the number of lives and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.lives = lives
@@ -104,8 +105,8 @@ class GameState:
         return [LivesChangedEvent(self.lives)]
 
     def set_level(self, level: int) -> List[Any]:
-        """
-        Set the level and return a list of change events.
+        """Set the level and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.level = level
@@ -113,8 +114,8 @@ class GameState:
         return [LevelChangedEvent(self.level)]
 
     def set_timer(self, time_remaining: int) -> List[Any]:
-        """
-        Set the timer and return a list of change events.
+        """Set the timer and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         self.timer = time_remaining
@@ -122,8 +123,8 @@ class GameState:
         return [TimerUpdatedEvent(self.timer)]
 
     def set_special(self, name: str, value: bool) -> List[Any]:
-        """
-        Set a special flag and return a list of change events.
+        """Set a special flag and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         if name in self.specials and self.specials[name] != value:
@@ -133,14 +134,12 @@ class GameState:
         return []
 
     def get_special(self, name: str) -> bool:
-        """
-        Get the value of a special flag.
-        """
+        """Get the value of a special flag."""
         return self.specials.get(name, False)
 
     def set_game_over(self, value: bool) -> List[Any]:
-        """
-        Set the game over flag and return a list of change events.
+        """Set the game over flag and return a list of change events.
+
         Does not fire events directly (side-effect free).
         """
         if self.game_over != value:
@@ -151,14 +150,12 @@ class GameState:
         return []
 
     def is_game_over(self) -> bool:
-        """
-        Return True if the game is over, False otherwise.
-        """
+        """Return True if the game is over, False otherwise."""
         return self.game_over
 
     def restart(self) -> List[Any]:
-        """
-        Reset the game state and return a list of all change events.
+        """Reset the game state and return a list of all change events.
+
         Does not fire events directly (side-effect free).
         """
         self.logger.info("Game state restarted")
@@ -174,8 +171,8 @@ class GameState:
         return all_events
 
     def full_restart(self, level_manager: Any) -> List[Any]:
-        """
-        Reset all game state, load the level, set timer from level manager, and return all change events.
+        """Reset all game state, load the level, set timer from level manager, and return all change events.
+
         Does not fire events directly (side-effect free).
         """
         self.logger.info("Full game state restart")
@@ -196,3 +193,9 @@ class GameState:
             MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")
         )
         return all_events
+
+    def get_lives(self) -> int:
+        """Return the current number of lives."""
+        if self.lives is not None:
+            return self.lives
+        return 0

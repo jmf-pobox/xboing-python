@@ -1,3 +1,5 @@
+"""UI view for displaying the level complete screen in XBoing."""
+
 from typing import Callable, Optional
 
 import pygame
@@ -11,8 +13,8 @@ from .view import View
 
 
 class LevelCompleteView(View):
-    """
-    View for displaying the level complete overlay, including bonus breakdown and final score.
+    """View for displaying the level complete overlay, including bonus breakdown and final score.
+
     Draws only within the play window region.
     """
 
@@ -26,8 +28,7 @@ class LevelCompleteView(View):
         level_manager: LevelManager,
         on_advance_callback: Optional[Callable[[], None]] = None,
     ) -> None:
-        """
-        Initialize the LevelCompleteView.
+        """Initialize the LevelCompleteView.
 
         Args:
             layout (GameLayout): The GameLayout instance.
@@ -37,6 +38,7 @@ class LevelCompleteView(View):
             game_state (GameState): The current game state.
             level_manager (LevelManager): The level manager instance.
             on_advance_callback (Optional[Callable[[], None]]): Callback for advancing to the next level.
+
         """
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
@@ -58,9 +60,7 @@ class LevelCompleteView(View):
         self._compute_bonuses()
 
     def _compute_bonuses(self) -> None:
-        """
-        Gather stats and compute bonuses for the level complete screen.
-        """
+        """Gather stats and compute bonuses for the level complete screen."""
         self.level_num = self.game_state.level
         self.level_title = str(
             self.level_manager.get_level_info().get("title", f"Level {self.level_num}")
@@ -80,35 +80,34 @@ class LevelCompleteView(View):
         self.final_score = self.game_state.score + self.total_bonus
 
     def activate(self) -> None:
-        """
-        Activate the view and recompute bonuses.
-        """
+        """Activate the view and recompute bonuses."""
         self.active = True
         self._compute_bonuses()
 
     def deactivate(self) -> None:
-        """
-        Deactivate the view.
-        """
+        """Deactivate the view."""
         self.active = False
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        """
-        Handle a single Pygame event (advance on SPACE).
+        """Handle a single Pygame event (advance on SPACE).
 
         Args:
             event (pygame.event.Event): The Pygame event to handle.
+
         """
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if self.on_advance_callback:
-                self.on_advance_callback()
+        if (
+            event.type == pygame.KEYDOWN
+            and event.key == pygame.K_SPACE
+            and self.on_advance_callback
+        ):
+            self.on_advance_callback()
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the level complete overlay, bonus breakdown, and final score.
+        """Draw the level complete overlay, bonus breakdown, and final score.
 
         Args:
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         play_rect = self.layout.get_play_rect()
         overlay = pygame.Surface((play_rect.width, play_rect.height), pygame.SRCALPHA)
