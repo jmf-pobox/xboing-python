@@ -1,3 +1,4 @@
+"""Application coordinator for XBoing, managing high-level app flow and orchestration."""
 import logging
 from typing import TYPE_CHECKING
 

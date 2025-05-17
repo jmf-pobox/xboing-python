@@ -1,3 +1,4 @@
+"""Dependency injection module definitions for XBoing."""
 from typing import Callable, Optional
 
 import pygame

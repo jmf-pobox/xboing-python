@@ -1,5 +1,5 @@
 """
-XBoing - Main application entry point and game loop.
+Main entry point for the XBoing game application.
 
 This module defines the XBoingApp class, which encapsulates all game setup and the main loop.
 """

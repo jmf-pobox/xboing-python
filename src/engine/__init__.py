@@ -1,4 +1,4 @@
-"""XBoing Engine - SDL2 Abstraction Layer.
+"""Engine package for XBoing, providing core game engine components.
 
 This package provides a clean abstraction over SDL2 (via pygame) for:
 - Window management

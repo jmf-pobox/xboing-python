@@ -1,1 +1,1 @@
-"""Layout module for XBoing."""
+"""Layout package for XBoing, managing window and region layouts."""
