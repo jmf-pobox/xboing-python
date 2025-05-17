@@ -1,7 +1,7 @@
 """Controller for main game logic, state updates, and event handling in XBoing."""
 
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 import pygame
 
@@ -16,6 +16,7 @@ from engine.events import (
     MessageChangedEvent,
     PaddleHitEvent,
     PowerUpCollectedEvent,
+    SpecialReverseChangedEvent,
     WallHitEvent,
 )
 from engine.graphics import Renderer
@@ -81,6 +82,8 @@ class GameController(Controller):
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
         self.level_complete: bool = False
+        self._last_mouse_x: Optional[int] = None
+        self.reverse: bool = False  # Reverse paddle control state
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -144,14 +147,14 @@ class GameController(Controller):
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
-        self.handle_paddle_input(delta_ms)
-        self.handle_mouse_paddle_control()
+        self.handle_paddle_arrow_key_movement(delta_ms)
+        self.handle_paddle_mouse_movement()
         self.update_blocks_and_timer(delta_ms)
         self.update_balls_and_collisions(delta_ms)
         self.check_level_complete()
         self.handle_debug_x_key()
 
-    def handle_paddle_input(self, delta_ms: float) -> None:
+    def handle_paddle_arrow_key_movement(self, delta_ms: float) -> None:
         """Handle paddle movement and input.
 
         Args:
@@ -160,7 +163,12 @@ class GameController(Controller):
 
         """
         paddle_direction = 0
-        if self.input_manager.is_key_pressed(pygame.K_LEFT):
+        if self.reverse:
+            if self.input_manager.is_key_pressed(pygame.K_LEFT):
+                paddle_direction = 1
+            elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
+                paddle_direction = -1
+        elif self.input_manager.is_key_pressed(pygame.K_LEFT):
             paddle_direction = -1
         elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
             paddle_direction = 1
@@ -168,14 +176,21 @@ class GameController(Controller):
         if play_rect:
             self.paddle.set_direction(paddle_direction)
             self.paddle.update(delta_ms, play_rect.width, play_rect.x)
+        else:
+            self.paddle.set_direction(0)
 
-    def handle_mouse_paddle_control(self) -> None:
+    def handle_paddle_mouse_movement(self) -> None:
         """Handle mouse-based paddle movement."""
         play_rect = self.layout.get_play_rect()
         mouse_pos = self.input_manager.get_mouse_position()
-        if self.input_manager.is_mouse_button_pressed(0):
-            local_x = mouse_pos[0] - play_rect.x - self.paddle.width // 2
-            self.paddle.move_to(local_x, play_rect.width, play_rect.x)
+        mouse_x = mouse_pos[0]
+        if self.reverse:
+            center_x = play_rect.x + play_rect.width // 2
+            mirrored_x = 2 * center_x - mouse_x
+            local_x = mirrored_x - play_rect.x - self.paddle.width // 2
+        else:
+            local_x = mouse_x - play_rect.x - self.paddle.width // 2
+        self.paddle.move_to(local_x, play_rect.width, play_rect.x)
 
     def update_blocks_and_timer(self, delta_ms: float) -> None:
         """Update blocks and timer if appropriate.
@@ -270,6 +285,20 @@ class GameController(Controller):
                         )
                     elif effect == SpriteBlock.TYPE_TIMER:
                         self.level_manager.add_time(20)
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                            )
+                        )
+                    elif effect == SpriteBlock.TYPE_REVERSE:
+                        """Toggle reverse paddle control and notify UI via event."""
+                        self.toggle_reverse()
+                        pygame.event.post(
+                            pygame.event.Event(
+                                pygame.USEREVENT,
+                                {"event": SpecialReverseChangedEvent(self.reverse)},
+                            )
+                        )
                         pygame.event.post(
                             pygame.event.Event(
                                 pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
@@ -446,3 +475,11 @@ class GameController(Controller):
         """Fully restart the game state and post relevant events."""
         changes = self.game_state.full_restart(self.level_manager)
         self.post_game_state_events(changes)
+
+    def toggle_reverse(self) -> None:
+        """Toggle the reverse paddle control state."""
+        self.reverse = not self.reverse
+
+    def set_reverse(self, value: bool) -> None:
+        """Set the reverse paddle control state explicitly."""
+        self.reverse = value

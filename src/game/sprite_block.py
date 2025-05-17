@@ -483,7 +483,9 @@ class SpriteBlock:
                         0, min(5 - int(self.health), len(self.animation_frames) - 1)
                     )
                     if self.image_file in self._image_cache:
-                        self.image = self._image_cache[self.animation_frames[frame_index]]
+                        self.image = self._image_cache[
+                            self.animation_frames[frame_index]
+                        ]
                 if self.health <= 0:
                     broken = True
                     points = self.points

@@ -265,6 +265,7 @@ class LevelManager:
         Returns
         -------
             int: Score multiplier (1, 2, 3, 4, or 5)
+
         """
         multiplier = 1
         if self.time_remaining > 0 and self.time_bonus != 0:

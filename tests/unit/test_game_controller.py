@@ -12,6 +12,7 @@ from engine.events import (
     MessageChangedEvent,
     PaddleHitEvent,
     PowerUpCollectedEvent,
+    SpecialReverseChangedEvent,
     WallHitEvent,
 )
 from game.ball_manager import BallManager
@@ -526,3 +527,119 @@ def test_lives_display_and_game_over_event_order():
         assert (
             lives_event_idx < gameover_event_idx
         ), "LivesChangedEvent(0) should be posted before GameOverEvent"
+
+
+def test_update_balls_and_collisions_reverse_block():
+    """Test that hitting a reverse block toggles reverse and posts SpecialReverseChangedEvent."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball = Mock()
+    ball.x = 10
+    ball.y = 20
+    ball.radius = 5
+    ball.vx = 1
+    ball.vy = 2
+    ball.update.return_value = (True, False, False)
+    paddle = Mock()
+    block_manager = Mock()
+    block_manager.check_collisions.side_effect = [
+        (0, 0, [SpriteBlock.TYPE_REVERSE])
+    ] + [(0, 0, [])] * 10
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = Mock(width=100, height=100, x=0, y=0)
+    layout.get_play_rect.return_value = play_rect
+    ball_manager = BallManager()
+    ball_manager.add_ball(ball)
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        controller.update_balls_and_collisions(0.016)
+        # Should have toggled reverse
+        assert controller.reverse is True
+        # Should have posted SpecialReverseChangedEvent
+        assert any(
+            call.args[0].type == pygame.USEREVENT
+            and hasattr(call.args[0], "event")
+            and isinstance(call.args[0].event, SpecialReverseChangedEvent)
+            and call.args[0].event.active is True
+            for call in mock_post.call_args_list
+        )
+
+
+def test_arrow_key_movement_reversed():
+    """Test that arrow key movement is reversed when reverse is active."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball_manager = BallManager()
+    paddle = Mock()
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = PlayRect()
+    layout.get_play_rect.return_value = play_rect
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    controller.reverse = True
+    input_manager.is_key_pressed.side_effect = lambda k: k == pygame.K_LEFT
+    # When reverse is True, left should move right (direction=1)
+    with patch.object(paddle, "set_direction") as set_dir:
+        controller.handle_paddle_arrow_key_movement(16.67)
+        set_dir.assert_called_with(1)
+    input_manager.is_key_pressed.side_effect = lambda k: k == pygame.K_RIGHT
+    with patch.object(paddle, "set_direction") as set_dir:
+        controller.handle_paddle_arrow_key_movement(16.67)
+        set_dir.assert_called_with(-1)
+
+
+def test_mouse_movement_reversed():
+    """Test that mouse movement is mirrored when reverse is active."""
+    game_state = Mock()
+    level_manager = Mock()
+    ball_manager = BallManager()
+    paddle = Mock()
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    play_rect = PlayRect()
+    play_rect.width = 100
+    play_rect.x = 0
+    play_rect.y = 0
+    layout.get_play_rect.return_value = play_rect
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    controller.reverse = True
+    # Mouse at x=80, paddle width=20, play area center=50, mirrored_x=20
+    input_manager.get_mouse_position.return_value = (80, 0)
+    paddle.width = 20
+    with patch.object(paddle, "move_to") as move_to:
+        controller.handle_paddle_mouse_movement()
+        # local_x = mirrored_x - play_rect.x - paddle.width // 2 = 20 - 0 - 10 = 10
+        move_to.assert_called_with(10, 100, 0)
