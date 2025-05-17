@@ -7,7 +7,7 @@ This module defines the XBoingApp class, which encapsulates all game setup and t
 import logging
 import time
 import typing
-from typing import Any, Dict, Optional, Type, cast
+from typing import Any, Dict, Optional, cast
 
 import pygame
 from injector import Injector
@@ -20,20 +20,6 @@ from controllers.level_complete_controller import LevelCompleteController
 from controllers.window_controller import WindowController
 from di_module import XBoingModule
 from engine.audio_manager import AudioManager
-from engine.events import (
-    ApplauseEvent,
-    BallLostEvent,
-    BallShotEvent,
-    BlockHitEvent,
-    BombExplodedEvent,
-    BonusCollectedEvent,
-    GameOverEvent,
-    PaddleHitEvent,
-    PowerUpCollectedEvent,
-    UIButtonClickEvent,
-    WallHitEvent,
-    XBoingEvent,
-)
 from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
