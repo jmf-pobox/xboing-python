@@ -102,13 +102,13 @@ class InstructionsView(View):
             logo_rect = logo_surf.get_rect(center=(centerx, y + scaled_h // 2))
             play_surf.blit(logo_surf, logo_rect)
             return logo_rect.bottom + 10
-        else:
-            logo_font = self.headline_font
-            logo_text = "XBoing"
-            logo_surf = logo_font.render(logo_text, True, (255, 255, 255))
-            logo_rect = logo_surf.get_rect(center=(centerx, 40))
-            play_surf.blit(logo_surf, logo_rect)
-            return logo_rect.bottom + 10
+
+        logo_font = self.headline_font
+        logo_text = "XBoing"
+        logo_surf = logo_font.render(logo_text, True, (255, 255, 255))
+        logo_rect = logo_surf.get_rect(center=(centerx, 40))
+        play_surf.blit(logo_surf, logo_rect)
+        return logo_rect.bottom + 10
 
     def _draw_headline(self, play_surf: pygame.Surface, centerx: int, y: int) -> int:
         headline = " - Instructions - "

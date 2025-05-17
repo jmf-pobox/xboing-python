@@ -56,9 +56,6 @@ class LevelCompleteController(Controller):
         self.game_view = game_view
         self.layout = layout
         self.on_advance_callback = on_advance_callback
-        self.waiting_for_launch_ref: Optional[List[bool]] = (
-            None  # To be set by main if needed
-        )
         self.ui_manager = ui_manager
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
@@ -89,8 +86,6 @@ class LevelCompleteController(Controller):
         self.post_game_state_events(level_changed_events)
 
         self.level_manager.get_next_level()
-        if self.waiting_for_launch_ref is not None:
-            self.waiting_for_launch_ref[0] = True
         pygame.event.post(
             pygame.event.Event(
                 pygame.USEREVENT, {"event": type("UIButtonClickEvent", (), {})()}
@@ -110,7 +105,6 @@ class LevelCompleteController(Controller):
         )
         self.balls.clear()
         self.balls.append(self.game_controller.create_new_ball())
-        self.game_controller.waiting_for_launch = True
         self.game_view.balls = self.balls
         self.ui_manager.set_view("game")
         # Optionally sync controller with view if needed

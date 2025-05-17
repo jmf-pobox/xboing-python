@@ -46,6 +46,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 
         # Create a WAV file for the converted data
         with wave.open(output_path, "wb") as wav_file:
+            wav_file: wave.Wave_write  # type: ignore
             # Set parameters - assuming 8-bit µ-law, mono, 8000Hz (standard for AU)
             wav_file.setparams((1, 2, 8000, 0, "NONE", "not compressed"))
 
@@ -133,8 +134,8 @@ def main() -> int:
         return 1
     if fix_balllost_au(str(input_path), str(output_path)):
         return 0
-    else:
-        return 1
+
+    return 1
 
 
 if __name__ == "__main__":

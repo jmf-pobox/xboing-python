@@ -130,6 +130,7 @@ class LevelManager:
             bool: True if level was loaded successfully, False otherwise
 
         """
+        result = False
         if level_num is not None:
             self.current_level = level_num
 
@@ -144,30 +145,27 @@ class LevelManager:
 
         if not os.path.exists(level_file):
             self.logger.warning(f"Level file not found: {level_file}")
-            return False
+        else:
+            try:
+                level_data = self._parse_level_file(level_file)
+                if level_data:
+                    self.level_title = level_data["title"]
+                    self.time_bonus = level_data["time_bonus"]
+                    self.time_remaining = float(level_data["time_bonus"])
 
-        try:
-            level_data = self._parse_level_file(level_file)
-            if level_data:
-                self.level_title = level_data["title"]
-                self.time_bonus = level_data["time_bonus"]
-                self.time_remaining = float(level_data["time_bonus"])
-
-                # Create blocks based on level data using block manager
-                if self.block_manager:
-                    self._create_blocks_from_layout(level_data["layout"])
-
-                    # Set appropriate background for this level
-                    self._set_level_background()
-
-                    return True
-                self.logger.error("Error: Block manager not set")
-                return False
-            self.logger.warning(f"Failed to parse level file: {level_file}")
-            return False
-        except Exception as e:
-            self.logger.error(f"Error loading level {self.current_level}: {e}")
-            return False
+                    # Create blocks based on level data using block manager
+                    if self.block_manager:
+                        self._create_blocks_from_layout(level_data["layout"])
+                        # Set appropriate background for this level
+                        self._set_level_background()
+                        result = True
+                    else:
+                        self.logger.error("Error: Block manager not set")
+                else:
+                    self.logger.warning(f"Failed to parse level file: {level_file}")
+            except Exception as e:
+                self.logger.error(f"Error loading level {self.current_level}: {e}")
+        return result
 
     def get_next_level(self) -> bool:
         """Advance to the next level, or reset if at the last level."""

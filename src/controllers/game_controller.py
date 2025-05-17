@@ -335,8 +335,6 @@ class GameController(Controller):
             logger.debug(
                 f"Total balls after adding new ball: {len(self.ball_manager.balls)}"
             )
-            self.waiting_for_launch = True
-            logger.debug(f"waiting_for_launch set to {self.waiting_for_launch}")
         # If no lives remain, set game over
         else:
             logger.debug("No lives remain, setting game over.")

@@ -115,8 +115,7 @@ def main() -> int:
         return 1
     if create_background_from_xpm(str(xpm_path), str(png_path)):
         return 0
-    else:
-        return 1
+    return 1
 
 
 if __name__ == "__main__":
