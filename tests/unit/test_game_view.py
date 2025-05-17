@@ -1,7 +1,7 @@
 import pygame
 
-from ui.game_view import GameView
 from game.ball_manager import BallManager
+from ui.game_view import GameView
 
 
 class MockBlockManager:

@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pygame
 
+from controllers.game_controller import GameController
 from engine.events import (
     BallLostEvent,
     BallShotEvent,
@@ -13,7 +14,6 @@ from engine.events import (
     PowerUpCollectedEvent,
     WallHitEvent,
 )
-from src.controllers.game_controller import GameController
 from game.ball_manager import BallManager
 from game.sprite_block import SpriteBlock
 
@@ -76,9 +76,6 @@ def test_ball_launch_logic():
     paddle = Mock()
     block_manager = Mock()
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     ball_manager = BallManager()
@@ -151,9 +148,6 @@ def test_update_balls_and_collisions_bomb(mock_ball):
         (0, 0, [])
     ] * 10
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -203,9 +197,6 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
         (0, 0, [])
     ] * 10
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -258,9 +249,6 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
         (0, 0, [])
     ] * 10
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -311,9 +299,6 @@ def test_update_balls_and_collisions_timer(mock_ball):
         (0, 0, [])
     ] * 10
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -359,9 +344,6 @@ def test_update_balls_and_collisions_ball_lost():
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -407,9 +389,6 @@ def test_update_balls_and_collisions_paddle_hit():
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -455,9 +434,6 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)
@@ -493,7 +469,7 @@ def test_lives_display_and_game_over_event_order():
     """
     When the last ball is lost, LivesChangedEvent(0) should be posted before GameOverEvent.
     """
-    from src.game.game_state import GameState
+    from game.game_state import GameState
 
     level_manager = Mock()
     # Start with one ball that will be lost
@@ -508,9 +484,6 @@ def test_lives_display_and_game_over_event_order():
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
     renderer = Mock()
-    audio_manager = Mock()
-    event_sound_map = {"boing": "boing"}
-    create_new_ball = Mock()
     input_manager = Mock()
     layout = Mock()
     play_rect = Mock(width=100, height=100, x=0, y=0)

@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
+
 import pygame
-from typing import Type, Dict
 
 from engine.audio_manager import AudioManager
 from engine.events import XBoingEvent

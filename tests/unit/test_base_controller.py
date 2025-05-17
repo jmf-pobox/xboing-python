@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pygame
 
-from src.controllers.window_controller import WindowController
+from controllers.window_controller import WindowController
 
 
 def make_key_event(key, mod=0):
