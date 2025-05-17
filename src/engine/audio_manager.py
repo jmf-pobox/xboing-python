@@ -10,6 +10,7 @@ from engine.events import XBoingEvent
 class AudioManager:
     """
     Event-driven audio manager that listens for game events and plays sounds.
+    Only handles custom events posted as pygame.USEREVENT with an 'event' attribute (XBoingEvent instance).
     """
 
     def __init__(
@@ -37,8 +38,7 @@ class AudioManager:
             events: A sequence of pygame events to process.
         """
         for event in events:
-            # Check if this is a pygame event with our custom event attribute
-            if hasattr(event, "event") and event.type == pygame.USEREVENT:
+            if event.type == pygame.USEREVENT:
                 event_type = type(event.event)
                 sound_name = self.event_sound_map.get(event_type)
                 if sound_name and not self.muted:
