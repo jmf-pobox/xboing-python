@@ -82,7 +82,10 @@ class LevelCompleteController(Controller):
             "advance_to_next_level called: advancing to next level and switching to game view/controller."
         )
         self.game_controller.level_complete = False  # Reset for new level
-        self.game_state.set_level(self.game_state.level + 1)
+        # Get the events returned by set_level and post them
+        level_changed_events = self.game_state.set_level(self.game_state.level + 1)
+        self.post_game_state_events(level_changed_events)
+
         self.level_manager.get_next_level()
         if self.waiting_for_launch_ref is not None:
             self.waiting_for_launch_ref[0] = True
@@ -130,3 +133,14 @@ class LevelCompleteController(Controller):
             delta_time: Time elapsed since last update in milliseconds.
         """
         pass
+
+    def post_game_state_events(self, changes: List[Any]) -> None:
+        """
+        Post all events returned by GameState/model methods to the Pygame event queue.
+        This implements the decoupled event firing pattern: models return events, controllers post them.
+
+        Args:
+            changes: List of event objects to post to the Pygame event queue.
+        """
+        for event in changes:
+            pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": event}))
