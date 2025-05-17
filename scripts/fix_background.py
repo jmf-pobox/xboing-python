@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Fix Background Image Converter
+"""Convert the XBoing background pattern XPM to a PNG file for the Python port.
 
 This script is specifically designed to correctly convert the XBoing
 background pattern XPM to a PNG file for the Python port.
@@ -9,10 +8,11 @@ Usage:
   python fix_background.py [--input INPUT_FILE] [--output OUTPUT_FILE]
   (Defaults: input=xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm, output=assets/images/bgrnds/bgrnd.png)
 """
+
 import argparse
 import logging
-import sys
 from pathlib import Path
+import sys
 
 from PIL import Image
 
@@ -20,15 +20,19 @@ logger = logging.getLogger("xboing.scripts.fix_background")
 
 
 def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
-    """
-    Convert the XBoing background XPM to a PNG file.
+    """Convert the XBoing background XPM to a PNG file.
 
     This function is specifically designed for the bgrnd.xpm file.
+
     Args:
+    ----
         xpm_path (str): Path to the input XPM file.
         png_path (str): Path to the output PNG file.
+
     Returns:
+    -------
         bool: True if successful, False otherwise.
+
     """
     # Define the colors directly from the XPM file
     colors = {
@@ -43,8 +47,7 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
 
     with open(xpm_path) as f:
         for line in f:
-            line = line.strip()
-            if "/* pixels */" in line:
+            if "/* pixels */" in line.strip():
                 pixel_data_started = True
                 continue
 
@@ -81,10 +84,12 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
 
 
 def main() -> int:
-    """
-    Main entry point for the background XPM to PNG conversion script.
-    Returns:
+    """Convert the XBoing background pattern XPM to a PNG file for the Python port.
+
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Convert bgrnd.xpm to PNG for XBoing Python port."
@@ -110,8 +115,7 @@ def main() -> int:
         return 1
     if create_background_from_xpm(str(xpm_path), str(png_path)):
         return 0
-    else:
-        return 1
+    return 1
 
 
 if __name__ == "__main__":

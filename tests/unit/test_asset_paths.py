@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test the asset path utilities to ensure they correctly locate game assets.
-"""
+"""Test the asset path utilities to ensure they correctly locate game assets."""
 
 import os
 

@@ -1,5 +1,5 @@
-"""
-TopBarView: UI bar at the top of the XBoing window.
+"""TopBarView: UI bar at the top of the XBoing window.
+
 Displays score, lives, level, timer, message, and special status.
 """
 
@@ -13,8 +13,8 @@ from ui.score_display import ScoreDisplay
 
 
 class TopBarView:
-    """
-    UI bar at the top of the XBoing window.
+    """UI bar at the top of the XBoing window.
+
     Displays score, lives, level, timer, message, and special status.
     """
 
@@ -24,38 +24,38 @@ class TopBarView:
         lives_display_component: LivesDisplayComponent,
         level_display_component: LevelDisplay,
     ) -> None:
-        """
-        Initialize the TopBarView.
+        """Initialize the TopBarView.
 
         Args:
+        ----
             score_display: The ScoreDisplay component.
             lives_display_component: The LivesDisplayComponent.
             level_display_component: The LevelDisplay component.
-            timer_display_component: The TimerDisplay component.
-            message_display_component: The MessageDisplay component.
-            special_display_component: The SpecialDisplay component.
+
         """
         self.score_display = score_display
         self.lives_display_component = lives_display_component
         self.level_display_component = level_display_component
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Forward events to all top bar components.
+        """Forward events to all top bar components.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
+
         """
         self.score_display.handle_events(events)
         self.lives_display_component.handle_events(events)
         self.level_display_component.handle_events(events)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw all top bar components onto the given surface.
+        """Draw all top bar components onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         self.score_display.draw(surface)
         self.lives_display_component.draw(surface)

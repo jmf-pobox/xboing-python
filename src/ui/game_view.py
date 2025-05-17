@@ -1,5 +1,5 @@
-"""
-GameView: Main gameplay content view for XBoing.
+"""GameView: Main gameplay content view for XBoing.
+
 Handles rendering of blocks, paddle, balls, and play area walls.
 """
 
@@ -15,8 +15,8 @@ from .view import View
 
 
 class GameView(View):
-    """
-    Main gameplay content view.
+    """Main gameplay content view.
+
     Renders blocks, paddle, balls, and play area walls.
     """
 
@@ -28,15 +28,16 @@ class GameView(View):
         ball_manager: BallManager,
         renderer: Renderer,
     ) -> None:
-        """
-        Initialize the GameView.
+        """Initialize the GameView.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             block_manager (SpriteBlockManager): The block manager for the current level.
             paddle (Paddle): The player paddle object.
             ball_manager (BallManager): The BallManager instance managing all balls.
             renderer (Renderer): The main renderer instance.
+
         """
         self.layout: GameLayout = layout
         self.block_manager: SpriteBlockManager = block_manager
@@ -45,11 +46,12 @@ class GameView(View):
         self.renderer: Renderer = renderer
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the blocks, paddle, balls, and play area walls.
+        """Draw the blocks, paddle, balls, and play area walls.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         # Draw the blocks
         self.block_manager.draw(surface)
@@ -83,22 +85,19 @@ class GameView(View):
         )  # Right
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        """
-        Handle a single Pygame event (currently a stub).
+        """Handle a single Pygame event (currently a stub).
 
         Args:
+        ----
             event (pygame.event.Event): The Pygame event to handle.
+
         """
-        pass  # GameView may handle events in the future
+        # No-op for now
 
     def activate(self) -> None:
-        """
-        Activate the view (currently a stub).
-        """
-        pass
+        """Activate the view (currently a stub)."""
+        # No-op for now
 
     def deactivate(self) -> None:
-        """
-        Deactivate the view (currently a stub).
-        """
-        pass
+        """Deactivate the view (currently a stub)."""
+        # No-op for now

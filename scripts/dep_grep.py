@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""
-Dependency Grepper for XBoing Python Packages
+"""Scan XBoing Python packages and output their inter-package dependencies.
 
 Scans each module in each src package and outputs which packages depend upon which other packages.
 
 Usage:
   python scripts/dep_grep.py
 """
-import re
+
 from pathlib import Path
+import re
 from typing import Dict, Set
 
 SRC_DIR = Path(__file__).parent.parent / "src"
@@ -24,10 +24,12 @@ PACKAGES = [
 
 
 def find_package_dependencies() -> Dict[str, Set[str]]:
-    """
-    Scan each package for imports of other packages and return a dependency map.
-    Returns:
+    """Scan each package for imports of other packages and return a dependency map.
+
+    Returns
+    -------
         Dict[str, Set[str]]: Mapping from package to set of dependent packages.
+
     """
     deps: Dict[str, Set[str]] = {pkg: set() for pkg in PACKAGES}
     for pkg in PACKAGES:
@@ -48,10 +50,12 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
 
 
 def print_dependencies(deps: Dict[str, Set[str]]) -> None:
-    """
-    Print the package dependency summary.
+    """Print the package dependency summary.
+
     Args:
+    ----
         deps: Dependency map from find_package_dependencies().
+
     """
     print("Package dependencies:")
     for pkg in PACKAGES:
@@ -60,9 +64,7 @@ def print_dependencies(deps: Dict[str, Set[str]]) -> None:
 
 
 def main() -> None:
-    """
-    Main entry point for the dependency grepper script.
-    """
+    """Find and print the package dependencies."""
     deps = find_package_dependencies()
     print_dependencies(deps)
 

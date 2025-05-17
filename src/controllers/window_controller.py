@@ -1,3 +1,5 @@
+"""Controller for handling window events and UI management in XBoing."""
+
 import logging
 from typing import Callable, List, Optional
 
@@ -9,8 +11,8 @@ from ui.ui_manager import UIManager
 
 
 class WindowController(Controller):
-    """
-    Handles global/system events (quit, volume, mute, etc.) and is always active.
+    """Handles global/system events (quit, volume, mute, etc.) and is always active.
+
     No longer a base class for per-view controllers.
     """
 
@@ -20,13 +22,14 @@ class WindowController(Controller):
         quit_callback: Optional[Callable[[], None]] = None,
         ui_manager: Optional[UIManager] = None,
     ) -> None:
-        """
-        Initialize the WindowController.
+        """Initialize the WindowController.
 
         Args:
+        ----
             audio_manager: Manager for sound effects and volume control.
             quit_callback: Function to call when quitting the game.
             ui_manager: Manager for UI views and transitions.
+
         """
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
@@ -34,8 +37,7 @@ class WindowController(Controller):
         self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Handle input/events for this controller, including global controls.
+        """Handle input/events for this controller, including global controls.
 
         Processes global controls:
         - +/= keys: Increase volume
@@ -45,7 +47,9 @@ class WindowController(Controller):
         - Shift+/: Show instructions
 
         Args:
+        ----
             events: List of pygame events to process.
+
         """
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -75,25 +79,28 @@ class WindowController(Controller):
                     if self.quit_callback:
                         self.quit_callback()
                 # Instructions hotkey (Shift + / for '?')
-                elif event.key == pygame.K_SLASH and (event.mod & pygame.KMOD_SHIFT):
-                    if self.ui_manager:
-                        self.ui_manager.set_view("instructions")
+                elif (
+                    event.key == pygame.K_SLASH
+                    and (event.mod & pygame.KMOD_SHIFT)
+                    and self.ui_manager
+                ):
+                    self.ui_manager.set_view("instructions")
 
-    def update(self, delta_time: float) -> None:
-        """
-        Update logic for this controller.
+    def update(self, delta_ms: float) -> None:
+        """Update logic for this controller.
 
         This base implementation does nothing and should be overridden by subclasses
         that need to update game state or perform other actions each frame.
 
         Args:
+        ----
             delta_time: Time elapsed since the last update in seconds.
+
         """
-        pass
+        # No-op for now
 
     def quit_game(self) -> None:
-        """
-        Trigger the quit callback if provided.
+        """Trigger the quit callback if provided.
 
         Controllers should call this method instead of calling the quit_callback directly
         to ensure proper logging and consistent behavior.

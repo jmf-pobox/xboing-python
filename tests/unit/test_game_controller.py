@@ -120,12 +120,12 @@ def test_ball_launch_logic():
 # Disabled due to persistent hangs in the test environment
 # See assistant/test history for details
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
-def DISABLED_test_update_balls_and_collisions_extra_ball(mock_ball):
+def disabled_test_update_balls_and_collisions_extra_ball(mock_ball):
     pass
 
 
 @patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
-def DISABLED_test_update_balls_and_collisions_multiball(mock_ball):
+def disabled_test_update_balls_and_collisions_multiball(mock_ball):
     pass
 
 
@@ -466,9 +466,7 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
 
 
 def test_lives_display_and_game_over_event_order():
-    """
-    When the last ball is lost, LivesChangedEvent(0) should be posted before GameOverEvent.
-    """
+    """When the last ball is lost, LivesChangedEvent(0) should be posted before GameOverEvent."""
     from game.game_state import GameState
 
     level_manager = Mock()

@@ -1,8 +1,10 @@
+"""Controller for handling the game over state in XBoing."""
+
 import logging
 from typing import Any, Callable, List, Optional
 
-import pygame
 from injector import inject
+import pygame
 
 from controllers.controller import Controller
 from controllers.controller_manager import ControllerManager
@@ -18,8 +20,8 @@ logger = logging.getLogger("xboing.GameOverController")
 
 
 class GameOverController(Controller):
-    """
-    Controller for handling the game over state, including resetting the game and handling input events.
+    """Controller for handling the game over state, including resetting the game and handling input events.
+
     The controller_manager attribute is set after construction to avoid DI circular dependency.
     """
 
@@ -35,10 +37,10 @@ class GameOverController(Controller):
         audio_manager: AudioManager,
         quit_callback: Callable[[], None],
     ) -> None:
-        """
-        Initialize the GameOverController with all required dependencies.
+        """Initialize the GameOverController with all required dependencies.
 
         Args:
+        ----
             game_state: The current game state.
             level_manager: The level manager instance.
             game_controller: The main game controller instance.
@@ -47,6 +49,7 @@ class GameOverController(Controller):
             ui_manager: The UIManager instance.
             audio_manager: The AudioManager instance.
             quit_callback: Callback to quit the game.
+
         """
         self.game_state = game_state
         self.level_manager = level_manager
@@ -62,20 +65,24 @@ class GameOverController(Controller):
         )
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Handle Pygame events for the game over screen.
+        """Handle Pygame events for the game over screen.
 
         Args:
+        ----
             events: List of Pygame events to process.
+
         """
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if self.reset_callback is not None:
-                    self.reset_callback()
+            if (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_SPACE
+                and self.reset_callback is not None
+            ):
+                self.reset_callback()
 
     def reset_game(self) -> None:
-        """
-        Reset the game state and return to gameplay view.
+        """Reset the game state and return to gameplay view.
+
         Note: controller_manager must be set before calling this method.
         """
         logger.debug(
@@ -122,19 +129,21 @@ class GameOverController(Controller):
         )
 
     def handle_event(self, event: Any) -> None:
-        """
-        Handle a single event (protocol stub for future use).
+        """Handle a single event (protocol stub for future use).
 
         Args:
+        ----
             event: A single event object (type may vary).
+
         """
-        pass  # No EventBus events handled yet, but protocol is implemented for future use
+        # No-op for now
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update method (no-op for GameOverController).
+        """Update method (no-op for GameOverController).
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
+
         """
-        pass  # GameOverController does not need to update per frame
+        # No-op for now

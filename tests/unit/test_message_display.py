@@ -29,7 +29,7 @@ def test_message_display_initial_state():
     layout = DummyLayout()
     renderer = DummyRenderer()
     font = pygame.font.Font(None, 24)
-    comp = MessageDisplay(layout, renderer, font)
+    comp = MessageDisplay(layout, renderer, font)  # type: ignore[arg-type]  # test stub
     assert comp.message == ""
     assert comp.alignment == "left"
     comp.draw(pygame.Surface((200, 40)))
@@ -42,7 +42,7 @@ def test_message_display_updates_on_event():
     layout = DummyLayout()
     renderer = DummyRenderer()
     font = pygame.font.Font(None, 24)
-    comp = MessageDisplay(layout, renderer, font)
+    comp = MessageDisplay(layout, renderer, font)  # type: ignore[arg-type]  # test stub
 
     # Create a pygame event with a MessageChangedEvent
     event = pygame.event.Event(

@@ -36,7 +36,11 @@ class DummyRenderer:
 
 class DummyLayout:
     class DummyTimeWindow:
+        """Dummy time window for layout stub."""
+
         class DummyRect:
+            """Dummy rect for layout stub."""
+
             rect = pygame.Rect(0, 0, 100, 30)
 
         rect = DummyRect()
@@ -48,10 +52,10 @@ class DummyLayout:
 
 
 def test_timer_display_initial_state():
-    layout = DummyLayout()
-    renderer = DummyRenderer()
+    layout = DummyLayout()  # type: ignore  # test stub, not a real GameLayout
+    renderer = DummyRenderer()  # type: ignore  # test stub, not a real Renderer
     font = pygame.font.Font(None, 24)
-    comp = TimerDisplay(layout, renderer, font)
+    comp = TimerDisplay(layout, renderer, font)  # type: ignore
     assert comp.time_remaining == 0
     comp.draw(pygame.Surface((100, 30)))
     assert renderer.last_args is not None
@@ -59,15 +63,13 @@ def test_timer_display_initial_state():
 
 
 def test_timer_display_updates_on_event():
-    layout = DummyLayout()
-    renderer = DummyRenderer()
+    layout = DummyLayout()  # type: ignore  # test stub, not a real GameLayout
+    renderer = DummyRenderer()  # type: ignore  # test stub, not a real Renderer
     font = pygame.font.Font(None, 24)
-    comp = TimerDisplay(layout, renderer, font)
-
+    comp = TimerDisplay(layout, renderer, font)  # type: ignore
     # Create a pygame event with a TimerUpdatedEvent
     event = pygame.event.Event(pygame.USEREVENT, {"event": TimerUpdatedEvent(77)})
     comp.handle_events([event])
-
     assert comp.time_remaining == 77
     comp.draw(pygame.Surface((100, 30)))
     assert renderer.last_args is not None

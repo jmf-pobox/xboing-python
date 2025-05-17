@@ -1,5 +1,4 @@
-"""
-Input handling abstraction over SDL2/pygame.
+"""Input handling abstraction over SDL2/pygame.
 
 This module provides keyboard and mouse input management,
 abstracting the underlying pygame implementation.
@@ -15,6 +14,7 @@ class InputManager:
     """Manages keyboard and mouse input."""
 
     logger = logging.getLogger("xboing.InputManager")
+    MAX_MOUSE_BUTTONS = 3  # Number of supported mouse buttons (left, middle, right)
 
     def __init__(self) -> None:
         """Initialize the input manager."""
@@ -34,11 +34,10 @@ class InputManager:
         self.mouse_buttons_up: List[bool] = [False, False, False]
         self.mouse_motion: Tuple[int, int] = (0, 0)
 
+        self.key_map = {}  # TODO: Populate with actual key mappings
+
     def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
-        """
-        Update input state for the current frame.
-        Should be called at the beginning of each frame.
-        """
+        """Update input state for the current frame."""
         if events is None:
             events = pygame.event.get()
         # Clear one-frame states
@@ -53,29 +52,33 @@ class InputManager:
             if event.type == pygame.QUIT:
                 return False  # Signal to quit
 
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 self.keys_pressed[event.key] = True
                 self.keys_down.add(event.key)
 
-            elif event.type == pygame.KEYUP:
+            if event.type == pygame.KEYUP:
                 self.keys_pressed[event.key] = False
                 self.keys_up.add(event.key)
 
-            elif event.type == pygame.MOUSEMOTION:
+            if event.type == pygame.MOUSEMOTION:
                 self.mouse_pos = event.pos
                 self.mouse_motion = event.rel
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button <= 3:  # Only track main three buttons
-                    button_idx = event.button - 1
-                    self.mouse_buttons_pressed[button_idx] = True
-                    self.mouse_buttons_down[button_idx] = True
+            if (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button <= self.MAX_MOUSE_BUTTONS
+            ):
+                button_idx = event.button - 1
+                self.mouse_buttons_pressed[button_idx] = True
+                self.mouse_buttons_down[button_idx] = True
 
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button <= 3:  # Only track main three buttons
-                    button_idx = event.button - 1
-                    self.mouse_buttons_pressed[button_idx] = False
-                    self.mouse_buttons_up[button_idx] = True
+            if (
+                event.type == pygame.MOUSEBUTTONUP
+                and event.button <= self.MAX_MOUSE_BUTTONS
+            ):
+                button_idx = event.button - 1
+                self.mouse_buttons_pressed[button_idx] = False
+                self.mouse_buttons_up[button_idx] = True
 
         return True  # Continue
 
@@ -100,34 +103,43 @@ class InputManager:
         return self.mouse_motion
 
     def is_mouse_button_pressed(self, button: int) -> bool:
-        """
-        Check if a mouse button is currently pressed.
+        """Check if a mouse button is currently pressed.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
+
         """
-        if 0 <= button < 3:
+        if 0 <= button < self.MAX_MOUSE_BUTTONS:
             return self.mouse_buttons_pressed[button]
         return False
 
     def is_mouse_button_down(self, button: int) -> bool:
-        """
-        Check if a mouse button was pressed this frame.
+        """Check if a mouse button was pressed this frame.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
+
         """
-        if 0 <= button < 3:
+        if 0 <= button < self.MAX_MOUSE_BUTTONS:
             return self.mouse_buttons_down[button]
         return False
 
     def is_mouse_button_up(self, button: int) -> bool:
-        """
-        Check if a mouse button was released this frame.
+        """Check if a mouse button was released this frame.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
+
         """
-        if 0 <= button < 3:
+        if 0 <= button < self.MAX_MOUSE_BUTTONS:
             return self.mouse_buttons_up[button]
         return False
+
+    def get_key_name(self, key_code: int) -> str:
+        """Return the name of the key for the given key code."""
+        if key_code in self.key_map:
+            return self.key_map[key_code]
+        return str(key_code)

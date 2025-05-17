@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Improved XPM to PNG Converter for XBoing (Cross-Platform, Modernized)
+"""Convert XBoing XPM files to PNG format for the Python/SDL2 implementation.
 
 This tool converts the original XBoing XPM files to PNG format with proper color
 handling for use with the Python/SDL2 implementation.
@@ -19,9 +18,9 @@ Usage:
 import argparse
 import logging
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
@@ -86,203 +85,204 @@ X11_COLORS = {
 logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
 
 
-def parse_xpm(
-    xpm_file: str,
-) -> Optional[Tuple[int, int, List[List[Tuple[int, int, int, int]]]]]:
-    """
-    Parse an XPM file and extract image data.
-
-    Args:
-        xpm_file (str): Path to the XPM file
-
-    Returns:
-        tuple: (width, height, pixels) or None on failure
-    """
-    with open(xpm_file) as f:
-        content = f.read()
-
-    logger.info(f"\nParsing {xpm_file}")
-
-    # Extract the XPM data array with a regex pattern
+def _extract_xpm_lines(content: str) -> List[str]:
+    """Extract quoted XPM data lines from the file content."""
     match = re.search(
         r"static\s+char\s+\*\s*\w+\s*\[\s*\]\s*=\s*{(.*?)};", content, re.DOTALL
     )
     if not match:
-        logger.error(f"Failed to parse XPM data in {xpm_file}")
-        return None
-
+        return []
     xpm_data = match.group(1).strip()
-    # Clean up lines, handling quoted strings properly
     lines = []
     for line in xpm_data.split("\n"):
-        line = line.strip()
-        if not line:
+        if not line.strip():
             continue
-
-        # Extract quoted strings
         quote_match = re.search(r'"([^"]*)"', line)
         if quote_match:
             lines.append(quote_match.group(1))
+    return lines
 
-    # Parse header (first line after comments)
+
+def _parse_xpm_header(lines: List[str]) -> Optional[Tuple[int, int, int, int, int]]:
+    """Parse the XPM header and return (header_index, width, height, num_colors, chars_per_pixel)."""
     header_index = 0
     while header_index < len(lines) and (
         lines[header_index].startswith("/*") or not lines[header_index].strip()
     ):
         header_index += 1
-
     if header_index >= len(lines):
-        logger.error(f"Could not find header in {xpm_file}")
         return None
-
-    logger.info(f"Header line: '{lines[header_index]}'")
-
     header = lines[header_index].split()
     try:
         width = int(header[0])
         height = int(header[1])
         num_colors = int(header[2])
         chars_per_pixel = int(header[3])
-        logger.info(
-            f"Parsed header: width={width}, height={height}, colors={num_colors}, chars_per_pixel={chars_per_pixel}"
-        )
+        return header_index, width, height, num_colors, chars_per_pixel
     except (ValueError, IndexError):
-        logger.error(f"Invalid XPM header in {xpm_file}: {lines[header_index]}")
         return None
 
-    # Parse color table
+
+def _parse_xpm_color_table(
+    lines: List[str], header_index: int, num_colors: int, chars_per_pixel: int
+) -> Optional[Dict[str, Tuple[int, int, int, int]]]:
+    """Parse the color table from XPM lines."""
     color_table = {}
     for i in range(header_index + 1, header_index + num_colors + 1):
         if i >= len(lines):
-            logger.error(f"Unexpected end of color table in {xpm_file}")
             return None
-
         color_line = lines[i]
         if len(color_line) < chars_per_pixel:
-            logger.error(
-                f"Invalid color definition in {xpm_file}, line too short: {color_line}"
-            )
             return None
-
         key = color_line[:chars_per_pixel]
-
-        # Handle the special case for None (transparent)
         if re.search(r"c\s+None", color_line):
-            r, g, b, a = 0, 0, 0, 0  # Transparent
-            color_table[key] = (r, g, b, a)
+            color_table[key] = (0, 0, 0, 0)
             continue
-
-        # Extract color
-        # Try hex color format (#RRGGBB or #RRRRGGGGBBBB)
         hex_match = re.search(r"c\s+#([0-9A-Fa-f]{6})", color_line)
         if hex_match:
             color_hex = hex_match.group(1)
             r = int(color_hex[0:2], 16)
             g = int(color_hex[2:4], 16)
             b = int(color_hex[4:6], 16)
-            a = 255  # Fully opaque
-            color_table[key] = (r, g, b, a)
+            color_table[key] = (r, g, b, 255)
             continue
-
-        # Try a hex color format with more digits, e.g., #4949FFFF
         hex_match_long = re.search(r"c\s+#([0-9A-Fa-f]{8,12})", color_line)
         if hex_match_long:
             color_hex = hex_match_long.group(1)
-            # Handle special case: #RRRRGGGGBBBB (12 characters)
             if len(color_hex) == 12:
                 r = int(color_hex[0:4], 16) >> 8
                 g = int(color_hex[4:8], 16) >> 8
                 b = int(color_hex[8:12], 16) >> 8
-            # Handle special case: #RRGGBBAA (8 characters)
             elif len(color_hex) == 8:
                 r = int(color_hex[0:2], 16)
                 g = int(color_hex[2:4], 16)
                 b = int(color_hex[4:6], 16)
                 a = int(color_hex[6:8], 16)
+                color_table[key] = (r, g, b, a)
+                continue
             else:
-                # Default to parsing as RGB
                 r = int(color_hex[0:2], 16)
                 g = int(color_hex[2:4], 16)
                 b = int(color_hex[4:6], 16)
-                a = 255
-            color_table[key] = (r, g, b, a)
+            color_table[key] = (r, g, b, 255)
             continue
-
-        # Try named colors
         named_match = re.search(r"c\s+(\w+)", color_line)
         if named_match:
             color_name = named_match.group(1).lower()
-            if color_name in X11_COLORS:
-                color_table[key] = X11_COLORS[color_name]
-            else:
-                logger.warning(
-                    f"Unknown color name '{color_name}' in {xpm_file}, using black"
-                )
-                color_table[key] = (0, 0, 0, 255)
+            color_table[key] = X11_COLORS.get(color_name, (0, 0, 0, 255))
             continue
+        color_table[key] = (0, 0, 0, 255)
+    return color_table
 
-        # If we got here, we couldn't parse the color
-        logger.warning(
-            f"Could not parse color in {xpm_file}, line: {color_line} - using black"
-        )
-        color_table[key] = (0, 0, 0, 255)  # Default to black
 
-    # Parse pixel data
+def _parse_xpm_pixels(
+    lines: List[str],
+    pixel_start_index: int,
+    height: int,
+    width: int,
+    chars_per_pixel: int,
+    color_table: Dict[str, Tuple[int, int, int, int]],
+) -> List[List[Tuple[int, int, int, int]]]:
+    """Parse the pixel data from XPM lines."""
     pixels = []
-    pixel_start_index = header_index + num_colors + 1
-
     for i in range(pixel_start_index, pixel_start_index + height):
         if i >= len(lines):
-            logger.error(f"Unexpected end of pixel data in {xpm_file}")
-            return None
-
+            break
         row = lines[i]
         row_pixels = []
-
         for j in range(0, len(row), chars_per_pixel):
             if j + chars_per_pixel <= len(row):
                 pixel_key = row[j : j + chars_per_pixel]
-                if pixel_key in color_table:
-                    row_pixels.append(color_table[pixel_key])
-                else:
-                    logger.warning(
-                        f"Unknown pixel key '{pixel_key}' in {xpm_file}, row {i}, column {j}"
-                    )
-                    row_pixels.append((0, 0, 0, 255))  # Default to black
-
+                row_pixels.append(color_table.get(pixel_key, (0, 0, 0, 255)))
         pixels.append(row_pixels)
+    return pixels
 
-    # Verify image dimensions
+
+def _validate_xpm_pixels(
+    pixels: List[List[Tuple[int, int, int, int]]],
+    width: int,
+    height: int,
+    xpm_file: str,
+) -> None:
     if len(pixels) != height:
         logger.warning(
             f"Warning: Expected {height} rows, got {len(pixels)} in {xpm_file}"
         )
-
     for row_index, row in enumerate(pixels):
         if len(row) != width:
             logger.warning(
                 f"Warning: Row {row_index} expected {width} pixels, got {len(row)} in {xpm_file}"
             )
 
+
+def parse_xpm(
+    xpm_file: str,
+) -> Optional[Tuple[int, int, List[List[Tuple[int, int, int, int]]]]]:
+    """Parse an XPM file and extract image data.
+
+    Args:
+    ----
+        xpm_file (str): Path to the XPM file
+
+    Returns:
+    -------
+        tuple: (width, height, pixels) or None on failure
+
+    """
+    with open(xpm_file) as f:
+        content = f.read()
+
+    logger.info(f"\nParsing {xpm_file}")
+
+    lines = _extract_xpm_lines(content)
+    if not lines:
+        logger.error(f"Failed to parse XPM data in {xpm_file}")
+        return None
+
+    header_info = _parse_xpm_header(lines)
+    if not header_info:
+        logger.error(f"Invalid XPM header in {xpm_file}: {lines}")
+        return None
+
+    header_index, width, height, num_colors, chars_per_pixel = header_info
+
+    logger.info(f"Header line: '{lines[header_index]}'")
+
+    color_table = _parse_xpm_color_table(
+        lines, header_index, num_colors, chars_per_pixel
+    )
+    if color_table is None:
+        logger.error(f"Unexpected end of color table in {xpm_file}")
+        return None
+
+    pixel_start_index = header_index + num_colors + 1
+    pixels = _parse_xpm_pixels(
+        lines, pixel_start_index, height, width, chars_per_pixel, color_table
+    )
+    _validate_xpm_pixels(pixels, width, height, xpm_file)
+
     return width, height, pixels
 
 
 def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
-    """
-    Convert an XPM file to a PNG file.
+    """Convert an XPM file to a PNG file.
 
     Args:
+    ----
         xpm_path (str): Path to the XPM file
         png_path (str): Path to save the PNG file
 
     Returns:
+    -------
         bool: True if successful, False otherwise
-    """
-    result = parse_xpm(xpm_path)
-    if not result:
-        return False
 
-    width, height, pixels = result
+    """
+    result = False
+    xpm_data = parse_xpm(xpm_path)
+    if not xpm_data:
+        return result
+
+    width, height, pixels = xpm_data
 
     # Create a new image with RGBA mode for transparency
     img = Image.new("RGBA", (width, height))
@@ -319,41 +319,46 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
         logger.warning(
             f"Warning: Image {os.path.basename(xpm_path)} has no visible pixels, generating a placeholder."
         )
-        # Create a placeholder based on the filename
         base_name = os.path.basename(xpm_path)
-        if "blue" in base_name.lower():
-            color = (60, 120, 255, 255)
-        elif "red" in base_name.lower():
-            color = (255, 60, 60, 255)
-        elif "green" in base_name.lower() or "grn" in base_name.lower():
-            color = (40, 220, 40, 255)
-        elif "yellow" in base_name.lower() or "yell" in base_name.lower():
-            color = (255, 255, 40, 255)
-        elif "purple" in base_name.lower() or "purp" in base_name.lower():
-            color = (200, 40, 200, 255)
-        elif "tan" in base_name.lower():
-            color = (210, 180, 140, 255)
-        elif "black" in base_name.lower():
-            color = (40, 40, 40, 255)
-        else:
-            color = (150, 150, 150, 255)
 
+        def get_placeholder_color(name: str) -> Tuple[int, int, int, int]:
+            name = name.lower()
+            color_map = [
+                ("blue", (60, 120, 255, 255)),
+                ("red", (255, 60, 60, 255)),
+                ("green", (40, 220, 40, 255)),
+                ("grn", (40, 220, 40, 255)),
+                ("yellow", (255, 255, 40, 255)),
+                ("yell", (255, 255, 40, 255)),
+                ("purple", (200, 40, 200, 255)),
+                ("purp", (200, 40, 200, 255)),
+                ("tan", (210, 180, 140, 255)),
+                ("black", (40, 40, 40, 255)),
+            ]
+            for key, color in color_map:
+                if key in name:
+                    return color
+            return (150, 150, 150, 255)
+
+        color = get_placeholder_color(base_name)
         # Create a rounded block with a 3D effect
         for y in range(height):
             for x in range(width):
                 # Leave corners transparent
-                if (
+                is_corner = (
                     (x < 2 and y < 2)
                     or (x < 2 and y >= height - 2)
                     or (x >= width - 2 and y < 2)
                     or (x >= width - 2 and y >= height - 2)
-                ):
+                )
+                is_main_body = 2 <= x < width - 2 and 2 <= y < height - 2
+                is_top_edge = y < 2 or x < 2
+                is_bottom_edge = y >= height - 2 or x >= width - 2
+                if is_corner:
                     img.putpixel((x, y), (0, 0, 0, 0))
-                # Main block body
-                elif 2 <= x < width - 2 and 2 <= y < height - 2:
+                elif is_main_body:
                     img.putpixel((x, y), color)
-                # Top-edge highlight
-                elif y < 2:
+                elif is_top_edge:
                     highlight = (
                         min(255, color[0] + 40),
                         min(255, color[1] + 40),
@@ -361,26 +366,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
                         255,
                     )
                     img.putpixel((x, y), highlight)
-                # Left-edge highlight
-                elif x < 2:
-                    highlight = (
-                        min(255, color[0] + 40),
-                        min(255, color[1] + 40),
-                        min(255, color[2] + 40),
-                        255,
-                    )
-                    img.putpixel((x, y), highlight)
-                # Bottom-edge shadow
-                elif y >= height - 2:
-                    shadow = (
-                        max(0, color[0] - 40),
-                        max(0, color[1] - 40),
-                        max(0, color[2] - 40),
-                        255,
-                    )
-                    img.putpixel((x, y), shadow)
-                # Right-edge shadow
-                elif x >= width - 2:
+                elif is_bottom_edge:
                     shadow = (
                         max(0, color[0] - 40),
                         max(0, color[1] - 40),
@@ -389,25 +375,30 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
                     )
                     img.putpixel((x, y), shadow)
 
-    # Save the image with maximum quality
-    img.save(png_path, optimize=True)
+    try:
+        img.save(png_path, optimize=True)
+        logger.info(f"Successfully converted {xpm_path} to {png_path}")
+        result = True
+    except Exception as e:
+        logger.error(f"Failed to save PNG {png_path}: {e}")
+        result = False
 
-    logger.info(f"Successfully converted {xpm_path} to {png_path}")
-    return True
+    return result
 
 
 def convert_directory(
     input_dir: Path, output_dir: Path, dry_run: bool = False
 ) -> Dict[str, List[str]]:
-    """
-    Convert all XPM files in a directory tree to PNG, preserving
-    the subdirectory structure.
+    """Convert all XPM files in a directory tree to PNG.
+
     Args:
+    ----
         input_dir (Path): Input directory with XPM files
         output_dir (Path): Output directory for PNG files
         dry_run (bool): If True, do not convert
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
+
     """
     results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
     for root, _, files in os.walk(input_dir):
@@ -446,10 +437,12 @@ def convert_directory(
 
 
 def main() -> int:
-    """
-    Main entry point for the XPM to PNG conversion script.
-    Returns:
+    """Convert XBoing XPM files to PNG format for the Python/SDL2 implementation.
+
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Convert XBoing XPM files to PNG format. Requires Pillow."

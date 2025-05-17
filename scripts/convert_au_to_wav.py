@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-"""
-Audio Converter (Cross-Platform, Modernized)
+"""Convert .au audio files from the legacy XBoing C codebase to .wav format for the Python port.
 
-This script converts .au audio files from the legacy XBoing C codebase to .wav format for the Python port.
 - Default input: xboing2.4-clang/sounds/
 - Default output: assets/sounds/
 - Uses ffmpeg for conversion (must be installed and in PATH)
@@ -15,9 +13,9 @@ Usage:
 
 import argparse
 import logging
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional
 
 logger = logging.getLogger("xboing.scripts.convert_au_to_wav")
@@ -39,14 +37,16 @@ def check_ffmpeg() -> bool:
 def convert_au_to_wav(
     input_file: Path, output_file: Optional[Path] = None, dry_run: bool = False
 ) -> Optional[bool]:
-    """
-    Convert an .au file to .wav format using ffmpeg.
+    """Convert an .au file to .wav format using ffmpeg.
+
     Args:
+    ----
         input_file (Path): Path to the .au file
         output_file (Path): Path for the output .wav file (optional)
         dry_run (bool): If True, do not convert
     Returns:
         bool: True if converted, False if failed, None if skipped
+
     """
     if output_file is None:
         output_file = input_file.with_suffix(".wav")
@@ -81,14 +81,16 @@ def convert_au_to_wav(
 def convert_directory(
     input_dir: Path, output_dir: Path, dry_run: bool = False
 ) -> Dict[str, List[str]]:
-    """
-    Convert all .au files in a directory to .wav format.
+    """Convert all .au files in a directory to .wav format.
+
     Args:
+    ----
         input_dir (Path): Directory containing .au files
         output_dir (Path): Directory to save .wav files
         dry_run (bool): If True, do not convert
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
+
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     au_files = sorted(input_dir.glob("*.au"))
@@ -106,10 +108,12 @@ def convert_directory(
 
 
 def main() -> int:
-    """
-    Main entry point for the audio conversion script.
-    Returns:
+    """Convert .au audio files from the legacy XBoing C codebase to .wav format for the Python port.
+
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Convert .au audio files from legacy XBoing to .wav for Python port. Requires ffmpeg."

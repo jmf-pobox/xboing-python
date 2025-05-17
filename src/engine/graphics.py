@@ -1,5 +1,4 @@
-"""
-Graphics rendering abstraction over SDL2/pygame.
+"""Graphics rendering abstraction over SDL2/pygame.
 
 This module provides a clean interface for sprite rendering, animations,
 and other graphical operations, abstracting the underlying pygame implementation.
@@ -22,15 +21,16 @@ class Sprite:
         scale: float = 1.0,
         angle: float = 0.0,
     ) -> None:
-        """
-        Initialize a sprite.
+        """Initialize a sprite.
 
         Args:
+        ----
             surface (pygame.Surface): The image surface.
             x (int): X position.
             y (int): Y position.
             scale (float): Scale factor.
             angle (float): Rotation angle in degrees.
+
         """
         self.original_surface: pygame.Surface = surface
         self.surface: pygame.Surface = surface
@@ -105,16 +105,17 @@ class AnimatedSprite(Sprite):
         scale: float = 1.0,
         angle: float = 0.0,
     ) -> None:
-        """
-        Initialize an animated sprite.
+        """Initialize an animated sprite.
 
         Args:
+        ----
             frames (List[pygame.Surface]): List of pygame.Surface objects for animation frames.
             frame_duration (int): Duration of each frame in milliseconds.
             x (int): X position.
             y (int): Y position.
             scale (float): Scale factor.
             angle (float): Rotation angle in degrees.
+
         """
         if not frames:
             raise ValueError("Frames list cannot be empty")
@@ -131,11 +132,12 @@ class AnimatedSprite(Sprite):
         self.loop: bool = True
 
     def update(self, delta_ms: int) -> None:
-        """
-        Update the animation.
+        """Update the animation.
 
         Args:
+        ----
             delta_ms (int): Time passed since last update in milliseconds.
+
         """
         if not self.playing:
             return
@@ -180,11 +182,12 @@ class Renderer:
     """Main renderer class for managing drawing operations."""
 
     def __init__(self, window_surface: pygame.Surface) -> None:
-        """
-        Initialize the renderer.
+        """Initialize the renderer.
 
         Args:
+        ----
             window_surface (pygame.Surface): The main window surface.
+
         """
         self.logger: logging.Logger = logging.getLogger("xboing.Renderer")
         if window_surface is None:
@@ -235,10 +238,10 @@ class Renderer:
         y: int,
         centered: bool = False,
     ) -> pygame.Rect:
-        """
-        Draw text to the renderer.
+        """Draw text to the renderer.
 
         Args:
+        ----
             text (str): The text to render.
             font (pygame.font.Font): The font to use.
             color (Tuple[int, int, int]): The color of the text.
@@ -247,7 +250,9 @@ class Renderer:
             centered (bool, optional): Whether to center the text. Defaults to False.
 
         Returns:
+        -------
             pygame.Rect: The rectangle of the rendered text.
+
         """
         text_surface: pygame.Surface = font.render(text, True, color)
         text_rect: pygame.Rect = text_surface.get_rect()

@@ -1,7 +1,4 @@
-"""
-Stateless renderer for displaying LED-style numbers using digit sprites.
-Used by UI components for visual output.
-"""
+"""Stateless renderer for displaying LED-style numbers using digit sprites."""
 
 import logging
 import os
@@ -18,10 +15,7 @@ def get_digits_dir() -> str:
 
 
 class DigitRenderer:
-    """
-    Stateless renderer for displaying LED-style numbers using digit sprites.
-    Used by UI components for visual output.
-    """
+    """Stateless renderer for displaying LED-style numbers using digit sprites."""
 
     logger = logging.getLogger("xboing.DigitRenderer")
 
@@ -55,26 +49,26 @@ class DigitRenderer:
     def render_number(
         self,
         number: int,
-        spacing: int = 2,
-        scale: float = 1.0,
         color: Optional[Tuple[int, int, int]] = None,
         width: Optional[int] = None,
         right_justified: bool = False,
     ) -> pygame.Surface:
-        """
-        Render a number as a surface using digit sprites.
+        """Render a number as a surface using digit sprites.
 
         Args:
+        ----
             number: The number to render.
-            spacing: Spacing between digits. Defaults to 2.
-            scale: Scale factor for digit size. Defaults to 1.0.
             color: Color to tint digits. Defaults to None.
             width: Minimum width (pads with spaces). Defaults to None.
             right_justified: Right-justify the number. Defaults to False.
 
         Returns:
+        -------
             The rendered number as a pygame.Surface.
+
         """
+        spacing: int = 2
+        scale: float = 1.0
         number_str = str(number)
         if width is not None and len(number_str) < width:
             number_str = " " * (width - len(number_str)) + number_str
@@ -125,10 +119,10 @@ class DigitRenderer:
         colon_width: int = 8,
         color: Optional[Tuple[int, int, int]] = None,
     ) -> pygame.Surface:
-        """
-        Render a time value as MM:SS using digit sprites and a colon.
+        """Render a time value as MM:SS using digit sprites and a colon.
 
         Args:
+        ----
             seconds: Time in seconds to render.
             spacing: Spacing between digits. Defaults to 2.
             scale: Scale factor for digit size. Defaults to 1.0.
@@ -136,7 +130,9 @@ class DigitRenderer:
             color: Color to tint digits and colon. Defaults to None (yellow colon).
 
         Returns:
+        -------
             The rendered time as a pygame.Surface.
+
         """
         minutes = seconds // 60
         secs = seconds % 60

@@ -1,5 +1,5 @@
-"""
-UIManager: Central manager for all UI components, content views, overlays, and bars in XBoing.
+"""UIManager: Central manager for all UI components, content views, overlays, and bars in XBoing.
+
 Handles view switching, event routing, and drawing of the UI.
 """
 
@@ -7,10 +7,11 @@ from typing import Any, Callable, Dict, List, Optional
 
 import pygame
 
+from engine.events import GameOverEvent, LevelCompleteEvent
+
 
 class UIManager:
-    """
-    Manages all UI components, content views, and bars for the application.
+    """Manages all UI components, content views, and bars for the application.
 
     UIManager is responsible for:
     - Registering and switching between different content views (e.g., game, game over, instructions).
@@ -20,7 +21,8 @@ class UIManager:
     - Drawing all registered UI components onto the main surface.
     - Providing a unified interface for UI setup and event handling.
 
-    Attributes:
+    Attributes
+    ----------
         top_bar: The top UI bar component.
         bottom_bar: The bottom UI bar component.
         views: Dictionary mapping view names to view objects.
@@ -29,6 +31,7 @@ class UIManager:
         previous_view: The name of the previously active view.
         window_controller: The always-active controller for global events.
         view_controller_map: Mapping of view names to their controllers.
+
     """
 
     def __init__(
@@ -36,12 +39,13 @@ class UIManager:
         window_controller: Any = None,
         view_controller_map: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """
-        Initialize the UIManager.
+        """Initialize the UIManager.
 
         Args:
+        ----
             window_controller: The always-active controller for global events.
             view_controller_map: Mapping of view names to their controllers.
+
         """
         self.top_bar: Any = None
         self.bottom_bar: Any = None
@@ -54,53 +58,59 @@ class UIManager:
         self.view_controller_map: Dict[str, Any] = view_controller_map or {}
 
     def register_top_bar(self, top_bar: Any) -> None:
-        """
-        Register the top UI bar component.
+        """Register the top UI bar component.
 
         Args:
+        ----
             top_bar: The top bar UI component to register.
+
         """
         self.top_bar = top_bar
 
     def register_bottom_bar(self, bottom_bar: Any) -> None:
-        """
-        Register the bottom UI bar component.
+        """Register the bottom UI bar component.
 
         Args:
+        ----
             bottom_bar: The bottom bar UI component to register.
+
         """
         self.bottom_bar = bottom_bar
 
     def register_view(self, name: str, view: Any) -> None:
-        """
-        Register a content view with a given name.
+        """Register a content view with a given name.
 
         Args:
+        ----
             name (str): The name of the view.
             view: The view object to register.
+
         """
         self.views[name] = view
         if self.current_view is None:
             self.set_view(name)
 
     def register_view_change_callback(self, callback: Callable[[str], None]) -> None:
-        """
-        Register a callback to be called when the view changes.
+        """Register a callback to be called when the view changes.
 
         Args:
+        ----
             callback (Callable[[str], None]): A callable that takes the new view name as its argument.
+
         """
         self._view_change_callbacks.append(callback)
 
     def set_view(self, name: str) -> None:
-        """
-        Set the active view by name.
+        """Set the active view by name.
 
         Args:
+        ----
             name (str): The name of the view to activate.
 
         Raises:
+        ------
             ValueError: If the view name is not registered.
+
         """
         if name in self.views:
             if self.current_view is not None:
@@ -117,11 +127,12 @@ class UIManager:
             raise ValueError(f"View '{name}' not registered.")
 
     def draw_all(self, surface: pygame.Surface) -> None:
-        """
-        Draw the current view, top bar, and bottom bar onto the given surface.
+        """Draw the current view, top bar, and bottom bar onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
+
         """
         if self.current_view:
             self.current_view.draw(surface)
@@ -138,14 +149,15 @@ class UIManager:
         bottom_bar: Any = None,
         initial_view: Optional[str] = None,
     ) -> None:
-        """
-        Register all UI components in one place. Accepts dict of views, top/bottom bars, and initial view name.
+        """Register all UI components in one place. Accepts dict of views, top/bottom bars, and initial view name.
 
         Args:
+        ----
             views (Optional[Dict[str, Any]]): Dictionary of view names to view objects.
             top_bar: The top bar UI component.
             bottom_bar: The bottom bar UI component.
             initial_view (Optional[str]): The name of the initial view to activate.
+
         """
         if top_bar:
             self.register_top_bar(top_bar)
@@ -158,14 +170,14 @@ class UIManager:
             self.set_view(initial_view)
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Handle and dispatch events to the window controller, active view's controller, and UI bars.
+        """Handle and dispatch events to the window controller, active view's controller, and UI bars.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
-        """
-        from engine.events import GameOverEvent, LevelCompleteEvent
 
+        """
+        # from engine.events import GameOverEvent, LevelCompleteEvent  # moved to top
         # Dispatch to always-active window controller
         if self.window_controller:
             self.window_controller.handle_events(events)

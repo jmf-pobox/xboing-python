@@ -1,5 +1,4 @@
-"""
-Block implementation for XBoing.
+"""Block implementation for XBoing.
 
 This module contains the block class and related utilities for
 creating, rendering, and managing breakable blocks.
@@ -46,10 +45,10 @@ class Block:
         color_name: str = "blue",
         points: int = 100,
     ) -> None:
-        """
-        Initialize a block.
+        """Initialize a block.
 
         Args:
+        ----
             x (int): X position
             y (int): Y position
             width (int): Block width
@@ -57,6 +56,7 @@ class Block:
             block_type (int): Type of block (normal, hard, unbreakable, etc.)
             color_name (str): Name of the color from the COLORS dictionary
             points (int): Points awarded for breaking this block
+
         """
         self.x: int = x
         self.y: int = y
@@ -92,11 +92,12 @@ class Block:
         )
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update the block's state.
+        """Update the block's state.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
+
         """
         # Update hit animation
         if self.is_hit:
@@ -105,11 +106,12 @@ class Block:
                 self.is_hit = False
 
     def hit(self) -> Tuple[bool, int]:
-        """
-        Handle the block being hit by a ball.
+        """Handle the block being hit by a ball.
 
-        Returns:
+        Returns
+        -------
             tuple: (broken, points) - Whether the block was broken and points earned
+
         """
         # Can't hit unbreakable blocks
         if self.health < 0:
@@ -132,11 +134,12 @@ class Block:
         return (False, 0)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the block.
+        """Draw the block.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
+
         """
         # Determine color based on hit state
         color = self.color
@@ -225,15 +228,16 @@ class BlockManager:
         offset_x: int = 0,
         offset_y: int = 0,
     ) -> None:
-        """
-        Initialize the block manager.
+        """Initialize the block manager.
 
         Args:
+        ----
             brick_width (int): Width of each brick
             brick_height (int): Height of each brick
             margin (int): Margin between bricks
             offset_x (int): X offset for all blocks (for positioning within play area)
             offset_y (int): Y offset for all blocks (for positioning within play area)
+
         """
         self.brick_width: int = brick_width
         self.brick_height: int = brick_height
@@ -245,16 +249,18 @@ class BlockManager:
     def create_level(
         self, level_num: int = 1, width: int = 800, top_margin: int = 100
     ) -> List[Block]:
-        """
-        Create a level with blocks arranged in a pattern.
+        """Create a level with blocks arranged in a pattern.
 
         Args:
+        ----
             level_num (int): Level number to determine difficulty
             width (int): Width of the play area
             top_margin (int): Top margin for blocks
 
         Returns:
+        -------
             list: The created blocks
+
         """
         self.blocks = []
 
@@ -416,24 +422,27 @@ class BlockManager:
         return self.blocks
 
     def update(self, delta_ms: float) -> None:
-        """
-        Update all blocks.
+        """Update all blocks.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
+
         """
         for block in self.blocks:
             block.update(delta_ms)
 
     def check_collisions(self, ball: Any) -> Tuple[int, int]:
-        """
-        Check for collisions between a ball and all blocks.
+        """Check for collisions between a ball and all blocks.
 
         Args:
+        ----
             ball (Ball): The ball to check collisions with
 
         Returns:
+        -------
             tuple: (points, broken_blocks) - Points earned and number of blocks broken
+
         """
         points = 0
         broken_blocks = 0
@@ -498,11 +507,12 @@ class BlockManager:
         return points, broken_blocks
 
     def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw all blocks.
+        """Draw all blocks.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
+
         """
         for block in self.blocks:
             block.draw(surface)

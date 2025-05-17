@@ -1,5 +1,4 @@
-"""
-Asset loading utilities.
+"""Asset loading utilities.
 
 This module provides functions for loading game assets such as
 images and converting them for use with pygame.
@@ -17,16 +16,18 @@ logger = logging.getLogger("xboing.AssetLoader")
 def load_image(
     filename: str, alpha: bool = True, scale: Optional[Tuple[int, int]] = None
 ) -> pygame.Surface:
-    """
-    Load an image and convert it for optimal display.
+    """Load an image and convert it for optimal display.
 
     Args:
+    ----
         filename (str): Path to the image file
         alpha (bool): Whether the image has alpha transparency
         scale (tuple[int, int] | None): Optional (width, height) to scale the image to
 
     Returns:
+    -------
         pygame.Surface: The loaded image surface
+
     """
     try:
         surface = pygame.image.load(filename)
@@ -38,10 +39,7 @@ def load_image(
         return surface
 
     # Convert the surface for faster blitting
-    if alpha:
-        surface = surface.convert_alpha()
-    else:
-        surface = surface.convert()
+    surface = surface.convert_alpha() if alpha else surface.convert()
 
     # Scale if needed
     if scale:
@@ -53,17 +51,19 @@ def load_image(
 def load_image_sequence(
     directory: str, pattern: str, num_frames: int, alpha: bool = True
 ) -> List[pygame.Surface]:
-    """
-    Load a sequence of images for animation.
+    """Load a sequence of images for animation.
 
     Args:
+    ----
         directory (str): Directory containing the images
         pattern (str): Filename pattern with {} for frame number
         num_frames (int): Number of frames to load
         alpha (bool): Whether the images have alpha transparency
 
     Returns:
+    -------
         list[pygame.Surface]: List of loaded image surfaces
+
     """
     frames = []
     for i in range(num_frames):
@@ -74,13 +74,15 @@ def load_image_sequence(
 
 
 def create_font(size: int) -> pygame.font.Font:
-    """
-    Create a pygame font object.
+    """Create a pygame font object.
 
     Args:
+    ----
         size (int): Font size in points
 
     Returns:
+    -------
         pygame.font.Font: The font object
+
     """
     return pygame.font.Font(None, size)

@@ -1,5 +1,6 @@
 # XBoing Python Port
 
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/jmf-pobox/xboing-python)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
 [![Build](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml)
@@ -124,19 +125,16 @@ python scripts/sync_assets.py
 ### Documentation
 
 See the `docs/` directory for detailed information:
-- [Project Paths](docs/PROJECT-PATHS.md) – Directory structure and asset locations
-- [Hatch Usage](docs/HATCH_USAGE.md) – Using Hatch for environment and dependency management
-- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
 - [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
-- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
 - [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
 - [Dependency Injection Design](docs/DI-DESIGN.md) – Dependency injection and modularity
-- [Logging Design](docs/LOGGING-DESIGN.md) – Logging system and best practices
-- [Scripts Design](docs/SCRIPTS-DESIGN.md) – Utility and asset conversion scripts
-- [Game Controller Tests](docs/GAME-CONTROLLER-TESTS.md) – Game controller test strategy
+- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
+- [Hatch Usage](docs/HATCH_USAGE.md) – Using Hatch for environment and dependency management
 - [Highscore Design](docs/HIGHSCORE-DESIGN.md) – High score system design
-- [MVC Refactor](docs/MVC-REFACTOR.md) – Notes on MVC refactor
-- [Design Feedback](docs/DESIGN-FEEDBACK.md) – Design review and feedback
+- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
+- [Logging Design](docs/LOGGING-DESIGN.md) – Logging system and best practices
+- [Project Paths](docs/PROJECT-PATHS.md) – Directory structure and asset locations
+- [Scripts Design](docs/SCRIPTS-DESIGN.md) – Utility and asset conversion scripts
 
 ### Contributing
 

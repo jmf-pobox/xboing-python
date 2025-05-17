@@ -64,6 +64,7 @@ dependencies = [
     "mypy",
     "ruff",
     "black",
+    "pylint",
     # Dev tools
     "pillow",
 ]
@@ -75,9 +76,14 @@ cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m src.main"
 # Code quality commands
 lint = "ruff check src/ tests/"
-lint-fix = "ruff check --fix src/ tests/"
-format = "black src/ tests/ scripts/"
-format-check = "black --check src/ tests/ scripts/"
+fmt = [
+    "black src/ tests/ scripts/",
+    "ruff check --fix src/ tests/ scripts/"
+]
+lint-fix = [
+    "black src/ tests/ scripts/",
+    "ruff check --fix src/ tests/ scripts/"
+]
 typecheck = "mypy src/"
 # Combined quality check
 check = [
@@ -91,6 +97,7 @@ fix = [
     "lint-fix"
 ]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
+pylint = "python -m pylint --rcfile=.pylintrc src"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -98,6 +105,7 @@ python_files = "test_*.py"
 
 # Black configuration
 [tool.black]
+# Aligned with pylint and ruff: 88 chars, Python 3.8
 line-length = 88
 target-version = ["py38"]
 include = '\.pyi?$'
@@ -117,43 +125,35 @@ exclude = '''
 
 # Ruff configuration
 [tool.ruff]
+# Aligned with pylint and black: 88 chars, Python 3.8
 line-length = 88
 target-version = "py38"
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "F",    # pyflakes
-    "B",    # flake8-bugbear
-    "I",    # isort
-    "UP",   # pyupgrade
+    "E", "F", "B", "I", "UP", "PL", "D", "N", "C4", "SIM", "A", "C90",
 ]
 ignore = [
-    "E203",  # Whitespace before ':' (black compatibility)
-    "E501",  # Line too long (handled by black)
+    "E203", "E501", "D203", "D213",
+    "D100", "D101", "D102", "D103", "D107", "D205", "D212",
+    "PLR2004", "C408",
+    "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417"
 ]
+per-file-ignores = { "__init__.py" = ["F401"] }
 
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"] # Unused imports in __init__.py
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+combine-as-imports = true
+force-sort-within-sections = true
 
 # MyPy configuration 
 [tool.mypy]
+# Maximum strictness, check tests as strictly as source
 python_version = "3.8"
-warn_return_any = false
-warn_unused_configs = true
-disallow_untyped_defs = false     # Don't require all functions to have type hints
-disallow_incomplete_defs = false  # Don't require all function params to have type hints
-check_untyped_defs = true         # Check the body of functions without type hints
-disallow_untyped_decorators = false
-ignore_missing_imports = true     # Ignore missing imports 
-
-# Ignore specific modules
-[[tool.mypy.overrides]]
-module = [
-    "pygame.*",
-    "tests.*"
-]
-ignore_errors = true
+strict = true
+warn_unused_ignores = true
+warn_return_any = true
+# No test ignore override: tests are checked strictly
 
 [tool.hatch.envs.publish]
 dependencies = [
@@ -170,3 +170,8 @@ test-publish = [
     "twine check dist/*",
     "twine upload --repository testpypi dist/*"
 ]
+
+[tool.hatch.fmt]
+targets = ["src", "tests", "scripts"]
+formatter = "black"
+linter = "isort"

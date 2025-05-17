@@ -1,5 +1,4 @@
-"""
-XBoing - Main application entry point and game loop.
+"""Main entry point for the XBoing game application.
 
 This module defines the XBoingApp class, which encapsulates all game setup and the main loop.
 """
@@ -9,8 +8,8 @@ import time
 import typing
 from typing import Any, Dict, Optional, cast
 
-import pygame
 from injector import Injector
+import pygame
 
 from app_coordinator import AppCoordinator
 from controllers.controller import Controller
@@ -67,8 +66,7 @@ logger.setLevel(logging.DEBUG)
 
 
 class XBoingApp:
-    """
-    Main application class for XBoing.
+    """Main application class for XBoing.
 
     Handles all game setup, dependency injection, and the main game loop.
     """
@@ -244,9 +242,7 @@ class XBoingApp:
         self.logger = logging.getLogger(__name__)
 
     def run(self) -> None:
-        """
-        Run the main game loop.
-        """
+        """Run the main game loop."""
         last_time = time.time()
         while self.nonlocal_vars["running"]:
             now = time.time()
@@ -284,9 +280,7 @@ class XBoingApp:
 
 
 def main() -> None:
-    """
-    Application entry point. Instantiates and runs the XBoingApp.
-    """
+    """Application entry point. Instantiates and runs the XBoingApp."""
     app = XBoingApp()
     app.run()
 

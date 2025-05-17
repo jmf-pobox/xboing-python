@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
-"""
-Special converter for the balllost.au file which has a corrupted header.
+"""Fix and convert the balllost.au file with a corrupted header to .wav format.
 
 Usage:
   python fix_balllost.py [--input INPUT_FILE] [--output OUTPUT_FILE]
   (Defaults: input=xboing2.4-clang/sounds/balllost.au, output=assets/sounds/balllost.wav)
 """
+
 import argparse
 import logging
-import wave
 from pathlib import Path
+import wave
 
 logger = logging.getLogger("xboing.scripts.fix_balllost")
 
 
 def fix_balllost_au(input_path: str, output_path: str) -> bool:
-    """
-    Fix and convert the balllost.au file that has a corrupted header.
+    """Fix and convert the balllost.au file that has a corrupted header.
 
     Args:
+    ----
         input_path (str): Path to the balllost.au file
         output_path (str): Path for the output .wav file
 
     Returns:
+    -------
         bool: True if successful, False otherwise
+
     """
     try:
         # Read the entire file
@@ -44,6 +46,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 
         # Create a WAV file for the converted data
         with wave.open(output_path, "wb") as wav_file:
+            wav_file: wave.Wave_write  # type: ignore
             # Set parameters - assuming 8-bit µ-law, mono, 8000Hz (standard for AU)
             wav_file.setparams((1, 2, 8000, 0, "NONE", "not compressed"))
 
@@ -57,10 +60,9 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
                 mantissa = u_val & 0x0F
 
                 # Convert to linear PCM
-                if exponent == 0:
-                    sample = mantissa
-                else:
-                    sample = (0x10 | mantissa) << (exponent - 1)
+                sample = (
+                    mantissa if exponent == 0 else (0x10 | mantissa) << (exponent - 1)
+                )
 
                 # Apply sign
                 linear = sign * sample
@@ -71,10 +73,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
             # Convert audio data using the table
             pcm_data = bytearray()
             for byte in audio_data:
-                if isinstance(byte, int):
-                    byte_val = byte
-                else:
-                    byte_val = ord(byte)
+                byte_val = byte if isinstance(byte, int) else ord(byte)
 
                 # Get linear value from table
                 value = ulaw_table[byte_val]
@@ -104,10 +103,12 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 
 
 def main() -> int:
-    """
-    Main entry point for the balllost.au fix/conversion script.
-    Returns:
+    """Convert the balllost.au file with a corrupted header to .wav format.
+
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Fix and convert the balllost.au file to .wav format."
@@ -133,8 +134,8 @@ def main() -> int:
         return 1
     if fix_balllost_au(str(input_path), str(output_path)):
         return 0
-    else:
-        return 1
+
+    return 1
 
 
 if __name__ == "__main__":

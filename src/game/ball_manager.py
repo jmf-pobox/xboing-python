@@ -1,15 +1,18 @@
+"""Manages ball objects and their state in XBoing."""
+
 from typing import Iterator, List, Optional
 
 from .ball import Ball
 
 
 class BallManager:
-    """
-    Manages the canonical list of Ball objects in play.
+    """Manages the canonical list of Ball objects in play.
+
     Provides methods to add, remove, reset, and iterate balls.
     """
 
     def __init__(self) -> None:
+        """Initialize the BallManager with an empty list of balls."""
         self._balls: List[Ball] = []
 
     @property
@@ -18,15 +21,19 @@ class BallManager:
         return self._balls
 
     def __iter__(self) -> Iterator[Ball]:
+        """Return an iterator over the managed balls."""
         return iter(self._balls)
 
     def add_ball(self, ball: Ball) -> None:
+        """Add a ball to the manager."""
         self._balls.append(ball)
 
     def remove_ball(self, ball: Ball) -> None:
+        """Remove a ball from the manager."""
         self._balls.remove(ball)
 
     def clear(self) -> None:
+        """Remove all balls from the manager."""
         self._balls.clear()
 
     def reset(self, initial_ball: Optional[Ball] = None) -> None:
@@ -36,25 +43,21 @@ class BallManager:
             self._balls.append(initial_ball)
 
     def get_active_balls(self) -> List[Ball]:
+        """Return a list of active balls currently managed."""
         return [ball for ball in self._balls if ball.active]
 
     def __len__(self) -> int:
+        """Return the number of balls currently managed."""
         return len(self._balls)
 
     def available_balls(self) -> int:
-        """
-        Return the number of balls currently managed (available for play).
-        """
+        """Return the number of balls currently managed (available for play)."""
         return len(self._balls)
 
     def active_ball(self) -> bool:
-        """
-        Return True if there is at least one active ball in play.
-        """
+        """Return True if there is at least one active ball in play."""
         return any(ball.active for ball in self._balls)
 
     def number_of_active_balls(self) -> int:
-        """
-        Return the number of active balls in play.
-        """
+        """Return the number of active balls in play."""
         return sum(1 for ball in self._balls if ball.active)

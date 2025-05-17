@@ -1,5 +1,5 @@
-"""
-TimerDisplay: UI component for displaying the remaining time in the timer window region.
+"""TimerDisplay: UI component for displaying the remaining time in the timer window region.
+
 Subscribes to TimerUpdatedEvent and renders itself using the renderer.
 """
 
@@ -13,21 +13,22 @@ from layout.game_layout import GameLayout
 
 
 class TimerDisplay:
-    """
-    UI component for displaying the remaining time in the timer window region.
+    """UI component for displaying the remaining time in the timer window region.
+
     Subscribes to TimerUpdatedEvent and renders itself using the renderer.
     """
 
     def __init__(
         self, layout: GameLayout, renderer: Renderer, font: pygame.font.Font
     ) -> None:
-        """
-        Initialize the TimerDisplay.
+        """Initialize the TimerDisplay.
 
         Args:
+        ----
             layout: The GameLayout instance.
             renderer: The renderer instance.
             font: The font to use for the timer.
+
         """
         self.layout = layout
         self.renderer = renderer
@@ -35,11 +36,12 @@ class TimerDisplay:
         self.time_remaining = 0
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """
-        Handle timer update events and update the displayed time.
+        """Handle timer update events and update the displayed time.
 
         Args:
+        ----
             events: List of Pygame events to handle.
+
         """
         for event in events:
             if event.type == pygame.USEREVENT and isinstance(
@@ -47,12 +49,13 @@ class TimerDisplay:
             ):
                 self.time_remaining = event.event.time_remaining
 
-    def draw(self, surface: pygame.Surface) -> None:
-        """
-        Draw the timer onto the given surface.
+    def draw(self, _surface: pygame.Surface) -> None:
+        """Draw the timer onto the given surface.
 
         Args:
+        ----
             surface: The Pygame surface to draw on.
+
         """
         timer_rect = self.layout.get_timer_rect()
         y = timer_rect.y + (timer_rect.height // 2)
