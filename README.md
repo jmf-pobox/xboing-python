@@ -1,6 +1,6 @@
 # XBoing Python Port
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/jmf-pobox/xboing-python)
+[![GitHub release](https://img.shields.io/github/v/release/jmf-pobox/xboing-python?include_prereleases)](https://github.com/jmf-pobox/xboing-python/releases)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
 [![Build](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml)
