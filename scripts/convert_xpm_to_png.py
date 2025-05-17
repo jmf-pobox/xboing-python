@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Improved XPM to PNG Converter for XBoing (Cross-Platform, Modernized)
+"""Convert XBoing XPM files to PNG format for the Python/SDL2 implementation.
 
 This tool converts the original XBoing XPM files to PNG format with proper color
 handling for use with the Python/SDL2 implementation.
@@ -89,14 +88,14 @@ logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
 def parse_xpm(
     xpm_file: str,
 ) -> Optional[Tuple[int, int, List[List[Tuple[int, int, int, int]]]]]:
-    """
-    Parse an XPM file and extract image data.
+    """Parse an XPM file and extract image data.
 
     Args:
         xpm_file (str): Path to the XPM file
 
     Returns:
         tuple: (width, height, pixels) or None on failure
+
     """
     with open(xpm_file) as f:
         content = f.read()
@@ -268,8 +267,7 @@ def parse_xpm(
 
 
 def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
-    """
-    Convert an XPM file to a PNG file.
+    """Convert an XPM file to a PNG file.
 
     Args:
         xpm_path (str): Path to the XPM file
@@ -277,6 +275,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
 
     Returns:
         bool: True if successful, False otherwise
+
     """
     result = parse_xpm(xpm_path)
     if not result:
@@ -353,16 +352,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
                 elif 2 <= x < width - 2 and 2 <= y < height - 2:
                     img.putpixel((x, y), color)
                 # Top-edge highlight
-                elif y < 2:
-                    highlight = (
-                        min(255, color[0] + 40),
-                        min(255, color[1] + 40),
-                        min(255, color[2] + 40),
-                        255,
-                    )
-                    img.putpixel((x, y), highlight)
-                # Left-edge highlight
-                elif x < 2:
+                elif y < 2 or x < 2:
                     highlight = (
                         min(255, color[0] + 40),
                         min(255, color[1] + 40),
@@ -371,16 +361,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
                     )
                     img.putpixel((x, y), highlight)
                 # Bottom-edge shadow
-                elif y >= height - 2:
-                    shadow = (
-                        max(0, color[0] - 40),
-                        max(0, color[1] - 40),
-                        max(0, color[2] - 40),
-                        255,
-                    )
-                    img.putpixel((x, y), shadow)
-                # Right-edge shadow
-                elif x >= width - 2:
+                elif y >= height - 2 or x >= width - 2:
                     shadow = (
                         max(0, color[0] - 40),
                         max(0, color[1] - 40),
@@ -399,15 +380,15 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
 def convert_directory(
     input_dir: Path, output_dir: Path, dry_run: bool = False
 ) -> Dict[str, List[str]]:
-    """
-    Convert all XPM files in a directory tree to PNG, preserving
-    the subdirectory structure.
+    """Convert all XPM files in a directory tree to PNG.
+
     Args:
         input_dir (Path): Input directory with XPM files
         output_dir (Path): Output directory for PNG files
         dry_run (bool): If True, do not convert
     Returns:
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
+
     """
     results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
     for root, _, files in os.walk(input_dir):
@@ -446,10 +427,11 @@ def convert_directory(
 
 
 def main() -> int:
-    """
-    Main entry point for the XPM to PNG conversion script.
+    """Convert XBoing XPM files to PNG format for the Python/SDL2 implementation.
+
     Returns:
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Convert XBoing XPM files to PNG format. Requires Pillow."

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Special converter for the balllost.au file which has a corrupted header.
+"""Fix and convert the balllost.au file with a corrupted header to .wav format.
 
 Usage:
   python fix_balllost.py [--input INPUT_FILE] [--output OUTPUT_FILE]
@@ -15,8 +14,7 @@ logger = logging.getLogger("xboing.scripts.fix_balllost")
 
 
 def fix_balllost_au(input_path: str, output_path: str) -> bool:
-    """
-    Fix and convert the balllost.au file that has a corrupted header.
+    """Fix and convert the balllost.au file that has a corrupted header.
 
     Args:
         input_path (str): Path to the balllost.au file
@@ -24,6 +22,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 
     Returns:
         bool: True if successful, False otherwise
+
     """
     try:
         # Read the entire file
@@ -104,10 +103,11 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 
 
 def main() -> int:
-    """
-    Main entry point for the balllost.au fix/conversion script.
+    """Convert the balllost.au file with a corrupted header to .wav format.
+
     Returns:
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Fix and convert the balllost.au file to .wav format."

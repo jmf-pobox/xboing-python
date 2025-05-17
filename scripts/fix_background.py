@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Fix Background Image Converter
+"""Convert the XBoing background pattern XPM to a PNG file for the Python port.
 
 This script is specifically designed to correctly convert the XBoing
 background pattern XPM to a PNG file for the Python port.
@@ -20,15 +19,17 @@ logger = logging.getLogger("xboing.scripts.fix_background")
 
 
 def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
-    """
-    Convert the XBoing background XPM to a PNG file.
+    """Convert the XBoing background XPM to a PNG file.
 
     This function is specifically designed for the bgrnd.xpm file.
+
     Args:
         xpm_path (str): Path to the input XPM file.
         png_path (str): Path to the output PNG file.
+
     Returns:
         bool: True if successful, False otherwise.
+
     """
     # Define the colors directly from the XPM file
     colors = {
@@ -81,10 +82,11 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
 
 
 def main() -> int:
-    """
-    Main entry point for the background XPM to PNG conversion script.
+    """Convert the XBoing background pattern XPM to a PNG file for the Python port.
+
     Returns:
         int: Exit code (0 for success, 1 for error)
+
     """
     parser = argparse.ArgumentParser(
         description="Convert bgrnd.xpm to PNG for XBoing Python port."
