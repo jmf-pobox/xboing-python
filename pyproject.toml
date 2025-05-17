@@ -98,6 +98,7 @@ python_files = "test_*.py"
 
 # Black configuration
 [tool.black]
+# Aligned with pylint and ruff: 88 chars, Python 3.8
 line-length = 88
 target-version = ["py38"]
 include = '\.pyi?$'
@@ -117,43 +118,43 @@ exclude = '''
 
 # Ruff configuration
 [tool.ruff]
+# Aligned with pylint and black: 88 chars, Python 3.8
 line-length = 88
 target-version = "py38"
 
 [tool.ruff.lint]
+# Maximum strictness: enable all major rulesets, including pylint, docstring, naming, complexity, etc.
+# Docstring style: PEP 257-aligned (D211, D212 enforced; D203, D213 ignored)
 select = [
     "E",    # pycodestyle errors
     "F",    # pyflakes
     "B",    # flake8-bugbear
     "I",    # isort
     "UP",   # pyupgrade
+    "PL",   # pylint ruleset
+    "D",    # pydocstyle (docstring style)
+    "N",    # pep8-naming
+    "C4",   # flake8-comprehensions
+    "SIM",  # flake8-simplify
+    "A",    # flake8-builtins
+    "C90",  # mccabe (complexity)
 ]
 ignore = [
     "E203",  # Whitespace before ':' (black compatibility)
     "E501",  # Line too long (handled by black)
+    "D203",  # Ignore: prefer D211 (no blank line before class docstring)
+    "D213",  # Ignore: prefer D212 (multi-line summary on first line)
 ]
-
-[tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"] # Unused imports in __init__.py
+per-file-ignores = { "__init__.py" = ["F401"] }
 
 # MyPy configuration 
 [tool.mypy]
+# Maximum strictness, check tests as strictly as source
 python_version = "3.8"
-warn_return_any = false
-warn_unused_configs = true
-disallow_untyped_defs = false     # Don't require all functions to have type hints
-disallow_incomplete_defs = false  # Don't require all function params to have type hints
-check_untyped_defs = true         # Check the body of functions without type hints
-disallow_untyped_decorators = false
-ignore_missing_imports = true     # Ignore missing imports 
-
-# Ignore specific modules
-[[tool.mypy.overrides]]
-module = [
-    "pygame.*",
-    "tests.*"
-]
-ignore_errors = true
+strict = true
+warn_unused_ignores = true
+warn_return_any = true
+# No test ignore override: tests are checked strictly
 
 [tool.hatch.envs.publish]
 dependencies = [
