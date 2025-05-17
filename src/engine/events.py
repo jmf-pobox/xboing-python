@@ -1,4 +1,5 @@
 """Events module for XBoing."""
+
 from typing import Tuple
 
 

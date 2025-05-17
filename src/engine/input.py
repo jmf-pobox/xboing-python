@@ -62,12 +62,18 @@ class InputManager:
                 self.mouse_pos = event.pos
                 self.mouse_motion = event.rel
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button <= self.MAX_MOUSE_BUTTONS:
+            elif (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button <= self.MAX_MOUSE_BUTTONS
+            ):
                 button_idx = event.button - 1
                 self.mouse_buttons_pressed[button_idx] = True
                 self.mouse_buttons_down[button_idx] = True
 
-            elif event.type == pygame.MOUSEBUTTONUP and event.button <= self.MAX_MOUSE_BUTTONS:
+            elif (
+                event.type == pygame.MOUSEBUTTONUP
+                and event.button <= self.MAX_MOUSE_BUTTONS
+            ):
                 button_idx = event.button - 1
                 self.mouse_buttons_pressed[button_idx] = False
                 self.mouse_buttons_up[button_idx] = True

@@ -1,4 +1,5 @@
 """Audio manager module for XBoing."""
+
 import logging
 import os
 from typing import Dict, Sequence
@@ -40,7 +41,9 @@ class AudioManager:
         for event in events:
             if event.type == pygame.USEREVENT:
                 event_data = getattr(event, "event", None)
-                sound_name = getattr(event_data, "sound_effect", None) if event_data else None
+                sound_name = (
+                    getattr(event_data, "sound_effect", None) if event_data else None
+                )
                 if sound_name and not self.muted:
                     self.logger.debug(
                         f"Handling event: {type(event.event).__name__}, playing sound: {sound_name}"
