@@ -7,7 +7,7 @@ init-hook='import sys; sys.path.append("src")'
 
 [MESSAGES CONTROL]
 disable=
-    bad-continuation,  # Accept black's formatting
+    # Accept black's formatting
 
 [FORMAT]
 max-line-length=88
@@ -39,7 +39,7 @@ ignore-imports=yes
 additional-builtins=pytest
 
 [EXCEPTIONS]
-overgeneral-exceptions=Exception
+overgeneral-exceptions=builtins.Exception
 
 [PYTHON3]
 python-version=3.8
