@@ -24,6 +24,7 @@ class Sprite:
         """Initialize a sprite.
 
         Args:
+        ----
             surface (pygame.Surface): The image surface.
             x (int): X position.
             y (int): Y position.
@@ -107,6 +108,7 @@ class AnimatedSprite(Sprite):
         """Initialize an animated sprite.
 
         Args:
+        ----
             frames (List[pygame.Surface]): List of pygame.Surface objects for animation frames.
             frame_duration (int): Duration of each frame in milliseconds.
             x (int): X position.
@@ -133,6 +135,7 @@ class AnimatedSprite(Sprite):
         """Update the animation.
 
         Args:
+        ----
             delta_ms (int): Time passed since last update in milliseconds.
 
         """
@@ -182,6 +185,7 @@ class Renderer:
         """Initialize the renderer.
 
         Args:
+        ----
             window_surface (pygame.Surface): The main window surface.
 
         """
@@ -237,6 +241,7 @@ class Renderer:
         """Draw text to the renderer.
 
         Args:
+        ----
             text (str): The text to render.
             font (pygame.font.Font): The font to use.
             color (Tuple[int, int, int]): The color of the text.
@@ -245,6 +250,7 @@ class Renderer:
             centered (bool, optional): Whether to center the text. Defaults to False.
 
         Returns:
+        -------
             pygame.Rect: The rectangle of the rendered text.
 
         """

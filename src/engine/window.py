@@ -31,6 +31,7 @@ class Window:
         """Initialize the game window.
 
         Args:
+        ----
             width: Window width in pixels
             height: Window height in pixels
             title: Window title
@@ -96,9 +97,11 @@ class Window:
         """Process window events.
 
         Args:
+        ----
             events: Sequence of pygame events to process.
 
         Returns:
+        -------
             bool: False if the window should close, True otherwise
 
         """

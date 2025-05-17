@@ -1,7 +1,6 @@
 from unittest.mock import Mock, patch
 
 import pygame
-
 from controllers.game_controller import GameController
 from engine.events import (
     BallLostEvent,

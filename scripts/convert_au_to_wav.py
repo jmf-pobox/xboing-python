@@ -40,6 +40,7 @@ def convert_au_to_wav(
     """Convert an .au file to .wav format using ffmpeg.
 
     Args:
+    ----
         input_file (Path): Path to the .au file
         output_file (Path): Path for the output .wav file (optional)
         dry_run (bool): If True, do not convert
@@ -83,6 +84,7 @@ def convert_directory(
     """Convert all .au files in a directory to .wav format.
 
     Args:
+    ----
         input_dir (Path): Directory containing .au files
         output_dir (Path): Directory to save .wav files
         dry_run (bool): If True, do not convert
@@ -108,7 +110,8 @@ def convert_directory(
 def main() -> int:
     """Convert .au audio files from the legacy XBoing C codebase to .wav format for the Python port.
 
-    Returns:
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
 
     """

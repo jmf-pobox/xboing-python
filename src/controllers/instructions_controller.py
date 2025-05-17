@@ -3,10 +3,9 @@
 from typing import Any, Callable, List, Optional
 
 import pygame
-from injector import inject
-
 from controllers.controller import Controller
 from engine.audio_manager import AudioManager
+from injector import inject
 from ui.ui_manager import UIManager
 
 
@@ -27,6 +26,7 @@ class InstructionsController(Controller):
         """Initialize the InstructionsController.
 
         Args:
+        ----
             on_exit_callback: Callback to exit the instructions view.
             audio_manager: The AudioManager instance (optional, for future use).
             quit_callback: Callback to quit the game (optional, for future use).
@@ -42,6 +42,7 @@ class InstructionsController(Controller):
         """Handle input/events for instructions view and global controls.
 
         Args:
+        ----
             events: List of Pygame events to process.
 
         """
@@ -57,6 +58,7 @@ class InstructionsController(Controller):
         """Update logic for instructions view (usually minimal).
 
         Args:
+        ----
             delta_time: Time elapsed since last update in milliseconds.
 
         """
@@ -66,6 +68,7 @@ class InstructionsController(Controller):
         """Handle a single event (protocol stub for future use).
 
         Args:
+        ----
             event: A single event object (type may vary).
 
         """

@@ -22,6 +22,7 @@ class CollisionSystem:
         """Initialize the collision system.
 
         Args:
+        ----
             screen_width (int): Screen width for boundary checks
             screen_height (int): Screen height for boundary checks
 
@@ -40,9 +41,11 @@ class CollisionSystem:
         """Check and handle collisions between a ball and the walls.
 
         Args:
+        ----
             ball (Ball): The ball to check
 
         Returns:
+        -------
             Dict[str, Any]: Collision information
 
         """
@@ -89,10 +92,12 @@ class CollisionSystem:
         """Check and handle collisions between a ball and the paddle.
 
         Args:
+        ----
             ball (Ball): The ball to check
             paddle (Paddle): The paddle to check against
 
         Returns:
+        -------
             Dict[str, Any]: Collision information
 
         """
@@ -128,12 +133,14 @@ class CollisionSystem:
         """Check collision between a circle and a rectangle.
 
         Args:
+        ----
             circle_x (float): Circle center X coordinate
             circle_y (float): Circle center Y coordinate
             circle_radius (float): Circle radius
             rect (pygame.Rect): Rectangle to check against
 
         Returns:
+        -------
             bool: True if collision occurred, False otherwise
 
         """
@@ -160,6 +167,7 @@ class CollisionSystem:
         """Calculate the collision normal vector for a circle-rectangle collision.
 
         Args:
+        ----
             circle_x (float): Current circle center X coordinate
             circle_y (float): Current circle center Y coordinate
             prev_x (float): Previous circle center X coordinate
@@ -167,6 +175,7 @@ class CollisionSystem:
             rect (pygame.Rect): Rectangle involved in the collision
 
         Returns:
+        -------
             tuple: (nx, ny) normalized collision normal vector
 
         """

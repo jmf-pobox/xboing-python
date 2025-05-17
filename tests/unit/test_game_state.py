@@ -2,7 +2,6 @@ from unittest.mock import patch
 
 import pygame
 import pytest
-
 from engine.events import (
     GameOverEvent,
     LevelChangedEvent,

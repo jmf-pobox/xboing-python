@@ -10,6 +10,7 @@ def setup_logging(
     """Set up logging configuration for the application.
 
     Args:
+    ----
         default_level: The default logging level (e.g., logging.INFO).
         log_file: The file to write logs to.
 

@@ -73,6 +73,7 @@ class LevelManager:
         """Initialize the level manager.
 
         Args:
+        ----
             levels_dir (str): Directory containing level data files.
                 If None, tries to find the default levels directory.
             layout (GameLayout): The game layout to set backgrounds on.
@@ -101,6 +102,7 @@ class LevelManager:
         """Set the block manager to use for creating blocks.
 
         Args:
+        ----
             block_manager (SpriteBlockManager): The block manager to use
 
         """
@@ -110,6 +112,7 @@ class LevelManager:
         """Set the game layout to use for backgrounds.
 
         Args:
+        ----
             layout (GameLayout): The game layout to use
 
         """
@@ -119,9 +122,11 @@ class LevelManager:
         """Load a specific level.
 
         Args:
+        ----
             level_num (int): Level number to load. If None, uses current_level.
 
         Returns:
+        -------
             bool: True if level was loaded successfully, False otherwise
 
         """
@@ -183,6 +188,7 @@ class LevelManager:
         """Update level timer and state.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
@@ -199,6 +205,7 @@ class LevelManager:
         """Add time to the level timer (for power-ups).
 
         Args:
+        ----
             seconds (int): Seconds to add
 
         """
@@ -215,7 +222,8 @@ class LevelManager:
     def is_level_complete(self) -> bool:
         """Check if the level is complete (all breakable blocks destroyed).
 
-        Returns:
+        Returns
+        -------
             bool: True if level is complete, False otherwise
 
         """
@@ -226,7 +234,8 @@ class LevelManager:
     def get_level_info(self) -> dict:
         """Get current level information.
 
-        Returns:
+        Returns
+        -------
             dict: Dictionary with level info (level_num, title, time_bonus, time_remaining)
 
         """
@@ -240,7 +249,8 @@ class LevelManager:
     def get_time_remaining(self) -> int:
         """Get remaining time in seconds.
 
-        Returns:
+        Returns
+        -------
             int: Remaining time in seconds
 
         """
@@ -249,7 +259,8 @@ class LevelManager:
     def get_score_multiplier(self) -> int:
         """Get score multiplier based on remaining time.
 
-        Returns:
+        Returns
+        -------
             int: Score multiplier (1, 2, 3, 4, or 5)
 
         """
@@ -277,6 +288,7 @@ class LevelManager:
         """Create blocks based on the level layout.
 
         Args:
+        ----
             layout (list): List of rows, each a string of characters representing blocks
 
         """
@@ -400,9 +412,11 @@ class LevelManager:
         """Get the file path for a specific level number.
 
         Args:
+        ----
             level_num (int): Level number (1-80)
 
         Returns:
+        -------
             str: Path to the level file
 
         """
@@ -414,9 +428,11 @@ class LevelManager:
         """Parse an XBoing level file.
 
         Args:
+        ----
             file_path (str): Path to the level file
 
         Returns:
+        -------
             dict: Dictionary with level data (title, time_bonus, layout)
                   or None if parsing failed
 

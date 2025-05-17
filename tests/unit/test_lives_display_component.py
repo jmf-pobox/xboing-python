@@ -1,5 +1,4 @@
 import pygame
-
 from engine.events import LivesChangedEvent
 from ui.lives_display import LivesDisplayComponent
 

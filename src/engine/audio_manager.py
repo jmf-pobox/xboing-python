@@ -5,7 +5,6 @@ import os
 from typing import Dict, Sequence
 
 import pygame
-
 from engine.events import XBoingEvent
 
 
@@ -22,6 +21,7 @@ class AudioManager:
         """Initialize the audio manager.
 
         Args:
+        ----
             sound_dir: Directory containing sound files.
 
         """
@@ -35,6 +35,7 @@ class AudioManager:
         """Handle a sequence of events, playing sounds for mapped custom events.
 
         Args:
+        ----
             events: A sequence of pygame events to process.
 
         """

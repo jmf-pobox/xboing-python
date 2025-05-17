@@ -1,6 +1,5 @@
 import pygame
 import pytest
-
 from engine.events import MessageChangedEvent
 from ui.message_display import MessageDisplay
 

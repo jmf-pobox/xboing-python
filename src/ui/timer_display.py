@@ -6,7 +6,6 @@ Subscribes to TimerUpdatedEvent and renders itself using the renderer.
 from typing import List
 
 import pygame
-
 from engine.events import TimerUpdatedEvent
 from engine.graphics import Renderer
 from layout.game_layout import GameLayout
@@ -24,6 +23,7 @@ class TimerDisplay:
         """Initialize the TimerDisplay.
 
         Args:
+        ----
             layout: The GameLayout instance.
             renderer: The renderer instance.
             font: The font to use for the timer.
@@ -38,6 +38,7 @@ class TimerDisplay:
         """Handle timer update events and update the displayed time.
 
         Args:
+        ----
             events: List of Pygame events to handle.
 
         """
@@ -51,6 +52,7 @@ class TimerDisplay:
         """Draw the timer onto the given surface.
 
         Args:
+        ----
             surface: The Pygame surface to draw on.
 
         """

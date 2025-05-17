@@ -1,5 +1,4 @@
 import pygame
-
 from engine.events import ScoreChangedEvent
 from ui.score_display import ScoreDisplay
 

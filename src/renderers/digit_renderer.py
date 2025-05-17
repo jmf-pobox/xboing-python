@@ -5,7 +5,6 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import pygame
-
 from utils.asset_paths import get_asset_path
 
 
@@ -56,12 +55,14 @@ class DigitRenderer:
         """Render a number as a surface using digit sprites.
 
         Args:
+        ----
             number: The number to render.
             color: Color to tint digits. Defaults to None.
             width: Minimum width (pads with spaces). Defaults to None.
             right_justified: Right-justify the number. Defaults to False.
 
         Returns:
+        -------
             The rendered number as a pygame.Surface.
 
         """
@@ -120,6 +121,7 @@ class DigitRenderer:
         """Render a time value as MM:SS using digit sprites and a colon.
 
         Args:
+        ----
             seconds: Time in seconds to render.
             spacing: Spacing between digits. Defaults to 2.
             scale: Scale factor for digit size. Defaults to 1.0.
@@ -127,6 +129,7 @@ class DigitRenderer:
             color: Color to tint digits and colon. Defaults to None (yellow colon).
 
         Returns:
+        -------
             The rendered time as a pygame.Surface.
 
         """

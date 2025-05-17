@@ -4,7 +4,6 @@ import logging
 from typing import Any, List
 
 import pygame
-
 from controllers.controller import Controller
 from engine.events import (
     ApplauseEvent,
@@ -61,6 +60,7 @@ class GameController(Controller):
         """Initialize the GameController.
 
         Args:
+        ----
             game_state: The main GameState instance.
             level_manager: The LevelManager instance.
             ball_manager: The BallManager instance for managing balls.
@@ -85,6 +85,7 @@ class GameController(Controller):
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
 
         Args:
+        ----
             events: List of Pygame events to process.
 
         """
@@ -138,6 +139,7 @@ class GameController(Controller):
         """Update gameplay logic.
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
@@ -152,6 +154,7 @@ class GameController(Controller):
         """Handle paddle movement and input.
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
@@ -177,6 +180,7 @@ class GameController(Controller):
         """Update blocks and timer if appropriate.
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
@@ -190,6 +194,7 @@ class GameController(Controller):
         """Update balls, check for collisions, and handle block effects.
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
@@ -383,7 +388,8 @@ class GameController(Controller):
     def create_new_ball(self) -> Ball:
         """Create a new ball stuck to the paddle, using the controller's paddle and BALL_RADIUS.
 
-        Returns:
+        Returns
+        -------
             Ball: The newly created Ball object.
 
         """
@@ -410,6 +416,7 @@ class GameController(Controller):
         """Handle a single event (protocol stub for future use).
 
         Args:
+        ----
             event: A single event object (type may vary).
 
         """
@@ -424,6 +431,7 @@ class GameController(Controller):
         This implements the decoupled event firing pattern: models return events, controllers post them.
 
         Args:
+        ----
             changes: List of event objects to post to the Pygame event queue.
 
         """

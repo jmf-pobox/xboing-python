@@ -2,7 +2,6 @@ import logging
 from unittest import mock
 
 import pytest
-
 from renderers.lives_renderer import LivesRenderer
 
 

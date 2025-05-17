@@ -6,7 +6,6 @@ Subscribes to ScoreChangedEvent and renders itself in the score window region.
 from typing import List
 
 import pygame
-
 from engine.events import ScoreChangedEvent
 from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer
@@ -30,6 +29,7 @@ class ScoreDisplay:
         """Initialize the ScoreDisplay.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             digit_display (DigitRenderer): The DigitRenderer instance.
             x (int, optional): The x position for the score display. Defaults to 220.
@@ -46,6 +46,7 @@ class ScoreDisplay:
         """Handle score update events and update the displayed score.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -59,6 +60,7 @@ class ScoreDisplay:
         """Draw the score as a fixed-width, right-justified number onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

@@ -10,7 +10,6 @@ import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pygame
-
 from utils.asset_paths import get_blocks_dir
 
 
@@ -144,6 +143,7 @@ class SpriteBlock:
         """Preload all block images to avoid loading during gameplay.
 
         Args:
+        ----
             blocks_dir (str): Directory containing block images
 
         """
@@ -213,6 +213,7 @@ class SpriteBlock:
         """Initialize a sprite-based block.
 
         Args:
+        ----
             x (int): X position
             y (int): Y position
             block_type (int): Type of block (from TYPE_* constants)
@@ -303,9 +304,11 @@ class SpriteBlock:
         """Create a proper XBoing-style block image with 3D effects and rounded corners.
 
         Args:
+        ----
             block_type (int): Type of block to create
 
         Returns:
+        -------
             pygame.Surface: The block image surface
 
         """
@@ -384,6 +387,7 @@ class SpriteBlock:
         """Update the block's state.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
@@ -442,7 +446,8 @@ class SpriteBlock:
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
         """Handle the block being hit by a ball.
 
-        Returns:
+        Returns
+        -------
             tuple: (broken, points, effect) - Whether the block was broken, points earned, and any special effect
 
         """
@@ -529,6 +534,7 @@ class SpriteBlock:
         """Draw the block.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """
@@ -562,6 +568,7 @@ class SpriteBlockManager:
         """Initialize the sprite block manager.
 
         Args:
+        ----
             offset_x (int): X offset for all blocks (for positioning within play area)
             offset_y (int): Y offset for all blocks (for positioning within play area)
 
@@ -596,11 +603,13 @@ class SpriteBlockManager:
         """Create a level with blocks arranged in a pattern based on the original XBoing.
 
         Args:
+        ----
             level_num (int): Level number to determine difficulty
             width (int): Width of the play area
             top_margin (int): Top margin for blocks
 
         Returns:
+        -------
             List[SpriteBlock]: The created blocks
 
         """
@@ -794,6 +803,7 @@ class SpriteBlockManager:
         """Update all blocks.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
@@ -804,9 +814,11 @@ class SpriteBlockManager:
         """Check for collisions between a ball and all blocks.
 
         Args:
+        ----
             ball (Ball): The ball to check collisions with
 
         Returns:
+        -------
             Tuple[int, int, List[Any]]: Points earned, number of blocks broken, and any special effects
 
         """
@@ -888,6 +900,7 @@ class SpriteBlockManager:
         """Draw all blocks.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """

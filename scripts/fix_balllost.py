@@ -17,10 +17,12 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
     """Fix and convert the balllost.au file that has a corrupted header.
 
     Args:
+    ----
         input_path (str): Path to the balllost.au file
         output_path (str): Path for the output .wav file
 
     Returns:
+    -------
         bool: True if successful, False otherwise
 
     """
@@ -105,7 +107,8 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
 def main() -> int:
     """Convert the balllost.au file with a corrupted header to .wav format.
 
-    Returns:
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
 
     """

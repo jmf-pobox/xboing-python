@@ -6,7 +6,6 @@ Subscribes to special events and renders their state as colored labels.
 from typing import Any, Dict, List, Tuple
 
 import pygame
-
 from engine.events import (
     SpecialFastGunChangedEvent,
     SpecialKillerChangedEvent,
@@ -57,6 +56,7 @@ class SpecialDisplay:
         """Initialize the SpecialDisplay.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The font to use for labels.
@@ -72,6 +72,7 @@ class SpecialDisplay:
         """Handle special power-up events and update state.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -86,6 +87,7 @@ class SpecialDisplay:
         """Draw the special power-up labels and their states.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

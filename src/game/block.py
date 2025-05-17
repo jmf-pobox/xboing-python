@@ -48,6 +48,7 @@ class Block:
         """Initialize a block.
 
         Args:
+        ----
             x (int): X position
             y (int): Y position
             width (int): Block width
@@ -94,6 +95,7 @@ class Block:
         """Update the block's state.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
@@ -106,7 +108,8 @@ class Block:
     def hit(self) -> Tuple[bool, int]:
         """Handle the block being hit by a ball.
 
-        Returns:
+        Returns
+        -------
             tuple: (broken, points) - Whether the block was broken and points earned
 
         """
@@ -134,6 +137,7 @@ class Block:
         """Draw the block.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """
@@ -227,6 +231,7 @@ class BlockManager:
         """Initialize the block manager.
 
         Args:
+        ----
             brick_width (int): Width of each brick
             brick_height (int): Height of each brick
             margin (int): Margin between bricks
@@ -247,11 +252,13 @@ class BlockManager:
         """Create a level with blocks arranged in a pattern.
 
         Args:
+        ----
             level_num (int): Level number to determine difficulty
             width (int): Width of the play area
             top_margin (int): Top margin for blocks
 
         Returns:
+        -------
             list: The created blocks
 
         """
@@ -418,6 +425,7 @@ class BlockManager:
         """Update all blocks.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
@@ -428,9 +436,11 @@ class BlockManager:
         """Check for collisions between a ball and all blocks.
 
         Args:
+        ----
             ball (Ball): The ball to check collisions with
 
         Returns:
+        -------
             tuple: (points, broken_blocks) - Points earned and number of blocks broken
 
         """
@@ -500,6 +510,7 @@ class BlockManager:
         """Draw all blocks.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """

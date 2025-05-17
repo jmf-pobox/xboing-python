@@ -4,7 +4,6 @@ import logging
 from typing import Callable, List, Optional
 
 import pygame
-
 from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from ui.ui_manager import UIManager
@@ -25,6 +24,7 @@ class WindowController(Controller):
         """Initialize the WindowController.
 
         Args:
+        ----
             audio_manager: Manager for sound effects and volume control.
             quit_callback: Function to call when quitting the game.
             ui_manager: Manager for UI views and transitions.
@@ -46,6 +46,7 @@ class WindowController(Controller):
         - Shift+/: Show instructions
 
         Args:
+        ----
             events: List of pygame events to process.
 
         """
@@ -91,6 +92,7 @@ class WindowController(Controller):
         that need to update game state or perform other actions each frame.
 
         Args:
+        ----
             delta_time: Time elapsed since the last update in seconds.
 
         """

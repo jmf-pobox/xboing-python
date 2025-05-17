@@ -20,6 +20,7 @@ class ControllerManager:
         """Register a controller with a given name.
 
         Args:
+        ----
             name: The name of the controller.
             controller: The controller instance to register.
 
@@ -32,9 +33,11 @@ class ControllerManager:
         """Set the active controller by name.
 
         Args:
+        ----
             name: The name of the controller to activate.
 
         Raises:
+        ------
             ValueError: If the controller name is not registered.
 
         """
@@ -49,7 +52,8 @@ class ControllerManager:
     def active_controller(self) -> Optional[Any]:
         """Get the currently active controller.
 
-        Returns:
+        Returns
+        -------
             The active controller instance, or None if not set.
 
         """

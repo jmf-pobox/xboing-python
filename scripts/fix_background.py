@@ -24,10 +24,12 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
     This function is specifically designed for the bgrnd.xpm file.
 
     Args:
+    ----
         xpm_path (str): Path to the input XPM file.
         png_path (str): Path to the output PNG file.
 
     Returns:
+    -------
         bool: True if successful, False otherwise.
 
     """
@@ -84,7 +86,8 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
 def main() -> int:
     """Convert the XBoing background pattern XPM to a PNG file for the Python port.
 
-    Returns:
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
 
     """

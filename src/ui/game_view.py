@@ -4,7 +4,6 @@ Handles rendering of blocks, paddle, balls, and play area walls.
 """
 
 import pygame
-
 from engine.graphics import Renderer
 from game.ball_manager import BallManager
 from game.paddle import Paddle
@@ -31,6 +30,7 @@ class GameView(View):
         """Initialize the GameView.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             block_manager (SpriteBlockManager): The block manager for the current level.
             paddle (Paddle): The player paddle object.
@@ -48,6 +48,7 @@ class GameView(View):
         """Draw the blocks, paddle, balls, and play area walls.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """
@@ -86,6 +87,7 @@ class GameView(View):
         """Handle a single Pygame event (currently a stub).
 
         Args:
+        ----
             event (pygame.event.Event): The Pygame event to handle.
 
         """

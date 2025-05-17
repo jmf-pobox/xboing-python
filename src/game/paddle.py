@@ -9,7 +9,6 @@ import os
 from typing import Any, Dict, Optional
 
 import pygame
-
 from utils.asset_paths import get_paddles_dir
 
 # Setup logging
@@ -33,6 +32,7 @@ class Paddle:
         """Initialize the paddle.
 
         Args:
+        ----
             x (int): Starting X position
             y (int): Y position (usually fixed)
             width (int): Paddle width
@@ -131,6 +131,7 @@ class Paddle:
         """Update paddle position.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
             play_width (int): Play area width for boundary checking
             offset_x (int): X offset of the play area
@@ -163,6 +164,7 @@ class Paddle:
         """Set paddle movement direction.
 
         Args:
+        ----
             direction (int): -1 for left, 0 for none, 1 for right
 
         """
@@ -172,6 +174,7 @@ class Paddle:
         """Move paddle to a specific x position.
 
         Args:
+        ----
             x (int): Target X position relative to play area
             play_width (int): Play area width for boundary checking
             offset_x (int): X offset of the play area
@@ -194,6 +197,7 @@ class Paddle:
         """Set paddle size.
 
         Args:
+        ----
             size (int): SIZE_SMALL, SIZE_MEDIUM, or SIZE_LARGE
 
         """
@@ -220,6 +224,7 @@ class Paddle:
         """Draw the paddle.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """

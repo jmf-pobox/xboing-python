@@ -5,7 +5,6 @@ import os
 from typing import Any, Dict, Optional
 
 import pygame
-
 from utils.asset_paths import get_balls_dir
 
 
@@ -52,12 +51,14 @@ class LivesRenderer:
         """Render the number of lives as ball images.
 
         Args:
+        ----
             num_lives: Number of lives to display.
             spacing: Spacing between balls. Defaults to 4.
             scale: Scale factor for ball size. Defaults to 1.0.
             max_lives: Maximum number of lives to display. Defaults to 3.
 
         Returns:
+        -------
             The rendered lives as a pygame.Surface.
 
         """

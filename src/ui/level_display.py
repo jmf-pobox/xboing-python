@@ -6,7 +6,6 @@ Subscribes to LevelChangedEvent and renders itself in the level window region.
 from typing import List
 
 import pygame
-
 from engine.events import LevelChangedEvent
 from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer
@@ -28,6 +27,7 @@ class LevelDisplay:
         """Initialize the LevelDisplay.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             digit_display (DigitRenderer): The DigitRenderer instance.
             x (int, optional): The x position for the level display. Defaults to 510.
@@ -42,6 +42,7 @@ class LevelDisplay:
         """Handle level update events and update the displayed level.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -55,6 +56,7 @@ class LevelDisplay:
         """Draw the level number as LED-style digits onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

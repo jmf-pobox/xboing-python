@@ -6,7 +6,6 @@ Subscribes to LivesChangedEvent and renders itself in the lives window region.
 from typing import List
 
 import pygame
-
 from engine.events import LivesChangedEvent
 from layout.game_layout import GameLayout
 from renderers.lives_renderer import LivesRenderer
@@ -29,6 +28,7 @@ class LivesDisplayComponent:
         """Initialize the LivesDisplayComponent.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             lives_display_util (LivesRenderer): The LivesRenderer instance.
             x (int, optional): The x position for the lives display. Defaults to 365.
@@ -45,6 +45,7 @@ class LivesDisplayComponent:
         """Handle lives update events and update the displayed lives.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -58,6 +59,7 @@ class LivesDisplayComponent:
         """Draw the lives as ball images onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

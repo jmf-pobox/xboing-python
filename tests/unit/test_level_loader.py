@@ -10,7 +10,6 @@ import os
 
 import pygame
 import pytest
-
 from game.level_manager import LevelManager
 from game.sprite_block import SpriteBlockManager
 

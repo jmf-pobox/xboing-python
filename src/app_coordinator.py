@@ -20,6 +20,7 @@ class AppCoordinator:
         """Initialize the AppCoordinator and register the view change callback.
 
         Args:
+        ----
             ui_manager: The UIManager instance managing UI views.
             controller_manager: The ControllerManager instance managing controllers.
 
@@ -36,6 +37,7 @@ class AppCoordinator:
         """Sync the active controller to the current view name.
 
         Args:
+        ----
             view_name: The name of the view that became active.
 
         """

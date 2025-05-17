@@ -9,8 +9,6 @@ import typing
 from typing import Any, Dict, Optional, cast
 
 import pygame
-from injector import Injector
-
 from app_coordinator import AppCoordinator
 from controllers.controller import Controller
 from controllers.controller_manager import ControllerManager
@@ -25,6 +23,7 @@ from engine.window import Window
 from game.ball_manager import BallManager
 from game.game_setup import create_game_objects
 from game.game_state import GameState
+from injector import Injector
 from layout.game_layout import GameLayout
 from ui.bottom_bar_view import BottomBarView
 from ui.game_over_view import GameOverView

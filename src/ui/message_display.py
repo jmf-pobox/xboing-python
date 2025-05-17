@@ -6,7 +6,6 @@ Subscribes to MessageChangedEvent and renders itself using the renderer.
 from typing import List
 
 import pygame
-
 from engine.events import MessageChangedEvent
 from engine.graphics import Renderer
 from layout.game_layout import GameLayout
@@ -28,6 +27,7 @@ class MessageDisplay:
         """Initialize the MessageDisplay.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The font to use for messages.
@@ -43,6 +43,7 @@ class MessageDisplay:
         """Handle message update events and update the displayed message.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -57,6 +58,7 @@ class MessageDisplay:
         """Draw the message onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

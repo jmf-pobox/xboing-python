@@ -4,7 +4,6 @@ import logging
 from typing import Any, Callable, List, Optional
 
 import pygame
-
 from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from engine.events import MessageChangedEvent
@@ -36,6 +35,7 @@ class LevelCompleteController(Controller):
         """Initialize the LevelCompleteController.
 
         Args:
+        ----
             game_state: The current game state.
             level_manager: The level manager instance.
             balls: List of Ball objects in play.
@@ -66,6 +66,7 @@ class LevelCompleteController(Controller):
         """Handle input/events for level complete view and global controls.
 
         Args:
+        ----
             events: List of Pygame events to process.
 
         """
@@ -117,6 +118,7 @@ class LevelCompleteController(Controller):
         """Handle a LevelCompleteEvent and switch to the level_complete view.
 
         Args:
+        ----
             event: A single event object (type may vary).
 
         """
@@ -129,6 +131,7 @@ class LevelCompleteController(Controller):
         """Update logic for level complete view (usually minimal).
 
         Args:
+        ----
             delta_time: Time elapsed since last update in milliseconds.
 
         """
@@ -140,6 +143,7 @@ class LevelCompleteController(Controller):
         This implements the decoupled event firing pattern: models return events, controllers post them.
 
         Args:
+        ----
             changes: List of event objects to post to the Pygame event queue.
 
         """

@@ -6,7 +6,6 @@ Handles view switching, event routing, and drawing of the UI.
 from typing import Any, Callable, Dict, List, Optional
 
 import pygame
-
 from engine.events import GameOverEvent, LevelCompleteEvent
 
 
@@ -21,7 +20,8 @@ class UIManager:
     - Drawing all registered UI components onto the main surface.
     - Providing a unified interface for UI setup and event handling.
 
-    Attributes:
+    Attributes
+    ----------
         top_bar: The top UI bar component.
         bottom_bar: The bottom UI bar component.
         views: Dictionary mapping view names to view objects.
@@ -41,6 +41,7 @@ class UIManager:
         """Initialize the UIManager.
 
         Args:
+        ----
             window_controller: The always-active controller for global events.
             view_controller_map: Mapping of view names to their controllers.
 
@@ -59,6 +60,7 @@ class UIManager:
         """Register the top UI bar component.
 
         Args:
+        ----
             top_bar: The top bar UI component to register.
 
         """
@@ -68,6 +70,7 @@ class UIManager:
         """Register the bottom UI bar component.
 
         Args:
+        ----
             bottom_bar: The bottom bar UI component to register.
 
         """
@@ -77,6 +80,7 @@ class UIManager:
         """Register a content view with a given name.
 
         Args:
+        ----
             name (str): The name of the view.
             view: The view object to register.
 
@@ -89,6 +93,7 @@ class UIManager:
         """Register a callback to be called when the view changes.
 
         Args:
+        ----
             callback (Callable[[str], None]): A callable that takes the new view name as its argument.
 
         """
@@ -98,9 +103,11 @@ class UIManager:
         """Set the active view by name.
 
         Args:
+        ----
             name (str): The name of the view to activate.
 
         Raises:
+        ------
             ValueError: If the view name is not registered.
 
         """
@@ -122,6 +129,7 @@ class UIManager:
         """Draw the current view, top bar, and bottom bar onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """
@@ -143,6 +151,7 @@ class UIManager:
         """Register all UI components in one place. Accepts dict of views, top/bottom bars, and initial view name.
 
         Args:
+        ----
             views (Optional[Dict[str, Any]]): Dictionary of view names to view objects.
             top_bar: The top bar UI component.
             bottom_bar: The bottom bar UI component.
@@ -163,6 +172,7 @@ class UIManager:
         """Handle and dispatch events to the window controller, active view's controller, and UI bars.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """

@@ -3,7 +3,6 @@
 from typing import Callable, Optional
 
 import pygame
-
 from engine.graphics import Renderer
 from game.game_state import GameState
 from game.level_manager import LevelManager
@@ -31,6 +30,7 @@ class LevelCompleteView(View):
         """Initialize the LevelCompleteView.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The main Renderer instance.
             font (pygame.font.Font): The main font for headlines.
@@ -92,6 +92,7 @@ class LevelCompleteView(View):
         """Handle a single Pygame event (advance on SPACE).
 
         Args:
+        ----
             event (pygame.event.Event): The Pygame event to handle.
 
         """
@@ -106,6 +107,7 @@ class LevelCompleteView(View):
         """Draw the level complete overlay, bonus breakdown, and final score.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

@@ -6,7 +6,6 @@ Displays score, lives, level, timer, message, and special status.
 from typing import List
 
 import pygame
-
 from ui.level_display import LevelDisplay
 from ui.lives_display import LivesDisplayComponent
 from ui.score_display import ScoreDisplay
@@ -27,6 +26,7 @@ class TopBarView:
         """Initialize the TopBarView.
 
         Args:
+        ----
             score_display: The ScoreDisplay component.
             lives_display_component: The LivesDisplayComponent.
             level_display_component: The LevelDisplay component.
@@ -40,6 +40,7 @@ class TopBarView:
         """Forward events to all top bar components.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -51,6 +52,7 @@ class TopBarView:
         """Draw all top bar components onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

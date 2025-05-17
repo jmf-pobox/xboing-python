@@ -16,9 +16,11 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     """Create and initialize core game objects (paddle, ball manager, block manager, level manager).
 
     Args:
+    ----
         layout: The game layout object (must have get_play_rect method)
 
     Returns:
+    -------
         Dict[str, Any]: Dictionary of game objects
 
     """

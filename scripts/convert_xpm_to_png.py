@@ -91,9 +91,11 @@ def parse_xpm(
     """Parse an XPM file and extract image data.
 
     Args:
+    ----
         xpm_file (str): Path to the XPM file
 
     Returns:
+    -------
         tuple: (width, height, pixels) or None on failure
 
     """
@@ -270,10 +272,12 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
     """Convert an XPM file to a PNG file.
 
     Args:
+    ----
         xpm_path (str): Path to the XPM file
         png_path (str): Path to save the PNG file
 
     Returns:
+    -------
         bool: True if successful, False otherwise
 
     """
@@ -383,6 +387,7 @@ def convert_directory(
     """Convert all XPM files in a directory tree to PNG.
 
     Args:
+    ----
         input_dir (Path): Input directory with XPM files
         output_dir (Path): Output directory for PNG files
         dry_run (bool): If True, do not convert
@@ -429,7 +434,8 @@ def convert_directory(
 def main() -> int:
     """Convert XBoing XPM files to PNG format for the Python/SDL2 implementation.
 
-    Returns:
+    Returns
+    -------
         int: Exit code (0 for success, 1 for error)
 
     """

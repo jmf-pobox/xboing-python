@@ -11,7 +11,6 @@ import random
 from typing import Any, ClassVar, List, Optional, Tuple
 
 import pygame
-
 from utils.asset_paths import get_balls_dir
 
 logger = logging.getLogger(__name__)
@@ -65,6 +64,7 @@ class Ball:
         """Initialize a new ball.
 
         Args:
+        ----
             x (float): Starting X position
             y (float): Starting Y position
             radius (int): Ball radius
@@ -123,6 +123,7 @@ class Ball:
         """Update ball position and handle collisions.
 
         Args:
+        ----
             delta_ms (float): Time since last frame in milliseconds
             screen_width (int): Play area width for boundary collision
             screen_height (int): Play area height for boundary collision
@@ -131,6 +132,7 @@ class Ball:
             offset_y (int): Y offset of the play area
 
         Returns:
+        -------
             tuple: (is_active, hit_paddle, hit_wall) - ball status and collision info
 
         """
@@ -208,9 +210,11 @@ class Ball:
         """Check for collision with the paddle and handle bouncing.
 
         Args:
+        ----
             paddle (Paddle): The paddle object
 
         Returns:
+        -------
             bool: True if collision occurred, False otherwise
 
         """
@@ -279,6 +283,7 @@ class Ball:
         """Draw the ball.
 
         Args:
+        ----
             surface (pygame.Surface): Surface to draw on
 
         """
@@ -335,6 +340,7 @@ class Ball:
         """Set the ball's position.
 
         Args:
+        ----
             x (float): New X position
             y (float): New Y position
 
@@ -347,6 +353,7 @@ class Ball:
         """Set the ball's velocity.
 
         Args:
+        ----
             vx (float): X velocity component
             vy (float): Y velocity component
 

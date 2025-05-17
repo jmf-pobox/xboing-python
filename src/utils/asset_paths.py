@@ -19,11 +19,13 @@ def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
     """Get the absolute path to an asset.
 
     Args:
+    ----
         relative_path (str): Relative path within the assets directory
             (e.g., 'images/blocks/redblk.png')
         create_dirs (bool): If True, create directories if they don't exist
 
     Returns:
+    -------
         str: Absolute path to the asset
 
     """

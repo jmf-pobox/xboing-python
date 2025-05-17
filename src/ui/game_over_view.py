@@ -4,9 +4,8 @@ import logging
 from typing import Callable
 
 import pygame
-from injector import inject
-
 from engine.graphics import Renderer
+from injector import inject
 from layout.game_layout import GameLayout
 
 from .view import View
@@ -30,6 +29,7 @@ class GameOverView(View):
         """Initialize the GameOverView.
 
         Args:
+        ----
             layout (GameLayout): The GameLayout instance.
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The main font.
@@ -57,6 +57,7 @@ class GameOverView(View):
         """Handle a single Pygame event. Calls controller.reset_game if Space is pressed.
 
         Args:
+        ----
             event (pygame.event.Event): The Pygame event to handle.
 
         """
@@ -66,6 +67,7 @@ class GameOverView(View):
         """Draw the game over overlay and final score onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

@@ -25,7 +25,8 @@ PACKAGES = [
 def find_package_dependencies() -> Dict[str, Set[str]]:
     """Scan each package for imports of other packages and return a dependency map.
 
-    Returns:
+    Returns
+    -------
         Dict[str, Set[str]]: Mapping from package to set of dependent packages.
 
     """
@@ -51,6 +52,7 @@ def print_dependencies(deps: Dict[str, Set[str]]) -> None:
     """Print the package dependency summary.
 
     Args:
+    ----
         deps: Dependency map from find_package_dependencies().
 
     """

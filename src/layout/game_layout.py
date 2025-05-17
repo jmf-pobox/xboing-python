@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Any, List, Optional, Tuple
 
 import pygame
-
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir
 
@@ -63,6 +62,7 @@ class GameWindow:
         """Initialize a GameWindow.
 
         Args:
+        ----
             rect: The rectangle defining the window's position and size.
             name: The name of the window.
             parent: The parent GameWindow, if any.

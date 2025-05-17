@@ -6,7 +6,6 @@ Displays message, special status, and timer.
 from typing import List
 
 import pygame
-
 from ui.message_display import MessageDisplay
 from ui.special_display import SpecialDisplay
 from ui.timer_display import TimerDisplay
@@ -27,6 +26,7 @@ class BottomBarView:
         """Initialize the BottomBarView.
 
         Args:
+        ----
             message_display_component: The MessageDisplay component.
             special_display_component: The SpecialDisplay component.
             timer_display_component: The TimerDisplay component.
@@ -40,6 +40,7 @@ class BottomBarView:
         """Forward events to all bottom bar components.
 
         Args:
+        ----
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
@@ -51,6 +52,7 @@ class BottomBarView:
         """Draw all bottom bar components onto the given surface.
 
         Args:
+        ----
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """

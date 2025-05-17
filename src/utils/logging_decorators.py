@@ -12,9 +12,11 @@ def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
     """Log entry and exit of a function, including arguments and result.
 
     Args:
+    ----
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
+    -------
         A decorator that logs entry and exit of the decorated function.
 
     """
@@ -41,9 +43,11 @@ def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
     """Log exceptions raised by a function.
 
     Args:
+    ----
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
+    -------
         A decorator that logs exceptions raised by the decorated function.
 
     """
@@ -71,9 +75,11 @@ def log_timing(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
     """Log the execution time of a function.
 
     Args:
+    ----
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
+    -------
         A decorator that logs the execution time of the decorated function.
 
     """

@@ -106,6 +106,7 @@ class InputManager:
         """Check if a mouse button is currently pressed.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
 
         """
@@ -117,6 +118,7 @@ class InputManager:
         """Check if a mouse button was pressed this frame.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
 
         """
@@ -128,6 +130,7 @@ class InputManager:
         """Check if a mouse button was released this frame.
 
         Args:
+        ----
             button (int): Button index (0=left, 1=middle, 2=right)
 
         """

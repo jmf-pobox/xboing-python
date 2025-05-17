@@ -4,14 +4,13 @@ import logging
 from typing import Any, Callable, List, Optional
 
 import pygame
-from injector import inject
-
 from controllers.controller import Controller
 from controllers.controller_manager import ControllerManager
 from controllers.game_controller import GameController
 from engine.audio_manager import AudioManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
+from injector import inject
 from layout.game_layout import GameLayout
 from ui.game_view import GameView
 from ui.ui_manager import UIManager
@@ -40,6 +39,7 @@ class GameOverController(Controller):
         """Initialize the GameOverController with all required dependencies.
 
         Args:
+        ----
             game_state: The current game state.
             level_manager: The level manager instance.
             game_controller: The main game controller instance.
@@ -67,6 +67,7 @@ class GameOverController(Controller):
         """Handle Pygame events for the game over screen.
 
         Args:
+        ----
             events: List of Pygame events to process.
 
         """
@@ -130,6 +131,7 @@ class GameOverController(Controller):
         """Handle a single event (protocol stub for future use).
 
         Args:
+        ----
             event: A single event object (type may vary).
 
         """
@@ -139,6 +141,7 @@ class GameOverController(Controller):
         """Update method (no-op for GameOverController).
 
         Args:
+        ----
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
