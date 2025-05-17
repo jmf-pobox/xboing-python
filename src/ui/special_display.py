@@ -6,6 +6,7 @@ Subscribes to special events and renders their state as colored labels.
 from typing import Any, Dict, List, Tuple
 
 import pygame
+
 from engine.events import (
     SpecialFastGunChangedEvent,
     SpecialKillerChangedEvent,

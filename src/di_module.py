@@ -2,7 +2,9 @@
 
 from typing import Callable, Optional
 
+from injector import Module, provider
 import pygame
+
 from controllers.controller_manager import ControllerManager
 from controllers.game_controller import GameController
 from controllers.game_over_controller import GameOverController
@@ -16,7 +18,6 @@ from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
-from injector import Module, provider
 from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer
 from renderers.lives_renderer import LivesRenderer

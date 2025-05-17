@@ -1,4 +1,5 @@
 import pygame
+
 from game.ball_manager import BallManager
 from ui.game_view import GameView
 

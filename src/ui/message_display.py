@@ -6,6 +6,7 @@ Subscribes to MessageChangedEvent and renders itself using the renderer.
 from typing import List
 
 import pygame
+
 from engine.events import MessageChangedEvent
 from engine.graphics import Renderer
 from layout.game_layout import GameLayout

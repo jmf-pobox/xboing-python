@@ -5,10 +5,11 @@ Usage:
   python fix_balllost.py [--input INPUT_FILE] [--output OUTPUT_FILE]
   (Defaults: input=xboing2.4-clang/sounds/balllost.au, output=assets/sounds/balllost.wav)
 """
+
 import argparse
 import logging
-import wave
 from pathlib import Path
+import wave
 
 logger = logging.getLogger("xboing.scripts.fix_balllost")
 
@@ -58,10 +59,9 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
                 mantissa = u_val & 0x0F
 
                 # Convert to linear PCM
-                if exponent == 0:
-                    sample = mantissa
-                else:
-                    sample = (0x10 | mantissa) << (exponent - 1)
+                sample = (
+                    mantissa if exponent == 0 else (0x10 | mantissa) << (exponent - 1)
+                )
 
                 # Apply sign
                 linear = sign * sample
@@ -72,10 +72,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
             # Convert audio data using the table
             pcm_data = bytearray()
             for byte in audio_data:
-                if isinstance(byte, int):
-                    byte_val = byte
-                else:
-                    byte_val = ord(byte)
+                byte_val = byte if isinstance(byte, int) else ord(byte)
 
                 # Get linear value from table
                 value = ulaw_table[byte_val]

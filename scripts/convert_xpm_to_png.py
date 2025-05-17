@@ -18,9 +18,9 @@ Usage:
 import argparse
 import logging
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
@@ -116,8 +116,7 @@ def parse_xpm(
     # Clean up lines, handling quoted strings properly
     lines = []
     for line in xpm_data.split("\n"):
-        line = line.strip()
-        if not line:
+        if not line.strip():
             continue
 
         # Extract quoted strings

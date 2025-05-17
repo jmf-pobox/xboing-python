@@ -6,6 +6,7 @@ Displays message, special status, and timer.
 from typing import List
 
 import pygame
+
 from ui.message_display import MessageDisplay
 from ui.special_display import SpecialDisplay
 from ui.timer_display import TimerDisplay

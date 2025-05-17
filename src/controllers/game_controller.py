@@ -4,6 +4,7 @@ import logging
 from typing import Any, List
 
 import pygame
+
 from controllers.controller import Controller
 from engine.events import (
     ApplauseEvent,

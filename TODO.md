@@ -1,5 +1,6 @@
 # TODO.md
 
+- [ ] Remove potentially ableist language from test suite
 - [ ] Add type hints for all tests and making sure mypy --strict, ruff check, and black run clean
 - [ ] Update all tests to use injector-based setup, providing mocks/stubs via test modules as needed
 - [ ] Add or update tests to assert on log output using caplog.

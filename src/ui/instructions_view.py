@@ -3,9 +3,10 @@
 import os
 from typing import List, Tuple
 
-import pygame
-from engine.graphics import Renderer
 from injector import inject
+import pygame
+
+from engine.graphics import Renderer
 from layout.game_layout import GameLayout
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir, get_images_dir
@@ -116,7 +117,9 @@ class InstructionsView(View):
         play_surf.blit(headline_surf, headline_rect)
         return headline_rect.bottom + 20
 
-    def _draw_text_block(self, play_surf: pygame.Surface, centerx: int, start_y: int) -> int:
+    def _draw_text_block(
+        self, play_surf: pygame.Surface, centerx: int, start_y: int
+    ) -> int:
         line_height = self.text_font.get_height()
         total_lines = len(self.lines)
         total_text_height = total_lines * line_height + (total_lines - 1) * 6

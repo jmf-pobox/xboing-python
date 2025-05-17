@@ -6,6 +6,7 @@ Subscribes to LivesChangedEvent and renders itself in the lives window region.
 from typing import List
 
 import pygame
+
 from engine.events import LivesChangedEvent
 from layout.game_layout import GameLayout
 from renderers.lives_renderer import LivesRenderer

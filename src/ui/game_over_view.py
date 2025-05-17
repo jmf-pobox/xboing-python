@@ -3,9 +3,10 @@
 import logging
 from typing import Callable
 
-import pygame
-from engine.graphics import Renderer
 from injector import inject
+import pygame
+
+from engine.graphics import Renderer
 from layout.game_layout import GameLayout
 
 from .view import View

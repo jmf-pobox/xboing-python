@@ -4,6 +4,7 @@ Handles rendering of blocks, paddle, balls, and play area walls.
 """
 
 import pygame
+
 from engine.graphics import Renderer
 from game.ball_manager import BallManager
 from game.paddle import Paddle

@@ -6,6 +6,7 @@ Subscribes to ScoreChangedEvent and renders itself in the score window region.
 from typing import List
 
 import pygame
+
 from engine.events import ScoreChangedEvent
 from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer

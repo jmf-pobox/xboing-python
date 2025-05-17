@@ -76,9 +76,14 @@ cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m src.main"
 # Code quality commands
 lint = "ruff check src/ tests/"
-lint-fix = "ruff check --fix src/ tests/"
-format = "black src/ tests/ scripts/"
-format-check = "black --check src/ tests/ scripts/"
+fmt = [
+    "black src/ tests/ scripts/",
+    "ruff check --fix src/ tests/ scripts/"
+]
+lint-fix = [
+    "black src/ tests/ scripts/",
+    "ruff check --fix src/ tests/ scripts/"
+]
 typecheck = "mypy src/"
 # Combined quality check
 check = [
@@ -136,6 +141,11 @@ ignore = [
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
 
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+combine-as-imports = true
+force-sort-within-sections = true
+
 # MyPy configuration 
 [tool.mypy]
 # Maximum strictness, check tests as strictly as source
@@ -160,3 +170,8 @@ test-publish = [
     "twine check dist/*",
     "twine upload --repository testpypi dist/*"
 ]
+
+[tool.hatch.fmt]
+targets = ["src", "tests", "scripts"]
+formatter = "black"
+linter = "isort"

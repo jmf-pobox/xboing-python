@@ -3,6 +3,7 @@
 from typing import Callable, Optional
 
 import pygame
+
 from engine.graphics import Renderer
 from game.game_state import GameState
 from game.level_manager import LevelManager

@@ -13,9 +13,9 @@ Usage:
 
 import argparse
 import logging
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 from typing import Dict, List, Optional
 
 logger = logging.getLogger("xboing.scripts.convert_au_to_wav")

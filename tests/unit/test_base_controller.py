@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pygame
+
 from controllers.window_controller import WindowController
 
 

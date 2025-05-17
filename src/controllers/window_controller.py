@@ -4,6 +4,7 @@ import logging
 from typing import Callable, List, Optional
 
 import pygame
+
 from controllers.controller import Controller
 from engine.audio_manager import AudioManager
 from ui.ui_manager import UIManager

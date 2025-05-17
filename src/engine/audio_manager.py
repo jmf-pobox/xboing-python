@@ -5,6 +5,7 @@ import os
 from typing import Dict, Sequence
 
 import pygame
+
 from engine.events import XBoingEvent
 
 

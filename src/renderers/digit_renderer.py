@@ -5,6 +5,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import pygame
+
 from utils.asset_paths import get_asset_path
 
 

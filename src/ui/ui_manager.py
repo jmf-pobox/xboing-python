@@ -6,6 +6,7 @@ Handles view switching, event routing, and drawing of the UI.
 from typing import Any, Callable, Dict, List, Optional
 
 import pygame
+
 from engine.events import GameOverEvent, LevelCompleteEvent
 
 

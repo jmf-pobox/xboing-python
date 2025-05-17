@@ -10,6 +10,7 @@ import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pygame
+
 from utils.asset_paths import get_blocks_dir
 
 

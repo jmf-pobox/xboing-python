@@ -1,8 +1,12 @@
+from unittest.mock import create_autospec
+
 from controllers.level_complete_controller import LevelCompleteController
+from ui.ui_manager import UIManager
 
 
 class Dummy:
     def __getattr__(self, name):
+        """Return a dummy callable for any attribute access (test stub)."""
         return lambda *args, **kwargs: None
 
 
@@ -12,7 +16,7 @@ def test_level_complete_controller_instantiation_and_methods():
     level_manager = Dummy()
     balls = []
     game_controller = Dummy()
-    ui_manager = Dummy()
+    ui_manager = create_autospec(UIManager)
     game_view = Dummy()
     layout = Dummy()
     controller = LevelCompleteController(

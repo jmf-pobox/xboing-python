@@ -6,6 +6,7 @@ Displays score, lives, level, timer, message, and special status.
 from typing import List
 
 import pygame
+
 from ui.level_display import LevelDisplay
 from ui.lives_display import LivesDisplayComponent
 from ui.score_display import ScoreDisplay

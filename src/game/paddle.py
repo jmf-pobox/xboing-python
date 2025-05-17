@@ -9,6 +9,7 @@ import os
 from typing import Any, Dict, Optional
 
 import pygame
+
 from utils.asset_paths import get_paddles_dir
 
 # Setup logging

@@ -3,14 +3,15 @@
 import logging
 from typing import Any, Callable, List, Optional
 
+from injector import inject
 import pygame
+
 from controllers.controller import Controller
 from controllers.controller_manager import ControllerManager
 from controllers.game_controller import GameController
 from engine.audio_manager import AudioManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
-from injector import inject
 from layout.game_layout import GameLayout
 from ui.game_view import GameView
 from ui.ui_manager import UIManager

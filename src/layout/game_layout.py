@@ -1,11 +1,12 @@
 """GameLayout and GameWindow: Define and manage the spatial window hierarchy and region layout for XBoing."""
 
+from dataclasses import dataclass
 import logging
 import os
-from dataclasses import dataclass
 from typing import Any, List, Optional, Tuple
 
 import pygame
+
 from utils.asset_loader import load_image
 from utils.asset_paths import get_backgrounds_dir
 

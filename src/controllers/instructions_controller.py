@@ -2,10 +2,11 @@
 
 from typing import Any, Callable, List, Optional
 
+from injector import inject
 import pygame
+
 from controllers.controller import Controller
 from engine.audio_manager import AudioManager
-from injector import inject
 from ui.ui_manager import UIManager
 
 

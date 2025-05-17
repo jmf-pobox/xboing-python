@@ -6,8 +6,9 @@ Scans each module in each src package and outputs which packages depend upon whi
 Usage:
   python scripts/dep_grep.py
 """
-import re
+
 from pathlib import Path
+import re
 from typing import Dict, Set
 
 SRC_DIR = Path(__file__).parent.parent / "src"

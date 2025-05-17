@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""
-Test the mapping between level file characters and block types.
-"""
+"""Test the mapping between level file characters and block types."""
 
 import pygame
 import pytest
+
 from game.level_manager import LevelManager
 from game.sprite_block import SpriteBlock, SpriteBlockManager
 

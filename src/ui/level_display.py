@@ -6,6 +6,7 @@ Subscribes to LevelChangedEvent and renders itself in the level window region.
 from typing import List
 
 import pygame
+
 from engine.events import LevelChangedEvent
 from layout.game_layout import GameLayout
 from renderers.digit_renderer import DigitRenderer

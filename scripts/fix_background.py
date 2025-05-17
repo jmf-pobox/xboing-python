@@ -8,10 +8,11 @@ Usage:
   python fix_background.py [--input INPUT_FILE] [--output OUTPUT_FILE]
   (Defaults: input=xboing2.4-clang/bitmaps/bgrnds/bgrnd.xpm, output=assets/images/bgrnds/bgrnd.png)
 """
+
 import argparse
 import logging
-import sys
 from pathlib import Path
+import sys
 
 from PIL import Image
 
@@ -46,8 +47,7 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
 
     with open(xpm_path) as f:
         for line in f:
-            line = line.strip()
-            if "/* pixels */" in line:
+            if "/* pixels */" in line.strip():
                 pixel_data_started = True
                 continue
 

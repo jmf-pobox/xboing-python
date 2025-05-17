@@ -11,6 +11,7 @@ import random
 from typing import Any, ClassVar, List, Optional, Tuple
 
 import pygame
+
 from utils.asset_paths import get_balls_dir
 
 logger = logging.getLogger(__name__)
