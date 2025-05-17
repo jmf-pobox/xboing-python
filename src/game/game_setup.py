@@ -5,7 +5,7 @@ from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
 
-# Constants (should match those in main.py)
+# Constants (should match those in xboing.py)
 PADDLE_WIDTH = 70
 PADDLE_HEIGHT = 15
 
