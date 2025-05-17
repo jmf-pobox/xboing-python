@@ -1,5 +1,4 @@
-"""
-Asset path utilities for XBoing.
+"""Asset path utilities for XBoing.
 
 This module provides helper functions for locating assets in the
 project directory structure with a single canonical path for each asset type.
@@ -17,8 +16,7 @@ ASSETS_DIR = os.path.join(PROJECT_DIR, "assets")
 
 
 def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
-    """
-    Get the absolute path to an asset.
+    """Get the absolute path to an asset.
 
     Args:
         relative_path (str): Relative path within the assets directory
@@ -27,6 +25,7 @@ def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
 
     Returns:
         str: Absolute path to the asset
+
     """
     asset_path = os.path.join(ASSETS_DIR, relative_path)
 

@@ -7,14 +7,14 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
-    """
-    Decorator to log entry and exit of a function, including arguments and result.
+    """Decorator to log entry and exit of a function, including arguments and result.
 
     Args:
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
         A decorator that logs entry and exit of the decorated function.
+
     """
 
     def decorator(func: F) -> F:
@@ -36,14 +36,14 @@ def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
 
 
 def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
-    """
-    Decorator to log exceptions raised by a function.
+    """Decorator to log exceptions raised by a function.
 
     Args:
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
         A decorator that logs exceptions raised by the decorated function.
+
     """
 
     def decorator(func: F) -> F:
@@ -66,14 +66,14 @@ def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
 
 
 def log_timing(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
-    """
-    Decorator to log the execution time of a function.
+    """Decorator to log the execution time of a function.
 
     Args:
         logger: Optional logger to use. If None, uses self.logger or module logger.
 
     Returns:
         A decorator that logs the execution time of the decorated function.
+
     """
 
     def decorator(func: F) -> F:

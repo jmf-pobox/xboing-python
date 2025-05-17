@@ -1,5 +1,4 @@
-"""
-Asset loading utilities.
+"""Asset loading utilities.
 
 This module provides functions for loading game assets such as
 images and converting them for use with pygame.
@@ -17,8 +16,7 @@ logger = logging.getLogger("xboing.AssetLoader")
 def load_image(
     filename: str, alpha: bool = True, scale: Optional[Tuple[int, int]] = None
 ) -> pygame.Surface:
-    """
-    Load an image and convert it for optimal display.
+    """Load an image and convert it for optimal display.
 
     Args:
         filename (str): Path to the image file
@@ -27,6 +25,7 @@ def load_image(
 
     Returns:
         pygame.Surface: The loaded image surface
+
     """
     try:
         surface = pygame.image.load(filename)
@@ -53,8 +52,7 @@ def load_image(
 def load_image_sequence(
     directory: str, pattern: str, num_frames: int, alpha: bool = True
 ) -> List[pygame.Surface]:
-    """
-    Load a sequence of images for animation.
+    """Load a sequence of images for animation.
 
     Args:
         directory (str): Directory containing the images
@@ -64,6 +62,7 @@ def load_image_sequence(
 
     Returns:
         list[pygame.Surface]: List of loaded image surfaces
+
     """
     frames = []
     for i in range(num_frames):
@@ -74,13 +73,13 @@ def load_image_sequence(
 
 
 def create_font(size: int) -> pygame.font.Font:
-    """
-    Create a pygame font object.
+    """Create a pygame font object.
 
     Args:
         size (int): Font size in points
 
     Returns:
         pygame.font.Font: The font object
+
     """
     return pygame.font.Font(None, size)
