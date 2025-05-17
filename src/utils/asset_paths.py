@@ -40,7 +40,7 @@ def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
 
 def get_images_dir() -> str:
     """Get the path to the images directory."""
-    return get_asset_path("images", create_dirs=True)
+    return os.path.join(ASSETS_DIR, "images")
 
 
 def get_sounds_dir() -> str:

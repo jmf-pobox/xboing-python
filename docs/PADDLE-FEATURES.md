@@ -71,6 +71,33 @@ This document tracks the status and design of paddle-related features in the Pyt
 
 ---
 
+## Implementation Plan (Phased Approach)
+
+### Phase 1: Ammo State, Events, UI, and Sound Effects (No Bullets Yet)
+- Add ammo (bullet count) state to paddle/player.
+- Implement events for ammo collected (e.g., Max Ammo block) and ammo used (shot fired).
+- Create a UI component to display current ammo count; update in response to state/events.
+- Play sound effects for ammo collection and shot fired (even if no bullet is created yet).
+- Add unit tests for all of the above.
+
+### Phase 2: Machine Gun Block State and UI (No Bullets Yet)
+- Add machine gun mode state (boolean/timer).
+- Add logic to activate/deactivate machine gun mode.
+- Add UI indicator for machine gun mode.
+- Add unit tests for all of the above.
+
+### Phase 3: Bullet/Projectile Logic
+- Implement bullet creation, movement, and removal.
+- Integrate bullet updates into the game loop.
+- Implement bullet collision with blocks, balls, and enemies.
+- Add unit tests for all of the above.
+
+### Phase 4: Integration and Polish
+- Integrate all features and ensure smooth interaction between state, UI, sound, and bullet logic.
+- Add/expand integration tests.
+
+---
+
 ## References
 - `xboing2.4-clang/paddle.c`, `xboing2.4-clang/gun.c`, `xboing2.4-clang/draw.c`, `xboing2.4-clang/special_display.c`, `xboing2.4-clang/audio.c`, `xboing2.4-clang/main.c`
 - See also: [docs/xboing2.4/README](README) 

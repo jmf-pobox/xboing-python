@@ -19,8 +19,10 @@ from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
+from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
 from renderers.digit_renderer import DigitRenderer
 from renderers.lives_renderer import LivesRenderer
+from ui.ammo_display import AmmoDisplayComponent
 from ui.bottom_bar_view import BottomBarView
 from ui.game_over_view import GameOverView
 from ui.game_view import GameView
@@ -35,6 +37,10 @@ from ui.timer_display import TimerDisplay
 from ui.top_bar_view import TopBarView
 from ui.ui_manager import UIManager
 from utils.asset_loader import create_font
+
+WINDOW_WIDTH = 565  # Update if your window width is different
+RIGHT_MARGIN = 20
+RIGHT_EDGE_X = 475
 
 
 class XBoingModule(Module):
@@ -134,7 +140,43 @@ class XBoingModule(Module):
         self, lives_renderer: LivesRenderer
     ) -> LivesDisplayComponent:
         """Provide a LivesDisplayComponent instance for the UI."""
-        return LivesDisplayComponent(self._layout, lives_renderer, x=365, max_lives=3)
+        max_lives = 3
+        lives_surf = lives_renderer.render(
+            max_lives, spacing=10, scale=1.0, max_lives=max_lives
+        )
+        lives_x = RIGHT_EDGE_X - lives_surf.get_width()
+        return LivesDisplayComponent(
+            self._layout, lives_renderer, x=lives_x, max_lives=max_lives
+        )
+
+    @provider
+    def provide_ammo_renderer(self) -> AmmoRenderer:
+        """Provide an AmmoRenderer instance for rendering ammo in the UI."""
+        return AmmoRenderer()
+
+    @provider
+    def provide_ammo_display_component(
+        self,
+        ammo_renderer: AmmoRenderer,
+        lives_display_component: LivesDisplayComponent,
+    ) -> AmmoDisplayComponent:
+        """Provide an AmmoDisplayComponent instance for the UI."""
+        lives_y, lives_height = lives_display_component.get_y_and_height()
+        max_lives = 3
+        lives_surf = lives_display_component.lives_display_util.render(
+            max_lives, spacing=10, scale=1.0, max_lives=max_lives
+        )
+        lives_x = RIGHT_EDGE_X - lives_surf.get_width()
+        lives_width = lives_surf.get_width()
+        return AmmoDisplayComponent(
+            self._layout,
+            ammo_renderer,
+            max_ammo=MAX_AMMO,
+            lives_x=lives_x,
+            lives_width=lives_width,
+            lives_y=lives_y,
+            lives_height=lives_height,
+        )
 
     @provider
     def provide_level_display(self, digit_renderer: DigitRenderer) -> LevelDisplay:
@@ -165,9 +207,15 @@ class XBoingModule(Module):
         score_display: ScoreDisplay,
         lives_display_component: LivesDisplayComponent,
         level_display: LevelDisplay,
+        ammo_display_component: AmmoDisplayComponent,
     ) -> TopBarView:
         """Provide a TopBarView instance for the UI."""
-        return TopBarView(score_display, lives_display_component, level_display)
+        return TopBarView(
+            score_display,
+            lives_display_component,
+            level_display,
+            ammo_display_component,
+        )
 
     @provider
     def provide_bottom_bar_view(

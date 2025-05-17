@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import pygame
 
-from utils.asset_paths import get_balls_dir
+from utils.asset_paths import get_images_dir
 
 
 class LivesRenderer:
@@ -32,11 +32,11 @@ class LivesRenderer:
 
     def _load_ball_image(self) -> Optional[pygame.Surface]:
         """Load the ball image for displaying lives."""
-        balls_dir = get_balls_dir()
-        life_path = os.path.join(balls_dir, "life.png")
+        images_dir = get_images_dir()
+        life_path = os.path.join(images_dir, "balls", "life.png")
         if os.path.exists(life_path):
             return pygame.image.load(life_path).convert_alpha()
-        ball_path = os.path.join(balls_dir, "ball1.png")
+        ball_path = os.path.join(images_dir, "balls", "ball1.png")
         if os.path.exists(ball_path):
             return pygame.image.load(ball_path).convert_alpha()
         self.logger.warning("Could not load ball image for lives display")
