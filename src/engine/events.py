@@ -1,11 +1,9 @@
+"""Events module for XBoing."""
 from typing import Tuple
 
 
 class XBoingEvent:
-    """
-    Base class for all XBoing game events.
-    All custom event types should inherit from this class for type safety and event handling consistency.
-    """
+    """Base class for all XBoing game events."""
 
     pass
 

@@ -1,3 +1,4 @@
+"""Audio manager module for XBoing."""
 import logging
 import os
 from typing import Dict, Sequence
@@ -8,8 +9,8 @@ from engine.events import XBoingEvent
 
 
 class AudioManager:
-    """
-    Event-driven audio manager that listens for game events and plays sounds.
+    """Event-driven audio manager that listens for game events and plays sounds.
+
     Only handles custom events posted as pygame.USEREVENT with an 'event' attribute (XBoingEvent instance).
     """
 
@@ -17,9 +18,11 @@ class AudioManager:
         self,
         sound_dir: str = "assets/sounds",
     ):
-        """
+        """Initialize the audio manager.
+
         Args:
             sound_dir: Directory containing sound files.
+
         """
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
@@ -28,11 +31,11 @@ class AudioManager:
         self.muted: bool = False
 
     def handle_events(self, events: Sequence[pygame.event.Event]) -> None:
-        """
-        Handle a sequence of events, playing sounds for mapped custom events.
+        """Handle a sequence of events, playing sounds for mapped custom events.
 
         Args:
             events: A sequence of pygame events to process.
+
         """
         for event in events:
             if event.type == pygame.USEREVENT:

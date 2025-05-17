@@ -1,5 +1,4 @@
-"""
-Window management abstraction over SDL2/pygame.
+"""Window management abstraction over SDL2/pygame.
 
 This module provides window creation, management, and event handling,
 abstracting the underlying SDL2/pygame implementation.
@@ -29,8 +28,7 @@ class Window:
         fullscreen: bool = False,
         resizable: bool = False,
     ) -> None:
-        """
-        Initialize the game window.
+        """Initialize the game window.
 
         Args:
             width: Window width in pixels
@@ -38,6 +36,7 @@ class Window:
             title: Window title
             fullscreen: Whether to start in fullscreen mode
             resizable: Whether the window is resizable
+
         """
         pygame.init()
 
@@ -94,13 +93,14 @@ class Window:
         return self.clock.get_fps()
 
     def handle_events(self, events: Sequence[pygame.event.Event]) -> bool:
-        """
-        Process window events.
+        """Process window events.
 
         Args:
             events: Sequence of pygame events to process.
+
         Returns:
             bool: False if the window should close, True otherwise
+
         """
         for event in events:
             if event.type == pygame.QUIT:
