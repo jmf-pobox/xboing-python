@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, Optional, Sequence, Type
+from typing import Dict, Sequence
 
 import pygame
 
