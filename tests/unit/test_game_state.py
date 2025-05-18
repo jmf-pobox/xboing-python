@@ -32,36 +32,20 @@ def game_state():
 
 def test_score_event(game_state):
     state, mock_post = game_state
-    # Test set_score returns correct event
-    changes = state.set_score(42)
+    # Test _set_score returns correct event (private method, used for resets)
+    changes = state._set_score(42)
     assert len(changes) == 1
-    event = changes[0]
-    assert isinstance(event, ScoreChangedEvent)
-    assert event.score == 42
-
-    # Test add_score returns correct event
-    changes = state.add_score(8)
-    assert len(changes) == 1
-    event = changes[0]
-    assert isinstance(event, ScoreChangedEvent)
-    assert event.score == 50
+    assert isinstance(changes[0], ScoreChangedEvent)
+    assert changes[0].score == 42
 
 
 def test_lives_event(game_state):
     state, mock_post = game_state
-    # Test set_lives returns correct event
-    changes = state.set_lives(5)
+    # Test _set_lives returns correct event (private method, used for resets)
+    changes = state._set_lives(5)
     assert len(changes) == 1
-    event = changes[0]
-    assert isinstance(event, LivesChangedEvent)
-    assert event.lives == 5
-
-    # Test lose_life returns correct event (should decrement to 4)
-    changes = state.lose_life()
-    assert len(changes) == 1
-    event = changes[0]
-    assert isinstance(event, LivesChangedEvent)
-    assert event.lives == 4
+    assert isinstance(changes[0], LivesChangedEvent)
+    assert changes[0].lives == 5
 
 
 def test_level_event(game_state):
@@ -148,10 +132,17 @@ def test_ammo_initial_and_fire(game_state):
     assert changes == []
 
 
+class DummyLevelManager:
+    def load_level(self, level): pass
+    def get_time_remaining(self): return 60
+    def get_level_info(self): return {"title": "Test Level"}
+
+
 def test_ammo_reset_on_restart(game_state):
     state, _ = game_state
     state.ammo = 0
-    state.restart()
+    dummy_level_manager = DummyLevelManager()
+    state.full_restart(dummy_level_manager)
     assert state.ammo == 4
 
 

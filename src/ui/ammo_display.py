@@ -5,7 +5,7 @@ from typing import List
 
 import pygame
 
-from engine.events import AmmoFiredEvent
+from engine.events import AmmoCollectedEvent, AmmoFiredEvent
 from game.game_state import GameState
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
@@ -53,8 +53,8 @@ class AmmoDisplayComponent:
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle events and update ammo display when AmmoFiredEvent is received."""
         for event in events:
-            if event.type == pygame.USEREVENT and isinstance(
-                event.event, AmmoFiredEvent
+            if event.type == pygame.USEREVENT and (
+                isinstance(event.event, (AmmoFiredEvent, AmmoCollectedEvent))
             ):
                 self.ammo = self.game_state.get_ammo()
 

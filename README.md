@@ -173,3 +173,22 @@ You can build a standalone executable for XBoing using PyInstaller:
 
 See [docs/PYINSTALLER-GUIDE.md](docs/PYINSTALLER-GUIDE.md) for full details and troubleshooting.
 
+## Commit Message Standard
+
+This project uses the [Conventional Commits](https://www.conventionalcommits.org/) standard for all commit messages. This helps automate changelogs, semantic versioning, and improves code review clarity.
+
+**Format:**
+```
+<type>(<scope>): <short summary>
+```
+- **type**: feat, fix, chore, refactor, test, docs, etc.
+- **scope**: the area of the codebase affected (e.g., gun, ammo, ui)
+- **summary**: a brief description of the change
+
+**Example:**
+```
+feat(gun): implement ammo collection event, state, and UI update
+```
+
+See the [Conventional Commits documentation](https://www.conventionalcommits.org/) for more details.
+

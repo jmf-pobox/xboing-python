@@ -99,14 +99,9 @@ class GameController(Controller):
         """
         for event in events:
             # --- Section: Mouse Button Down (Ball Launch) ---
-            if event.type == 1025:  # pygame.MOUSEBUTTONDOWN
-                logger.debug("[handle_events] MOUSEBUTTONDOWN received.")
-            # Launch balls from paddle when mouse button is clicked and all balls are stuck to paddle
             if event.type == 1025:
                 balls = self.ball_manager.balls
-                if balls and all(
-                    getattr(ball, "stuck_to_paddle", False) for ball in balls
-                ):
+                if not self.ball_manager.has_ball_in_play():
                     logger.debug("[handle_events] launching ball(s)")
                     for ball in balls:
                         ball.release_from_paddle()
@@ -253,7 +248,11 @@ class GameController(Controller):
                         pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
                     )
                 for effect in effects:
-                    if effect == SpriteBlock.TYPE_EXTRABALL:
+                    if effect == SpriteBlock.TYPE_MAXAMMO:
+                        logger.debug("Max ammo block hit: adding ammo.")
+                        changes = self.game_state.add_ammo()
+                        self.post_game_state_events(changes)
+                    elif effect == SpriteBlock.TYPE_EXTRABALL:
                         new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                         new_ball.vx = -ball.vx
                         new_ball.vy = ball.vy
@@ -530,11 +529,6 @@ class GameController(Controller):
         """
         for event in changes:
             pygame.event.post(pygame.event.Event(pygame.USEREVENT, {"event": event}))
-
-    def restart_game(self) -> None:
-        """Restart the game state and post relevant events."""
-        changes = self.game_state.restart()
-        self.post_game_state_events(changes)
 
     def full_restart_game(self) -> None:
         """Fully restart the game state and post relevant events."""
