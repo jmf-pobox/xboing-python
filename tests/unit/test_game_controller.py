@@ -19,6 +19,7 @@ from engine.events import (
     WallHitEvent,
 )
 from game.ball_manager import BallManager
+from game.bullet_manager import BulletManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlock
 
@@ -84,6 +85,7 @@ def test_ball_launch_logic():
     input_manager = Mock()
     layout = Mock()
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in balls:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -95,6 +97,7 @@ def test_ball_launch_logic():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     # Patch pygame.event.post
     with patch("pygame.event.post") as mock_post:
@@ -158,6 +161,7 @@ def test_update_balls_and_collisions_bomb(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -169,6 +173,7 @@ def test_update_balls_and_collisions_bomb(mock_ball):
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -206,6 +211,7 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -216,6 +222,7 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -259,6 +266,7 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -269,6 +277,7 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -311,6 +320,7 @@ def test_update_balls_and_collisions_timer(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -322,6 +332,7 @@ def test_update_balls_and_collisions_timer(mock_ball):
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -356,6 +367,7 @@ def test_update_balls_and_collisions_ball_lost():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -367,6 +379,7 @@ def test_update_balls_and_collisions_ball_lost():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -401,6 +414,7 @@ def test_update_balls_and_collisions_paddle_hit():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -412,6 +426,7 @@ def test_update_balls_and_collisions_paddle_hit():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -447,6 +462,7 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
     layout.get_play_rect.return_value = play_rect
     # Set event_sound_map but no audio_manager
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -458,6 +474,7 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -496,6 +513,7 @@ def test_lives_display_and_game_over_event_order():
     real_gamestate = GameState()
     real_gamestate.lives = 1
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
     controller = GameController(
@@ -507,6 +525,7 @@ def test_lives_display_and_game_over_event_order():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.handle_life_loss()
@@ -557,6 +576,7 @@ def test_update_balls_and_collisions_reverse_block():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -567,6 +587,7 @@ def test_update_balls_and_collisions_reverse_block():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -594,6 +615,7 @@ def test_arrow_key_movement_reversed():
     layout = Mock()
     play_rect = PlayRect()
     layout.get_play_rect.return_value = play_rect
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -603,6 +625,7 @@ def test_arrow_key_movement_reversed():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     controller.reverse = True
     input_manager.is_key_pressed.side_effect = lambda k: k == pygame.K_LEFT
@@ -631,6 +654,7 @@ def test_mouse_movement_reversed():
     play_rect.x = 0
     play_rect.y = 0
     layout.get_play_rect.return_value = play_rect
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -640,6 +664,7 @@ def test_mouse_movement_reversed():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     controller.reverse = True
     # Mouse at x=80, paddle width=20, play area center=50, mirrored_x=20
@@ -675,6 +700,7 @@ def test_paddle_expand_event_fired():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -685,6 +711,7 @@ def test_paddle_expand_event_fired():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -724,6 +751,7 @@ def test_paddle_expand_at_max():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -734,6 +762,7 @@ def test_paddle_expand_at_max():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -774,6 +803,7 @@ def test_paddle_shrink_event_fired():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -784,6 +814,7 @@ def test_paddle_shrink_event_fired():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -823,6 +854,7 @@ def test_paddle_shrink_at_min():
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball_manager.add_ball(ball)
     controller = GameController(
         game_state,
@@ -833,6 +865,7 @@ def test_paddle_shrink_at_min():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -867,6 +900,7 @@ def test_sticky_paddle_activation_event(mock_ball):
     play_rect = Mock(width=100, height=100, x=0, y=0)
     layout.get_play_rect.return_value = play_rect
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     ball = make_mock_ball()
     ball_manager.add_ball(ball)
     controller = GameController(
@@ -878,6 +912,7 @@ def test_sticky_paddle_activation_event(mock_ball):
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         controller.update_balls_and_collisions(0.016)
@@ -906,6 +941,7 @@ def test_sticky_paddle_deactivation_on_ball_lost():
     input_manager = Mock()
     layout = Mock()
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -915,6 +951,7 @@ def test_sticky_paddle_deactivation_on_ball_lost():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     controller.sticky = True
     paddle.sticky = True
@@ -942,6 +979,7 @@ def test_sticky_paddle_deactivation_on_new_level():
     input_manager = Mock()
     layout = Mock()
     ball_manager = BallManager()
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -951,6 +989,7 @@ def test_sticky_paddle_deactivation_on_new_level():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     controller.sticky = True
     paddle.sticky = True
@@ -1012,6 +1051,7 @@ def test_ammo_fires_only_with_ball_in_play():
     layout = Mock()
     ball_manager = Mock()
     ball_manager.has_ball_in_play.return_value = True
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -1021,6 +1061,7 @@ def test_ammo_fires_only_with_ball_in_play():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         event = make_key_event(pygame.K_k)
@@ -1040,6 +1081,7 @@ def test_ammo_does_not_fire_without_ball_in_play():
     layout = Mock()
     ball_manager = Mock()
     ball_manager.has_ball_in_play.return_value = False
+    bullet_manager = BulletManager()
     controller = GameController(
         game_state,
         level_manager,
@@ -1049,6 +1091,7 @@ def test_ammo_does_not_fire_without_ball_in_play():
         input_manager=input_manager,
         layout=layout,
         renderer=renderer,
+        bullet_manager=bullet_manager,
     )
     with patch("pygame.event.post") as mock_post:
         event = make_key_event(pygame.K_k)
