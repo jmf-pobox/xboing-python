@@ -1,11 +1,16 @@
 """Stateless renderer for displaying bullets using bullet sprites or fallback circles."""
 
 import logging
-from typing import Optional
+import os
 
 import pygame
 
 from game.bullet_manager import BulletManager
+
+
+def get_bullet_sprite_path() -> str:
+    """Get the path to the bullet sprite image."""
+    return os.path.join("assets", "images", "guns", "bullet.png")
 
 
 class BulletRenderer:
@@ -13,14 +18,14 @@ class BulletRenderer:
 
     logger = logging.getLogger("xboing.BulletRenderer")
 
-    def __init__(self, bullet_sprite: Optional[pygame.Surface] = None) -> None:
-        """Initialize the BulletRenderer.
-
-        Args:
-            bullet_sprite: Optional sprite to use for bullets. If None, draws circles.
-
-        """
-        self.bullet_sprite = bullet_sprite
+    def __init__(self) -> None:
+        """Initialize the BulletRenderer and load the bullet sprite asset."""
+        bullet_sprite_path = get_bullet_sprite_path()
+        if os.path.exists(bullet_sprite_path):
+            self.bullet_sprite = pygame.image.load(bullet_sprite_path).convert_alpha()
+        else:
+            self.logger.warning(f"Could not load bullet sprite: {bullet_sprite_path}")
+            self.bullet_sprite = None
 
     def render(self, surface: pygame.Surface, bullet_manager: BulletManager) -> None:
         """Render all active bullets on the given surface.
