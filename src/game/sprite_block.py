@@ -70,7 +70,7 @@ class SpriteBlock:
         TYPE_TAN: ("tanblk.png", 100, BEHAVIOR_NORMAL),
         TYPE_YELLOW: ("yellblk.png", 100, BEHAVIOR_NORMAL),
         TYPE_PURPLE: ("purpblk.png", 100, BEHAVIOR_NORMAL),
-        TYPE_BULLET: ("bonus1.png", 200, BEHAVIOR_SPECIAL),  # Gives bullet ammo
+        TYPE_BULLET: ("bltblk.png", 200, BEHAVIOR_SPECIAL),  # Bullet block (ammo block)
         TYPE_BLACK: ("blakblk.png", 200, BEHAVIOR_UNBREAKABLE),
         TYPE_COUNTER: ("cntblk.png", 300, BEHAVIOR_COUNTER),
         TYPE_BOMB: ("bombblk.png", 500, BEHAVIOR_SPECIAL),
