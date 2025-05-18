@@ -11,6 +11,8 @@ from engine.events import LivesChangedEvent
 from layout.game_layout import GameLayout
 from renderers.lives_renderer import LivesRenderer
 
+LIVES_TOP_Y = 12
+
 
 class LivesDisplayComponent:
     """UI component for displaying the player's remaining lives as ball images.
@@ -56,6 +58,13 @@ class LivesDisplayComponent:
             ):
                 self.lives = event.event.lives
 
+    def get_y_and_height(self) -> tuple[int, int]:
+        """Return the y position and height of the lives display for alignment."""
+        lives_surf = self.lives_display_util.render(
+            self.lives, spacing=10, scale=1.0, max_lives=self.max_lives
+        )
+        return (LIVES_TOP_Y, lives_surf.get_height())
+
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the lives as ball images onto the given surface.
 
@@ -64,10 +73,8 @@ class LivesDisplayComponent:
             surface (pygame.Surface): The Pygame surface to draw on.
 
         """
-        score_rect = self.layout.get_score_rect()
-        # Render the lives using the utility
         lives_surf = self.lives_display_util.render(
             self.lives, spacing=10, scale=1.0, max_lives=self.max_lives
         )
-        y = score_rect.y + (score_rect.height - lives_surf.get_height()) // 2
+        y = LIVES_TOP_Y
         surface.blit(lives_surf, (self.x, y))

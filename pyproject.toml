@@ -96,6 +96,15 @@ fix = [
 ]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
+# Run the game with coverage and then show the report
+cov-game = [
+  "coverage run --source=src -m xboing",
+  "coverage report -m"
+]
+cov-game-html = [
+  "coverage run --source=src -m xboing",
+  "coverage html"
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -173,10 +182,3 @@ test-publish = [
 targets = ["src", "tests", "scripts"]
 formatter = "black"
 linter = "isort"
-
-# If using Poetry:
-# [tool.poetry.dev-dependencies]
-# pyinstaller = "^6.0.0"
-#
-# If not using Poetry, add to requirements-dev.txt or install manually:
-# pyinstaller

@@ -6,7 +6,7 @@ This module defines the XBoingApp class, which encapsulates all game setup and t
 import logging
 import time
 import typing
-from typing import Any, Dict, Optional, cast
+from typing import Dict, cast
 
 from injector import Injector
 import pygame
@@ -23,9 +23,14 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
 from game.ball_manager import BallManager
+from game.bullet_manager import BulletManager
 from game.game_setup import create_game_objects
 from game.game_state import GameState
+from game.level_manager import LevelManager
+from game.paddle import Paddle
+from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
+from renderers.bullet_renderer import BulletRenderer
 from ui.bottom_bar_view import BottomBarView
 from ui.game_over_view import GameOverView
 from ui.game_view import GameView
@@ -33,12 +38,13 @@ from ui.instructions_view import InstructionsView
 from ui.level_complete_view import LevelCompleteView
 from ui.top_bar_view import TopBarView
 from ui.ui_manager import UIManager
+from ui.view import View
 from utils.asset_loader import create_font, load_image
 from utils.asset_paths import get_asset_path, get_sounds_dir
 from utils.logging_config import setup_logging
 
 # Setup logging
-setup_logging(logging.DEBUG)
+setup_logging(logging.INFO)
 
 # Game constants - matching the original XBoing dimensions
 PLAY_WIDTH: int = 495  # Original game's play area width
@@ -62,7 +68,6 @@ BLOCK_MARGIN: int = 7  # Original spacing (SPACE constant)
 GAME_TITLE: str = "- XBoing II -"
 
 logger: logging.Logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class XBoingApp:
@@ -77,10 +82,12 @@ class XBoingApp:
     renderer: Renderer
     input_manager: InputManager
     layout: GameLayout
-    paddle: Any
-    ball_manager: Any
-    block_manager: Any
-    level_manager: Any
+    paddle: Paddle
+    ball_manager: BallManager
+    block_manager: SpriteBlockManager
+    level_manager: LevelManager
+    bullet_manager: BulletManager
+    bullet_renderer: BulletRenderer
     ui_manager: UIManager
     nonlocal_vars: Dict[str, bool]
     font: pygame.font.Font
@@ -90,9 +97,9 @@ class XBoingApp:
     game_view: GameView
     game_controller: GameController
     injector: Injector
-    controller_manager: Optional[ControllerManager]
+    controller_manager: ControllerManager
     level_complete_controller: LevelCompleteController
-    views: Dict[str, Any]
+    views: Dict[str, View]
     top_bar_view: TopBarView
     bottom_bar_view: BottomBarView
     game_over_view: GameOverView
@@ -123,6 +130,8 @@ class XBoingApp:
         self.ball_manager = game_objects["ball_manager"]
         self.block_manager = game_objects["block_manager"]
         self.level_manager = game_objects["level_manager"]
+        self.bullet_manager = game_objects["bullet_manager"]
+        self.bullet_renderer = game_objects["bullet_renderer"]
         self.game_state.set_timer(self.level_manager.get_time_remaining())
 
         # --- UI Manager and Fonts ---
@@ -138,8 +147,10 @@ class XBoingApp:
             self.layout,
             self.block_manager,
             self.paddle,
-            self.ball_manager.balls,
+            self.ball_manager,
             self.renderer,
+            self.bullet_manager,
+            self.bullet_renderer,
         )
         self.game_controller = GameController(
             self.game_state,
@@ -150,6 +161,7 @@ class XBoingApp:
             input_manager=self.input_manager,
             layout=self.layout,
             renderer=self.renderer,
+            bullet_manager=self.bullet_manager,
         )
         xboing_module_partial = XBoingModule(
             game_state=self.game_state,
@@ -172,6 +184,8 @@ class XBoingApp:
             instructions_text_font=self.instructions_text_font,
             on_exit_callback=lambda: self.ui_manager.set_view("game"),
             input_manager=self.input_manager,
+            bullet_manager=self.bullet_manager,
+            bullet_renderer=self.bullet_renderer,
         )
         injector_partial = Injector([xboing_module_partial])
         self.game_view = injector_partial.get(GameView)
@@ -198,6 +212,8 @@ class XBoingApp:
             instructions_text_font=self.instructions_text_font,
             on_exit_callback=lambda: self.ui_manager.set_view("game"),
             input_manager=self.input_manager,
+            bullet_manager=self.bullet_manager,
+            bullet_renderer=self.bullet_renderer,
         )
         self.injector = Injector([xboing_module])
 
@@ -240,6 +256,7 @@ class XBoingApp:
         )
         self.ball_manager = self.injector.get(BallManager)
         self.logger = logging.getLogger(__name__)
+        self.logger.debug(f"BulletManager id in XBoingApp: {id(self.bullet_manager)}")
 
     def run(self) -> None:
         """Run the main game loop."""

@@ -6,13 +6,29 @@ from typing import Tuple
 class XBoingEvent:
     """Base class for all XBoing game events."""
 
-    # No-op for now
+
+class AmmoFiredEvent(XBoingEvent):
+    """Event fired when ammo is used (e.g., bullet shot)."""
+
+    sound_effect = "shoot"
+
+    def __init__(self, ammo: int):
+        self.ammo = ammo
+
+
+class AmmoCollectedEvent(XBoingEvent):
+    """Event fired when ammo is collected."""
+
+    sound_effect = "ammo"
+
+    def __init__(self, ammo: int = 4):
+        self.ammo = ammo
 
 
 class BlockHitEvent(XBoingEvent):
     """Event: Ball hit a block."""
 
-    sound_effect = "boing"
+    sound_effect = "touch"
 
 
 class UIButtonClickEvent(XBoingEvent):
@@ -192,8 +208,6 @@ class SpecialX4ChangedEvent(XBoingEvent):
 
 class LevelCompleteEvent(XBoingEvent):
     """Event: Level completed."""
-
-    # No-op for now
 
 
 class PaddleGrowEvent(XBoingEvent):

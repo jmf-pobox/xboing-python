@@ -1,4 +1,8 @@
-# XBoing Python Port
+<p align="center">
+  <img src="assets/images/xboing_docs_logo.png" alt="XBoing Logo">
+</p>
+
+# XBoing II (Python port)
 
 [![GitHub release](https://img.shields.io/github/v/release/jmf-pobox/xboing-python?include_prereleases)](https://github.com/jmf-pobox/xboing-python/releases)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
@@ -11,18 +15,21 @@ A Python reimplementation of the classic XBoing game originally written for X11 
 
 ### What is XBoing?
 
-XBoing is an addictive breakout-style arcade game featuring:
-- 80 challenging levels with unique layouts
-- Colorful block types with different behaviors
-- Special power-ups and power-downs (paddle expanders, multiball, etc.)
-- Lively sound effects and colorful graphics
+XBoing is a fast-paced, blockout-style arcade game where you control a paddle to bounce a ball around the play area, destroying blocks and collecting power-ups. Inspired by the classic arcade genre, XBoing features:
+- 80+ challenging levels with unique layouts and increasing difficulty
+- A variety of colorful block types, including indestructible, counter, bomb, sticky, and death blocks
+- Special power-ups and power-downs: multiball, extra ball, paddle expand/shrink, sticky paddle, and more
+- Lively sound effects and vibrant graphics
 - Classic arcade-style gameplay with modern conveniences
+- Addictive, skill-based action that rewards quick reflexes and strategy
+
+Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern compatibility.
 
 ### Installation & Playing
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/xboing-py.git
+git clone https://github.com/jmf-pobox/xboing-py.git
 cd xboing-py
 
 # Create a virtual environment
@@ -55,21 +62,25 @@ python src/main.py
 - **Bomb Blocks**: Explode and destroy neighboring blocks
 - **Sticky Blocks**: Make balls stick to paddle
 
-## 💻 For Developers
-
 ### Project Status
 
-This Python port is currently in active development. Current features:
-- ✅ Full conversion of all original XBoing assets
-- ✅ Level loading system that reads original level files
-- ✅ Block implementation with proper behaviors
-- ✅ Basic ball physics and collision detection
-- ✅ Paddle movement and control
-- ✅ Audio system for sound effects
-- ✅ Background cycling between levels
-- 🚧 Special power-ups and effects (partially implemented)
-- 🚧 Game state management and transitions
-- 🚧 Score tracking and high scores
+This Python port is under active development and is already playable. Current features include:
+- ✅ Full conversion of all original XBoing assets (graphics, sounds, levels)
+- ✅ Level loading system that reads and displays original level files
+- ✅ Block implementation with correct behaviors and effects
+- ✅ Ball physics and collision detection
+- ✅ Paddle movement and control (keyboard and mouse)
+- ✅ Audio system for event-driven sound effects
+- ✅ Event-driven, component-based UI (score, lives, ammo, level, timer, messages)
+- ✅ Paddle gun/ammo feature: ammo state, UI, collection, and sound (Phase 1 complete)
+- 🚧 Special power-ups and effects (in progress)
+- 🚧 Game state management and transitions (polished, but ongoing)
+- 🚧 Score tracking and high scores (basic, more to come)
+- 🚧 Machine gun mode and bullet logic (planned)
+
+The game is fully playable, with most core features implemented and tested. Remaining work focuses on advanced power-ups, polish, and additional features to match and extend the original XBoing experience.
+
+## 💻 For Developers
 
 ### Project Structure
 
@@ -106,23 +117,32 @@ The game uses assets from the original XBoing converted to modern formats:
 
 Use `scripts/sync_assets.py` to synchronize assets from the original XBoing directory.
 
-### Development Tools
+### Asset Migration Tools
 
 ```bash
 # Run tests
 python -m pytest
 
 # Convert XPM to PNG (for new assets)
-python scripts/better_xpm_converter.py path/to/image.xpm output.png
+python scripts/convert_xpm_to_png.py path/to/image.xpm output.png
 
 # Convert AU to WAV (for new sounds)
-python scripts/convert_audio.py path/to/sound.au output.wav
+python scripts/convert_au_to_wav.py path/to/sound.au output.wav
 
-# Sync all assets from original XBoing
-python scripts/sync_assets.py
+# Normalize all audio files in the assets directory
+python scripts/normalize_audio.py
+
+# Fix background images (formatting, transparency, etc.)
+python scripts/fix_background.py
+
+# Fix ball lost sound or related assets
+python scripts/fix_balllost.py
+
+# Search dependencies in the codebase
+python scripts/dep_grep.py <search_term>
 ```
 
-### Documentation
+### Design Documentation
 
 See the `docs/` directory for detailed information:
 - [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
@@ -161,15 +181,24 @@ This project is licensed under the same terms as the original XBoing - see the L
 
 ## Original Source
 
-The original source code is available in the subdirectory: xboing2.4-clang
+The original source code is available at: https://www.techrescue.org/xboing/xboing2.4.tar.gz
 
-## Building a Standalone Executable
+## Commit Message Standard
 
-You can build a standalone executable for XBoing using PyInstaller:
+This project uses the [Conventional Commits](https://www.conventionalcommits.org/) standard for all commit messages. This helps automate changelogs, semantic versioning, and improves code review clarity.
 
-1. Install PyInstaller: `pip install pyinstaller`
-2. Run the build script: `python scripts/build_executable.py`
-3. The executable will be in the `dist/` directory.
+**Format:**
+```
+<type>(<scope>): <short summary>
+```
+- **type**: feat, fix, chore, refactor, test, docs, etc.
+- **scope**: the area of the codebase affected (e.g., gun, ammo, ui)
+- **summary**: a brief description of the change
 
-See [docs/PYINSTALLER-GUIDE.md](docs/PYINSTALLER-GUIDE.md) for full details and troubleshooting.
+**Example:**
+```
+feat(gun): implement ammo collection event, state, and UI update
+```
+
+See the [Conventional Commits documentation](https://www.conventionalcommits.org/) for more details.
 

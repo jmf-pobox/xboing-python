@@ -16,15 +16,27 @@ class MockLivesRendererUtil:
         return self.surface
 
 
+class MockAmmoRenderer:
+    def __init__(self):
+        self.last_ammo = None
+        self.last_kwargs = None
+        self.surface = pygame.Surface((60, 20))
+
+    def render(self, ammo, spacing=1, max_ammo=20):
+        self.last_ammo = ammo
+        self.last_kwargs = dict(spacing=spacing, max_ammo=max_ammo)
+        return self.surface
+
+
 class DummyLayout:
     def get_score_rect(self):
         return pygame.Rect(0, 0, 200, 40)
 
 
 def test_lives_display_initial_state():
-    layout = DummyLayout()
-    util = MockLivesRendererUtil()
-    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)
+    layout = DummyLayout()  # type: ignore
+    util = MockLivesRendererUtil()  # type: ignore
+    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)  # type: ignore
     assert comp.lives == 3
     comp.draw(pygame.Surface((200, 40)))
     assert util.last_lives == 3
@@ -33,9 +45,9 @@ def test_lives_display_initial_state():
 
 
 def test_lives_display_loss():
-    layout = DummyLayout()
-    util = MockLivesRendererUtil()
-    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)
+    layout = DummyLayout()  # type: ignore
+    util = MockLivesRendererUtil()  # type: ignore
+    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)  # type: ignore
 
     # Create a pygame event with a LivesChangedEvent
     event = pygame.event.Event(pygame.USEREVENT, {"event": LivesChangedEvent(2)})
@@ -49,9 +61,9 @@ def test_lives_display_loss():
 
 
 def test_lives_display_gain():
-    layout = DummyLayout()
-    util = MockLivesRendererUtil()
-    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)
+    layout = DummyLayout()  # type: ignore
+    util = MockLivesRendererUtil()  # type: ignore
+    comp = LivesDisplayComponent(layout, util, x=10, max_lives=3)  # type: ignore
 
     # Create a pygame event with a LivesChangedEvent for loss
     event_loss = pygame.event.Event(pygame.USEREVENT, {"event": LivesChangedEvent(2)})

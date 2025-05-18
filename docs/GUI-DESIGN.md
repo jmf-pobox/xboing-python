@@ -241,3 +241,41 @@ while running:
 - Clean separation of concerns and easier testing.
 
 This architecture improves maintainability, testability, and clarity of the event-driven design.
+
+## Top Bar Layout Dimensions and Calculations
+
+This section documents the precise pixel alignment and spacing for the top bar UI components (lives, ammo, and level displays) to match the original C version's compact layout.
+
+### Horizontal Alignment
+- **Right edge of lives and ammo displays:**
+  - The rightmost pixel of both the lives and ammo displays is aligned to x = 475 (measured from the left edge of the window).
+  - This ensures the lives and ammo are grouped just to the left of the level display, as in the C version.
+- **Level display:**
+  - The left edge of the level display is immediately to the right of the lives/ammo group, with no gap.
+- **Calculation:**
+  ```python
+  RIGHT_EDGE_X = 475
+  lives_surf = lives_renderer.render(max_lives, ...)
+  lives_x = RIGHT_EDGE_X - lives_surf.get_width()
+  # Use lives_x for both lives and ammo displays
+  ```
+
+### Vertical Alignment
+- **Lives display y-offset:**
+  - The top of the lives display is set to a fixed y offset: `LIVES_TOP_Y = 12`.
+- **Ammo display y-offset:**
+  - The top of the ammo display is set to `lives_y + lives_height + 2` (2px gap below lives).
+- **Calculation:**
+  ```python
+  LIVES_TOP_Y = 12
+  y_lives = LIVES_TOP_Y
+  y_ammo = y_lives + lives_height + 2
+  ```
+
+### Grouping Logic
+- The lives, ammo, and level displays are visually grouped in the top bar, with no large gaps between them.
+- The grouping and alignment are designed to match the original C version for a faithful recreation.
+
+### Rationale
+- These layout rules ensure the UI is visually compact, grouped, and matches the reference implementation.
+- All calculations are performed dynamically based on the rendered width of the lives display, so the layout adapts if the number of lives or the size of the assets changes.
