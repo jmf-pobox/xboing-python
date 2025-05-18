@@ -240,14 +240,124 @@ class GameController(Controller):
             changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
             self.post_game_state_events(changes)
 
+    def _handle_block_effects(self, effects, ball=None, bullet=None):
+        """Handle special block effects for both balls and bullets."""
+        for effect in effects:
+            if effect == SpriteBlock.TYPE_BULLET:
+                logger.debug("Bulletblock hit: adding ammo.")
+                changes = self.game_state.add_ammo()
+                self.post_game_state_events(changes)
+            elif effect == SpriteBlock.TYPE_MAXAMMO:
+                logger.debug("Max ammo block hit: adding ammo.")
+                changes = self.game_state.add_ammo()
+                self.post_game_state_events(changes)
+            elif effect == SpriteBlock.TYPE_EXTRABALL and ball is not None:
+                new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
+                new_ball.vx = -ball.vx
+                new_ball.vy = ball.vy
+                self.ball_manager.add_ball(new_ball)
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                    )
+                )
+            elif effect == SpriteBlock.TYPE_MULTIBALL and ball is not None:
+                for _ in range(2):
+                    new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
+                    speed = (ball.vx**2 + ball.vy**2) ** 0.5
+                    new_ball.vx = speed * (ball.vx / speed) * 0.8
+                    new_ball.vy = speed * (ball.vy / speed) * 0.8
+                    self.ball_manager.add_ball(new_ball)
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                    )
+                )
+            elif effect == SpriteBlock.TYPE_BOMB:
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
+                )
+            elif effect == SpriteBlock.TYPE_PAD_EXPAND:
+                old_size = self.paddle.size
+                if old_size < Paddle.SIZE_LARGE:
+                    self.paddle.set_size(old_size + 1)
+                    at_max = self.paddle.size == Paddle.SIZE_LARGE
+                    logger.debug(
+                        f"Paddle expanded to size {self.paddle.size} (width={self.paddle.width})"
+                    )
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT,
+                            {
+                                "event": PaddleGrowEvent(
+                                    self.paddle.width, at_max=at_max
+                                )
+                            },
+                        )
+                    )
+                else:
+                    logger.debug(
+                        "Paddle already at maximum size; cannot expand further."
+                    )
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT,
+                            {"event": PaddleGrowEvent(self.paddle.width, at_max=True)},
+                        )
+                    )
+            elif effect == SpriteBlock.TYPE_PAD_SHRINK:
+                old_size = self.paddle.size
+                if old_size > Paddle.SIZE_SMALL:
+                    self.paddle.set_size(old_size - 1)
+                    at_min = self.paddle.size == Paddle.SIZE_SMALL
+                    logger.debug(
+                        f"Paddle shrunk to size {self.paddle.size} (width={self.paddle.width})"
+                    )
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT,
+                            {
+                                "event": PaddleShrinkEvent(
+                                    self.paddle.width, at_min=at_min
+                                )
+                            },
+                        )
+                    )
+                else:
+                    logger.debug(
+                        "Paddle already at minimum size; cannot shrink further."
+                    )
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT,
+                            {
+                                "event": PaddleShrinkEvent(
+                                    self.paddle.width, at_min=True
+                                )
+                            },
+                        )
+                    )
+            elif effect == SpriteBlock.TYPE_TIMER:
+                self.level_manager.add_time(20)
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
+                    )
+                )
+            elif effect == SpriteBlock.TYPE_REVERSE:
+                self.toggle_reverse()
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT,
+                        {"event": SpecialReverseChangedEvent(self.reverse)},
+                    )
+                )
+            elif effect == SpriteBlock.TYPE_STICKY:
+                logger.debug("Sticky block hit: enabling sticky paddle mode.")
+                self.enable_sticky()
+
     def update_balls_and_collisions(self, delta_ms: float) -> None:
-        """Update balls and bullets, check for collisions, and handle block effects.
-
-        Args:
-        ----
-            delta_ms: Time elapsed since last update in milliseconds.
-
-        """
+        """Update balls and bullets, check for collisions, and handle block effects."""
         active_balls = []
         # --- Bullet-block collision detection ---
         active_bullets = []
@@ -262,15 +372,13 @@ class GameController(Controller):
                 pygame.event.post(
                     pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
                 )
-            for effect in effects:
-                if effect == SpriteBlock.TYPE_MAXAMMO:
-                    logger.debug("Max ammo block hit: adding ammo.")
-                    changes = self.game_state.add_ammo()
-                    self.post_game_state_events(changes)
-                # Add more bullet-specific effects as needed
-            if getattr(bullet, "active", True):
+            elif broken > 0:
+                self._handle_block_effects(effects, bullet=bullet)
+
+            if bullet.active:
                 active_bullets.append(bullet)
-        self.bullet_manager._bullets[:] = active_bullets  # Update bullet list
+            else:
+                self.bullet_manager.remove_bullet(bullet)
 
         # --- Ball-block collision detection ---
         for ball in self.ball_manager.balls:
@@ -294,124 +402,7 @@ class GameController(Controller):
                     pygame.event.post(
                         pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
                     )
-                for effect in effects:
-                    if effect == SpriteBlock.TYPE_MAXAMMO:
-                        logger.debug("Max ammo block hit: adding ammo.")
-                        changes = self.game_state.add_ammo()
-                        self.post_game_state_events(changes)
-                    elif effect == SpriteBlock.TYPE_EXTRABALL:
-                        new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
-                        new_ball.vx = -ball.vx
-                        new_ball.vy = ball.vy
-                        self.ball_manager.add_ball(new_ball)
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
-                            )
-                        )
-                    elif effect == SpriteBlock.TYPE_MULTIBALL:
-                        for _ in range(2):
-                            new_ball = Ball(
-                                ball.x, ball.y, ball.radius, (255, 255, 255)
-                            )
-                            speed = (ball.vx**2 + ball.vy**2) ** 0.5
-                            new_ball.vx = speed * (ball.vx / speed) * 0.8
-                            new_ball.vy = speed * (ball.vy / speed) * 0.8
-                            self.ball_manager.add_ball(new_ball)
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
-                            )
-                        )
-                    elif effect == SpriteBlock.TYPE_BOMB:
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT, {"event": BombExplodedEvent()}
-                            )
-                        )
-                    elif effect == SpriteBlock.TYPE_PAD_EXPAND:
-                        old_size = self.paddle.size
-                        if old_size < Paddle.SIZE_LARGE:
-                            self.paddle.set_size(old_size + 1)
-                            at_max = self.paddle.size == Paddle.SIZE_LARGE
-                            logger.debug(
-                                f"Paddle expanded to size {self.paddle.size} (width={self.paddle.width})"
-                            )
-                            pygame.event.post(
-                                pygame.event.Event(
-                                    pygame.USEREVENT,
-                                    {
-                                        "event": PaddleGrowEvent(
-                                            self.paddle.width, at_max=at_max
-                                        )
-                                    },
-                                )
-                            )
-                        else:
-                            logger.debug(
-                                "Paddle already at maximum size; cannot expand further."
-                            )
-                            pygame.event.post(
-                                pygame.event.Event(
-                                    pygame.USEREVENT,
-                                    {
-                                        "event": PaddleGrowEvent(
-                                            self.paddle.width, at_max=True
-                                        )
-                                    },
-                                )
-                            )
-                    elif effect == SpriteBlock.TYPE_PAD_SHRINK:
-                        old_size = self.paddle.size
-                        if old_size > Paddle.SIZE_SMALL:
-                            self.paddle.set_size(old_size - 1)
-                            at_min = self.paddle.size == Paddle.SIZE_SMALL
-                            logger.debug(
-                                f"Paddle shrunk to size {self.paddle.size} (width={self.paddle.width})"
-                            )
-                            pygame.event.post(
-                                pygame.event.Event(
-                                    pygame.USEREVENT,
-                                    {
-                                        "event": PaddleShrinkEvent(
-                                            self.paddle.width, at_min=at_min
-                                        )
-                                    },
-                                )
-                            )
-                        else:
-                            logger.debug(
-                                "Paddle already at minimum size; cannot shrink further."
-                            )
-                            pygame.event.post(
-                                pygame.event.Event(
-                                    pygame.USEREVENT,
-                                    {
-                                        "event": PaddleShrinkEvent(
-                                            self.paddle.width, at_min=True
-                                        )
-                                    },
-                                )
-                            )
-                    elif effect == SpriteBlock.TYPE_TIMER:
-                        self.level_manager.add_time(20)
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
-                            )
-                        )
-                    elif effect == SpriteBlock.TYPE_REVERSE:
-                        """Toggle reverse paddle control and notify UI via event."""
-                        self.toggle_reverse()
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT,
-                                {"event": SpecialReverseChangedEvent(self.reverse)},
-                            )
-                        )
-                    elif effect == SpriteBlock.TYPE_STICKY:
-                        logger.debug("Sticky block hit: enabling sticky paddle mode.")
-                        self.enable_sticky()
+                self._handle_block_effects(effects, ball=ball)
                 if hit_paddle:
                     pygame.event.post(
                         pygame.event.Event(
