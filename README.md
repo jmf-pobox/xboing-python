@@ -1,4 +1,8 @@
-# XBoing Python Port
+<p align="center">
+  <img src="assets/images/xboing.png" alt="XBoing Logo" width="479" height="75">
+</p>
+
+# XBoing II (Python port)
 
 [![GitHub release](https://img.shields.io/github/v/release/jmf-pobox/xboing-python?include_prereleases)](https://github.com/jmf-pobox/xboing-python/releases)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
@@ -11,12 +15,15 @@ A Python reimplementation of the classic XBoing game originally written for X11 
 
 ### What is XBoing?
 
-XBoing is an addictive breakout-style arcade game featuring:
-- 80 challenging levels with unique layouts
-- Colorful block types with different behaviors
-- Special power-ups and power-downs (paddle expanders, multiball, etc.)
-- Lively sound effects and colorful graphics
+XBoing is a fast-paced, blockout-style arcade game where you control a paddle to bounce a ball around the play area, destroying blocks and collecting power-ups. Inspired by the classic arcade genre, XBoing features:
+- 80+ challenging levels with unique layouts and increasing difficulty
+- A variety of colorful block types, including indestructible, counter, bomb, sticky, and death blocks
+- Special power-ups and power-downs: multiball, extra ball, paddle expand/shrink, sticky paddle, and more
+- Lively sound effects and vibrant graphics
 - Classic arcade-style gameplay with modern conveniences
+- Addictive, skill-based action that rewards quick reflexes and strategy
+
+Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern improvements and compatibility.
 
 ### Installation & Playing
 
@@ -54,6 +61,24 @@ python src/main.py
 - **Black Blocks**: Indestructible, bounce balls away
 - **Bomb Blocks**: Explode and destroy neighboring blocks
 - **Sticky Blocks**: Make balls stick to paddle
+
+### Project Status
+
+This Python port is under active development and is already playable. Current features include:
+- ✅ Full conversion of all original XBoing assets (graphics, sounds, levels)
+- ✅ Level loading system that reads and displays original level files
+- ✅ Block implementation with correct behaviors and effects
+- ✅ Ball physics and collision detection
+- ✅ Paddle movement and control (keyboard and mouse)
+- ✅ Audio system for event-driven sound effects
+- ✅ Event-driven, component-based UI (score, lives, ammo, level, timer, messages)
+- ✅ Paddle gun/ammo feature: ammo state, UI, collection, and sound (Phase 1 complete)
+- 🚧 Special power-ups and effects (in progress)
+- 🚧 Game state management and transitions (polished, but ongoing)
+- 🚧 Score tracking and high scores (basic, more to come)
+- 🚧 Machine gun mode and bullet logic (planned)
+
+The game is fully playable, with most core features implemented and tested. Remaining work focuses on advanced power-ups, polish, and additional features to match and extend the original XBoing experience.
 
 ## 💻 For Developers
 
