@@ -159,6 +159,7 @@ class XBoingModule(Module):
         self,
         ammo_renderer: AmmoRenderer,
         lives_display_component: LivesDisplayComponent,
+        game_state: "GameState",
     ) -> AmmoDisplayComponent:
         """Provide an AmmoDisplayComponent instance for the UI."""
         lives_y, lives_height = lives_display_component.get_y_and_height()
@@ -171,6 +172,7 @@ class XBoingModule(Module):
         return AmmoDisplayComponent(
             self._layout,
             ammo_renderer,
+            game_state,
             max_ammo=MAX_AMMO,
             lives_x=lives_x,
             lives_width=lives_width,

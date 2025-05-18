@@ -226,3 +226,12 @@ class PaddleShrinkEvent(XBoingEvent):
     def __init__(self, size: int, at_min: bool = False) -> None:
         self.size: int = size
         self.at_min: bool = at_min
+
+
+class AmmoFiredEvent(XBoingEvent):
+    """Event fired when ammo is used (e.g., bullet shot)."""
+
+    sound_effect = "shoot"
+
+    def __init__(self, ammo: int):
+        self.ammo = ammo

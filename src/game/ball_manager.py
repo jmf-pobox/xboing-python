@@ -42,9 +42,9 @@ class BallManager:
         if initial_ball is not None:
             self._balls.append(initial_ball)
 
-    def get_active_balls(self) -> List[Ball]:
-        """Return a list of active balls currently managed."""
-        return [ball for ball in self._balls if ball.active]
+    def has_ball_in_play(self) -> bool:
+        """Return True if there is at least one ball that is active and not stuck to the paddle (i.e., in play)."""
+        return any(ball.active and not ball.stuck_to_paddle for ball in self._balls)
 
     def __len__(self) -> int:
         """Return the number of balls currently managed."""

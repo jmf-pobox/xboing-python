@@ -4,6 +4,7 @@ import logging
 from typing import Any, Dict, List
 
 from engine.events import (
+    AmmoFiredEvent,
     GameOverEvent,
     LevelChangedEvent,
     LivesChangedEvent,
@@ -35,6 +36,7 @@ class GameState:
     game_over: bool
     specials: Dict[str, bool]
     _event_map: Dict[str, Any]
+    ammo: int
 
     def __init__(self) -> None:
         """Initialize the GameState with default values and event mappings."""
@@ -64,6 +66,7 @@ class GameState:
             "x2": SpecialX2ChangedEvent,
             "x4": SpecialX4ChangedEvent,
         }
+        self.ammo = 4  # Initial ammo count matches original C version
 
     def add_score(self, points: int) -> List[Any]:
         """Add points to the score and return a list of change events.
@@ -168,6 +171,7 @@ class GameState:
         all_events += self.set_game_over(False)
         for name in self.specials:
             all_events += self.set_special(name, False)
+        self.ammo = 4  # Reset ammo to 4 on restart
         return all_events
 
     def full_restart(self, level_manager: Any) -> List[Any]:
@@ -192,6 +196,7 @@ class GameState:
         all_events.append(
             MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")
         )
+        self.ammo = 4  # Reset ammo to 4 on full restart
         return all_events
 
     def get_lives(self) -> int:
@@ -199,3 +204,16 @@ class GameState:
         if self.lives is not None:
             return self.lives
         return 0
+
+    def fire_ammo(self) -> List[Any]:
+        """Decrement ammo and return a list of change events (AmmoFiredEvent)."""
+        if self.ammo > 0:
+            self.ammo -= 1
+            self.logger.info(f"Ammo fired, remaining ammo: {self.ammo}")
+            return [AmmoFiredEvent(self.ammo)]
+        self.logger.info("No ammo left to fire.")
+        return []
+
+    def get_ammo(self) -> int:
+        """Return the current ammo count."""
+        return self.ammo

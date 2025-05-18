@@ -5,6 +5,7 @@ from typing import List
 
 import pygame
 
+from game.game_state import GameState
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
 
@@ -16,6 +17,7 @@ class AmmoDisplayComponent:
         self,
         layout: GameLayout,
         ammo_display_util: AmmoRenderer,
+        game_state: GameState,
         max_ammo: int = MAX_AMMO,
         lives_x: int = 365,
         lives_width: int = 96,  # e.g., 3 lives * 32px each
@@ -28,6 +30,7 @@ class AmmoDisplayComponent:
         ----
             layout (GameLayout): The GameLayout instance.
             ammo_display_util (AmmoRenderer): The AmmoRenderer instance.
+            game_state (GameState): The GameState instance (source of truth for ammo).
             max_ammo (int, optional): The maximum number of bullets to display. Defaults to 20.
             lives_x (int, optional): The x position of the lives display. Defaults to 365.
             lives_width (int, optional): The width of the lives display. Defaults to 96.
@@ -37,7 +40,8 @@ class AmmoDisplayComponent:
         """
         self.layout = layout
         self.ammo_display_util = ammo_display_util
-        self.ammo: int = max_ammo
+        self.game_state = game_state
+        self.ammo: int = game_state.get_ammo()
         self.max_ammo: int = max_ammo
         self.lives_x: int = lives_x
         self.lives_width: int = lives_width
@@ -46,14 +50,13 @@ class AmmoDisplayComponent:
         self.logger = logging.getLogger("xboing.AmmoDisplayComponent")
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
+        from engine.events import AmmoFiredEvent
+
         for event in events:
-            if (
-                event.type == pygame.USEREVENT
-                and hasattr(event, "event")
-                and getattr(event.event, "__class__", None)
-                and event.event.__class__.__name__ == "AmmoChangedEvent"
+            if event.type == pygame.USEREVENT and isinstance(
+                event.event, AmmoFiredEvent
             ):
-                self.ammo = getattr(event.event, "ammo", self.ammo)
+                self.ammo = self.game_state.get_ammo()
 
     def draw(self, surface: pygame.Surface) -> None:
         ammo_surf = self.ammo_display_util.render(

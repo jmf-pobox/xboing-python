@@ -136,6 +136,18 @@ class GameController(Controller):
                         "[handle_events] not launching: not all balls stuck to paddle"
                     )
 
+            # --- Section: Ammo Fired (K key) ---
+            if (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_k
+                and self.ball_manager.has_ball_in_play()
+            ):
+                changes = self.game_state.fire_ammo()
+                for change in changes:
+                    pygame.event.post(
+                        pygame.event.Event(pygame.USEREVENT, {"event": change})
+                    )
+
             # --- Section: BallLostEvent Handling ---
             if event.type == pygame.USEREVENT and isinstance(
                 event.event, BallLostEvent
