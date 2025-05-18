@@ -5,6 +5,7 @@ from typing import List
 
 import pygame
 
+from engine.events import AmmoFiredEvent
 from game.game_state import GameState
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
@@ -50,8 +51,7 @@ class AmmoDisplayComponent:
         self.logger = logging.getLogger("xboing.AmmoDisplayComponent")
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        from engine.events import AmmoFiredEvent
-
+        """Handle events and update ammo display when AmmoFiredEvent is received."""
         for event in events:
             if event.type == pygame.USEREVENT and isinstance(
                 event.event, AmmoFiredEvent
@@ -59,6 +59,7 @@ class AmmoDisplayComponent:
                 self.ammo = self.game_state.get_ammo()
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Draw the ammo (bullets) display on the given surface."""
         ammo_surf = self.ammo_display_util.render(
             self.ammo, spacing=1, max_ammo=self.max_ammo
         )
