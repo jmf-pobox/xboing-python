@@ -2,10 +2,14 @@
 
 from typing import Any, Dict
 
+import pygame
+
 from game.ball_manager import BallManager
+from game.bullet_manager import BulletManager
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
+from renderers.bullet_renderer import BulletRenderer
 
 # Constants (should match those in xboing.py)
 PADDLE_WIDTH = 70
@@ -34,9 +38,14 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     level_manager.set_block_manager(block_manager)
     level_manager.set_layout(layout)
     level_manager.load_level(1)
+    bullet_manager: BulletManager = BulletManager()
+    bullet_sprite = pygame.image.load("assets/images/guns/bullet.png").convert_alpha()
+    bullet_renderer: BulletRenderer = BulletRenderer(bullet_sprite=bullet_sprite)
     return {
         "paddle": paddle,
         "ball_manager": ball_manager,
         "block_manager": block_manager,
         "level_manager": level_manager,
+        "bullet_manager": bullet_manager,
+        "bullet_renderer": bullet_renderer,
     }

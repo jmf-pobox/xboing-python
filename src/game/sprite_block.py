@@ -4,6 +4,7 @@ This module implements blocks using the original XBoing styling,
 with proper rounded edges and spacing matching the original game.
 """
 
+import functools
 import logging
 import os
 import random
@@ -11,6 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pygame
 
+from game.ball import Ball
+from game.bullet import Bullet
 from utils.asset_paths import get_blocks_dir
 
 
@@ -800,90 +803,107 @@ class SpriteBlockManager:
         for block in self.blocks:
             block.update(delta_ms)
 
-    def check_collisions(self, ball: Any) -> Tuple[int, int, List[Any]]:
-        """Check for collisions between a ball and all blocks.
+    @functools.singledispatchmethod
+    def check_collisions(self, obj) -> Tuple[int, int, List[Any]]:
+        """Dispatch collision checking based on object type (Ball, Bullet, etc)."""
+        raise NotImplementedError(f"Unsupported collision object type: {type(obj)}")
 
-        Args:
-        ----
-            ball (Ball): The ball to check collisions with
+    @check_collisions.register(Ball)
+    def _(self, ball) -> Tuple[int, int, List[Any]]:
+        """Check for collisions between a ball and all blocks."""
+        return self._check_block_collision(
+            obj=ball,
+            get_rect=ball.get_rect,
+            get_position=ball.get_position,
+            radius=ball.radius,
+            is_bullet=False,
+            remove_callback=None,
+        )
 
-        Returns:
-        -------
-            Tuple[int, int, List[Any]]: Points earned, number of blocks broken, and any special effects
+    @check_collisions.register(Bullet)
+    def _(self, bullet) -> Tuple[int, int, List[Any]]:
+        """Check for collisions between a bullet and all blocks."""
 
-        """
+        def remove_bullet():
+            bullet.active = False  # Mark bullet as inactive (caller should remove)
+
+        return self._check_block_collision(
+            obj=bullet,
+            get_rect=bullet.get_rect,
+            get_position=lambda: (bullet.x, bullet.y),
+            radius=bullet.radius,
+            is_bullet=True,
+            remove_callback=remove_bullet,
+        )
+
+    def _collides_with_block(
+        self, obj_x: float, obj_y: float, obj_radius: float, block_rect: pygame.Rect
+    ) -> bool:
+        """Return True if the object at (obj_x, obj_y) with radius collides with the block rect."""
+        closest_x = max(block_rect.left, min(obj_x, block_rect.right))
+        closest_y = max(block_rect.top, min(obj_y, block_rect.bottom))
+        dx = obj_x - closest_x
+        dy = obj_y - closest_y
+        distance = (dx * dx + dy * dy) ** 0.5
+        return distance <= obj_radius
+
+    def _reflect_ball(
+        self, obj, obj_x: float, obj_y: float, block: SpriteBlock
+    ) -> None:
+        """Reflect the ball's velocity and move it out of collision with the block."""
+        closest_x = max(block.rect.left, min(obj_x, block.rect.right))
+        closest_y = max(block.rect.top, min(obj_y, block.rect.bottom))
+        dx = obj_x - closest_x
+        dy = obj_y - closest_y
+        distance = (dx * dx + dy * dy) ** 0.5
+        if distance > 0:
+            nx = dx / distance
+            ny = dy / distance
+        else:
+            nx, ny = 0, -1
+        dot = obj.vx * nx + obj.vy * ny
+        obj.vx -= 2 * dot * nx
+        obj.vy -= 2 * dot * ny
+        overlap = obj.radius - distance
+        obj.x += nx * overlap
+        obj.y += ny * overlap
+        obj._update_rect()
+
+    def _handle_block_hit(self, block: SpriteBlock) -> Tuple[bool, int, Any]:
+        """Handle the result of hitting a block."""
+        return block.hit()
+
+    def _check_block_collision(
+        self,
+        obj,
+        get_rect,
+        get_position,
+        radius,
+        is_bullet: bool,
+        remove_callback=None,
+    ) -> Tuple[int, int, List[Any]]:
+        """Shared collision logic for balls and bullets."""
         points = 0
         broken_blocks = 0
         effects: List[Any] = []
-
-        # Get ball position and previous position
-        ball_rect = ball.get_rect()
-        ball_x, ball_y = ball.get_position()
-        ball_radius = ball.radius
-
-        # Check each block
-        for _, block in enumerate(self.blocks[:]):
-            # Check collision with the block
-            if block.rect.colliderect(ball_rect):
-                # Calculate collision normal using the block's edges
-                # Determine which side of the block was hit
-
-                # Find closest point on rectangle to circle center
-                closest_x = max(block.rect.left, min(ball_x, block.rect.right))
-                closest_y = max(block.rect.top, min(ball_y, block.rect.bottom))
-
-                # Calculate distance from closest point to circle center
-                dx = ball_x - closest_x
-                dy = ball_y - closest_y
-                distance = (dx * dx + dy * dy) ** 0.5
-
-                # If distance is less than or equal to radius, collision occurred
-                if distance <= ball_radius:
-                    # Determine normal vector (normalize the closest point vector)
-                    if distance > 0:
-                        nx = dx / distance
-                        ny = dy / distance
-                    else:
-                        # If ball is exactly at the closest point, use a default normal
-                        nx, ny = 0, -1
-
-                    # Handle ball bounce
-                    # Calculate dot product of velocity and normal
-                    dot = ball.vx * nx + ball.vy * ny
-
-                    # Reflect velocity
-                    ball.vx -= 2 * dot * nx
-                    ball.vy -= 2 * dot * ny
-
-                    # Move ball out of collision
-                    overlap = ball_radius - distance
-                    ball.x += nx * overlap
-                    ball.y += ny * overlap
-
-                    # Update ball rectangle
-                    ball._update_rect()
-
-                    # Hit the block
-                    broken, block_points, effect = block.hit()
-
-                    # Handle the hit result
-                    if broken:
-                        points += block_points
-                        broken_blocks += 1
-                        self.blocks.remove(block)
-
-                        # If there was a special effect, add it to the effects list
-                        if effect is not None:
-                            effects.append(effect)
-
-                    # Handle special death blocks
-                    if effect == "death":
-                        # Death blocks cause ball loss
-                        ball.active = False
-
-                    # Only handle one collision per update to prevent double hits
-                    break
-
+        obj_x, obj_y = get_position()
+        obj_radius = radius
+        for block in self.blocks[:]:
+            if self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
+                if not is_bullet:
+                    self._reflect_ball(obj, obj_x, obj_y, block)
+                broken, block_points, effect = self._handle_block_hit(block)
+                if broken:
+                    points += block_points
+                    broken_blocks += 1
+                    self.blocks.remove(block)
+                    if effect is not None:
+                        effects.append(effect)
+                if is_bullet and remove_callback:
+                    remove_callback()
+                if effect == "death" and not is_bullet:
+                    obj.active = False
+                break
         return points, broken_blocks, effects
 
     def draw(self, surface: pygame.Surface) -> None:

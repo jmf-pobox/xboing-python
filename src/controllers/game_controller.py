@@ -7,6 +7,7 @@ import pygame
 
 from controllers.controller import Controller
 from engine.events import (
+    AmmoFiredEvent,
     ApplauseEvent,
     BallLostEvent,
     BallShotEvent,
@@ -26,6 +27,8 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball import Ball
 from game.ball_manager import BallManager
+from game.bullet import Bullet
+from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
@@ -61,6 +64,7 @@ class GameController(Controller):
         input_manager: InputManager,
         layout: GameLayout,
         renderer: Renderer,
+        bullet_manager: BulletManager,
     ) -> None:
         """Initialize the GameController.
 
@@ -74,6 +78,7 @@ class GameController(Controller):
             input_manager: The InputManager instance.
             layout: The GameLayout instance.
             renderer: The Renderer instance.
+            bullet_manager: The BulletManager instance for managing bullets.
 
         """
         self.game_state: GameState = game_state
@@ -88,6 +93,7 @@ class GameController(Controller):
         self._last_mouse_x: Optional[int] = None
         self.reverse: bool = False  # Reverse paddle control state
         self.sticky: bool = False  # Sticky paddle state
+        self.bullet_manager: BulletManager = bullet_manager
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -98,6 +104,33 @@ class GameController(Controller):
 
         """
         for event in events:
+            logger.debug(f"[handle_events] Event received: {event}")
+            # --- Section: Ammo Fired (K key) ---
+            if (
+                event.type == pygame.KEYDOWN
+                and event.key == pygame.K_k
+                and self.ball_manager.has_ball_in_play()
+            ) or (event.type == 1025 and self.ball_manager.has_ball_in_play()):
+                logger.debug(f"About to fire ammo via game_state: {self.game_state}")
+                changes = self.game_state.fire_ammo()
+                for change in changes:
+                    pygame.event.post(
+                        pygame.event.Event(pygame.USEREVENT, {"event": change})
+                    )
+                    if isinstance(change, AmmoFiredEvent):
+                        x, _ = self.paddle.get_center()
+                        play_rect = self.layout.get_play_rect()
+                        bullet_radius = 4
+                        y = self.paddle.rect.top - bullet_radius - 1
+                        logger.warning(f"Firing bullet at y={y}")
+                        logger.warning(
+                            f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
+                        )
+                        bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
+                        self.bullet_manager.add_bullet(bullet)
+            else:
+                logger.debug(f"No ammo fired. {self.ball_manager.has_ball_in_play()}")
+
             # --- Section: Mouse Button Down (Ball Launch) ---
             if event.type == 1025:
                 balls = self.ball_manager.balls
@@ -131,18 +164,6 @@ class GameController(Controller):
                         "[handle_events] not launching: not all balls stuck to paddle"
                     )
 
-            # --- Section: Ammo Fired (K key) ---
-            if (
-                event.type == pygame.KEYDOWN
-                and event.key == pygame.K_k
-                and self.ball_manager.has_ball_in_play()
-            ):
-                changes = self.game_state.fire_ammo()
-                for change in changes:
-                    pygame.event.post(
-                        pygame.event.Event(pygame.USEREVENT, {"event": change})
-                    )
-
             # --- Section: BallLostEvent Handling ---
             if event.type == pygame.USEREVENT and isinstance(
                 event.event, BallLostEvent
@@ -162,9 +183,11 @@ class GameController(Controller):
         self.handle_paddle_mouse_movement()
         self.update_blocks_and_timer(delta_ms)
         self.update_balls_and_collisions(delta_ms)
+        self.bullet_manager.update(delta_ms)
         self.check_level_complete()
         self.handle_debug_x_key()
 
+    # TODO: Issue #5 - bug: paddle operate via the j k l keys for left, fire, right actions.
     def handle_paddle_arrow_key_movement(self, delta_ms: float) -> None:
         """Handle paddle movement and input.
 
@@ -218,7 +241,7 @@ class GameController(Controller):
             self.post_game_state_events(changes)
 
     def update_balls_and_collisions(self, delta_ms: float) -> None:
-        """Update balls, check for collisions, and handle block effects.
+        """Update balls and bullets, check for collisions, and handle block effects.
 
         Args:
         ----
@@ -226,6 +249,30 @@ class GameController(Controller):
 
         """
         active_balls = []
+        # --- Bullet-block collision detection ---
+        active_bullets = []
+        for bullet in self.bullet_manager.bullets:
+            points, broken, effects = self.block_manager.check_collisions(bullet)
+            if points != 0:
+                changes = self.game_state.add_score(points)
+                self.post_game_state_events(changes)
+            if broken > 0 and not any(
+                effect in SPECIAL_BLOCK_TYPES for effect in effects
+            ):
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
+                )
+            for effect in effects:
+                if effect == SpriteBlock.TYPE_MAXAMMO:
+                    logger.debug("Max ammo block hit: adding ammo.")
+                    changes = self.game_state.add_ammo()
+                    self.post_game_state_events(changes)
+                # Add more bullet-specific effects as needed
+            if getattr(bullet, "active", True):
+                active_bullets.append(bullet)
+        self.bullet_manager._bullets[:] = active_bullets  # Update bullet list
+
+        # --- Ball-block collision detection ---
         for ball in self.ball_manager.balls:
             play_rect = self.layout.get_play_rect()
             is_active, hit_paddle, hit_wall = ball.update(

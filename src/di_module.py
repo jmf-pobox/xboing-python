@@ -1,5 +1,11 @@
-"""Dependency injection module definitions for XBoing."""
+"""Dependency injection registry for XBoing.
 
+Provides canonical, pre-initialized instances of all core game objects, managers, controllers, and UI components.
+All providers return the instance passed to __init__, ensuring singleton-like behavior and consistency throughout the app.
+No provider constructs or accepts dependencies as parameters; all are returned from instance variables.
+"""
+
+import logging
 from typing import Callable, Optional
 
 from injector import Module, provider
@@ -14,12 +20,14 @@ from engine.audio_manager import AudioManager
 from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball_manager import BallManager
+from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
 from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
+from renderers.bullet_renderer import BulletRenderer
 from renderers.digit_renderer import DigitRenderer
 from renderers.lives_renderer import LivesRenderer
 from ui.ammo_display import AmmoDisplayComponent
@@ -44,9 +52,11 @@ RIGHT_EDGE_X = 475
 
 
 class XBoingModule(Module):
-    """Dependency injection module for XBoing, providing all core controllers and views.
+    """Dependency injection registry for XBoing.
 
-    Binds game state, managers, controllers, UI, and callback dependencies for injection.
+    Provides canonical, pre-initialized instances of all core game objects, managers, controllers, and UI components.
+    All providers return the instance passed to __init__, ensuring singleton-like behavior and consistency throughout the app.
+    No provider constructs or accepts dependencies as parameters; all are returned from instance variables.
     """
 
     def __init__(
@@ -71,33 +81,10 @@ class XBoingModule(Module):
         instructions_text_font: pygame.font.Font,
         on_exit_callback: Optional[Callable[[], None]],
         input_manager: InputManager,
-    ):
-        """Initialize the XBoingModule with all dependencies for DI.
-
-        Args:
-        ----
-            game_state: The main GameState instance.
-            level_manager: The LevelManager instance.
-            ball_manager: The BallManager instance.
-            paddle: The Paddle instance.
-            block_manager: The SpriteBlockManager instance.
-            game_controller: The main GameController instance.
-            game_view: The main GameView instance.
-            layout: The GameLayout instance.
-            ui_manager: The UIManager instance.
-            audio_manager: The AudioManager instance.
-            quit_callback: Callback to quit the game.
-            get_score_callback: Callback to get the current score.
-            font: Main font for UI and overlays.
-            small_font: Secondary font for UI and overlays.
-            reset_game_callback: Callback to reset the game (optional).
-            instructions_font: Font for instructions view.
-            instructions_headline_font: Headline font for instructions view.
-            instructions_text_font: Text font for instructions view.
-            on_exit_callback: Callback to exit instructions (optional).
-            input_manager: The InputManager instance.
-
-        """
+        bullet_manager: BulletManager,
+        bullet_renderer: BulletRenderer,
+    ) -> None:
+        """Initialize the registry with all canonical game objects and managers."""
         self._game_state = game_state
         self._level_manager = level_manager
         self._ball_manager = ball_manager
@@ -118,28 +105,32 @@ class XBoingModule(Module):
         self._instructions_text_font = instructions_text_font
         self._on_exit_callback = on_exit_callback
         self._input_manager = input_manager
+        self._bullet_manager = bullet_manager
+        self._bullet_renderer = bullet_renderer
+        self._renderer = game_view.renderer
+        self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
+        self.logger.setLevel(logging.DEBUG)
 
-    # --- UI Providers ---
     @provider
     def provide_digit_renderer(self) -> DigitRenderer:
-        """Provide a DigitRenderer instance for digit rendering in the UI."""
+        """Return a DigitRenderer for digit rendering in the UI."""
         return DigitRenderer()
 
     @provider
     def provide_lives_renderer(self) -> LivesRenderer:
-        """Provide a LivesRenderer instance for rendering lives in the UI."""
+        """Return a LivesRenderer for rendering lives in the UI."""
         return LivesRenderer()
 
     @provider
     def provide_score_display(self, digit_renderer: DigitRenderer) -> ScoreDisplay:
-        """Provide a ScoreDisplay instance for the UI."""
+        """Return a ScoreDisplay for the UI."""
         return ScoreDisplay(self._layout, digit_renderer, x=70, width=6)
 
     @provider
     def provide_lives_display_component(
         self, lives_renderer: LivesRenderer
     ) -> LivesDisplayComponent:
-        """Provide a LivesDisplayComponent instance for the UI."""
+        """Return a LivesDisplayComponent for the UI."""
         max_lives = 3
         lives_surf = lives_renderer.render(
             max_lives, spacing=10, scale=1.0, max_lives=max_lives
@@ -151,7 +142,7 @@ class XBoingModule(Module):
 
     @provider
     def provide_ammo_renderer(self) -> AmmoRenderer:
-        """Provide an AmmoRenderer instance for rendering ammo in the UI."""
+        """Return an AmmoRenderer for rendering ammo in the UI."""
         return AmmoRenderer()
 
     @provider
@@ -161,7 +152,7 @@ class XBoingModule(Module):
         lives_display_component: LivesDisplayComponent,
         game_state: "GameState",
     ) -> AmmoDisplayComponent:
-        """Provide an AmmoDisplayComponent instance for the UI."""
+        """Return an AmmoDisplayComponent for the UI."""
         lives_y, lives_height = lives_display_component.get_y_and_height()
         max_lives = 3
         lives_surf = lives_display_component.lives_display_util.render(
@@ -182,24 +173,24 @@ class XBoingModule(Module):
 
     @provider
     def provide_level_display(self, digit_renderer: DigitRenderer) -> LevelDisplay:
-        """Provide a LevelDisplay instance for the UI."""
+        """Return a LevelDisplay for the UI."""
         return LevelDisplay(self._layout, digit_renderer, x=510)
 
     @provider
     def provide_timer_display(self) -> TimerDisplay:
-        """Provide a TimerDisplay instance for the UI."""
+        """Return a TimerDisplay for the UI."""
         ui_font = create_font(34)
         return TimerDisplay(self._layout, self._game_view.renderer, ui_font)
 
     @provider
     def provide_message_display(self) -> MessageDisplay:
-        """Provide a MessageDisplay instance for the UI."""
+        """Return a MessageDisplay for the UI."""
         message_font = create_font(28)
         return MessageDisplay(self._layout, self._game_view.renderer, message_font)
 
     @provider
     def provide_special_display(self) -> SpecialDisplay:
-        """Provide a SpecialDisplay instance for the UI."""
+        """Return a SpecialDisplay for the UI."""
         special_font = create_font(16)
         return SpecialDisplay(self._layout, self._game_view.renderer, special_font)
 
@@ -211,7 +202,7 @@ class XBoingModule(Module):
         level_display: LevelDisplay,
         ammo_display_component: AmmoDisplayComponent,
     ) -> TopBarView:
-        """Provide a TopBarView instance for the UI."""
+        """Return a TopBarView for the UI."""
         return TopBarView(
             score_display,
             lives_display_component,
@@ -226,23 +217,17 @@ class XBoingModule(Module):
         special_display: SpecialDisplay,
         timer_display: TimerDisplay,
     ) -> BottomBarView:
-        """Provide a BottomBarView instance for the UI."""
+        """Return a BottomBarView for the UI."""
         return BottomBarView(message_display, special_display, timer_display)
 
     @provider
     def provide_game_view(self) -> GameView:
-        """Provide a GameView instance for the main game display."""
-        return GameView(
-            self._layout,
-            self._block_manager,
-            self._paddle,
-            self._ball_manager,
-            self._game_view.renderer,
-        )
+        """Return the canonical GameView instance."""
+        return self._game_view
 
     @provider
     def provide_level_complete_view(self) -> LevelCompleteView:
-        """Provide a LevelCompleteView instance for the UI."""
+        """Return a LevelCompleteView for the UI."""
         font = self._font
         small_font = self._small_font
         return LevelCompleteView(
@@ -255,10 +240,9 @@ class XBoingModule(Module):
             on_advance_callback=None,  # To be set in main.py after instantiation
         )
 
-    # --- Existing controller/view providers ---
     @provider
     def provide_game_over_controller(self) -> GameOverController:
-        """Provide a GameOverController instance for handling game over state."""
+        """Return a GameOverController for handling game over state."""
         return GameOverController(
             game_state=self._game_state,
             level_manager=self._level_manager,
@@ -274,7 +258,7 @@ class XBoingModule(Module):
     def provide_game_over_view(
         self, game_over_controller: GameOverController
     ) -> GameOverView:
-        """Provide a GameOverView instance for the UI."""
+        """Return a GameOverView for the UI."""
         return GameOverView(
             layout=self._layout,
             renderer=self._game_view.renderer,
@@ -285,7 +269,7 @@ class XBoingModule(Module):
 
     @provider
     def provide_instructions_view(self) -> InstructionsView:
-        """Provide an InstructionsView instance for the UI."""
+        """Return an InstructionsView for the UI."""
         return InstructionsView(
             layout=self._layout,
             renderer=self._game_view.renderer,
@@ -296,7 +280,7 @@ class XBoingModule(Module):
 
     @provider
     def provide_instructions_controller(self) -> InstructionsController:
-        """Provide an InstructionsController instance for handling instructions view events."""
+        """Return an InstructionsController for handling instructions view events."""
         return InstructionsController(
             on_exit_callback=self._on_exit_callback,
             audio_manager=self._audio_manager,
@@ -304,44 +288,27 @@ class XBoingModule(Module):
             ui_manager=self._ui_manager,
         )
 
-    # --- Controller Providers ---
     @provider
-    def provide_game_controller(
-        self,
-        game_state: GameState,
-        level_manager: LevelManager,
-        ball_manager: BallManager,
-        paddle: Paddle,
-        block_manager: SpriteBlockManager,
-        input_manager: InputManager,
-        layout: GameLayout,
-        renderer: Renderer,
-    ) -> GameController:
-        """Provide a GameController instance for main gameplay logic."""
-        return GameController(
-            game_state,
-            level_manager,
-            ball_manager,
-            paddle,
-            block_manager,
-            input_manager=input_manager,
-            layout=layout,
-            renderer=renderer,
+    def provide_game_controller(self) -> GameController:
+        """Return the canonical GameController instance."""
+        self.logger.debug(
+            f"BulletManager id in GameController: {id(self._bullet_manager)}"
         )
+        return self._game_controller
 
     @provider
     def provide_level_complete_controller(
         self,
         game_view: GameView,
     ) -> LevelCompleteController:
-        """Provide a LevelCompleteController instance for handling level completion logic."""
+        """Return a LevelCompleteController for handling level completion logic."""
         return LevelCompleteController(
             self._game_state,
             self._level_manager,
             self._ball_manager.balls,
             self._game_controller,
             self._ui_manager,
-            game_view,  # Use the injected GameView
+            self._game_view,
             self._layout,
             on_advance_callback=None,  # To be set in main.py after instantiation
             audio_manager=self._audio_manager,
@@ -356,63 +323,76 @@ class XBoingModule(Module):
         level_complete_controller: LevelCompleteController,
         game_over_controller: GameOverController,
     ) -> ControllerManager:
-        """Provide a ControllerManager instance for managing controllers."""
+        """Return a ControllerManager for managing controllers and breaking DI cycles.
+
+        This method wires up all controllers, registers them, and sets the initial controller.
+        It also sets the controller_manager on game_over_controller to break the DI cycle.
+        """
         manager = ControllerManager()
         manager.register_controller("game", game_controller)
         manager.register_controller("instructions", instructions_controller)
         manager.register_controller("level_complete", level_complete_controller)
         manager.register_controller("game_over", game_over_controller)
         manager.set_controller("game")
-        # Set controller_manager on game_over_controller to break DI cycle
         game_over_controller.controller_manager = manager
         return manager
 
     @provider
     def provide_game_state(self) -> GameState:
-        """Provide the main GameState instance."""
+        """Return the canonical GameState instance."""
         return self._game_state
 
     @provider
     def provide_level_manager(self) -> LevelManager:
-        """Provide the LevelManager instance."""
+        """Return the canonical LevelManager instance."""
         return self._level_manager
 
     @provider
     def provide_ball_manager(self) -> BallManager:
-        """Provide the BallManager instance."""
+        """Return the canonical BallManager instance."""
         return self._ball_manager
 
     @provider
     def provide_paddle(self) -> Paddle:
-        """Provide the Paddle instance."""
+        """Return the canonical Paddle instance."""
         return self._paddle
 
     @provider
     def provide_block_manager(self) -> SpriteBlockManager:
-        """Provide the SpriteBlockManager instance."""
+        """Return the canonical SpriteBlockManager instance."""
         return self._block_manager
 
     @provider
     def provide_game_layout(self) -> GameLayout:
-        """Provide the GameLayout instance."""
+        """Return the canonical GameLayout instance."""
         return self._layout
 
     @provider
     def provide_renderer(self) -> Renderer:
-        """Provide the Renderer instance."""
-        return self._game_view.renderer
+        """Return the canonical Renderer instance."""
+        return self._renderer
 
     @provider
     def provide_input_manager(self) -> InputManager:
-        """Provide the InputManager instance."""
+        """Return the canonical InputManager instance."""
         return self._input_manager
 
     @provider
     def provide_audio_manager(self) -> AudioManager:
-        """Provide the AudioManager instance."""
-        return AudioManager(sound_dir=self._audio_manager.sound_dir)
+        """Return the canonical AudioManager instance."""
+        return self._audio_manager
 
     @provider
     def provide_ui_manager(self) -> UIManager:
-        """Provide the UIManager instance."""
+        """Return the canonical UIManager instance."""
         return self._ui_manager
+
+    @provider
+    def provide_bullet_manager(self) -> BulletManager:
+        """Return the canonical BulletManager instance."""
+        return self._bullet_manager
+
+    @provider
+    def provide_bullet_renderer(self) -> BulletRenderer:
+        """Return the canonical BulletRenderer instance."""
+        return self._bullet_renderer
