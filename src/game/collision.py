@@ -1,5 +1,7 @@
 """Collision detection system for XBoing.
 
+TODO: This is not used anymore, but we should refactor the existing code to use this after updating it properly.
+
 This module provides a centralized collision detection system
 that handles interactions between game objects.
 """
