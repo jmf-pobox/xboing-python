@@ -54,7 +54,13 @@ def normalize_wav(input_file: Path, output_file: Path) -> bool:
         return False
 
 
+def normalize_audio_file(input_path: str, output_path: str) -> None:
+    """Normalize the audio file at input_path and save the result to output_path."""
+    # ... existing code ...
+
+
 def main():
+    """Parse arguments and normalize all .wav files in the input directory."""
     parser = argparse.ArgumentParser(
         description="Normalize loudness of .wav files in a directory."
     )
