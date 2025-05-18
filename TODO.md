@@ -20,4 +20,27 @@
     - Add a build script or Makefile target for building the executable.
     - Test the generated executable on supported platforms (macOS, Windows, Linux).
     - Update documentation (e.g., PYINSTALLER-GUIDE.md, README.md) with build and usage instructions.
--
+- [ ] Investigate DeprecationWarning from pygame/pkgdata.py about pkg_resources being deprecated. Current analysis: This warning appears to be triggered by test code using `pygame.font.Font(None, ...)`, which loads the default font and causes pygame to use its internal resource loader (which uses pkg_resources). User is not convinced this is the root cause; further investigation may be needed.
+- [ ] Paddle Gun Feature Implementation (Phased)
+    - [ ] Phase 1: Ammo State, Events, UI, and Sound Effects (No Bullets Yet)
+        - [x] Add ammo (bullet count) state to GameState
+        - [x] Add guard clause to prevent paddle gun from firing unless a ball is in play (GameController)
+        - [x] Implement events for ammo shot
+        - [x] Play sound effects for shot fired
+        - [x] Create UI component to display ammo count
+        - [ ] Implement events for ammo collected
+        - [ ] Play sound effects for ammo collection
+        - [ ] Add unit tests for all of the above
+    - [ ] Phase 2: Machine Gun Block State and UI (No Bullets Yet)
+        - [ ] Add machine gun mode state (boolean/timer)
+        - [ ] Add logic to activate/deactivate machine gun mode
+        - [ ] Add UI indicator for machine gun mode
+        - [ ] Add unit tests for all of the above
+    - [ ] Phase 3: Bullet/Projectile Logic
+        - [ ] Implement bullet creation, movement, and removal
+        - [ ] Integrate bullet updates into the game loop
+        - [ ] Implement bullet collision with blocks, balls, and enemies
+        - [ ] Add unit tests for all of the above
+    - [ ] Phase 4: Integration and Polish
+        - [ ] Integrate all features and ensure smooth interaction between state, UI, sound, and bullet logic
+        - [ ] Add/expand integration tests
