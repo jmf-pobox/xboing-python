@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/xboing_docs_logo.png" alt="XBoing Logo" width="479" height="75">
+  <img src="assets/images/xboing_docs_logo.png" alt="XBoing Logo">
 </p>
 
 # XBoing II (Python port)
