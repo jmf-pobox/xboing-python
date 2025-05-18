@@ -29,7 +29,7 @@ Originally developed for X11 in C, XBoing was designed for speed and fun, with a
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/xboing-py.git
+git clone https://github.com/jmf-pobox/xboing-py.git
 cd xboing-py
 
 # Create a virtual environment
@@ -117,7 +117,7 @@ The game uses assets from the original XBoing converted to modern formats:
 
 Use `scripts/sync_assets.py` to synchronize assets from the original XBoing directory.
 
-### Development Tools
+### Asset Migration Tools
 
 ```bash
 # Run tests
@@ -142,7 +142,7 @@ python scripts/fix_balllost.py
 python scripts/dep_grep.py <search_term>
 ```
 
-### Documentation
+### Design Documentation
 
 See the `docs/` directory for detailed information:
 - [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
