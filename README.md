@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/xboing.png" alt="XBoing Logo" width="479" height="75">
+  <img src="assets/images/xboing_docs_logo.png" alt="XBoing Logo" width="479" height="75">
 </p>
 
 # XBoing II (Python port)
@@ -23,7 +23,7 @@ XBoing is a fast-paced, blockout-style arcade game where you control a paddle to
 - Classic arcade-style gameplay with modern conveniences
 - Addictive, skill-based action that rewards quick reflexes and strategy
 
-Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern improvements and compatibility.
+Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern compatibility.
 
 ### Installation & Playing
 
@@ -82,20 +82,6 @@ The game is fully playable, with most core features implemented and tested. Rema
 
 ## 💻 For Developers
 
-### Project Status
-
-This Python port is currently in active development. Current features:
-- ✅ Full conversion of all original XBoing assets
-- ✅ Level loading system that reads original level files
-- ✅ Block implementation with proper behaviors
-- ✅ Basic ball physics and collision detection
-- ✅ Paddle movement and control
-- ✅ Audio system for sound effects
-- ✅ Background cycling between levels
-- 🚧 Special power-ups and effects (partially implemented)
-- 🚧 Game state management and transitions
-- 🚧 Score tracking and high scores
-
 ### Project Structure
 
 ```
@@ -138,13 +124,22 @@ Use `scripts/sync_assets.py` to synchronize assets from the original XBoing dire
 python -m pytest
 
 # Convert XPM to PNG (for new assets)
-python scripts/better_xpm_converter.py path/to/image.xpm output.png
+python scripts/convert_xpm_to_png.py path/to/image.xpm output.png
 
 # Convert AU to WAV (for new sounds)
-python scripts/convert_audio.py path/to/sound.au output.wav
+python scripts/convert_au_to_wav.py path/to/sound.au output.wav
 
-# Sync all assets from original XBoing
-python scripts/sync_assets.py
+# Normalize all audio files in the assets directory
+python scripts/normalize_audio.py
+
+# Fix background images (formatting, transparency, etc.)
+python scripts/fix_background.py
+
+# Fix ball lost sound or related assets
+python scripts/fix_balllost.py
+
+# Search dependencies in the codebase
+python scripts/dep_grep.py <search_term>
 ```
 
 ### Documentation
@@ -186,17 +181,7 @@ This project is licensed under the same terms as the original XBoing - see the L
 
 ## Original Source
 
-The original source code is available in the subdirectory: xboing2.4-clang
-
-## Building a Standalone Executable
-
-You can build a standalone executable for XBoing using PyInstaller:
-
-1. Install PyInstaller: `pip install pyinstaller`
-2. Run the build script: `python scripts/build_executable.py`
-3. The executable will be in the `dist/` directory.
-
-See [docs/PYINSTALLER-GUIDE.md](docs/PYINSTALLER-GUIDE.md) for full details and troubleshooting.
+The original source code is available at: https://www.techrescue.org/xboing/xboing2.4.tar.gz
 
 ## Commit Message Standard
 
