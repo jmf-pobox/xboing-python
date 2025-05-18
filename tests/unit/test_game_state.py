@@ -4,6 +4,7 @@ import pygame
 import pytest
 
 from engine.events import (
+    AmmoFiredEvent,
     GameOverEvent,
     LevelChangedEvent,
     LivesChangedEvent,
@@ -125,3 +126,48 @@ def test_game_over_event(game_state):
     # Should return empty list if setting to False or no change
     changes = state.set_game_over(False)
     assert changes == []
+
+
+def test_ammo_initial_and_fire(game_state):
+    state, _ = game_state
+    # Initial ammo should be 4
+    assert state.ammo == 4
+    # Firing ammo decrements and emits event
+    changes = state.fire_ammo()
+    assert state.ammo == 3
+    assert len(changes) == 1
+    assert isinstance(changes[0], AmmoFiredEvent)
+    assert changes[0].ammo == 3
+    # Firing until empty
+    state.ammo = 1
+    changes = state.fire_ammo()
+    assert state.ammo == 0
+    assert len(changes) == 1
+    changes = state.fire_ammo()
+    assert state.ammo == 0
+    assert changes == []
+
+
+def test_ammo_reset_on_restart(game_state):
+    state, _ = game_state
+    state.ammo = 0
+    state.restart()
+    assert state.ammo == 4
+
+
+def test_ammo_reset_on_full_restart(game_state):
+    state, _ = game_state
+    state.ammo = 0
+
+    class DummyLevelManager:
+        def get_time_remaining(self):
+            return 0
+
+        def get_level_info(self):
+            return {"title": "foo"}
+
+        def load_level(self, lvl):
+            pass
+
+    state.full_restart(DummyLevelManager())
+    assert state.ammo == 4

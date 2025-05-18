@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import pygame
 
 from engine.audio_manager import AudioManager
-from engine.events import XBoingEvent
+from engine.events import AmmoFiredEvent, XBoingEvent
 
 
 class BallLostEvent(XBoingEvent):
@@ -102,3 +102,13 @@ def test_unsubscribed_event_does_not_play(monkeypatch):
     mgr.handle_events([event])
 
     fake_sound.play.assert_not_called()
+
+
+def test_ammo_fired_event_triggers_sound(monkeypatch):
+    mgr = make_manager()
+    fake_sound = MagicMock()
+    mgr.sounds["shoot"] = fake_sound
+    mgr.muted = False
+    event = pygame.event.Event(pygame.USEREVENT, {"event": AmmoFiredEvent(3)})
+    mgr.handle_events([event])
+    fake_sound.play.assert_called_once()

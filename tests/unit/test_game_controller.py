@@ -999,3 +999,59 @@ def test_ball_releases_from_paddle():
     ball.paddle_offset = 0.0
     ball.release_from_paddle()
     assert ball.stuck_to_paddle is False
+
+
+def test_ammo_fires_only_with_ball_in_play():
+    game_state = Mock()
+    game_state.fire_ammo.return_value = [Mock()]
+    level_manager = Mock()
+    paddle = Mock()
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    ball_manager = Mock()
+    ball_manager.has_ball_in_play.return_value = True
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        event = make_key_event(pygame.K_k)
+        controller.handle_events([event])
+        game_state.fire_ammo.assert_called_once()
+        assert mock_post.called
+
+
+def test_ammo_does_not_fire_without_ball_in_play():
+    game_state = Mock()
+    game_state.fire_ammo.return_value = [Mock()]
+    level_manager = Mock()
+    paddle = Mock()
+    block_manager = Mock()
+    renderer = Mock()
+    input_manager = Mock()
+    layout = Mock()
+    ball_manager = Mock()
+    ball_manager.has_ball_in_play.return_value = False
+    controller = GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+    )
+    with patch("pygame.event.post") as mock_post:
+        event = make_key_event(pygame.K_k)
+        controller.handle_events([event])
+        game_state.fire_ammo.assert_not_called()
+        assert not mock_post.called

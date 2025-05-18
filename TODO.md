@@ -28,6 +28,12 @@
         - [x] Implement events for ammo shot
         - [x] Play sound effects for shot fired
         - [x] Create UI component to display ammo count
+        - [ ] Add or update unit test coverage for:
+            - src/ui/ammo_display.py (UI updates on events, correct display)
+            - src/renderers/ammo_renderer.py (rendering logic, edge cases)
+            - src/game/game_state.py (ammo state, fire_ammo logic, reset)
+            - src/di_module.py (DI setup for ammo components)
+            - src/controllers/game_controller.py (guard clause, event firing)
         - [ ] Implement events for ammo collected
         - [ ] Play sound effects for ammo collection
         - [ ] Add unit tests for all of the above
