@@ -27,20 +27,38 @@ Originally developed for X11 in C, XBoing was designed for speed and fun, with a
 
 ### Installation & Playing
 
+### 1. Install Hatch (if you don't have it)
 ```bash
-# Clone the repository
-git clone https://github.com/jmf-pobox/xboing-py.git
-cd xboing-py
+pip install --user hatch
+# or
+pipx install hatch
+# or
+brew install hatch
+```
 
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### 2. Clone the repository
+```bash
+git clone https://github.com/jmf-pobox/xboing-python.git
+cd xboing-python
+```
 
-# Install dependencies
-pip install -r requirements.txt
+### 3. Create and activate the environment
+```bash
+hatch shell
+```
 
-# Run the game
-python src/main.py
+### 4. Run the game
+```bash
+hatch run game
+# or, inside the hatch shell:
+python -m xboing
+```
+
+#### Advanced: Manual pip install (not recommended)
+If you prefer not to use Hatch, you can manually install runtime dependencies:
+```bash
+pip install pygame injector
+python -m xboing
 ```
 
 ### Game Controls
@@ -121,7 +139,7 @@ Use `scripts/sync_assets.py` to synchronize assets from the original XBoing dire
 
 ```bash
 # Run tests
-python -m pytest
+hatch run test
 
 # Convert XPM to PNG (for new assets)
 python scripts/convert_xpm_to_png.py path/to/image.xpm output.png

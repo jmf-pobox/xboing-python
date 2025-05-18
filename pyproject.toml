@@ -34,7 +34,7 @@ classifiers = [
 "Bug Tracker" = "https://github.com/jmf-pobox/xboing-python/issues"
 
 [project.scripts]
-xboing = "main:main"
+xboing = "xboing:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
@@ -71,7 +71,7 @@ path = ".venv"
 [tool.hatch.envs.default.scripts]
 test = "pytest tests/unit"
 cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
-game = "python -m src.main"
+game = "python -m xboing"
 # Code quality commands
 lint = "ruff check src/ tests/"
 fmt = [
@@ -105,6 +105,7 @@ cov-game-html = [
   "coverage run --source=src -m xboing",
   "coverage html"
 ]
+format-check = "black --check src/ tests/ scripts/"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
