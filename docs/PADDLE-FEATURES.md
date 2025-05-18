@@ -35,9 +35,20 @@ This document tracks the status and design of paddle-related features in the Pyt
 - **Original C Game:**
   - Implemented in `paddle.c` and `gun.c` (see `gunOn`, `gunOff`, and projectile logic).
   - Paddle fires bullets upward from its position; firing is limited by a timer or number of shots, depending on the powerup.
-- **Python Status:** Missing
-- **Feature Gap:** Gun state, firing logic, projectile collisions, and related UI/sound events are not yet implemented.
-- **Next Steps:** Implement gun state, firing, projectile collisions, and events for UI/sound. **This is the next major paddle feature to implement.**
+  - **Block explosion animations:** Each block type explodes with its own animation (e.g., purple blocks use `expurp[1-3].png`). In the Python port, the same animation is used for both ball and bullet hits. See [GitHub Issue #6](https://github.com/jmf-pobox/xboing-python/issues/6).
+- **Python Status:**
+  - **Ammo state, events, UI, and sound effects:** Complete.
+  - **Bullet creation, movement, and removal:** Complete.
+  - **Bullet rendering (with sprite):** Complete.
+  - **Bullet-block collision detection:** Complete and integrated.
+  - **DI/registry pattern and architecture:** Complete.
+  - **Tests:** Implemented for most logic; coverage can be improved.
+  - **Block explosion animations:** Currently, the same animation is used for both ball and bullet hits. Custom per-block-type explosion animations (as in the C version) are not yet implemented ([issue #6](https://github.com/jmf-pobox/xboing-python/issues/6)).
+  - **Machine gun powerup:** Not yet implemented.
+- **Next Steps:**
+  - Implement custom block explosion animations for bullet and ball hits (see [issue #6](https://github.com/jmf-pobox/xboing-python/issues/6)).
+  - Implement the machine gun powerup (state, UI, firing logic).
+  - Increase test coverage for all paddle gun logic and edge cases.
 
 ---
 
@@ -74,30 +85,31 @@ This document tracks the status and design of paddle-related features in the Pyt
 ## Implementation Plan (Phased Approach)
 
 ### Phase 1: Ammo State, Events, UI, and Sound Effects (No Bullets Yet)
-- Add ammo (bullet count) state to paddle/player.
-- Implement events for ammo collected (e.g., Max Ammo block) and ammo used (shot fired).
-- Create a UI component to display current ammo count; update in response to state/events.
-- Play sound effects for ammo collection and shot fired (even if no bullet is created yet).
-- Add unit tests for all of the above.
+- Add ammo (bullet count) state to paddle/player. **[Done]**
+- Implement events for ammo collected (e.g., Max Ammo block) and ammo used (shot fired). **[Done]**
+- Create a UI component to display current ammo count; update in response to state/events. **[Done]**
+- Play sound effects for ammo collection and shot fired (even if no bullet is created yet). **[Done]**
+- Add unit tests for all of the above. **[Done]**
 
 ### Phase 2: Machine Gun Block State and UI (No Bullets Yet)
-- Add machine gun mode state (boolean/timer).
+- Add machine gun mode state (boolean/timer). **[Not started]**
 - Add logic to activate/deactivate machine gun mode.
 - Add UI indicator for machine gun mode.
 - Add unit tests for all of the above.
 
 ### Phase 3: Bullet/Projectile Logic
-- Implement bullet creation, movement, and removal.
-- Integrate bullet updates into the game loop.
-- Implement bullet collision with blocks, balls, and enemies.
-- Add unit tests for all of the above.
+- Implement bullet creation, movement, and removal. **[Done]**
+- Integrate bullet updates into the game loop. **[Done]**
+- Implement bullet collision with blocks, balls, and enemies. **[Done for blocks; not needed for balls/enemies yet]**
+- Add unit tests for all of the above. **[Partial; needs more coverage]**
 
 ### Phase 4: Integration and Polish
-- Integrate all features and ensure smooth interaction between state, UI, sound, and bullet logic.
-- Add/expand integration tests.
+- Integrate all features and ensure smooth interaction between state, UI, sound, and bullet logic. **[In progress]**
+- Add/expand integration tests. **[Next step]**
 
 ---
 
 ## References
 - `xboing2.4-clang/paddle.c`, `xboing2.4-clang/gun.c`, `xboing2.4-clang/draw.c`, `xboing2.4-clang/special_display.c`, `xboing2.4-clang/audio.c`, `xboing2.4-clang/main.c`
-- See also: [docs/xboing2.4/README](README) 
+- See also: [docs/xboing2.4/README](README)
+- [GitHub Issue #6: Exloding blocks do not use custom animations as per original C version.](https://github.com/jmf-pobox/xboing-python/issues/6) 
