@@ -23,12 +23,12 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from engine.window import Window
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.game_setup import create_game_objects
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 from renderers.bullet_renderer import BulletRenderer
 from ui.bottom_bar_view import BottomBarView
@@ -44,7 +44,7 @@ from utils.asset_paths import get_asset_path, get_sounds_dir
 from utils.logging_config import setup_logging
 
 # Setup logging
-setup_logging(logging.INFO)
+setup_logging(logging.DEBUG)
 
 # Game constants - matching the original XBoing dimensions
 PLAY_WIDTH: int = 495  # Original game's play area width
@@ -84,7 +84,7 @@ class XBoingApp:
     layout: GameLayout
     paddle: Paddle
     ball_manager: BallManager
-    block_manager: SpriteBlockManager
+    block_manager: BlockManager
     level_manager: LevelManager
     bullet_manager: BulletManager
     bullet_renderer: BulletRenderer

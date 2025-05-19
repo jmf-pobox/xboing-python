@@ -20,11 +20,11 @@ from engine.audio_manager import AudioManager
 from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import MAX_AMMO, AmmoRenderer
 from renderers.bullet_renderer import BulletRenderer
@@ -65,7 +65,7 @@ class XBoingModule(Module):
         level_manager: LevelManager,
         ball_manager: BallManager,
         paddle: Paddle,
-        block_manager: SpriteBlockManager,
+        block_manager: BlockManager,
         game_controller: GameController,
         game_view: GameView,
         layout: GameLayout,
@@ -358,8 +358,8 @@ class XBoingModule(Module):
         return self._paddle
 
     @provider
-    def provide_block_manager(self) -> SpriteBlockManager:
-        """Return the canonical SpriteBlockManager instance."""
+    def provide_block_manager(self) -> BlockManager:
+        """Return the canonical BlockManager instance."""
         return self._block_manager
 
     @provider

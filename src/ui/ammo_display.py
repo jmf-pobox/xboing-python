@@ -66,8 +66,5 @@ class AmmoDisplayComponent:
         # Right-align ammo with lives display
         x = self.lives_x + self.lives_width - ammo_surf.get_width()
         y = self.lives_y + self.lives_height + 2  # 2px gap below lives
-        self.logger.debug(
-            f"Ammo display: x={self.lives_x}, width={self.lives_width}, y={self.lives_y}, height={self.lives_height}, ammo={self.ammo}"
-        )
         self.logger.debug(f"Ammo display: x={x}, width={ammo_surf.get_width()}, y={y}")
         surface.blit(ammo_surf, (x, y))

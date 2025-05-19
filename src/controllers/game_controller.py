@@ -27,12 +27,25 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball import Ball
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
+from game.block_types import (
+    BOMB_BLK,
+    BULLET_BLK,
+    EXTRABALL_BLK,
+    MAXAMMO_BLK,
+    MULTIBALL_BLK,
+    PAD_EXPAND_BLK,
+    PAD_SHRINK_BLK,
+    REVERSE_BLK,
+    SPECIAL_BLOCK_TYPES,
+    STICKY_BLK,
+    TIMER_BLK,
+)
 from game.bullet import Bullet
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlock, SpriteBlockManager
 from layout.game_layout import GameLayout
 
 logger = logging.getLogger(__name__)
@@ -60,7 +73,7 @@ class GameController(Controller):
         level_manager: LevelManager,
         ball_manager: BallManager,
         paddle: Paddle,
-        block_manager: SpriteBlockManager,
+        block_manager: BlockManager,
         input_manager: InputManager,
         layout: GameLayout,
         renderer: Renderer,
@@ -74,7 +87,7 @@ class GameController(Controller):
             level_manager: The LevelManager instance.
             ball_manager: The BallManager instance for managing balls.
             paddle: The Paddle instance.
-            block_manager: The SpriteBlockManager instance.
+            block_manager: The BlockManager instance.
             input_manager: The InputManager instance.
             layout: The GameLayout instance.
             renderer: The Renderer instance.
@@ -85,7 +98,7 @@ class GameController(Controller):
         self.level_manager: LevelManager = level_manager
         self.ball_manager: BallManager = ball_manager
         self.paddle: Paddle = paddle
-        self.block_manager: SpriteBlockManager = block_manager
+        self.block_manager: BlockManager = block_manager
         self.input_manager: InputManager = input_manager
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
@@ -242,16 +255,18 @@ class GameController(Controller):
 
     def _handle_block_effects(self, effects, ball=None, bullet=None):
         """Handle special block effects for both balls and bullets."""
+        logger.debug(f"Handling block effects: len = {len(effects)}")
         for effect in effects:
-            if effect == SpriteBlock.TYPE_BULLET:
+            logger.debug(f"Handling block effect: {effect}")
+            if effect == BULLET_BLK:
                 logger.debug("Bulletblock hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
-            elif effect == SpriteBlock.TYPE_MAXAMMO:
+            elif effect == MAXAMMO_BLK:
                 logger.debug("Max ammo block hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
-            elif effect == SpriteBlock.TYPE_EXTRABALL and ball is not None:
+            elif effect == EXTRABALL_BLK and ball is not None:
                 new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                 new_ball.vx = -ball.vx
                 new_ball.vy = ball.vy
@@ -261,7 +276,7 @@ class GameController(Controller):
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_MULTIBALL and ball is not None:
+            elif effect == MULTIBALL_BLK and ball is not None:
                 for _ in range(2):
                     new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                     speed = (ball.vx**2 + ball.vy**2) ** 0.5
@@ -273,11 +288,11 @@ class GameController(Controller):
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_BOMB:
+            elif effect == BOMB_BLK:
                 pygame.event.post(
                     pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
                 )
-            elif effect == SpriteBlock.TYPE_PAD_EXPAND:
+            elif effect == PAD_EXPAND_BLK:
                 old_size = self.paddle.size
                 if old_size < Paddle.SIZE_LARGE:
                     self.paddle.set_size(old_size + 1)
@@ -305,7 +320,7 @@ class GameController(Controller):
                             {"event": PaddleGrowEvent(self.paddle.width, at_max=True)},
                         )
                     )
-            elif effect == SpriteBlock.TYPE_PAD_SHRINK:
+            elif effect == PAD_SHRINK_BLK:
                 old_size = self.paddle.size
                 if old_size > Paddle.SIZE_SMALL:
                     self.paddle.set_size(old_size - 1)
@@ -337,14 +352,14 @@ class GameController(Controller):
                             },
                         )
                     )
-            elif effect == SpriteBlock.TYPE_TIMER:
+            elif effect == TIMER_BLK:
                 self.level_manager.add_time(20)
                 pygame.event.post(
                     pygame.event.Event(
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_REVERSE:
+            elif effect == REVERSE_BLK:
                 self.toggle_reverse()
                 pygame.event.post(
                     pygame.event.Event(
@@ -352,7 +367,7 @@ class GameController(Controller):
                         {"event": SpecialReverseChangedEvent(self.reverse)},
                     )
                 )
-            elif effect == SpriteBlock.TYPE_STICKY:
+            elif effect == STICKY_BLK:
                 logger.debug("Sticky block hit: enabling sticky paddle mode.")
                 self.enable_sticky()
 
@@ -604,17 +619,3 @@ class GameController(Controller):
     def on_new_level_loaded(self) -> None:
         """Call this when a new level is loaded to reset sticky state."""
         self.disable_sticky()
-
-
-# Define the set of special block types
-SPECIAL_BLOCK_TYPES = {
-    SpriteBlock.TYPE_PAD_EXPAND,
-    SpriteBlock.TYPE_PAD_SHRINK,
-    SpriteBlock.TYPE_STICKY,
-    SpriteBlock.TYPE_REVERSE,
-    SpriteBlock.TYPE_TIMER,
-    SpriteBlock.TYPE_BOMB,
-    SpriteBlock.TYPE_EXTRABALL,
-    SpriteBlock.TYPE_MULTIBALL,
-    # Add any other special types as needed
-}

@@ -97,7 +97,7 @@ class Ball:
         # Main ball animation state
         self.anim_frame: int = 0
         self.anim_counter: float = 0.0
-        self.ANIM_FRAME_MS: float = 81.0
+        self.anim_frame_ms = 100  # Animation frame duration in ms (was ANIM_FRAME_MS)
 
         # Ensure sprites are loaded
         if Ball.sprites is None:
@@ -143,8 +143,8 @@ class Ball:
             and len(Ball.sprites) > 1
         ):
             self.anim_counter += delta_ms
-            if self.anim_counter >= self.ANIM_FRAME_MS:
-                self.anim_counter -= self.ANIM_FRAME_MS
+            if self.anim_counter >= self.anim_frame_ms:
+                self.anim_counter -= self.anim_frame_ms
                 self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
 
         if not self.active:

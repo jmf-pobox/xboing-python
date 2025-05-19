@@ -1,14 +1,40 @@
 """Level Manager for XBoing.
 
 This module handles loading, parsing, and managing XBoing level files.
-It interfaces with the SpriteBlockManager to create the appropriate block layout.
+It interfaces with the BlockManager to create the appropriate block layout.
 """
 
 import logging
 import os
 from typing import Any, Dict, List, Optional
 
-from game.sprite_block import SpriteBlock
+from game.block_types import (
+    BLACK_BLK,
+    BLUE_BLK,
+    BOMB_BLK,
+    BULLET_BLK,
+    COUNTER_BLK,
+    DEATH_BLK,
+    DROP_BLK,
+    EXTRABALL_BLK,
+    GREEN_BLK,
+    HYPERSPACE_BLK,
+    MAXAMMO_BLK,
+    MGUN_BLK,
+    MULTIBALL_BLK,
+    PAD_EXPAND_BLK,
+    PAD_SHRINK_BLK,
+    PURPLE_BLK,
+    RANDOM_BLK,
+    RED_BLK,
+    REVERSE_BLK,
+    ROAMER_BLK,
+    STICKY_BLK,
+    TAN_BLK,
+    TIMER_BLK,
+    WALLOFF_BLK,
+    YELLOW_BLK,
+)
 from utils.asset_paths import get_levels_dir
 
 
@@ -30,41 +56,41 @@ class LevelManager:
     BACKGROUND_4 = 8
     BACKGROUND_5 = 9
 
-    # Map level file characters to SpriteBlock types
+    # Map level file characters to canonical block type keys
     CHAR_TO_BLOCK_TYPE = {
         ".": None,  # Empty space (don't create a block)
         " ": None,  # Also empty space
         "\n": None,  # Newline character (don't create a block)
-        "r": SpriteBlock.TYPE_RED,  # Red block
-        "g": SpriteBlock.TYPE_GREEN,  # Green block
-        "b": SpriteBlock.TYPE_BLUE,  # Blue block
-        "t": SpriteBlock.TYPE_TAN,  # Tan block
-        "y": SpriteBlock.TYPE_YELLOW,  # Yellow block
-        "p": SpriteBlock.TYPE_PURPLE,  # Purple block
-        "w": SpriteBlock.TYPE_BLACK,  # Black/wall block
-        "X": SpriteBlock.TYPE_BOMB,  # Bomb block
-        "0": SpriteBlock.TYPE_COUNTER,  # Counter block (0 hits)
-        "1": SpriteBlock.TYPE_COUNTER,  # Counter block (1 hit)
-        "2": SpriteBlock.TYPE_COUNTER,  # Counter block (2 hits)
-        "3": SpriteBlock.TYPE_COUNTER,  # Counter block (3 hits)
-        "4": SpriteBlock.TYPE_COUNTER,  # Counter block (4 hits)
-        "5": SpriteBlock.TYPE_COUNTER,  # Counter block (5 hits)
-        "B": SpriteBlock.TYPE_BULLET,  # Bullet block
-        "c": SpriteBlock.TYPE_MAXAMMO,  # Max ammo block
-        "H": SpriteBlock.TYPE_HYPERSPACE,  # Hyperspace block
-        "D": SpriteBlock.TYPE_DEATH,  # Death block
-        "L": SpriteBlock.TYPE_EXTRABALL,  # Extra ball block
-        "M": SpriteBlock.TYPE_MGUN,  # Machine gun block
-        "W": SpriteBlock.TYPE_WALLOFF,  # Wall off block
-        "?": SpriteBlock.TYPE_RANDOM,  # Random block
-        "d": SpriteBlock.TYPE_DROP,  # Drop block
-        "T": SpriteBlock.TYPE_TIMER,  # Timer block
-        "m": SpriteBlock.TYPE_MULTIBALL,  # Multiball block
-        "s": SpriteBlock.TYPE_STICKY,  # Sticky block
-        "R": SpriteBlock.TYPE_REVERSE,  # Reverse paddle control block
-        "<": SpriteBlock.TYPE_PAD_SHRINK,  # Shrink paddle block
-        ">": SpriteBlock.TYPE_PAD_EXPAND,  # Expand paddle block
-        "+": SpriteBlock.TYPE_ROAMER,  # Roamer block
+        "r": RED_BLK,  # Red block
+        "g": GREEN_BLK,  # Green block
+        "b": BLUE_BLK,  # Blue block
+        "t": TAN_BLK,  # Tan block
+        "y": YELLOW_BLK,  # Yellow block
+        "p": PURPLE_BLK,  # Purple block
+        "w": BLACK_BLK,  # Black/wall block
+        "X": BOMB_BLK,  # Bomb block
+        "0": COUNTER_BLK,  # Counter block (0 hits)
+        "1": COUNTER_BLK,  # Counter block (1 hit)
+        "2": COUNTER_BLK,  # Counter block (2 hits)
+        "3": COUNTER_BLK,  # Counter block (3 hits)
+        "4": COUNTER_BLK,  # Counter block (4 hits)
+        "5": COUNTER_BLK,  # Counter block (5 hits)
+        "B": BULLET_BLK,  # Bullet block
+        "c": MAXAMMO_BLK,  # Max ammo block
+        "H": HYPERSPACE_BLK,  # Hyperspace block
+        "D": DEATH_BLK,  # Death block
+        "L": EXTRABALL_BLK,  # Extra ball block
+        "M": MGUN_BLK,  # Machine gun block
+        "W": WALLOFF_BLK,  # Wall off block
+        "?": RANDOM_BLK,  # Random block
+        "d": DROP_BLK,  # Drop block
+        "T": TIMER_BLK,  # Timer block
+        "m": MULTIBALL_BLK,  # Multiball block
+        "s": STICKY_BLK,  # Sticky block
+        "R": REVERSE_BLK,  # Reverse paddle control block
+        "<": PAD_SHRINK_BLK,  # Shrink paddle block
+        ">": PAD_EXPAND_BLK,  # Expand paddle block
+        "+": ROAMER_BLK,  # Roamer block
     }
 
     def __init__(
@@ -103,7 +129,7 @@ class LevelManager:
 
         Args:
         ----
-            block_manager (SpriteBlockManager): The block manager to use
+            block_manager (BlockManager): The block manager to use
 
         """
         self.block_manager = block_manager
@@ -292,7 +318,7 @@ class LevelManager:
             self.logger.error("Block manager not set")
             return
 
-        # Calculate block dimensions and spacing (these should match SpriteBlockManager)
+        # Calculate block dimensions and spacing (these should match BlockManager)
         brick_width = self.block_manager.brick_width
         brick_height = self.block_manager.brick_height
 
@@ -347,8 +373,8 @@ class LevelManager:
                     + row_idx * (brick_height + vertical_spacing)
                 )
 
-                # Create the block
-                block = SpriteBlock(x, y, block_type)
+                # Create the block using the block manager's factory method
+                block = self.block_manager._create_block(x, y, block_type)
 
                 # Handle special properties based on block type
                 if char in "12345":  # Counter blocks 1-5
@@ -365,8 +391,6 @@ class LevelManager:
                     block.image_file = (
                         "cntblk.png"  # The base counter block image without a number
                     )
-                    if block.image_file in SpriteBlock._image_cache:
-                        block.image = SpriteBlock._image_cache[block.image_file]
                     # Disable animations completely for this block
                     block.animation_frames = None
 
