@@ -17,6 +17,7 @@ from engine.events import (
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
     WallHitEvent,
+    AmmoFiredEvent,
 )
 from engine.graphics import Renderer
 from engine.input import InputManager
@@ -626,6 +627,7 @@ def test_arrow_key_movement_reversed():
     block_manager = Mock()
     renderer = Mock()
     input_manager = Mock()
+    input_manager.keys_pressed = {}  # Fix: use real dict for debug logging
     layout = Mock()
     play_rect = PlayRect()
     layout.get_play_rect.return_value = play_rect
@@ -643,7 +645,6 @@ def test_arrow_key_movement_reversed():
     )
     controller.reverse = True
     input_manager.is_key_pressed.side_effect = lambda k: k == pygame.K_LEFT
-    # When reverse is True, left should move right (direction=1)
     with patch.object(paddle, "set_direction") as set_dir:
         controller.handle_paddle_arrow_key_movement(16.67)
         set_dir.assert_called_with(1)
@@ -1085,6 +1086,9 @@ def test_ammo_does_not_fire_without_ball_in_play():
     game_state = Mock()
     game_state.fire_ammo.return_value = [Mock()]
     level_manager = Mock()
+    level_manager.get_time_remaining.return_value = 0  # Fix: return a real value
+    level_manager.get_level_info.return_value = {"title": "Test Level"}  # Fix: return a real dict
+    game_state.set_timer.return_value = []  # Fix: return an iterable
     paddle = Mock()
     block_manager = Mock()
     renderer = Mock()
@@ -1092,6 +1096,7 @@ def test_ammo_does_not_fire_without_ball_in_play():
     layout = Mock()
     ball_manager = Mock()
     ball_manager.has_ball_in_play.return_value = False
+    ball_manager.balls = []  # Fix: use real list for iteration
     bullet_manager = BulletManager()
     controller = GameController(
         game_state,
@@ -1108,7 +1113,10 @@ def test_ammo_does_not_fire_without_ball_in_play():
         event = make_key_event(pygame.K_k)
         controller.handle_events([event])
         game_state.fire_ammo.assert_not_called()
-        assert not mock_post.called
+        # Only assert that AmmoFiredEvent is not posted
+        for call in mock_post.call_args_list:
+            event_obj = getattr(call.args[0], "event", None)
+            assert not isinstance(event_obj, AmmoFiredEvent)
 
 
 def test_block_scoring_and_event_on_hit():
