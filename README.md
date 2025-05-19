@@ -1,3 +1,5 @@
+# XBoing II (Python port)
+
 [![PyPI version](https://img.shields.io/pypi/v/xboing.svg)](https://pypi.org/project/xboing/)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
@@ -5,8 +7,6 @@
 
 > **Now available on PyPI!**  
 > Install with `pip install xboing` and run with `python -m xboing`.
-
-# XBoing II (Python port)
 
 ## 🚀 Quick Start
 
