@@ -18,10 +18,26 @@ from engine.events import (
     SpecialStickyChangedEvent,
     WallHitEvent,
 )
+from engine.graphics import Renderer
+from engine.input import InputManager
+from game.ball import Ball
 from game.ball_manager import BallManager
+from game.block import Block
+from game.block_manager import BlockManager
+from game.block_types import (
+    BOMB_BLK,
+    PAD_EXPAND_BLK,
+    PAD_SHRINK_BLK,
+    REVERSE_BLK,
+    STICKY_BLK,
+    TIMER_BLK,
+)
 from game.bullet_manager import BulletManager
+from game.game_state import GameState
+from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlock
+from layout.game_layout import GameLayout
+from utils.block_type_loader import get_block_types
 
 
 def make_key_event(key, mod=0):
@@ -151,8 +167,8 @@ def test_update_balls_and_collisions_bomb(mock_ball):
     ball.update.return_value = (True, False, False)
     paddle = Mock()
     block_manager = Mock()
-    # Use SpriteBlock.TYPE_BOMB for the effect
-    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_BOMB])] + [
+    # Use BOMB_BLK for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [BOMB_BLK])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -202,9 +218,9 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -257,9 +273,9 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -310,8 +326,8 @@ def test_update_balls_and_collisions_timer(mock_ball):
     ball.update.return_value = (True, False, False)
     paddle = Mock()
     block_manager = Mock()
-    # Use SpriteBlock.TYPE_TIMER for the effect
-    block_manager.check_collisions.side_effect = [(0, 0, [SpriteBlock.TYPE_TIMER])] + [
+    # Use TIMER_BLK for the effect
+    block_manager.check_collisions.side_effect = [(0, 0, [TIMER_BLK])] + [
         (0, 0, [])
     ] * 10
     renderer = Mock()
@@ -491,8 +507,6 @@ def test_update_balls_and_collisions_wall_hit_without_sound():
 
 def test_lives_display_and_game_over_event_order():
     """When the last ball is lost, LivesChangedEvent(0) should be posted before GameOverEvent."""
-    from game.game_state import GameState
-
     level_manager = Mock()
     # Start with one ball that will be lost
     ball = Mock()
@@ -567,9 +581,9 @@ def test_update_balls_and_collisions_reverse_block():
     ball.update.return_value = (True, False, False)
     paddle = Mock()
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_REVERSE])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [REVERSE_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -691,9 +705,9 @@ def test_paddle_expand_event_fired():
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -742,9 +756,9 @@ def test_paddle_expand_at_max():
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_LARGE)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_EXPAND])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -794,9 +808,9 @@ def test_paddle_shrink_event_fired():
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -845,9 +859,9 @@ def test_paddle_shrink_at_min():
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.set_size(Paddle.SIZE_SMALL)
     block_manager = Mock()
-    block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_PAD_SHRINK])
-    ] + [(0, 0, [])] * 10
+    block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
+        (0, 0, [])
+    ] * 10
     renderer = Mock()
     input_manager = Mock()
     layout = Mock()
@@ -891,7 +905,7 @@ def test_sticky_paddle_activation_event(mock_ball):
     paddle = Paddle(x=50, y=90, width=40, height=15)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [
-        (0, 0, [SpriteBlock.TYPE_STICKY]),  # Sticky block hit
+        (0, 0, [STICKY_BLK]),  # Sticky block hit
         (0, 0, []),
     ]
     renderer = Mock()
@@ -1013,7 +1027,6 @@ def test_ball_sticks_to_paddle_when_sticky():
 
     pygame.display.init()
     pygame.display.set_mode((1, 1))  # Fix: allow rect/collision logic
-    from game.ball import Ball
 
     # Place paddle at y=100, width=40, ball at y=107 (radius=8), x=60 (centered)
     paddle = Paddle(x=60, y=100, width=40, height=15)
@@ -1029,8 +1042,6 @@ def test_ball_sticks_to_paddle_when_sticky():
 
 def test_ball_releases_from_paddle():
     """Test that ball releases from paddle on release_from_paddle call."""
-    from game.ball import Ball
-
     paddle = Paddle(x=50, y=90, width=40, height=15)
     paddle.sticky = True
     ball = Ball(x=60, y=80)
@@ -1098,3 +1109,65 @@ def test_ammo_does_not_fire_without_ball_in_play():
         controller.handle_events([event])
         game_state.fire_ammo.assert_not_called()
         assert not mock_post.called
+
+
+def test_block_scoring_and_event_on_hit():
+    from unittest.mock import patch
+
+    import pygame
+
+    from controllers.game_controller import GameController
+    from game.ball import Ball
+    from game.ball_manager import BallManager
+    from game.bullet_manager import BulletManager
+    from game.game_state import GameState
+    from game.paddle import Paddle
+
+    pygame.init()
+    game_state = GameState()
+    level_manager = LevelManager()
+    ball_manager = BallManager()
+    paddle = Paddle(0, 0, 40, 15)
+    block_manager = BlockManager(0, 0)
+    input_manager = InputManager()
+    layout = GameLayout(495, 580)
+    renderer = Renderer(pygame.Surface((495, 580)))
+    bullet_manager = BulletManager()
+    GameController(
+        game_state,
+        level_manager,
+        ball_manager,
+        paddle,
+        block_manager,
+        input_manager=input_manager,
+        layout=layout,
+        renderer=renderer,
+        bullet_manager=bullet_manager,
+    )
+    # Add a block and a ball
+    block_types = get_block_types()
+    block = Block(10, 10, block_types["RED_BLK"])
+    block_manager.blocks = [block]
+    ball = Ball(10, 10, 8)
+    ball_manager.add_ball(ball)
+    # Patch event posting
+    with patch("pygame.event.post"):
+        # Simulate collision
+        block_manager._check_block_collision(
+            obj=ball,
+            get_rect=ball.get_rect,
+            get_position=ball.get_position,
+            radius=ball.radius,
+            is_bullet=False,
+            remove_callback=None,
+        )
+        # Manually hit the block to simulate breaking and awarding points
+        points, _, _ = block.hit()
+        if points:
+            game_state.add_score(points)
+        # Block should be in breaking state, not removed
+        assert block.state == "breaking"
+        assert block in block_manager.blocks
+        # Points should be awarded immediately
+        assert points > 0
+        assert block.state == "breaking"

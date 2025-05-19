@@ -11,8 +11,8 @@ import os
 import pygame
 import pytest
 
+from game.block_manager import BlockManager
 from game.level_manager import LevelManager
-from game.sprite_block import SpriteBlockManager
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -30,7 +30,7 @@ def test_level_loading():
     Asserts that each level loads successfully and block count is > 0.
     """
     level_manager = LevelManager()
-    block_manager = SpriteBlockManager(0, 0)
+    block_manager = BlockManager(0, 0)
     level_manager.set_block_manager(block_manager)
 
     for level_num in range(1, 11):
