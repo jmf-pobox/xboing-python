@@ -49,7 +49,6 @@ from game.paddle import Paddle
 from layout.game_layout import GameLayout
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class GameController(Controller):

@@ -109,7 +109,6 @@ class XBoingModule(Module):
         self._bullet_renderer = bullet_renderer
         self._renderer = game_view.renderer
         self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
-        self.logger.setLevel(logging.DEBUG)
 
     @provider
     def provide_digit_renderer(self) -> DigitRenderer:
