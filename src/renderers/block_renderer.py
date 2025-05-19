@@ -19,10 +19,23 @@ class BlockRenderer:
     _image_cache: Dict[str, pygame.Surface] = {}
 
     @classmethod
+    def clear_cache(cls) -> None:
+        """Clear the internal image cache."""
+        cls.logger.info("Clearing image cache.")
+        cls._image_cache.clear()
+    @classmethod
     def preload_images(
-        cls, block_type_data: dict, blocks_dir: Optional[str] = None
+        cls, block_type_data: dict, blocks_dir: Optional[str] = None, clear_cache: bool = False
     ) -> None:
-        """Preload all block images and animation frames to the cache from block_type_data."""
+        """Preload all block images and animation frames to the cache from block_type_data.
+        
+        Args:
+            block_type_data: Dictionary containing block type data.
+            blocks_dir: Directory containing block images.
+            clear_cache: Whether to clear the image cache before preloading.
+        """
+        if clear_cache:
+            cls.clear_cache()
         if blocks_dir is None:
             blocks_dir = get_blocks_dir()
         loaded_count = 0
