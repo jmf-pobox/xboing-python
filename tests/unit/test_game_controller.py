@@ -4,6 +4,7 @@ import pygame
 
 from controllers.game_controller import GameController
 from engine.events import (
+    AmmoFiredEvent,
     BallLostEvent,
     BallShotEvent,
     BombExplodedEvent,
@@ -17,7 +18,6 @@ from engine.events import (
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
     WallHitEvent,
-    AmmoFiredEvent,
 )
 from engine.graphics import Renderer
 from engine.input import InputManager
@@ -1087,7 +1087,9 @@ def test_ammo_does_not_fire_without_ball_in_play():
     game_state.fire_ammo.return_value = [Mock()]
     level_manager = Mock()
     level_manager.get_time_remaining.return_value = 0  # Fix: return a real value
-    level_manager.get_level_info.return_value = {"title": "Test Level"}  # Fix: return a real dict
+    level_manager.get_level_info.return_value = {
+        "title": "Test Level"
+    }  # Fix: return a real dict
     game_state.set_timer.return_value = []  # Fix: return an iterable
     paddle = Mock()
     block_manager = Mock()
