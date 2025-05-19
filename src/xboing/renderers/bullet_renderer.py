@@ -6,11 +6,12 @@ import os
 import pygame
 
 from xboing.game.bullet_manager import BulletManager
+from xboing.utils.asset_paths import get_asset_path
 
 
 def get_bullet_sprite_path() -> str:
     """Get the path to the bullet sprite image."""
-    return os.path.join("assets", "images", "guns", "bullet.png")
+    return get_asset_path("images/guns/bullet.png")
 
 
 class BulletRenderer:
