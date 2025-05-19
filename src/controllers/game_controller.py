@@ -229,7 +229,7 @@ class GameController(Controller):
         play_rect = self.layout.get_play_rect()
         mouse_pos = self.input_manager.get_mouse_position()
         mouse_x = mouse_pos[0]
-        if self._last_mouse_x != mouse_x:
+        if self._last_mouse_x is not None and self._last_mouse_x != mouse_x:
             if self.reverse:
                 center_x = play_rect.x + play_rect.width // 2
                 mirrored_x = 2 * center_x - mouse_x
