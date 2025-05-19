@@ -1,15 +1,19 @@
-<p align="center">
-  <img src="assets/images/xboing_docs_logo.png" alt="XBoing Logo">
-</p>
-
-# XBoing II (Python port)
-
-[![GitHub release](https://img.shields.io/github/v/release/jmf-pobox/xboing-python?include_prereleases)](https://github.com/jmf-pobox/xboing-python/releases)
+[![PyPI version](https://img.shields.io/pypi/v/xboing.svg)](https://pypi.org/project/xboing/)
 [![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
 [![Build](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml)
 
-A Python reimplementation of the classic XBoing game originally written for X11 in C. This modernized port maintains the gameplay and charm of the original while offering improved compatibility with modern systems.
+> **Now available on PyPI!**  
+> Install with `pip install xboing` and run with `python -m xboing`.
+
+# XBoing II (Python port)
+
+## 🚀 Quick Start
+
+```bash
+pip install xboing
+python -m xboing
+```
 
 ## 🎮 For Players
 
@@ -27,39 +31,22 @@ Originally developed for X11 in C, XBoing was designed for speed and fun, with a
 
 ### Installation & Playing
 
-### 1. Install Hatch (if you don't have it)
+#### 1. Install from PyPI (Recommended)
 ```bash
-pip install --user hatch
-# or
-pipx install hatch
-# or
-brew install hatch
+pip install xboing
+python -m xboing
 ```
 
-### 2. Clone the repository
+#### 2. (Optional) Development Install from Source
+If you want the latest development version or to contribute:
+
 ```bash
 git clone https://github.com/jmf-pobox/xboing-python.git
 cd xboing-python
-```
-
-### 3. Create and activate the environment
-```bash
-hatch shell
-```
-
-### 4. Run the game
-```bash
-hatch run game
-# or, inside the hatch shell:
+pip install -e .
 python -m xboing
 ```
-
-#### Advanced: Manual pip install (not recommended)
-If you prefer not to use Hatch, you can manually install runtime dependencies:
-```bash
-pip install pygame injector
-python -m xboing
-```
+Or use Hatch for advanced development workflows (see below).
 
 ### Game Controls
 
