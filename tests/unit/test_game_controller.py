@@ -1153,14 +1153,7 @@ def test_block_scoring_and_event_on_hit():
     # Patch event posting
     with patch("pygame.event.post"):
         # Simulate collision
-        block_manager._check_block_collision(
-            obj=ball,
-            get_rect=ball.get_rect,
-            get_position=ball.get_position,
-            radius=ball.radius,
-            is_bullet=False,
-            remove_callback=None,
-        )
+        block_manager.check_collisions(ball)
         # Manually hit the block to simulate breaking and awarding points
         points, _, _ = block.hit()
         if points:
