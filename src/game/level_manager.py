@@ -375,7 +375,7 @@ class LevelManager:
                 )
 
                 # Create the block using the block manager's factory method
-                block = self.block_manager._create_block(x, y, block_type)
+                block = self.block_manager.create_block(x, y, block_type)
 
                 # Handle special properties based on block type
                 if char in "12345":  # Counter blocks 1-5

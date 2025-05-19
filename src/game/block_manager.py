@@ -124,7 +124,7 @@ class BlockManager:
                     block_type = block_types[row % len(block_types)]
 
                     # Create the block
-                    block = self._create_block(x, y, block_type)
+                    block = self.create_block(x, y, block_type)
                     self.blocks.append(block)
 
         elif level_num == 2:
@@ -147,7 +147,7 @@ class BlockManager:
                         else:
                             block_type = "TAN_BLK"
 
-                        block = self._create_block(x, y, block_type)
+                        block = self.create_block(x, y, block_type)
                         self.blocks.append(block)
 
         elif level_num == 3:
@@ -183,7 +183,7 @@ class BlockManager:
                         ]
                         block_type = colors[(row + col) % len(colors)]
 
-                    block = self._create_block(x, y, block_type)
+                    block = self.create_block(x, y, block_type)
                     self.blocks.append(block)
 
         else:
@@ -246,7 +246,7 @@ class BlockManager:
                             block_types[:6]
                         )  # Regular colored blocks
 
-                    block = self._create_block(x, y, block_type)
+                    block = self.create_block(x, y, block_type)
                     self.blocks.append(block)
 
         return self.blocks
@@ -394,7 +394,7 @@ class BlockManager:
                 return block
         return None
 
-    def _create_block(self, x: int, y: int, block_type_key: str) -> Block:
+    def create_block(self, x: int, y: int, block_type_key: str) -> Block:
         """Create a Block using the canonical key and config from block_types.json."""
         config = self.block_type_data.get(block_type_key)
         if config is None:
