@@ -8,7 +8,7 @@ import pygame
 
 from game.ball import Ball
 from game.block import Block, CounterBlock
-from game.block_types import BLACK_BLK
+from game.block_types import BLACK_BLK, COUNTER_BLK
 from game.bullet import Bullet
 from renderers.block_renderer import BlockRenderer
 from utils.asset_paths import get_blocks_dir
@@ -199,6 +199,6 @@ class BlockManager:
         config = self.block_type_data.get(block_type_key)
         if config is None:
             raise ValueError(f"Unknown block type key {block_type_key}")
-        if block_type_key == "COUNTER_BLK":
+        if block_type_key == COUNTER_BLK:
             return CounterBlock(x, y, config)
         return Block(x, y, config)
