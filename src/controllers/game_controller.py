@@ -119,7 +119,7 @@ class GameController(Controller):
             logger.debug(f"[handle_events] Event received: {event}")
             # --- Section: Ammo Fired or Ball Launch (K key or mouse button) ---
             is_k_key = event.type == pygame.KEYDOWN and event.key == pygame.K_k
-            is_mouse_button = event.type == 1025  # Mouse button event
+            is_mouse_button = event.type == pygame.MOUSEBUTTONDOWN  # Mouse button event
             if (is_k_key or is_mouse_button):
                 if self.ball_manager.has_ball_in_play():
                     # Fire ammo
