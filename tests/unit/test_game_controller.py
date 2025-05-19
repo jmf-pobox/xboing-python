@@ -659,7 +659,8 @@ def test_mouse_movement_reversed():
     game_state = Mock()
     level_manager = Mock()
     ball_manager = BallManager()
-    paddle = Mock()
+    from game.paddle import Paddle
+    paddle = Paddle(x=50, y=90, width=20, height=15)  # Use real Paddle
     block_manager = Mock()
     renderer = Mock()
     input_manager = Mock()
@@ -670,22 +671,23 @@ def test_mouse_movement_reversed():
     play_rect.y = 0
     layout.get_play_rect.return_value = play_rect
     bullet_manager = BulletManager()
-    controller = GameController(
-        game_state,
-        level_manager,
-        ball_manager,
-        paddle,
-        block_manager,
-        input_manager=input_manager,
-        layout=layout,
-        renderer=renderer,
-        bullet_manager=bullet_manager,
-    )
-    controller.reverse = True
-    # Mouse at x=80, paddle width=20, play area center=50, mirrored_x=20
-    input_manager.get_mouse_position.return_value = (80, 0)
-    paddle.width = 20
     with patch.object(paddle, "move_to") as move_to:
+        controller = GameController(
+            game_state,
+            level_manager,
+            ball_manager,
+            paddle,
+            block_manager,
+            input_manager=input_manager,
+            layout=layout,
+            renderer=renderer,
+            bullet_manager=bullet_manager,
+        )
+        controller.reverse = True
+        # Mouse at x=80, paddle width=20, play area center=50, mirrored_x=20
+        input_manager.get_mouse_position.return_value = (80, 0)
+        paddle.width = 20
+        controller._last_mouse_x = 0  # Ensure this is different from mouse_x (80)
         controller.handle_paddle_mouse_movement()
         # local_x = mirrored_x - play_rect.x - paddle.width // 2 = 20 - 0 - 10 = 10
         move_to.assert_called_with(10, 100, 0)
