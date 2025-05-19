@@ -8,6 +8,7 @@ import pygame
 
 from game.ball import Ball
 from game.block import Block, CounterBlock
+from game.block_types import BLACK_BLK
 from game.bullet import Bullet
 from renderers.block_renderer import BlockRenderer
 from utils.asset_paths import get_blocks_dir
