@@ -1,10 +1,10 @@
 import pygame
 import pytest
 
-from game.ball_manager import BallManager
-from game.bullet_manager import BulletManager
-from renderers.bullet_renderer import BulletRenderer
-from ui.game_view import GameView
+from xboing.game.ball_manager import BallManager
+from xboing.game.bullet_manager import BulletManager
+from xboing.renderers.bullet_renderer import BulletRenderer
+from xboing.ui.game_view import GameView
 
 
 class MockBlockManager:

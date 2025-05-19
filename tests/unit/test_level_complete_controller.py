@@ -1,7 +1,7 @@
 from unittest.mock import create_autospec
 
-from controllers.level_complete_controller import LevelCompleteController
-from ui.ui_manager import UIManager
+from xboing.controllers.level_complete_controller import LevelCompleteController
+from xboing.ui.ui_manager import UIManager
 
 
 class Dummy:

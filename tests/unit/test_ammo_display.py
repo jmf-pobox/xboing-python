@@ -1,8 +1,8 @@
 # tests/unit/test_ammo_display.py
 import pygame
 
-from engine.events import AmmoFiredEvent
-from ui.ammo_display import AmmoDisplayComponent
+from xboing.engine.events import AmmoFiredEvent
+from xboing.ui.ammo_display import AmmoDisplayComponent
 
 
 class MockAmmoRenderer:

@@ -1,7 +1,7 @@
 import pygame
 import pytest
 
-from game.bullet import Bullet
+from xboing.game.bullet import Bullet
 
 
 @pytest.fixture(autouse=True)

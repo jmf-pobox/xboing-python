@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from controllers.controller_manager import ControllerManager
+from xboing.controllers.controller_manager import ControllerManager
 
 
 def test_controller_manager_registration_and_switching():

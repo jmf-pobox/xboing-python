@@ -2,22 +2,22 @@ from unittest.mock import Mock
 
 import pygame
 
-from controllers.game_controller import GameController
-from di_module import XBoingModule
-from engine.audio_manager import AudioManager
-from engine.input import InputManager
-from game.ball_manager import BallManager
-from game.block_manager import BlockManager
-from game.bullet_manager import BulletManager
-from game.game_state import GameState
-from game.level_manager import LevelManager
-from game.paddle import Paddle
-from layout.game_layout import GameLayout
-from renderers.ammo_renderer import AmmoRenderer
-from renderers.bullet_renderer import BulletRenderer
-from ui.ammo_display import AmmoDisplayComponent
-from ui.game_view import GameView
-from ui.ui_manager import UIManager
+from xboing.controllers.game_controller import GameController
+from xboing.di_module import XBoingModule
+from xboing.engine.audio_manager import AudioManager
+from xboing.engine.input import InputManager
+from xboing.game.ball_manager import BallManager
+from xboing.game.block_manager import BlockManager
+from xboing.game.bullet_manager import BulletManager
+from xboing.game.game_state import GameState
+from xboing.game.level_manager import LevelManager
+from xboing.game.paddle import Paddle
+from xboing.layout.game_layout import GameLayout
+from xboing.renderers.ammo_renderer import AmmoRenderer
+from xboing.renderers.bullet_renderer import BulletRenderer
+from xboing.ui.ammo_display import AmmoDisplayComponent
+from xboing.ui.game_view import GameView
+from xboing.ui.ui_manager import UIManager
 
 
 def test_di_provides_ammo_components():

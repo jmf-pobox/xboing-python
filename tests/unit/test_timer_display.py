@@ -1,8 +1,8 @@
 import pygame
 import pytest
 
-from engine.events import TimerUpdatedEvent
-from ui.timer_display import TimerDisplay
+from xboing.engine.events import TimerUpdatedEvent
+from xboing.ui.timer_display import TimerDisplay
 
 
 @pytest.fixture(autouse=True, scope="module")

@@ -1,7 +1,7 @@
 import pygame
 
-from engine.events import LevelChangedEvent
-from ui.level_display import LevelDisplay
+from xboing.engine.events import LevelChangedEvent
+from xboing.ui.level_display import LevelDisplay
 
 
 class MockDigitRenderer:

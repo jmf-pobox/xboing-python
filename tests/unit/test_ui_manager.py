@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pygame
 
-from ui.ui_manager import UIManager
+from xboing.ui.ui_manager import UIManager
 
 
 def test_ui_manager_registration_and_draw_order():

@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pygame
 import pytest
 
-from engine.events import (
+from xboing.engine.events import (
     AmmoFiredEvent,
     GameOverEvent,
     LevelChangedEvent,
@@ -19,7 +19,7 @@ from engine.events import (
     SpecialX4ChangedEvent,
     TimerUpdatedEvent,
 )
-from game.game_state import GameState
+from xboing.game.game_state import GameState
 
 
 @pytest.fixture

@@ -11,8 +11,8 @@ import os
 import pygame
 import pytest
 
-from game.block_manager import BlockManager
-from game.level_manager import LevelManager
+from xboing.game.block_manager import BlockManager
+from xboing.game.level_manager import LevelManager
 
 
 @pytest.fixture(scope="module", autouse=True)

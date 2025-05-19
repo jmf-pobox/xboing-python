@@ -1,5 +1,5 @@
-from game.bullet import Bullet
-from game.bullet_manager import BulletManager
+from xboing.game.bullet import Bullet
+from xboing.game.bullet_manager import BulletManager
 
 
 class DummyBullet(Bullet):

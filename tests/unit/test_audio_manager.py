@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import pygame
 
-from engine.audio_manager import AudioManager
-from engine.events import AmmoFiredEvent, XBoingEvent
+from xboing.engine.audio_manager import AudioManager
+from xboing.engine.events import AmmoFiredEvent, XBoingEvent
 
 
 class BallLostEvent(XBoingEvent):

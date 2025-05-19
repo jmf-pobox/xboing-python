@@ -1,8 +1,8 @@
 import pygame
 import pytest
 
-from engine.events import MessageChangedEvent
-from ui.message_display import MessageDisplay
+from xboing.engine.events import MessageChangedEvent
+from xboing.ui.message_display import MessageDisplay
 
 
 @pytest.fixture(autouse=True, scope="module")

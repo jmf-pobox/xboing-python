@@ -1,6 +1,6 @@
 import pygame
 
-from renderers.ammo_renderer import AmmoRenderer
+from xboing.renderers.ammo_renderer import AmmoRenderer
 
 
 def test_ammo_renderer_renders_correct_surface(monkeypatch):

@@ -1,7 +1,7 @@
 import pygame
 
-from engine.events import ScoreChangedEvent
-from ui.score_display import ScoreDisplay
+from xboing.engine.events import ScoreChangedEvent
+from xboing.ui.score_display import ScoreDisplay
 
 
 class MockDigitRenderer:

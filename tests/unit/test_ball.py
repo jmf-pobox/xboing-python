@@ -1,7 +1,7 @@
 import pygame
 import pytest
 
-from game.ball import Ball
+from xboing.game.ball import Ball
 
 
 @pytest.fixture(autouse=True)

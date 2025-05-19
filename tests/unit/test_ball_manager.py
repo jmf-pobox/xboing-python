@@ -1,7 +1,7 @@
 import pytest
 
-from game.ball import Ball
-from game.ball_manager import BallManager
+from xboing.game.ball import Ball
+from xboing.game.ball_manager import BallManager
 
 
 class DummyBall(Ball):

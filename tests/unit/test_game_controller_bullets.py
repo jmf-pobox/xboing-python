@@ -3,16 +3,16 @@ from unittest.mock import Mock, patch
 import pygame
 import pytest
 
-from controllers.game_controller import GameController
-from engine.graphics import Renderer
-from engine.input import InputManager
-from game.ball_manager import BallManager
-from game.block_manager import BlockManager
-from game.bullet_manager import BulletManager
-from game.game_state import GameState
-from game.level_manager import LevelManager
-from game.paddle import Paddle
-from layout.game_layout import GameLayout
+from xboing.controllers.game_controller import GameController
+from xboing.engine.graphics import Renderer
+from xboing.engine.input import InputManager
+from xboing.game.ball_manager import BallManager
+from xboing.game.block_manager import BlockManager
+from xboing.game.bullet_manager import BulletManager
+from xboing.game.game_state import GameState
+from xboing.game.level_manager import LevelManager
+from xboing.game.paddle import Paddle
+from xboing.layout.game_layout import GameLayout
 
 
 @pytest.fixture(autouse=True)

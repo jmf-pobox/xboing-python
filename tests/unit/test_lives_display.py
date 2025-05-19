@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from renderers.lives_renderer import LivesRenderer
+from xboing.renderers.lives_renderer import LivesRenderer
 
 
 @pytest.fixture(autouse=True)

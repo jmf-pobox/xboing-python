@@ -3,14 +3,14 @@ from unittest.mock import Mock
 import pygame
 import pytest
 
-from di_module import XBoingModule
-from game.ball_manager import BallManager
-from game.block_manager import BlockManager
-from game.bullet_manager import BulletManager
-from game.game_state import GameState
-from game.level_manager import LevelManager
-from game.paddle import Paddle
-from renderers.bullet_renderer import BulletRenderer
+from xboing.di_module import XBoingModule
+from xboing.game.ball_manager import BallManager
+from xboing.game.block_manager import BlockManager
+from xboing.game.bullet_manager import BulletManager
+from xboing.game.game_state import GameState
+from xboing.game.level_manager import LevelManager
+from xboing.game.paddle import Paddle
+from xboing.renderers.bullet_renderer import BulletRenderer
 
 
 @pytest.fixture(autouse=True)

@@ -2,8 +2,8 @@ from unittest.mock import Mock, patch
 
 import pygame
 
-from controllers.game_controller import GameController
-from engine.events import (
+from xboing.controllers.game_controller import GameController
+from xboing.engine.events import (
     AmmoFiredEvent,
     BallLostEvent,
     BallShotEvent,
@@ -19,13 +19,13 @@ from engine.events import (
     SpecialStickyChangedEvent,
     WallHitEvent,
 )
-from engine.graphics import Renderer
-from engine.input import InputManager
-from game.ball import Ball
-from game.ball_manager import BallManager
-from game.block import Block
-from game.block_manager import BlockManager
-from game.block_types import (
+from xboing.engine.graphics import Renderer
+from xboing.engine.input import InputManager
+from xboing.game.ball import Ball
+from xboing.game.ball_manager import BallManager
+from xboing.game.block import Block
+from xboing.game.block_manager import BlockManager
+from xboing.game.block_types import (
     BOMB_BLK,
     PAD_EXPAND_BLK,
     PAD_SHRINK_BLK,
@@ -33,12 +33,12 @@ from game.block_types import (
     STICKY_BLK,
     TIMER_BLK,
 )
-from game.bullet_manager import BulletManager
-from game.game_state import GameState
-from game.level_manager import LevelManager
-from game.paddle import Paddle
-from layout.game_layout import GameLayout
-from utils.block_type_loader import get_block_types
+from xboing.game.bullet_manager import BulletManager
+from xboing.game.game_state import GameState
+from xboing.game.level_manager import LevelManager
+from xboing.game.paddle import Paddle
+from xboing.layout.game_layout import GameLayout
+from xboing.utils.block_type_loader import get_block_types
 
 
 def make_key_event(key, mod=0):
@@ -144,17 +144,17 @@ def test_ball_launch_logic():
 
 # Disabled due to persistent hangs in the test environment
 # See assistant/test history for details
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def disabled_test_update_balls_and_collisions_extra_ball(mock_ball):
     pass
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def disabled_test_update_balls_and_collisions_multiball(mock_ball):
     pass
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_bomb(mock_ball):
     game_state = Mock()
     level_manager = Mock()
@@ -203,7 +203,7 @@ def test_update_balls_and_collisions_bomb(mock_ball):
         )
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_expand(mock_ball):
     """Test that hitting a pad expand block increases paddle size and fires PaddleGrowEvent."""
     game_state = Mock()
@@ -258,7 +258,7 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
         )
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     """Test that hitting a pad shrink block decreases paddle size and fires PaddleShrinkEvent."""
     game_state = Mock()
@@ -313,7 +313,7 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
         )
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_update_balls_and_collisions_timer(mock_ball):
     game_state = Mock()
     level_manager = Mock()
@@ -659,7 +659,8 @@ def test_mouse_movement_reversed():
     game_state = Mock()
     level_manager = Mock()
     ball_manager = BallManager()
-    from game.paddle import Paddle
+    from xboing.game.paddle import Paddle
+
     paddle = Paddle(x=50, y=90, width=20, height=15)  # Use real Paddle
     block_manager = Mock()
     renderer = Mock()
@@ -900,7 +901,7 @@ def test_paddle_shrink_at_min():
         )
 
 
-@patch("controllers.game_controller.Ball", side_effect=make_mock_ball)
+@patch("xboing.controllers.game_controller.Ball", side_effect=make_mock_ball)
 def test_sticky_paddle_activation_event(mock_ball):
     """Test sticky paddle activates and fires event when sticky block is hit."""
     game_state = Mock()
@@ -1128,12 +1129,12 @@ def test_block_scoring_and_event_on_hit():
 
     import pygame
 
-    from controllers.game_controller import GameController
-    from game.ball import Ball
-    from game.ball_manager import BallManager
-    from game.bullet_manager import BulletManager
-    from game.game_state import GameState
-    from game.paddle import Paddle
+    from xboing.controllers.game_controller import GameController
+    from xboing.game.ball import Ball
+    from xboing.game.ball_manager import BallManager
+    from xboing.game.bullet_manager import BulletManager
+    from xboing.game.game_state import GameState
+    from xboing.game.paddle import Paddle
 
     pygame.init()
     game_state = GameState()

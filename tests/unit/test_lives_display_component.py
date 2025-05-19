@@ -1,7 +1,7 @@
 import pygame
 
-from engine.events import LivesChangedEvent
-from ui.lives_display import LivesDisplayComponent
+from xboing.engine.events import LivesChangedEvent
+from xboing.ui.lives_display import LivesDisplayComponent
 
 
 class MockLivesRendererUtil:

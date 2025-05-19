@@ -4,9 +4,9 @@
 import pygame
 import pytest
 
-from game.block import Block
-from game.block_manager import BlockManager
-from game.block_types import (
+from xboing.game.block import Block
+from xboing.game.block_manager import BlockManager
+from xboing.game.block_types import (
     BLUE_BLK,
     BULLET_BLK,
     COUNTER_BLK,
@@ -16,8 +16,8 @@ from game.block_types import (
     TAN_BLK,
     YELLOW_BLK,
 )
-from game.level_manager import LevelManager
-from utils.block_type_loader import get_block_types
+from xboing.game.level_manager import LevelManager
+from xboing.utils.block_type_loader import get_block_types
 
 
 @pytest.fixture
@@ -129,8 +129,8 @@ def test_block_removal_after_explosion_animation():
 
 
 def test_counterblock_initialization_and_hit_logic():
-    from game.block import CounterBlock
-    from utils.block_type_loader import BlockTypeData
+    from xboing.game.block import CounterBlock
+    from xboing.utils.block_type_loader import BlockTypeData
 
     # Minimal config for a counter block with 3 hits and 4 animation frames
     config: BlockTypeData = {
