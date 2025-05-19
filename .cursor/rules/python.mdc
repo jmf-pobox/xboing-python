@@ -3,23 +3,26 @@ description:
 globs: *.py
 alwaysApply: false
 ---
-- All code must comply with [PEP 8](mdc:https:/peps.python.org/pep-0008) (style guide) and [PEP 257](mdc:https:/peps.python.org/pep-0257) (docstrings).
+- All code must comply with [PEP 8](mdc:https:/peps.python.org/pep-0008) (style guide)
 - Use modern, concise docstrings for all public classes, methods, and functions, following PEP 257 conventions.
 - Use [PEP 484](mdc:https:/peps.python.org/pep-0484) type hints everywhere: annotate all function/method arguments, return types, and class attributes.
-- Run `mypy --strict` on all modules before and after changes. Resolve all type errors and warnings, including missing annotations, incompatible types, and untyped attributes.
 - Use precise types (e.g., `List[pygame.event.Event]`, `Optional[Type]`, `Callable`, etc.), not just `Any`.
 - Cross-reference related modules to ensure correct types for arguments and attributes.
+- Do not use hasattr except as a last resort, favor isinstance
 - Use `# type: ignore` only as a last resort, and always with a comment explaining why.
 - Format all code with [black](mdc:https:/black.readthedocs.io/en/stable) before committing or running tests.
 - Do not manually adjust formatting that black would change.
-- Run `ruff check <module> --fix` after code changes to auto-fix style and import issues. Resolve all linter errors and warnings unless there is a strong, documented reason not to.
 - Run the full test suite (`pytest`) before and after every code change. All tests must pass (100% pass rate) before marking a task as complete.
-- For each module:
-  1. Run `hatch run lint-fix` and resolve all type issues.
-  2. Add/update type annotations and docstrings.
-  3. Format with black.
-  4. Run `pytest` to ensure all tests pass.
-  5. Run `hatch run lint-fix` again to confirm type safety.
-  6. Update `TODO.md` to reflect completed work.
+- For each code change:
+  1. Update `TODO.md` to add tasks.
+  2. Mark tasks as in progress with [p].
+  3. Run `hatch run lint-fix` and resolve all issues.
+  4. Run `mypy -strict` for src and scripts directories and resolve all issues.
+  5. Run `pytest` to ensure all tests pass.
+  6. Make new code changes in both src and tests, while maintaining PEP 8, PEP 484, and PEP 257 compliance.
+  7. Run `mypy -strict` for src and scripts directories and modify code to resolve issues.
+  8. Run `hatch run lint-fix` again to modify code to resolve issues.
+  9. Run `pytest` to ensure all tests pass and modify code to resolve issues.
+  10. Go back to step 7-9 until no code changes are made.
+  11. Update `TODO.md` to remove completed tasks.
 - Do not attempt to fix linter errors more than 3 times in a row; ask for help if issues persist.
-- Update or create docstrings for all public-facing code.

@@ -5,11 +5,12 @@ alwaysApply: false
 ---
 - Run tests first
 - Read game_debug.log
-- If bug is not evidenced in log, suggest adding more logging
+- If bug is not evidenced in log, adding more logging
 - Run the app or request user to run app and trigger bug
 - Read game_debug.log again to pinpoint issue
-- Suggest narrow fix to resolve bug
-- Make fix
+- Explain bug and suggest narrow fix to resolve bug
+- Make fix when confirmed
 - Run tests after making fix
-- Follow general python rules for linting, formatting
+- Follow python rules
+
 
