@@ -39,3 +39,5 @@
     - [ ] Phase 4: Integration and Polish
         - [ ] Integrate all features and ensure smooth interaction between state, UI, sound, and bullet logic
         - [ ] Add/expand integration tests
+- [x] Add support for j/k/l keys for paddle movement and launch/fire in game_controller.py
+- [ ] Fix test_ammo_does_not_fire_without_ball_in_play to use a list for ball_manager.balls when mocking
