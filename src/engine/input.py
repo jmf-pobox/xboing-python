@@ -55,10 +55,20 @@ class InputManager:
             if event.type == pygame.KEYDOWN:
                 self.keys_pressed[event.key] = True
                 self.keys_down.add(event.key)
+                try:
+                    key_name = pygame.key.name(event.key)
+                except Exception:
+                    key_name = str(event.key)
+                self.logger.debug(f"[InputManager] KEYDOWN: {event.key} ({key_name})")
 
             if event.type == pygame.KEYUP:
                 self.keys_pressed[event.key] = False
                 self.keys_up.add(event.key)
+                try:
+                    key_name = pygame.key.name(event.key)
+                except Exception:
+                    key_name = str(event.key)
+                self.logger.debug(f"[InputManager] KEYUP: {event.key} ({key_name})")
 
             if event.type == pygame.MOUSEMOTION:
                 self.mouse_pos = event.pos

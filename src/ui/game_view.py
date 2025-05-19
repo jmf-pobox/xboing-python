@@ -7,9 +7,9 @@ import pygame
 
 from engine.graphics import Renderer
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 from renderers.bullet_renderer import BulletRenderer
 
@@ -25,7 +25,7 @@ class GameView(View):
     def __init__(
         self,
         layout: GameLayout,
-        block_manager: SpriteBlockManager,
+        block_manager: BlockManager,
         paddle: Paddle,
         ball_manager: BallManager,
         renderer: Renderer,
@@ -37,7 +37,7 @@ class GameView(View):
         Args:
         ----
             layout (GameLayout): The GameLayout instance.
-            block_manager (SpriteBlockManager): The block manager for the current level.
+            block_manager (BlockManager): The block manager for the current level.
             paddle (Paddle): The player paddle object.
             ball_manager (BallManager): The BallManager instance managing all balls.
             renderer (Renderer): The main renderer instance.
@@ -46,7 +46,7 @@ class GameView(View):
 
         """
         self.layout: GameLayout = layout
-        self.block_manager: SpriteBlockManager = block_manager
+        self.block_manager: BlockManager = block_manager
         self.paddle: Paddle = paddle
         self.ball_manager = ball_manager
         self.renderer: Renderer = renderer

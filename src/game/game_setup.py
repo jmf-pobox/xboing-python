@@ -3,10 +3,10 @@
 from typing import Any, Dict
 
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from renderers.bullet_renderer import BulletRenderer
 
 # Constants (should match those in xboing.py)
@@ -31,7 +31,7 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     paddle_y = play_rect.y + play_rect.height - Paddle.DIST_BASE
     paddle: Paddle = Paddle(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
     ball_manager: BallManager = BallManager()
-    block_manager: SpriteBlockManager = SpriteBlockManager(play_rect.x, play_rect.y)
+    block_manager: BlockManager = BlockManager(play_rect.x, play_rect.y)
     level_manager: LevelManager = LevelManager()
     level_manager.set_block_manager(block_manager)
     level_manager.set_layout(layout)

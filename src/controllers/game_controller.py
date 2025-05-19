@@ -27,16 +27,28 @@ from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball import Ball
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
+from game.block_types import (
+    BOMB_BLK,
+    BULLET_BLK,
+    EXTRABALL_BLK,
+    MAXAMMO_BLK,
+    MULTIBALL_BLK,
+    PAD_EXPAND_BLK,
+    PAD_SHRINK_BLK,
+    REVERSE_BLK,
+    SPECIAL_BLOCK_TYPES,
+    STICKY_BLK,
+    TIMER_BLK,
+)
 from game.bullet import Bullet
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlock, SpriteBlockManager
 from layout.game_layout import GameLayout
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class GameController(Controller):
@@ -60,7 +72,7 @@ class GameController(Controller):
         level_manager: LevelManager,
         ball_manager: BallManager,
         paddle: Paddle,
-        block_manager: SpriteBlockManager,
+        block_manager: BlockManager,
         input_manager: InputManager,
         layout: GameLayout,
         renderer: Renderer,
@@ -74,7 +86,7 @@ class GameController(Controller):
             level_manager: The LevelManager instance.
             ball_manager: The BallManager instance for managing balls.
             paddle: The Paddle instance.
-            block_manager: The SpriteBlockManager instance.
+            block_manager: The BlockManager instance.
             input_manager: The InputManager instance.
             layout: The GameLayout instance.
             renderer: The Renderer instance.
@@ -85,7 +97,7 @@ class GameController(Controller):
         self.level_manager: LevelManager = level_manager
         self.ball_manager: BallManager = ball_manager
         self.paddle: Paddle = paddle
-        self.block_manager: SpriteBlockManager = block_manager
+        self.block_manager: BlockManager = block_manager
         self.input_manager: InputManager = input_manager
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
@@ -105,36 +117,34 @@ class GameController(Controller):
         """
         for event in events:
             logger.debug(f"[handle_events] Event received: {event}")
-            # --- Section: Ammo Fired (K key) ---
-            if (
-                event.type == pygame.KEYDOWN
-                and event.key == pygame.K_k
-                and self.ball_manager.has_ball_in_play()
-            ) or (event.type == 1025 and self.ball_manager.has_ball_in_play()):
-                logger.debug(f"About to fire ammo via game_state: {self.game_state}")
-                changes = self.game_state.fire_ammo()
-                for change in changes:
-                    pygame.event.post(
-                        pygame.event.Event(pygame.USEREVENT, {"event": change})
+            # --- Section: Ammo Fired or Ball Launch (K key or mouse button) ---
+            is_k_key = event.type == pygame.KEYDOWN and event.key == pygame.K_k
+            is_mouse_button = event.type == pygame.MOUSEBUTTONDOWN  # Mouse button event
+            if is_k_key or is_mouse_button:
+                if self.ball_manager.has_ball_in_play():
+                    # Fire ammo
+                    logger.debug(
+                        f"About to fire ammo via game_state: {self.game_state}"
                     )
-                    if isinstance(change, AmmoFiredEvent):
-                        x, _ = self.paddle.get_center()
-                        play_rect = self.layout.get_play_rect()
-                        bullet_radius = 4
-                        y = self.paddle.rect.top - bullet_radius - 1
-                        logger.warning(f"Firing bullet at y={y}")
-                        logger.warning(
-                            f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
+                    changes = self.game_state.fire_ammo()
+                    for change in changes:
+                        pygame.event.post(
+                            pygame.event.Event(pygame.USEREVENT, {"event": change})
                         )
-                        bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
-                        self.bullet_manager.add_bullet(bullet)
-            else:
-                logger.debug(f"No ammo fired. {self.ball_manager.has_ball_in_play()}")
-
-            # --- Section: Mouse Button Down (Ball Launch) ---
-            if event.type == 1025:
-                balls = self.ball_manager.balls
-                if not self.ball_manager.has_ball_in_play():
+                        if isinstance(change, AmmoFiredEvent):
+                            x, _ = self.paddle.get_center()
+                            play_rect = self.layout.get_play_rect()
+                            bullet_radius = 4
+                            y = self.paddle.rect.top - bullet_radius - 1
+                            logger.warning(f"Firing bullet at y={y}")
+                            logger.warning(
+                                f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
+                            )
+                            bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
+                            self.bullet_manager.add_bullet(bullet)
+                else:
+                    # Launch ball(s)
+                    balls = self.ball_manager.balls
                     logger.debug("[handle_events] launching ball(s)")
                     for ball in balls:
                         ball.release_from_paddle()
@@ -159,10 +169,6 @@ class GameController(Controller):
                         )
                     )
                     logger.debug("Ball(s) launched and timer started.")
-                else:
-                    logger.debug(
-                        "[handle_events] not launching: not all balls stuck to paddle"
-                    )
 
             # --- Section: BallLostEvent Handling ---
             if event.type == pygame.USEREVENT and isinstance(
@@ -187,9 +193,8 @@ class GameController(Controller):
         self.check_level_complete()
         self.handle_debug_x_key()
 
-    # TODO: Issue #5 - bug: paddle operate via the j k l keys for left, fire, right actions.
     def handle_paddle_arrow_key_movement(self, delta_ms: float) -> None:
-        """Handle paddle movement and input.
+        """Handle paddle movement and input (arrow keys and j/k/l keys).
 
         Args:
         ----
@@ -197,14 +202,19 @@ class GameController(Controller):
 
         """
         paddle_direction = 0
+        # Support both arrow keys and j/l keys for left/right
+        left_keys = [pygame.K_LEFT, pygame.K_j]
+        right_keys = [pygame.K_RIGHT, pygame.K_l]
+        left_pressed = [k for k in left_keys if self.input_manager.is_key_pressed(k)]
+        right_pressed = [k for k in right_keys if self.input_manager.is_key_pressed(k)]
         if self.reverse:
-            if self.input_manager.is_key_pressed(pygame.K_LEFT):
+            if left_pressed:
                 paddle_direction = 1
-            elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
+            elif right_pressed:
                 paddle_direction = -1
-        elif self.input_manager.is_key_pressed(pygame.K_LEFT):
+        elif left_pressed:
             paddle_direction = -1
-        elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
+        elif right_pressed:
             paddle_direction = 1
         play_rect = self.layout.get_play_rect()
         if play_rect:
@@ -214,17 +224,19 @@ class GameController(Controller):
             self.paddle.set_direction(0)
 
     def handle_paddle_mouse_movement(self) -> None:
-        """Handle mouse-based paddle movement."""
+        """Handle mouse-based paddle movement, but only if the mouse has moved."""
         play_rect = self.layout.get_play_rect()
         mouse_pos = self.input_manager.get_mouse_position()
         mouse_x = mouse_pos[0]
-        if self.reverse:
-            center_x = play_rect.x + play_rect.width // 2
-            mirrored_x = 2 * center_x - mouse_x
-            local_x = mirrored_x - play_rect.x - self.paddle.width // 2
-        else:
-            local_x = mouse_x - play_rect.x - self.paddle.width // 2
-        self.paddle.move_to(local_x, play_rect.width, play_rect.x)
+        if self._last_mouse_x is not None and self._last_mouse_x != mouse_x:
+            if self.reverse:
+                center_x = play_rect.x + play_rect.width // 2
+                mirrored_x = 2 * center_x - mouse_x
+                local_x = mirrored_x - play_rect.x - self.paddle.width // 2
+            else:
+                local_x = mouse_x - play_rect.x - self.paddle.width // 2
+            self.paddle.move_to(local_x, play_rect.width, play_rect.x)
+        self._last_mouse_x = mouse_x
 
     def update_blocks_and_timer(self, delta_ms: float) -> None:
         """Update blocks and timer if appropriate.
@@ -242,16 +254,18 @@ class GameController(Controller):
 
     def _handle_block_effects(self, effects, ball=None, bullet=None):
         """Handle special block effects for both balls and bullets."""
+        logger.debug(f"Handling block effects: len = {len(effects)}")
         for effect in effects:
-            if effect == SpriteBlock.TYPE_BULLET:
+            logger.debug(f"Handling block effect: {effect}")
+            if effect == BULLET_BLK:
                 logger.debug("Bulletblock hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
-            elif effect == SpriteBlock.TYPE_MAXAMMO:
+            elif effect == MAXAMMO_BLK:
                 logger.debug("Max ammo block hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
-            elif effect == SpriteBlock.TYPE_EXTRABALL and ball is not None:
+            elif effect == EXTRABALL_BLK and ball is not None:
                 new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                 new_ball.vx = -ball.vx
                 new_ball.vy = ball.vy
@@ -261,7 +275,7 @@ class GameController(Controller):
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_MULTIBALL and ball is not None:
+            elif effect == MULTIBALL_BLK and ball is not None:
                 for _ in range(2):
                     new_ball = Ball(ball.x, ball.y, ball.radius, (255, 255, 255))
                     speed = (ball.vx**2 + ball.vy**2) ** 0.5
@@ -273,11 +287,11 @@ class GameController(Controller):
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_BOMB:
+            elif effect == BOMB_BLK:
                 pygame.event.post(
                     pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
                 )
-            elif effect == SpriteBlock.TYPE_PAD_EXPAND:
+            elif effect == PAD_EXPAND_BLK:
                 old_size = self.paddle.size
                 if old_size < Paddle.SIZE_LARGE:
                     self.paddle.set_size(old_size + 1)
@@ -305,7 +319,7 @@ class GameController(Controller):
                             {"event": PaddleGrowEvent(self.paddle.width, at_max=True)},
                         )
                     )
-            elif effect == SpriteBlock.TYPE_PAD_SHRINK:
+            elif effect == PAD_SHRINK_BLK:
                 old_size = self.paddle.size
                 if old_size > Paddle.SIZE_SMALL:
                     self.paddle.set_size(old_size - 1)
@@ -337,14 +351,14 @@ class GameController(Controller):
                             },
                         )
                     )
-            elif effect == SpriteBlock.TYPE_TIMER:
+            elif effect == TIMER_BLK:
                 self.level_manager.add_time(20)
                 pygame.event.post(
                     pygame.event.Event(
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
                     )
                 )
-            elif effect == SpriteBlock.TYPE_REVERSE:
+            elif effect == REVERSE_BLK:
                 self.toggle_reverse()
                 pygame.event.post(
                     pygame.event.Event(
@@ -352,7 +366,7 @@ class GameController(Controller):
                         {"event": SpecialReverseChangedEvent(self.reverse)},
                     )
                 )
-            elif effect == SpriteBlock.TYPE_STICKY:
+            elif effect == STICKY_BLK:
                 logger.debug("Sticky block hit: enabling sticky paddle mode.")
                 self.enable_sticky()
 
@@ -604,17 +618,3 @@ class GameController(Controller):
     def on_new_level_loaded(self) -> None:
         """Call this when a new level is loaded to reset sticky state."""
         self.disable_sticky()
-
-
-# Define the set of special block types
-SPECIAL_BLOCK_TYPES = {
-    SpriteBlock.TYPE_PAD_EXPAND,
-    SpriteBlock.TYPE_PAD_SHRINK,
-    SpriteBlock.TYPE_STICKY,
-    SpriteBlock.TYPE_REVERSE,
-    SpriteBlock.TYPE_TIMER,
-    SpriteBlock.TYPE_BOMB,
-    SpriteBlock.TYPE_EXTRABALL,
-    SpriteBlock.TYPE_MULTIBALL,
-    # Add any other special types as needed
-}

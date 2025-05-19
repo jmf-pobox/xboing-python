@@ -7,11 +7,11 @@ from di_module import XBoingModule
 from engine.audio_manager import AudioManager
 from engine.input import InputManager
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 from renderers.ammo_renderer import AmmoRenderer
 from renderers.bullet_renderer import BulletRenderer
@@ -27,7 +27,7 @@ def test_di_provides_ammo_components():
     lm = LevelManager()
     bm = BallManager()
     paddle = Paddle(0, 0, 10, 10)
-    sbm = SpriteBlockManager(0, 0)
+    sbm = BlockManager(0, 0)
     gc = Mock(spec=GameController)
     gv = Mock(spec=GameView)
     gv.renderer = Mock()  # Add renderer attribute to fix DI module initialization

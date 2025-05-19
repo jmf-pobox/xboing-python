@@ -1,67 +1,45 @@
-# XBoing Block Implementation
+# XBoing Block System — Current Design
 
-This document describes the implementation of blocks in the Python port of XBoing, based on the original X11 version.
+## Block Data and Configuration
 
-## Original XBoing Block Specifications
+- All block types, attributes, point values, and image mappings are defined in `assets/config/block_types.json`.
+- The canonical string constants for block types are defined in `src/game/block_types.py` and are used throughout the codebase to prevent typos and ensure consistency.
+- The mapping from level file characters to block types in `LevelManager` now uses these canonical constants.
 
-In the original XBoing game:
+## Block Implementation
 
-- Blocks are defined with dimensions of 40x20 pixels (BLOCK_WIDTH=40, BLOCK_HEIGHT=20)
-- Spacing between blocks is 7 pixels (SPACE=7)
-- Blocks have rounded edges and 3D-style appearance with different colors
-- Multiple special block types with animations and effects
+- Block logic is handled by the `Block` class and its subclasses (e.g., `CounterBlock` for counter blocks).
+- Block management (creation, removal, state updates) is handled by `BlockManager`.
+- Block rendering is stateless and handled by `BlockRenderer`, which preloads all block images and animation frames.
+- All block configuration (including special effects, point values, and image/animation data) is loaded from the JSON at startup.
 
-## Implementation Details
+## Rendering and Animation
 
-### Block Dimensions and Spacing
+- Blocks are rendered using preloaded PNG sprites, converted from the original XPMs.
+- Animated blocks (e.g., counter, death, bonus) use multiple frames as specified in the JSON.
+- Explosion/breaking animations are handled by the `Block` class, using per-type frames as specified in the JSON.
+- Special overlays (e.g., for dynamite, random block text) are partially implemented.
 
-The blocks in this implementation follow the original specifications:
-- Width: 40 pixels
-- Height: 20 pixels
-- Spacing between blocks: 7 pixels
+## Block Types and Effects
 
-### Sprite-Based Rendering
+- All block types from the original game are present, including standard, special, powerup, and animated blocks.
+- Special effects (e.g., ammo, multiball, paddle shrink/expand, sticky, etc.) are triggered using canonical string constants, not hardcoded strings or ints.
+- Unbreakable and special blocks are handled according to their type and configuration.
+- Point values and behaviors are fully data-driven and match the canonical JSON.
 
-Rather than drawing shapes with pygame's drawing primitives, this implementation uses the actual sprites from the original XBoing game:
+## Testing and Compliance
 
-1. Original XPM files are converted to PNG format using the provided `xpm_to_png.py` tool
-2. The sprites are loaded and cached to improve performance
-3. Animated blocks have multiple frames that cycle during gameplay
+- All tests use the canonical string constants and are updated to match the data-driven system.
+- The codebase is fully PEP 8/257/484 compliant, type-checked, and formatted.
+- Legacy integer constants, static mappings, and dead code have been removed.
 
-### Block Positioning
+## Outstanding Gaps (as of now)
 
-Blocks are positioned following the original XBoing's algorithm:
-- Horizontal spacing: Each block is positioned with a 7-pixel margin between blocks
-- Vertical spacing: Blocks have 7 pixels between rows
-- The entire grid is offset to be centered in the play area
+- Chain explosions (e.g., bomb block): Logic for triggering neighbor explosions is not fully implemented.
+- Block overlays (dynamite, random block text): Some overlays are not yet rendered.
+- Full parity with C version: Some special block behaviors and animations are not yet ported.
+- Ensure all block types in `block_types.json` are covered in tests and code.
 
-### Block Types
+---
 
-The implementation includes all block types from the original game:
-- Regular colored blocks (red, blue, green, yellow, purple, tan)
-- Special blocks (bomb, extraball, multiball, etc.)
-- Animated blocks (counter blocks, death blocks)
-- Powerup blocks (sticky, paddle expand/shrink, etc.)
-
-## Collision Detection
-
-Collision detection with blocks:
-1. Uses rectangle-based collision detection with additional precision for angles
-2. Calculates proper bounce angles based on where the ball hits the block
-3. Triggers block animations and breakage when appropriate
-
-## Usage
-
-The sprite-based blocks are implemented in the `SpriteBlock` and `SpriteBlockManager` classes, which replace the simpler drawn blocks that were previously used. 
-
-To create a new level with blocks:
-
-```python
-# Create a block manager with proper positioning
-block_manager = SpriteBlockManager(play_area_x, play_area_y)
-
-# Create a level with the specified parameters
-block_manager.create_level(level_number, play_area_width, top_margin)
-```
-
-Each block is positioned precisely within the grid, and the spacing between blocks matches the original XBoing game for authentic reproduction.
+The XBoing Python block system is now fully data-driven, using canonical constants and JSON configuration for all block types and behaviors. Rendering, animation, and special effects are handled by dedicated, stateless classes. The codebase is clean, modern, and maintainable, with only a few advanced features (like chain explosions and overlays) remaining for full parity with the original.

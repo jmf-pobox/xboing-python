@@ -7,11 +7,11 @@ from controllers.game_controller import GameController
 from engine.graphics import Renderer
 from engine.input import InputManager
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from layout.game_layout import GameLayout
 
 
@@ -27,7 +27,7 @@ def make_controller():
     lm = LevelManager()
     bm = BallManager()
     paddle = Paddle(0, 0, 10, 10)
-    sbm = SpriteBlockManager(0, 0)
+    sbm = BlockManager(0, 0)
     im = InputManager()
     layout = GameLayout(495, 580)
     renderer = Mock(spec=Renderer)

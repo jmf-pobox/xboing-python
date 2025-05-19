@@ -94,15 +94,14 @@ class Ball:
         self.animation_frame: int = 0
         self.frame_counter: int = 0
         self.birth_animation: bool = False
+        # Main ball animation state
+        self.anim_frame: int = 0
+        self.anim_counter: float = 0.0
+        self.anim_frame_ms = 100  # Animation frame duration in ms (was ANIM_FRAME_MS)
 
         # Ensure sprites are loaded
         if Ball.sprites is None:
             Ball.load_sprites()
-
-        # Select a random ball sprite from the available ones
-        self.sprite_index: int = (
-            random.randint(0, len(Ball.sprites) - 1) if Ball.sprites else 0
-        )
 
         # Create the collision rect
         self.rect: pygame.Rect = pygame.Rect(
@@ -137,6 +136,17 @@ class Ball:
             tuple: (is_active, hit_paddle, hit_wall) - ball status and collision info
 
         """
+        # Animate main ball (not during birth animation)
+        if (
+            not self.birth_animation
+            and Ball.sprites is not None
+            and len(Ball.sprites) > 1
+        ):
+            self.anim_counter += delta_ms
+            if self.anim_counter >= self.anim_frame_ms:
+                self.anim_counter -= self.anim_frame_ms
+                self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
+
         if not self.active:
             return (False, False, False)
 
@@ -322,9 +332,9 @@ class Ball:
                     self.animation_frame = 0
                     self.birth_animation = False
         else:
-            # Draw regular ball sprite
+            # Draw animated main ball sprite
             assert Ball.sprites is not None
-            sprite = Ball.sprites[self.sprite_index]
+            sprite = Ball.sprites[self.anim_frame]
             sprite_rect = sprite.get_rect()
             sprite_rect.center = (int(self.x), int(self.y))
             surface.blit(sprite, sprite_rect)

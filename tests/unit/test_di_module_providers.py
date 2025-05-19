@@ -5,11 +5,11 @@ import pytest
 
 from di_module import XBoingModule
 from game.ball_manager import BallManager
+from game.block_manager import BlockManager
 from game.bullet_manager import BulletManager
 from game.game_state import GameState
 from game.level_manager import LevelManager
 from game.paddle import Paddle
-from game.sprite_block import SpriteBlockManager
 from renderers.bullet_renderer import BulletRenderer
 
 
@@ -26,7 +26,7 @@ def make_module():
     lm = LevelManager()
     bm = BallManager()
     paddle = Paddle(0, 0, 10, 10)
-    sbm = SpriteBlockManager(0, 0)
+    sbm = BlockManager(0, 0)
     gc = Mock()
     gv = Mock()
     gv.renderer = Mock()
