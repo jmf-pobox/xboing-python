@@ -179,7 +179,7 @@ class BlockManager:
 
     def get_breakable_count(self) -> int:
         """Get the number of breakable blocks (excluding unbreakable ones)."""
-        return sum(1 for block in self.blocks if block.type != "BLACK_BLK")
+        return sum(1 for block in self.blocks if block.type != BLACK_BLK)
 
     def remaining_blocks(self) -> int:
         """Return the number of blocks that are not broken."""
