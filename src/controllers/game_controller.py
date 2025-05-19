@@ -118,36 +118,32 @@ class GameController(Controller):
         """
         for event in events:
             logger.debug(f"[handle_events] Event received: {event}")
-            # --- Section: Ammo Fired (K key) ---
-            if (
-                event.type == pygame.KEYDOWN
-                and event.key == pygame.K_k
-                and self.ball_manager.has_ball_in_play()
-            ) or (event.type == 1025 and self.ball_manager.has_ball_in_play()):
-                logger.debug(f"About to fire ammo via game_state: {self.game_state}")
-                changes = self.game_state.fire_ammo()
-                for change in changes:
-                    pygame.event.post(
-                        pygame.event.Event(pygame.USEREVENT, {"event": change})
-                    )
-                    if isinstance(change, AmmoFiredEvent):
-                        x, _ = self.paddle.get_center()
-                        play_rect = self.layout.get_play_rect()
-                        bullet_radius = 4
-                        y = self.paddle.rect.top - bullet_radius - 1
-                        logger.warning(f"Firing bullet at y={y}")
-                        logger.warning(
-                            f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
+            # --- Section: Ammo Fired or Ball Launch (K key or mouse button) ---
+            is_k_key = event.type == pygame.KEYDOWN and event.key == pygame.K_k
+            is_mouse_button = event.type == 1025  # Mouse button event
+            if (is_k_key or is_mouse_button):
+                if self.ball_manager.has_ball_in_play():
+                    # Fire ammo
+                    logger.debug(f"About to fire ammo via game_state: {self.game_state}")
+                    changes = self.game_state.fire_ammo()
+                    for change in changes:
+                        pygame.event.post(
+                            pygame.event.Event(pygame.USEREVENT, {"event": change})
                         )
-                        bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
-                        self.bullet_manager.add_bullet(bullet)
-            else:
-                logger.debug(f"No ammo fired. {self.ball_manager.has_ball_in_play()}")
-
-            # --- Section: Mouse Button Down (Ball Launch) ---
-            if event.type == 1025:
-                balls = self.ball_manager.balls
-                if not self.ball_manager.has_ball_in_play():
+                        if isinstance(change, AmmoFiredEvent):
+                            x, _ = self.paddle.get_center()
+                            play_rect = self.layout.get_play_rect()
+                            bullet_radius = 4
+                            y = self.paddle.rect.top - bullet_radius - 1
+                            logger.warning(f"Firing bullet at y={y}")
+                            logger.warning(
+                                f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
+                            )
+                            bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
+                            self.bullet_manager.add_bullet(bullet)
+                else:
+                    # Launch ball(s)
+                    balls = self.ball_manager.balls
                     logger.debug("[handle_events] launching ball(s)")
                     for ball in balls:
                         ball.release_from_paddle()
@@ -172,10 +168,6 @@ class GameController(Controller):
                         )
                     )
                     logger.debug("Ball(s) launched and timer started.")
-                else:
-                    logger.debug(
-                        "[handle_events] not launching: not all balls stuck to paddle"
-                    )
 
             # --- Section: BallLostEvent Handling ---
             if event.type == pygame.USEREVENT and isinstance(
@@ -200,9 +192,8 @@ class GameController(Controller):
         self.check_level_complete()
         self.handle_debug_x_key()
 
-    # TODO: Issue #5 - bug: paddle operate via the j k l keys for left, fire, right actions.
     def handle_paddle_arrow_key_movement(self, delta_ms: float) -> None:
-        """Handle paddle movement and input.
+        """Handle paddle movement and input (arrow keys and j/k/l keys).
 
         Args:
         ----
@@ -210,14 +201,22 @@ class GameController(Controller):
 
         """
         paddle_direction = 0
+        # Support both arrow keys and j/l keys for left/right
+        left_keys = [pygame.K_LEFT, pygame.K_j]
+        right_keys = [pygame.K_RIGHT, pygame.K_l]
+        logger.debug(f"[paddle movement DIAG] pygame.K_j={pygame.K_j} ({type(pygame.K_j)}), pygame.K_l={pygame.K_l} ({type(pygame.K_l)}), keys_pressed={self.input_manager.keys_pressed}")
+        logger.debug(f"[paddle movement DIAG] left_keys: {[f'{k} ({type(k)})' for k in left_keys]}, right_keys: {[f'{k} ({type(k)})' for k in right_keys]}, keys_pressed keys: {[f'{k} ({type(k)})' for k in self.input_manager.keys_pressed.keys()]}")
+        left_pressed = [k for k in left_keys if self.input_manager.is_key_pressed(k)]
+        right_pressed = [k for k in right_keys if self.input_manager.is_key_pressed(k)]
+        logger.debug(f"[paddle movement] left_pressed: {left_pressed}, right_pressed: {right_pressed}, reverse: {self.reverse}")
         if self.reverse:
-            if self.input_manager.is_key_pressed(pygame.K_LEFT):
+            if left_pressed:
                 paddle_direction = 1
-            elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
+            elif right_pressed:
                 paddle_direction = -1
-        elif self.input_manager.is_key_pressed(pygame.K_LEFT):
+        elif left_pressed:
             paddle_direction = -1
-        elif self.input_manager.is_key_pressed(pygame.K_RIGHT):
+        elif right_pressed:
             paddle_direction = 1
         play_rect = self.layout.get_play_rect()
         if play_rect:
@@ -227,17 +226,19 @@ class GameController(Controller):
             self.paddle.set_direction(0)
 
     def handle_paddle_mouse_movement(self) -> None:
-        """Handle mouse-based paddle movement."""
+        """Handle mouse-based paddle movement, but only if the mouse has moved."""
         play_rect = self.layout.get_play_rect()
         mouse_pos = self.input_manager.get_mouse_position()
         mouse_x = mouse_pos[0]
-        if self.reverse:
-            center_x = play_rect.x + play_rect.width // 2
-            mirrored_x = 2 * center_x - mouse_x
-            local_x = mirrored_x - play_rect.x - self.paddle.width // 2
-        else:
-            local_x = mouse_x - play_rect.x - self.paddle.width // 2
-        self.paddle.move_to(local_x, play_rect.width, play_rect.x)
+        if self._last_mouse_x != mouse_x:
+            if self.reverse:
+                center_x = play_rect.x + play_rect.width // 2
+                mirrored_x = 2 * center_x - mouse_x
+                local_x = mirrored_x - play_rect.x - self.paddle.width // 2
+            else:
+                local_x = mouse_x - play_rect.x - self.paddle.width // 2
+            self.paddle.move_to(local_x, play_rect.width, play_rect.x)
+        self._last_mouse_x = mouse_x
 
     def update_blocks_and_timer(self, delta_ms: float) -> None:
         """Update blocks and timer if appropriate.
