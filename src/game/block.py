@@ -38,7 +38,12 @@ class Block:
         self.height: int = config.get("height", 20)
         self.rect: pygame.Rect = pygame.Rect(x, y, self.width, self.height)
         self.image_file: str = config.get("main_sprite", "").replace(".xpm", ".png")
-        self.points: int = config.get("points", 0)
+        # Ensure points is always an int
+        points_val = config.get("points", 0)
+        try:
+            self.points: int = int(points_val)
+        except (TypeError, ValueError):
+            self.points = 0
         self.explosion_frames: list[str] = [
             f.replace(".xpm", ".png") for f in config.get("explosion_frames", [])
         ]
@@ -215,7 +220,9 @@ class CounterBlock(Block):
             self.is_hit = True
             self.hit_timer = 200
             # Update animation frame based on hits_remaining
-            if self.animation_frames and 0 <= self.hits_remaining < len(self.animation_frames):
+            if self.animation_frames and 0 <= self.hits_remaining < len(
+                self.animation_frames
+            ):
                 self.animation_frame = self.hits_remaining
         if self.hits_remaining == 0:
             broken = True
@@ -226,7 +233,6 @@ class CounterBlock(Block):
         return broken, points, effect
 
     def draw(self, surface: pygame.Surface) -> None:
-        # Select the correct frame for the current hits_remaining
         if self.state == "breaking":
             if not self.explosion_frames:
                 self.state = "destroyed"
@@ -245,10 +251,7 @@ class CounterBlock(Block):
                 is_hit=False,
             )
         else:
-            if self.hits_remaining > 1 and self.animation_frames and 0 <= (self.hits_remaining - 2) < len(self.animation_frames):
-                frame_file = self.animation_frames[self.hits_remaining - 2]
-            else:
-                frame_file = self.image_file
+            counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
             BlockRenderer.render(
                 surface=surface,
                 x=self.x,
@@ -256,6 +259,8 @@ class CounterBlock(Block):
                 width=self.width,
                 height=self.height,
                 block_type=self.type,
-                image_file=frame_file,
+                image_file=self.image_file,
                 is_hit=self.is_hit,
+                animation_frames=self.animation_frames,
+                counter_value=counter_value,
             )

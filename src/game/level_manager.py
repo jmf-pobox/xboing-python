@@ -8,6 +8,7 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 
+from game.block import CounterBlock
 from game.block_types import (
     BLACK_BLK,
     BLUE_BLK,
@@ -36,7 +37,6 @@ from game.block_types import (
     YELLOW_BLK,
 )
 from utils.asset_paths import get_levels_dir
-from game.block import CounterBlock
 
 
 class LevelManager:
@@ -382,7 +382,9 @@ class LevelManager:
                     hits = int(char)
                     if isinstance(block, CounterBlock):
                         block.hits_remaining = hits + 1
-                        if block.animation_frames and 0 <= (hits - 1) < len(block.animation_frames):
+                        if block.animation_frames and 0 <= (hits - 1) < len(
+                            block.animation_frames
+                        ):
                             block.animation_frame = hits - 1
                 elif char == "0":  # Special case for '0' counter blocks
                     if isinstance(block, CounterBlock):

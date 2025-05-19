@@ -137,7 +137,12 @@ def test_counterblock_initialization_and_hit_logic():
         "blockType": "COUNTER_BLK",
         "main_sprite": "cntblk.png",
         "points": 200,
-        "animation_frames": ["cntblk1.png", "cntblk2.png", "cntblk3.png", "cntblk4.png"],
+        "animation_frames": [
+            "cntblk1.png",
+            "cntblk2.png",
+            "cntblk3.png",
+            "cntblk4.png",
+        ],
         "explosion_frames": ["excnt1.png", "excnt2.png", "excnt3.png"],
     }
     block = CounterBlock(10, 20, config)
