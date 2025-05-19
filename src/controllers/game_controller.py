@@ -120,10 +120,12 @@ class GameController(Controller):
             # --- Section: Ammo Fired or Ball Launch (K key or mouse button) ---
             is_k_key = event.type == pygame.KEYDOWN and event.key == pygame.K_k
             is_mouse_button = event.type == 1025  # Mouse button event
-            if (is_k_key or is_mouse_button):
+            if is_k_key or is_mouse_button:
                 if self.ball_manager.has_ball_in_play():
                     # Fire ammo
-                    logger.debug(f"About to fire ammo via game_state: {self.game_state}")
+                    logger.debug(
+                        f"About to fire ammo via game_state: {self.game_state}"
+                    )
                     changes = self.game_state.fire_ammo()
                     for change in changes:
                         pygame.event.post(
@@ -203,11 +205,8 @@ class GameController(Controller):
         # Support both arrow keys and j/l keys for left/right
         left_keys = [pygame.K_LEFT, pygame.K_j]
         right_keys = [pygame.K_RIGHT, pygame.K_l]
-        logger.debug(f"[paddle movement DIAG] pygame.K_j={pygame.K_j} ({type(pygame.K_j)}), pygame.K_l={pygame.K_l} ({type(pygame.K_l)}), keys_pressed={self.input_manager.keys_pressed}")
-        logger.debug(f"[paddle movement DIAG] left_keys: {[f'{k} ({type(k)})' for k in left_keys]}, right_keys: {[f'{k} ({type(k)})' for k in right_keys]}, keys_pressed keys: {[f'{k} ({type(k)})' for k in self.input_manager.keys_pressed.keys()]}")
         left_pressed = [k for k in left_keys if self.input_manager.is_key_pressed(k)]
         right_pressed = [k for k in right_keys if self.input_manager.is_key_pressed(k)]
-        logger.debug(f"[paddle movement] left_pressed: {left_pressed}, right_pressed: {right_pressed}, reverse: {self.reverse}")
         if self.reverse:
             if left_pressed:
                 paddle_direction = 1
