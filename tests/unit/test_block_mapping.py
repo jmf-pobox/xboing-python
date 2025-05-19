@@ -126,3 +126,44 @@ def test_block_removal_after_explosion_animation():
         block_manager.update(100)
     # Now block should be removed
     assert block not in block_manager.blocks
+
+
+def test_counterblock_initialization_and_hit_logic():
+    from game.block import CounterBlock
+    from utils.block_type_loader import BlockTypeData
+
+    # Minimal config for a counter block with 3 hits and 4 animation frames
+    config: BlockTypeData = {
+        "blockType": "COUNTER_BLK",
+        "main_sprite": "cntblk.png",
+        "points": 200,
+        "animation_frames": ["cntblk1.png", "cntblk2.png", "cntblk3.png", "cntblk4.png"],
+        "explosion_frames": ["excnt1.png", "excnt2.png", "excnt3.png"],
+    }
+    block = CounterBlock(10, 20, config)
+    block.hits_remaining = 3
+    block.animation_frame = 2  # Should match hits_remaining - 1
+
+    # Hit 1: hits_remaining should decrement, animation_frame should update
+    broken, points, effect = block.hit()
+    assert not broken
+    assert block.hits_remaining == 2
+    assert block.animation_frame == 2  # Should match hits_remaining
+
+    # Hit 2
+    broken, points, effect = block.hit()
+    assert not broken
+    assert block.hits_remaining == 1
+    assert block.animation_frame == 1
+
+    # Hit 3: block should break
+    broken, points, effect = block.hit()
+    assert broken
+    assert points == 200
+    assert block.hits_remaining == 0
+    assert block.state == "breaking"
+
+    # After breaking, further hits should not decrement below 0
+    broken, points, effect = block.hit()
+    assert block.hits_remaining == 0
+    assert block.state == "breaking"

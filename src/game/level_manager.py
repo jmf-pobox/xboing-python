@@ -36,6 +36,7 @@ from game.block_types import (
     YELLOW_BLK,
 )
 from utils.asset_paths import get_levels_dir
+from game.block import CounterBlock
 
 
 class LevelManager:
@@ -378,20 +379,18 @@ class LevelManager:
 
                 # Handle special properties based on block type
                 if char in "12345":  # Counter blocks 1-5
-                    # Set hit points based on character (1-5)
                     hits = int(char)
-                    block.health = hits + 1  # Add 1 because we decrement on hit
+                    if isinstance(block, CounterBlock):
+                        block.hits_remaining = hits + 1
+                        if block.animation_frames and 0 <= (hits - 1) < len(block.animation_frames):
+                            block.animation_frame = hits - 1
                 elif char == "0":  # Special case for '0' counter blocks
-                    # In the original C code, '0' counter blocks have counterSlide=0
-                    # and don't display a number or count down
-                    block.health = 1  # Just one hit to break
-                    block.counter_value = 0  # Mark as a non-counting counter block
-
-                    # Force this block to use the base counter block image without animation
+                    if isinstance(block, CounterBlock):
+                        block.hits_remaining = 1
+                        block.animation_frame = 0
                     block.image_file = (
                         "cntblk.png"  # The base counter block image without a number
                     )
-                    # Disable animations completely for this block
                     block.animation_frames = None
 
                 # Add block to manager

@@ -204,22 +204,20 @@ class CounterBlock(Block):
 
     def __init__(self, x: int, y: int, config: BlockTypeData) -> None:
         super().__init__(x, y, config)
-        self.counter_value: int = config.get("hits", 5)
+        self.hits_remaining: int = config.get("hits", 5)
 
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
         broken = False
         points = 0
         effect = None
-        if self.counter_value > 0:
-            self.counter_value -= 1
+        if self.hits_remaining > 0:
+            self.hits_remaining -= 1
             self.is_hit = True
             self.hit_timer = 200
-            # Update animation frame based on counter_value
-            if self.animation_frames and 0 <= self.counter_value < len(
-                self.animation_frames
-            ):
-                self.animation_frame = self.counter_value
-        if self.counter_value == 0:
+            # Update animation frame based on hits_remaining
+            if self.animation_frames and 0 <= self.hits_remaining < len(self.animation_frames):
+                self.animation_frame = self.hits_remaining
+        if self.hits_remaining == 0:
             broken = True
             points = self.points
             self.state = "breaking"
@@ -228,7 +226,7 @@ class CounterBlock(Block):
         return broken, points, effect
 
     def draw(self, surface: pygame.Surface) -> None:
-        # Select the correct frame for the current counter_value
+        # Select the correct frame for the current hits_remaining
         if self.state == "breaking":
             if not self.explosion_frames:
                 self.state = "destroyed"
@@ -247,11 +245,10 @@ class CounterBlock(Block):
                 is_hit=False,
             )
         else:
-            frame_file = self.image_file
-            if self.animation_frames and 0 <= self.counter_value < len(
-                self.animation_frames
-            ):
-                frame_file = self.animation_frames[self.counter_value]
+            if self.hits_remaining > 1 and self.animation_frames and 0 <= (self.hits_remaining - 2) < len(self.animation_frames):
+                frame_file = self.animation_frames[self.hits_remaining - 2]
+            else:
+                frame_file = self.image_file
             BlockRenderer.render(
                 surface=surface,
                 x=self.x,
