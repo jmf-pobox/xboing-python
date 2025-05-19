@@ -91,36 +91,39 @@ The game is fully playable, with most core features implemented and tested. Rema
 
 ```
 xboing-python/
-├── assets/               # Game assets (images, sounds, levels)
-│   ├── images/           # All game images (balls, blocks, backgrounds, etc.)
-│   ├── sounds/           # Sound effects (WAV, AU)
-│   └── levels/           # Level data files
-├── docs/                 # Documentation and design docs
-├── scripts/              # Utility scripts for asset conversion, etc.
-├── src/                  # Source code
-│   ├── app_coordinator.py# App entry coordination
-│   ├── controllers/      # Controllers for game, window, UI, etc.
-│   ├── di_module.py      # Dependency injection setup
-│   ├── engine/           # Game engine (graphics, audio, input, window)
-│   ├── game/             # Game logic (ball, blocks, paddle, collision, state)
-│   ├── layout/           # Layout helpers and game layout logic
-│   ├── main.py           # Main entry point
-│   ├── renderers/        # Rendering helpers (digits, lives, etc.)
-│   ├── ui/               # User interface components (views, displays)
-│   └── utils/            # Utility functions and helpers
-├── tests/                # Test scripts
-│   ├── integration/      # Integration tests
-│   └── unit/             # Unit tests
-└── xboing2.4-clang/      # Original XBoing C source/assets (reference)
+├── src/
+│   └── xboing/
+│       ├── assets/           # Game assets (images, sounds, levels, config)
+│       │   ├── images/       # All game images (balls, blocks, backgrounds, etc.)
+│       │   ├── sounds/       # Sound effects (WAV)
+│       │   ├── levels/       # Level data files
+│       │   └── config/       # Block types and other config
+│       ├── controllers/      # Controllers for game, window, UI, etc.
+│       ├── engine/           # Game engine (graphics, audio, input, window)
+│       ├── game/             # Game logic (ball, blocks, paddle, collision, state)
+│       ├── layout/           # Layout helpers and game layout logic
+│       ├── renderers/        # Rendering helpers (digits, lives, etc.)
+│       ├── ui/               # User interface components (views, displays)
+│       ├── utils/            # Utility functions and helpers
+│       ├── di_module.py      # Dependency injection setup
+│       ├── app_coordinator.py# App entry coordination
+│       └── main.py           # Main entry point
+├── docs/                     # Documentation and design docs
+├── scripts/                  # Utility scripts for asset conversion, etc.
+├── tests/                    # Test scripts
+│   ├── integration/          # Integration tests
+│   └── unit/                 # Unit tests
+└── xboing2.4-clang/          # Original XBoing C source/assets (reference)
 ```
 
 ### Asset Management
 
-The game uses assets from the original XBoing converted to modern formats:
-- Original XPM graphics → PNG format
-- Original AU sound files → WAV format
+All asset path helpers resolve to `src/xboing/assets/` and its subfolders. All images, sounds, and levels are loaded from this canonical directory inside the package. Asset conversion scripts in `scripts/` should use this path for input/output.
 
-Use `scripts/sync_assets.py` to synchronize assets from the original XBoing directory.
+- Original XPM graphics → PNG format (in `src/xboing/assets/images/`)
+- Original AU sound files → WAV format (in `src/xboing/assets/sounds/`)
+
+Use the provided conversion scripts in `scripts/` to update or add assets as needed.
 
 ### Asset Migration Tools
 

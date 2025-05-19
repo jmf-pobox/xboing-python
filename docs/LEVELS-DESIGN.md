@@ -79,7 +79,7 @@ Create a `LevelManager` class that will handle:
 
 ```python
 class LevelManager:
-    def __init__(self, levels_dir="../levels"):
+    def __init__(self, levels_dir="src/xboing/assets/levels"):
         self.levels_dir = levels_dir
         self.current_level = 1
         self.max_levels = 80  # Original game has 80 levels
@@ -195,7 +195,7 @@ Create UI elements to display level information:
 Implement robust path handling to find level files:
 
 ```python
-def get_level_file_path(level_num, levels_dir="../levels"):
+def get_level_file_path(level_num, levels_dir="src/xboing/assets/levels"):
     """Get the file path for a specific level number."""
     # Format level number with leading zeros
     level_name = f"level{level_num:02d}.data"

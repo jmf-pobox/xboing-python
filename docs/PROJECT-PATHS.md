@@ -8,21 +8,26 @@ This document describes the organization of the XBoing Python project, including
 
 ```
 xboing-python/
-├── assets/                # Game assets (images, sounds, levels) for the Python port
-│   ├── images/
-│   ├── levels/
-│   └── sounds/
+├── src/
+│   └── xboing/
+│       ├── assets/           # Game assets (images, sounds, levels, config)
+│       │   ├── images/
+│       │   ├── levels/
+│       │   ├── sounds/
+│       │   └── config/
+│       ├── controllers/       # Controller logic for input and view transitions
+│       ├── engine/            # Core engine: graphics, audio, input, window, events, event_bus
+│       ├── game/              # Game logic: ball, paddle, blocks, collision, state
+│       ├── layout/            # Layout management: GameLayout, GameWindow, Rect
+│       ├── renderers/         # Stateless renderer utilities (LivesRenderer, DigitRenderer, etc.)
+│       ├── ui/                # UI components: score, lives, timer, overlays, views
+│       ├── utils/             # Utility functions and helpers (asset_loader, asset_paths, etc.)
+│       ├── di_module.py
+│       ├── app_coordinator.py
+│       └── main.py
 ├── docs/                  # Project documentation and design docs
 ├── dist/                  # Build/distribution artifacts (if any)
 ├── scripts/               # Utility scripts for asset conversion, etc.
-├── src/                   # Main Python source code
-│   ├── controllers/       # Controller logic for input and view transitions
-│   ├── engine/            # Core engine: graphics, audio, input, window, events, event_bus
-│   ├── game/              # Game logic: ball, paddle, blocks, collision, state
-│   ├── layout/            # Layout management: GameLayout, GameWindow, Rect
-│   ├── renderers/         # Stateless renderer utilities (LivesRenderer, DigitRenderer, etc.)
-│   ├── ui/                # UI components: score, lives, timer, overlays, views
-│   └── utils/             # Utility functions and helpers (asset_loader, asset_paths, etc.)
 ├── tests/                 # Test suite
 │   ├── unit/              # Unit tests
 │   └── integration/       # Integration tests
@@ -39,7 +44,7 @@ xboing-python/
 
 ## Directory & File Descriptions
 
-- **assets/**: Contains all game assets for the Python version, including images (PNG), sounds (WAV), and level data. This directory is the single source of truth for all asset files. All asset path helpers in the codebase resolve to this top-level directory.
+- **src/xboing/assets/**: Contains all game assets for the Python version, including images (PNG), sounds (WAV), level data, and config. This directory is the single source of truth for all asset files. All asset path helpers in the codebase resolve to this directory.
 
 - **docs/**: Holds all design and technical documentation, including GUI, audio, level, and block design documents, as well as project path explanations and environment usage guides.
 

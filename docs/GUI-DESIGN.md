@@ -46,8 +46,8 @@
 
 ## 6. Asset Management
 
-- All asset path helpers (in `src/utils/asset_paths.py`) resolve to the top-level `assets/` directory.
-- All images, sounds, and levels are loaded from the canonical `assets/` directory at the project root.
+- All asset path helpers (in `src/utils/asset_paths.py`) resolve to the top-level `src/xboing/assets/` directory.
+- All images, sounds, and levels are loaded from the canonical `src/xboing/assets/` directory inside the package.
 
 ---
 

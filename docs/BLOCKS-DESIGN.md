@@ -2,7 +2,7 @@
 
 ## Block Data and Configuration
 
-- All block types, attributes, point values, and image mappings are defined in `assets/config/block_types.json`.
+- All block types, attributes, point values, and image mappings are defined in `src/xboing/assets/config/block_types.json`.
 - The canonical string constants for block types are defined in `src/game/block_types.py` and are used throughout the codebase to prevent typos and ensure consistency.
 - The mapping from level file characters to block types in `LevelManager` now uses these canonical constants.
 
@@ -15,7 +15,7 @@
 
 ## Rendering and Animation
 
-- Blocks are rendered using preloaded PNG sprites, converted from the original XPMs.
+- Blocks are rendered using preloaded PNG sprites, converted from the original XPMs, located in `src/xboing/assets/images/blocks/`.
 - Animated blocks (e.g., counter, death, bonus) use multiple frames as specified in the JSON.
 - Explosion/breaking animations are handled by the `Block` class, using per-type frames as specified in the JSON.
 - Special overlays (e.g., for dynamite, random block text) are partially implemented.
