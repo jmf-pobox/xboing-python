@@ -19,13 +19,25 @@ python -m xboing
 
 ### What is XBoing?
 
-XBoing is a fast-paced, blockout-style arcade game where you control a paddle to bounce a ball around the play area, destroying blocks and collecting power-ups. Inspired by the classic arcade genre, XBoing features:
-- 80+ challenging levels with unique layouts and increasing difficulty
-- A variety of colorful block types, including indestructible, counter, bomb, sticky, and death blocks
-- Special power-ups and power-downs: multiball, extra ball, paddle expand/shrink, sticky paddle, and more
-- Lively sound effects and vibrant graphics
-- Classic arcade-style gameplay with modern conveniences
-- Addictive, skill-based action that rewards quick reflexes and strategy
+XBoing is a blockout type game where you have a paddle which you control to bounce a ball around the game zone destroying blocks with a proton ball. Each block carries a different point value. The more blocks you destroy, the better your score. The person with the highest score wins.
+
+The arena is filled with blocks and other objects. You have a paddle that can move from left to right at the bottom of the arena. You control the paddle so that the proton ball bounces around blowing up blocks and that it does not go past the paddle and out the bottom, much like a pinball game.
+
+XBoing has many features for a simple blockout type of game. Some of them are listed below :
+
+- Over 20 different block types
+- 80 pre-designed levels
+- Sound support for many systems
+- Very colourful - arcade like
+- Keyboard and mouse control
+- In game instructions
+- (originally) Australian Made :-)
+
+To be added:
+
+- Builtin WYSIWYG level editor
+- Simple installation
+- Detailed manual page
 
 Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern compatibility.
 
