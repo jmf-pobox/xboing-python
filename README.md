@@ -50,10 +50,9 @@ Or use Hatch for advanced development workflows (see below).
 
 ### Game Controls
 
-- **Left/Right Arrow Keys**: Move paddle
-- **Space**: Launch ball / Pause game
-- **Esc**: Quit game
-- **F**: Toggle fullscreen
+- **J-K-L Keys**: Move paddle left, fire/launch, move paddle right
+- **Mouse**: Move left, click to fire/launch, move right
+- **Control-Q**: Quit game
 
 ### Special Blocks & Power-ups
 
