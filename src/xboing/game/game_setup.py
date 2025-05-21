@@ -29,7 +29,7 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     play_rect = layout.get_play_rect()
     paddle_x = play_rect.x + (play_rect.width // 2) - (PADDLE_WIDTH // 2)
     paddle_y = play_rect.y + play_rect.height - Paddle.DIST_BASE
-    paddle: Paddle = Paddle(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
+    paddle: Paddle = Paddle(paddle_x, paddle_y)
     ball_manager: BallManager = BallManager()
     block_manager: BlockManager = BlockManager(play_rect.x, play_rect.y)
     level_manager: LevelManager = LevelManager()

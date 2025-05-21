@@ -98,7 +98,7 @@ class BlockManager:
         dx = obj_x - closest_x
         dy = obj_y - closest_y
         distance = (dx * dx + dy * dy) ** 0.5
-        return distance <= obj_radius
+        return bool(distance <= obj_radius)
 
     def _reflect_ball(
         self, obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
@@ -189,7 +189,7 @@ class BlockManager:
     def get_block_by_id(self, block_id: int) -> Optional[Block]:
         """Return the Block with the given ID, or None if not found."""
         for block in self.blocks:
-            if hasattr(block, "id") and block.id == block_id:  # type: ignore[attr-defined]  # Block.id is dynamic
+            if hasattr(block, "id") and block.id == block_id:
                 return block
         return None
 

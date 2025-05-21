@@ -62,5 +62,5 @@ def get_block_types() -> Dict[str, BlockTypeData]:
             )
             continue
         block_type = entry["blockType"]
-        block_types[block_type] = entry  # type: ignore
+        block_types[block_type] = entry
     return block_types

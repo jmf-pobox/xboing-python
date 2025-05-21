@@ -18,6 +18,7 @@ disable=
     W1203,  # logging-fstring-interpolation
     W0718,  # broad-exception-caught
     W0511,  # fixme
+    W2301,  # unnecessary-ellipsis
 
 [FORMAT]
 max-line-length=200

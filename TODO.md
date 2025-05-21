@@ -20,6 +20,9 @@ Keep the TODO list organized by:
 - [ ] feat(paddle): Update UI to show feedback for gun and other paddle specials
 - [p] Refactor Ball.sprites and Ball.animation_frames to always be lists, never None, and update all relevant logic and type hints.
 - [p] Encapsulate removal of inactive balls in BallManager and update controller to use it.
+- [ ] Introduce CircularGameShape as a subclass of GameShape, with unit tests.
+- [p] Add module docstrings and replace pass with ellipsis in abstract methods in game_shape.py and circular_game_shape.py.
+- [p] Refactor Paddle to inherit from GameShape, update its logic, and update tests.
 
 ## Overall Coding Standards
 - [ ] chore(lint): Progressive linter enforcement per docs/LINTER-PLAN.md for Ruff and Pylint until full compliance

@@ -1,7 +1,7 @@
 """Controller for main game logic, state updates, and event handling in XBoing."""
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Sequence
 
 import pygame
 
@@ -244,7 +244,7 @@ class GameController(Controller):
             changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
             self.post_game_state_events(changes)
 
-    def _handle_block_effects(self, effects, ball=None):
+    def _handle_block_effects(self, effects: Sequence[str], ball=None):
         """Handle special block effects for both balls and bullets."""
         logger.debug(f"Handling block effects: len = {len(effects)}")
         for effect in effects:

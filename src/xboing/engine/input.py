@@ -151,5 +151,5 @@ class InputManager:
     def get_key_name(self, key_code: int) -> str:
         """Return the name of the key for the given key code."""
         if key_code in self.key_map:
-            return self.key_map[key_code]
+            return str(self.key_map[key_code])
         return str(key_code)
