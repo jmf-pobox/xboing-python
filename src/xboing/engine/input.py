@@ -34,8 +34,6 @@ class InputManager:
         self.mouse_buttons_up: List[bool] = [False, False, False]
         self.mouse_motion: Tuple[int, int] = (0, 0)
 
-        self.key_map: Dict[int, str] = {}  # TODO: Populate with actual key mappings
-
     def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
         """Update input state for the current frame."""
         if events is None:
@@ -149,9 +147,3 @@ class InputManager:
         if 0 <= button < self.MAX_MOUSE_BUTTONS:
             return self.mouse_buttons_up[button]
         return False
-
-    def get_key_name(self, key_code: int) -> str:
-        """Return the name of the key for the given key code."""
-        if key_code in self.key_map:
-            return str(self.key_map[key_code])
-        return str(key_code)
