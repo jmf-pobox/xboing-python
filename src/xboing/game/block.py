@@ -11,11 +11,12 @@ from xboing.game.block_types import (
     SPECIAL_BLOCK_TYPES,
     UNBREAKABLE_BLOCK_TYPES,
 )
+from xboing.game.game_shape import GameShape
 from xboing.renderers.block_renderer import BlockRenderer
 from xboing.utils.block_type_loader import BlockTypeData
 
 
-class Block:
+class Block(GameShape):
     """A sprite-based breakable block in the game (formerly SpriteBlock)."""
 
     logger = logging.getLogger("xboing.Block")
@@ -24,26 +25,29 @@ class Block:
         """Initialize a sprite-based block using config data from block_types.json.
 
         Args:
-        ----
             x (int): X position
             y (int): Y position
             config (BlockTypeData): Block type configuration dict
 
         """
-        self.x: int = x
-        self.y: int = y
+        # --- Geometry and Base Class Init ---
+        width: int = config.get("width", 40)
+        height: int = config.get("height", 20)
+        super().__init__(x, y, width, height)
+
+        # --- Block Type and Image Setup ---
         self.config: BlockTypeData = config
         self.type: str = config.get("blockType", "UNKNOWN")
-        self.width: int = config.get("width", 40)
-        self.height: int = config.get("height", 20)
-        self.rect: pygame.Rect = pygame.Rect(x, y, self.width, self.height)
         self.image_file: str = config.get("main_sprite", "").replace(".xpm", ".png")
-        # Ensure points is always an int
+
+        # --- Points/Scoring ---
         points_val = config.get("points", 0)
         try:
             self.points: int = int(points_val)
         except (TypeError, ValueError):
             self.points = 0
+
+        # --- Animation and Explosion Frames ---
         self.explosion_frames: list[str] = [
             f.replace(".xpm", ".png") for f in config.get("explosion_frames", [])
         ]
@@ -51,16 +55,17 @@ class Block:
         self.animation_frames: Optional[list[str]] = (
             [f.replace(".xpm", ".png") for f in anim] if anim else None
         )
-        # Block state - set initial health based on config (add a 'health' or 'hits' field to JSON if needed)
+
+        # --- Block State and Health ---
         self.health = config.get("hits", 1)
         self.is_hit: bool = False
         self.hit_timer: float = 0.0
         self.animation_frame: int = 0
         self.animation_timer: float = 0.0
         self.animation_speed: int = 200  # ms per frame
-        # For special blocks, set up animation frames (if needed)
+
+        # --- Special Block Animation/Image Setup ---
         image_override: Optional[pygame.Surface] = None
-        # For roamer blocks which move
         self.direction: Optional[str] = None
         self.move_timer: float = 0.0
         self.move_interval: int = 1000  # ms between movements
@@ -76,11 +81,13 @@ class Block:
             self.logger.warning(
                 f"Error: Missing block image '{self.image_file}' for block type {self.type}"
             )
-            img = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            img = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
             pygame.draw.rect(
-                img, (255, 0, 255), pygame.Rect(0, 0, self.width, self.height)
+                img, (255, 0, 255), pygame.Rect(0, 0, self.rect.width, self.rect.height)
             )
             self.image = img
+
+        # --- Breaking/Explosion State ---
         self.state: str = "normal"  # 'normal', 'breaking', 'destroyed'
         self.explosion_frame_index: int = 0
         self.explosion_timer: float = 0.0
@@ -88,35 +95,37 @@ class Block:
 
     def __repr__(self) -> str:
         """Return a string representation of the block."""
-        return f"Block(x={self.x}, y={self.y}, type={self.type}, state={self.state})"
+        return f"Block(x={self.rect.x}, y={self.rect.y}, type={self.type}, state={self.state})"
 
     def update(self, delta_ms: float) -> None:
         """Update the block's state.
 
         Args:
-        ----
             delta_ms (float): Time since last frame in milliseconds
 
         """
-        # Update hit animation
+        # --- Hit Animation Section ---
         if self.is_hit:
             self.hit_timer -= delta_ms
             if self.hit_timer <= 0:
                 self.is_hit = False
-        # Update animations for special blocks
+
+        # --- Special Block Animation Section ---
         if self.animation_frames:
             self.animation_timer += delta_ms
             if self.animation_timer >= self.animation_speed:
                 self.animation_timer = 0
                 frame_index = (self.animation_frame + 1) % len(self.animation_frames)
                 self.animation_frame = int(frame_index)
-        # Update roamer movement
+
+        # --- Roamer Movement Section ---
         if self.type == ROAMER_BLK and self.direction:
             self.move_timer += delta_ms
             if self.move_timer >= self.move_interval:
                 self.move_timer = 0
                 self.set_random_direction()
-        # Handle breaking/explosion animation
+
+        # --- Breaking/Explosion Animation Section ---
         if self.state == "breaking":
             self.explosion_timer += delta_ms
             if self.explosion_timer >= self.explosion_frame_duration:
@@ -162,6 +171,7 @@ class Block:
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the block using BlockRenderer."""
+        # --- Breaking/Explosion Drawing Section ---
         if self.state == "breaking":
             if not self.explosion_frames:
                 # No explosion animation: immediately mark as destroyed and skip drawing
@@ -172,10 +182,10 @@ class Block:
             ]
             BlockRenderer.render(
                 surface=surface,
-                x=self.x,
-                y=self.y,
-                width=self.width,
-                height=self.height,
+                x=self.rect.x,
+                y=self.rect.y,
+                width=self.rect.width,
+                height=self.rect.height,
                 block_type=self.type,
                 image_file=frame_file,
                 is_hit=False,
@@ -183,10 +193,10 @@ class Block:
         else:
             BlockRenderer.render(
                 surface=surface,
-                x=self.x,
-                y=self.y,
-                width=self.width,
-                height=self.height,
+                x=self.rect.x,
+                y=self.rect.y,
+                width=self.rect.width,
+                height=self.rect.height,
                 block_type=self.type,
                 image_file=self.image_file,
                 is_hit=self.is_hit,
@@ -241,10 +251,10 @@ class CounterBlock(Block):
             ]
             BlockRenderer.render(
                 surface=surface,
-                x=self.x,
-                y=self.y,
-                width=self.width,
-                height=self.height,
+                x=self.rect.x,
+                y=self.rect.y,
+                width=self.rect.width,
+                height=self.rect.height,
                 block_type=self.type,
                 image_file=frame_file,
                 is_hit=False,
@@ -253,10 +263,10 @@ class CounterBlock(Block):
             counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
             BlockRenderer.render(
                 surface=surface,
-                x=self.x,
-                y=self.y,
-                width=self.width,
-                height=self.height,
+                x=self.rect.x,
+                y=self.rect.y,
+                width=self.rect.width,
+                height=self.rect.height,
                 block_type=self.type,
                 image_file=self.image_file,
                 is_hit=self.is_hit,
