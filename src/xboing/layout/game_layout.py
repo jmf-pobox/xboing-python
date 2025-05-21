@@ -221,7 +221,7 @@ class GameLayout:
                 self.logger.warning(
                     "Using fallback color for play background (bgrnd.png not found)"
                 )
-        except Exception as e:
+        except (pygame.error, FileNotFoundError, OSError) as e:
             self.logger.error(f"Error loading background images: {e}")
 
     def draw(self, surface: pygame.Surface) -> None:
@@ -260,5 +260,5 @@ class GameLayout:
             bg_img = load_image(bg_path, alpha=False)
             self.play_window.set_background_pixmap(bg_img)
             self.logger.debug(f"Set play area background to: {bg_file}")
-        except Exception as e:
+        except (pygame.error, FileNotFoundError, OSError) as e:
             self.logger.error(f"Error loading background image: {e}")

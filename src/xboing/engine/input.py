@@ -57,7 +57,8 @@ class InputManager:
                 self.keys_down.add(event.key)
                 try:
                     key_name = pygame.key.name(event.key)
-                except Exception:
+                except (ValueError, pygame.error) as e:
+                    self.logger.debug(f"Error getting key name for {event.key}: {e}")
                     key_name = str(event.key)
                 self.logger.debug(f"[InputManager] KEYDOWN: {event.key} ({key_name})")
 
@@ -66,7 +67,8 @@ class InputManager:
                 self.keys_up.add(event.key)
                 try:
                     key_name = pygame.key.name(event.key)
-                except Exception:
+                except (ValueError, pygame.error) as e:
+                    self.logger.debug(f"Error getting key name for {event.key}: {e}")
                     key_name = str(event.key)
                 self.logger.debug(f"[InputManager] KEYUP: {event.key} ({key_name})")
 

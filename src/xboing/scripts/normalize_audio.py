@@ -77,7 +77,8 @@ def normalize_directory(
         try:
             normalize_wav(wav_file, out_file)
             converted.append(str(wav_file))
-        except Exception:
+        except (OSError, subprocess.CalledProcessError) as e:
+            logger.error(f"Failed to normalize {wav_file}: {e}")
             failed.append(str(wav_file))
     return {"converted": converted, "skipped": skipped, "failed": failed}
 

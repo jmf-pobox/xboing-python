@@ -57,7 +57,7 @@ class BlockRenderer:
                             path
                         ).convert_alpha()
                         loaded_count += 1
-                    except Exception as e:
+                    except (pygame.error, FileNotFoundError, OSError) as e:
                         cls.logger.warning(f"Failed to load {main_sprite}: {e}")
                         failed_count += 1
             # Preload explosion frames
@@ -70,7 +70,7 @@ class BlockRenderer:
                             path
                         ).convert_alpha()
                         loaded_count += 1
-                    except Exception as e:
+                    except (pygame.error, FileNotFoundError, OSError) as e:
                         cls.logger.warning(f"Failed to load {frame}: {e}")
                         failed_count += 1
             # Preload animation frames
@@ -83,7 +83,7 @@ class BlockRenderer:
                             path
                         ).convert_alpha()
                         loaded_count += 1
-                    except Exception as e:
+                    except (pygame.error, FileNotFoundError, OSError) as e:
                         cls.logger.warning(f"Failed to load {frame}: {e}")
                         failed_count += 1
         cls.logger.info(f"Loaded {loaded_count} block images, {failed_count} failed.")

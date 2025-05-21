@@ -195,7 +195,7 @@ class LevelManager:
     def _safe_parse_level_file(self, level_file: str) -> Optional[Dict[str, Any]]:
         try:
             return self._parse_level_file(level_file)
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.logger.error(f"Error loading level {self.current_level}: {e}")
             return None
 
@@ -478,6 +478,6 @@ class LevelManager:
                         layout.append(row)
 
                 return {"title": title, "time_bonus": time_bonus, "layout": layout}
-        except Exception as e:
+        except (OSError, ValueError) as e:
             self.logger.error(f"Error parsing level file {file_path}: {e}")
             return None

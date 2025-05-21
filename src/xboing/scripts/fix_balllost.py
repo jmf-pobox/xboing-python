@@ -97,7 +97,7 @@ def fix_balllost_au(input_path: str, output_path: str) -> bool:
         logger.info(f"Successfully converted {input_path} to {output_path}")
         return True
 
-    except Exception as e:
+    except (OSError, wave.Error) as e:
         logger.error(f"Error converting {input_path}: {e}")
         return False
 

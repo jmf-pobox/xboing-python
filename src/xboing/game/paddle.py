@@ -96,7 +96,7 @@ class Paddle(GameShape):
                 f"Large: {self.paddle_dimensions[self.SIZE_LARGE]}"
             )
 
-        except Exception as e:
+        except (pygame.error, FileNotFoundError, OSError) as e:
             logger.error(f"Error loading paddle sprites: {e}")
             # Fall back to simple rectangles with exact dimensions from original XPM files
             logger.warning(
@@ -224,7 +224,7 @@ class Paddle(GameShape):
                 # Draw the appropriate paddle sprite at the correct position
                 paddle_img = self.paddle_images[self.size]
                 surface.blit(paddle_img, self.rect.topleft)
-            except Exception as e:
+            except (pygame.error, KeyError) as e:
                 logger.error(f"Error drawing paddle sprite: {e}")
                 # Fall back to rectangle if sprite can't be drawn
                 pygame.draw.rect(surface, (200, 200, 200), self.rect)
