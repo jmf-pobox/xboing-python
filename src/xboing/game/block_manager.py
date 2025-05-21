@@ -66,14 +66,11 @@ class BlockManager:
     @check_collisions.register(Ball)
     def _(self, ball) -> Tuple[int, int, List[Any]]:
         """Check for collisions between a ball and all blocks."""
-        return self._check_block_collision(
-            obj=ball,
-            get_rect=ball.get_rect,
-            get_position=ball.get_position,
-            radius=ball.radius,
-            is_bullet=False,
-            remove_callback=None,
-        )
+        return self._check_block_collision(obj=ball,
+                                           get_position=ball.get_position,
+                                           radius=ball.radius,
+                                           is_bullet=False,
+                                           remove_callback=None)
 
     @check_collisions.register(Bullet)
     def _(self, bullet) -> Tuple[int, int, List[Any]]:
@@ -82,14 +79,12 @@ class BlockManager:
         def remove_bullet():
             bullet.active = False  # Mark bullet as inactive (caller should remove)
 
-        return self._check_block_collision(
-            obj=bullet,
-            get_rect=bullet.get_rect,
-            get_position=lambda: (bullet.x, bullet.y),
-            radius=bullet.radius,
-            is_bullet=True,
-            remove_callback=remove_bullet,
-        )
+        return self._check_block_collision(obj=bullet,
+                                           get_position=lambda: (bullet.x,
+                                                                 bullet.y),
+                                           radius=bullet.radius,
+                                           is_bullet=True,
+                                           remove_callback=remove_bullet)
 
     def _collides_with_block(
         self, obj_x: float, obj_y: float, obj_radius: float, block_rect: pygame.Rect
@@ -127,15 +122,8 @@ class BlockManager:
         self.logger.debug(f"Block hit: [{block}]")
         return block.hit()
 
-    def _check_block_collision(
-        self,
-        obj,
-        get_rect,
-        get_position,
-        radius,
-        is_bullet: bool,
-        remove_callback=None,
-    ) -> Tuple[int, int, List[Any]]:
+    def _check_block_collision(self, obj, get_position, radius,
+                               is_bullet: bool, remove_callback=None) -> Tuple[int, int, List[Any]]:
         """Shared collision logic for balls and bullets."""
         points = 0
         broken_blocks = 0

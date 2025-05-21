@@ -89,21 +89,11 @@ class BlockRenderer:
         cls.logger.info(f"Loaded {loaded_count} block images, {failed_count} failed.")
 
     @classmethod
-    def render(
-        cls,
-        surface: pygame.Surface,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
-        block_type: str,
-        image_file: str,
-        is_hit: bool = False,
-        animation_frame: Optional[int] = None,
-        animation_frames: Optional[list[str]] = None,
-        direction: Optional[str] = None,
-        counter_value: Optional[int] = None,
-    ) -> None:
+    def render(cls, surface: pygame.Surface, x: int, y: int, width: int,
+               height: int, block_type: str, image_file: str,
+               is_hit: bool = False, animation_frame: Optional[int] = None,
+               animation_frames: Optional[list[str]] = None,
+               counter_value: Optional[int] = None) -> None:
         """Render a block at the given position on the surface.
 
         Args:

@@ -254,9 +254,7 @@ class XBoingModule(Module):
         )
 
     @provider
-    def provide_game_over_view(
-        self, game_over_controller: GameOverController
-    ) -> GameOverView:
+    def provide_game_over_view(self) -> GameOverView:
         """Return a GameOverView for the UI."""
         return GameOverView(
             layout=self._layout,
@@ -296,10 +294,7 @@ class XBoingModule(Module):
         return self._game_controller
 
     @provider
-    def provide_level_complete_controller(
-        self,
-        game_view: GameView,
-    ) -> LevelCompleteController:
+    def provide_level_complete_controller(self) -> LevelCompleteController:
         """Return a LevelCompleteController for handling level completion logic."""
         return LevelCompleteController(
             self._game_state,
