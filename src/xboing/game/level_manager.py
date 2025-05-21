@@ -261,12 +261,12 @@ class LevelManager:
             return self.block_manager.get_breakable_count() == 0
         return False
 
-    def get_level_info(self) -> dict:
+    def get_level_info(self) -> Dict[str, Any]:
         """Get current level information.
 
         Returns
         -------
-            dict: Dictionary with level info (level_num, title, time_bonus, time_remaining)
+            Dict[str, Any]: Dictionary with level info (level_num, title, time_bonus, time_remaining)
 
         """
         return {
@@ -454,7 +454,7 @@ class LevelManager:
 
         Returns:
         -------
-            dict: Dictionary with level data (title, time_bonus, layout)
+            Optional[Dict[str, Any]]: Dictionary with level data (title, time_bonus, layout)
                   or None if parsing failed
 
         """
