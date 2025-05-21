@@ -186,13 +186,6 @@ class BlockManager:
         count: int = len([b for b in self.blocks if not b.is_broken()])
         return count
 
-    def get_block_by_id(self, block_id: int) -> Optional[Block]:
-        """Return the Block with the given ID, or None if not found."""
-        for block in self.blocks:
-            if hasattr(block, "id") and block.id == block_id:
-                return block
-        return None
-
     def create_block(self, x: int, y: int, block_type_key: str) -> Block:
         """Create a Block using the canonical key and config from block_types.json."""
         config = self.block_type_data.get(block_type_key)
