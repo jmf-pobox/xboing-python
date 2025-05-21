@@ -34,7 +34,7 @@ class InputManager:
         self.mouse_buttons_up: List[bool] = [False, False, False]
         self.mouse_motion: Tuple[int, int] = (0, 0)
 
-        self.key_map = {}  # TODO: Populate with actual key mappings
+        self.key_map: Dict[int, str] = {}  # TODO: Populate with actual key mappings
 
     def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
         """Update input state for the current frame."""
