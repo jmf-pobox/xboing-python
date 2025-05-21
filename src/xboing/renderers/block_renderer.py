@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pygame
 
@@ -27,7 +27,7 @@ class BlockRenderer:
     @classmethod
     def preload_images(
         cls,
-        block_type_data: dict,
+        block_type_data: Dict[str, Any],
         blocks_dir: Optional[str] = None,
         clear_cache: bool = False,
     ) -> None:
@@ -100,7 +100,7 @@ class BlockRenderer:
         image_file: str,
         is_hit: bool = False,
         animation_frame: Optional[int] = None,
-        animation_frames: Optional[list[str]] = None,
+        animation_frames: Optional[List[str]] = None,
         counter_value: Optional[int] = None,
     ) -> None:
         """Render a block at the given position on the surface.

@@ -2,7 +2,7 @@
 
 import logging
 import random
-from typing import Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pygame
 
@@ -31,8 +31,8 @@ class Block(GameShape):
 
         """
         # --- Geometry and Base Class Init ---
-        width: int = config.get("width", 40)
-        height: int = config.get("height", 20)
+        width: int = _safe_int(config.get("width", 40), 40)
+        height: int = _safe_int(config.get("height", 20), 20)
         super().__init__(x, y, width, height)
 
         # --- Block Type and Image Setup ---
@@ -41,23 +41,20 @@ class Block(GameShape):
         self.image_file: str = config.get("main_sprite", "").replace(".xpm", ".png")
 
         # --- Points/Scoring ---
-        points_val = config.get("points", 0)
-        try:
-            self.points: int = int(points_val)
-        except (TypeError, ValueError):
-            self.points = 0
+        self.points: int = _safe_int(config.get("points", 0), 0)
 
         # --- Animation and Explosion Frames ---
-        self.explosion_frames: list[str] = [
-            f.replace(".xpm", ".png") for f in config.get("explosion_frames", [])
+        explosion_frames_val = config.get("explosion_frames", [])
+        self.explosion_frames: List[str] = [
+            str(f).replace(".xpm", ".png") for f in explosion_frames_val
         ]
         anim = config.get("animation_frames")
-        self.animation_frames: Optional[list[str]] = (
-            [f.replace(".xpm", ".png") for f in anim] if anim else None
+        self.animation_frames: Optional[List[str]] = (
+            [str(f).replace(".xpm", ".png") for f in anim] if anim else None
         )
 
         # --- Block State and Health ---
-        self.health = config.get("hits", 1)
+        self.health = _safe_int(config.get("hits", 1), 1)
         self.is_hit: bool = False
         self.hit_timer: float = 0.0
         self.animation_frame: int = 0
@@ -210,7 +207,7 @@ class Block(GameShape):
 
     def is_broken(self) -> bool:
         """Check if the block is broken."""
-        return self.health <= 0
+        return bool(self.health <= 0)
 
 
 class CounterBlock(Block):
@@ -218,7 +215,7 @@ class CounterBlock(Block):
 
     def __init__(self, x: int, y: int, config: BlockTypeData) -> None:
         super().__init__(x, y, config)
-        self.hits_remaining: int = config.get("hits", 5)
+        self.hits_remaining: int = _safe_int(config.get("hits", 5), 5)
 
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
         broken = False
@@ -273,3 +270,12 @@ class CounterBlock(Block):
                 animation_frames=self.animation_frames,
                 counter_value=counter_value,
             )
+
+
+def _safe_int(val: Any, default: int = 0) -> int:
+    try:
+        if val is None:
+            return default
+        return int(val)
+    except (TypeError, ValueError):
+        return default
