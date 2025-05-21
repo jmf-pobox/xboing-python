@@ -27,7 +27,7 @@ xboing-python/
 │       └── main.py
 ├── docs/                  # Project documentation and design docs
 ├── dist/                  # Build/distribution artifacts (if any)
-├── scripts/               # Utility scripts for asset conversion, etc.
+├── scripts/               # Utility scripts for asset conversion, etc. (run as modules)
 ├── tests/                 # Test suite
 │   ├── unit/              # Unit tests
 │   └── integration/       # Integration tests
@@ -50,7 +50,7 @@ xboing-python/
 
 - **dist/**: Used for build or distribution artifacts. Typically empty unless building a distributable package.
 
-- **scripts/**: Contains utility scripts for asset conversion (e.g., XPM to PNG, AU to WAV), asset synchronization, and other development tools. These scripts help bridge the gap between the legacy and modern codebases.
+- **scripts/**: Contains utility scripts for asset conversion (e.g., XPM to PNG, AU to WAV), asset synchronization, and other development tools. These scripts help bridge the gap between the legacy and modern codebases. Run these scripts as modules, e.g., `python -m xboing.scripts.convert_au_to_wav`.
 
 - **src/**: The main source code for the Python implementation.  N.B. 'src' is already in the PYTHONPATH and should not appear in imports.
   - **src/controllers/**: Controller logic for input handling and view transitions.

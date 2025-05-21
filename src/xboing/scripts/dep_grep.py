@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=duplicate-code
 """Scan XBoing Python packages and output their inter-package dependencies.
 
 Scans each module in each src package and outputs which packages depend upon which other packages.
@@ -7,9 +8,13 @@ Usage:
   python scripts/dep_grep.py
 """
 
+import argparse
+import logging
 from pathlib import Path
 import re
 from typing import Dict, Set
+
+from xboing.scripts.utils import run_cli_conversion
 
 SRC_DIR = Path(__file__).parent.parent / "src"
 PACKAGES = [
@@ -21,6 +26,8 @@ PACKAGES = [
     "ui",
     "utils",
 ]
+
+logger = logging.getLogger("xboing.scripts.dep_grep")
 
 
 def find_package_dependencies() -> Dict[str, Set[str]]:
@@ -63,10 +70,26 @@ def print_dependencies(deps: Dict[str, Set[str]]) -> None:
         print(f"{pkg}: {dep_list}")
 
 
-def main() -> None:
+def main() -> int:
     """Find and print the package dependencies."""
-    deps = find_package_dependencies()
-    print_dependencies(deps)
+    parser = argparse.ArgumentParser(
+        description="Find and print the package dependencies."
+    )
+
+    def conversion_func(input_path, output_path, dry_run=False):  # pylint: disable=unused-argument
+        # Arguments are unused; required for run_cli_conversion signature
+        deps = find_package_dependencies()
+        print_dependencies(deps)
+        return {"converted": [], "skipped": [], "failed": []}
+
+    return run_cli_conversion(
+        parser,
+        ".",
+        ".",
+        logger,
+        conversion_func,
+        None,
+    )
 
 
 if __name__ == "__main__":

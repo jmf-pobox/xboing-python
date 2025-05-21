@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=duplicate-code
 
 """
 XBoing Audio Normalization Script.
@@ -28,6 +29,11 @@ import logging
 from pathlib import Path
 import subprocess
 
+from xboing.scripts.utils import (
+    print_conversion_summary,
+    run_cli_conversion,
+)
+
 logger = logging.getLogger("xboing.scripts.normalize_audio")
 
 
@@ -54,29 +60,42 @@ def normalize_wav(input_file: Path, output_file: Path) -> bool:
         return False
 
 
-def main() -> None:
+def normalize_directory(input_path, output_path, dry_run=False):
+    """Normalize all .wav files in the input directory and return a results dict."""
+    output_path.mkdir(parents=True, exist_ok=True)
+    converted = []
+    skipped = []
+    failed = []
+    for wav_file in input_path.glob("*.wav"):
+        out_file = output_path / wav_file.name
+        if dry_run:
+            skipped.append(str(wav_file))
+            continue
+        try:
+            normalize_wav(wav_file, out_file)
+            converted.append(str(wav_file))
+        except Exception:
+            failed.append(str(wav_file))
+    return {"converted": converted, "skipped": skipped, "failed": failed}
+
+
+def main() -> int:
     """Parse arguments and normalize all .wav files in the input directory."""
     parser = argparse.ArgumentParser(
         description="Normalize loudness of .wav files in a directory."
     )
-    parser.add_argument(
-        "--input", "-i", default="assets/sounds", help="Input directory with .wav files"
-    )
-    parser.add_argument(
-        "--output",
-        "-o",
-        default="assets/sounds/normalized",
-        help="Output directory for normalized files",
-    )
-    args = parser.parse_args()
 
-    input_dir = Path(args.input)
-    output_dir = Path(args.output)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    def conversion_func(input_path, output_path, dry_run=False):
+        return normalize_directory(input_path, output_path, dry_run=dry_run)
 
-    for wav_file in input_dir.glob("*.wav"):
-        out_file = output_dir / wav_file.name
-        normalize_wav(wav_file, out_file)
+    return run_cli_conversion(
+        parser,
+        "assets/sounds",
+        "assets/sounds/normalized",
+        logger,
+        conversion_func,
+        print_conversion_summary,
+    )
 
 
 if __name__ == "__main__":

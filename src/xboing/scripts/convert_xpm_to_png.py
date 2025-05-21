@@ -25,6 +25,11 @@ from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 
+from xboing.scripts.utils import (
+    print_conversion_summary,
+    run_cli_conversion,
+)
+
 # Color mapping for XBoing's named colors (based on X11 color names)
 X11_COLORS = {
     "black": (0, 0, 0, 255),
@@ -446,48 +451,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert XBoing XPM files to PNG format. Requires Pillow."
     )
-    parser.add_argument(
-        "--input",
-        "-i",
-        default="xboing2.4-clang/bitmaps",
-        help="Input directory containing XPM files (default: xboing2.4-clang/bitmaps)",
+    return run_cli_conversion(
+        parser,
+        "xboing2.4-clang/bitmaps",
+        "assets/images",
+        logger,
+        convert_directory,
+        print_conversion_summary,
     )
-    parser.add_argument(
-        "--output",
-        "-o",
-        default="assets/images",
-        help="Output directory for PNG files (default: assets/images)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview what would be converted, but do not actually convert.",
-    )
-    args = parser.parse_args()
-
-    input_path = Path(args.input).resolve()
-    output_path = Path(args.output).resolve()
-
-    if not input_path.exists() or not input_path.is_dir():
-        logger.error(
-            f"[ERROR] Input directory {input_path} does not exist or is not a directory."
-        )
-        return 1
-
-    logger.info(f"Input:  {input_path}")
-    logger.info(f"Output: {output_path}")
-    logger.info(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
-
-    results = convert_directory(input_path, output_path, dry_run=args.dry_run)
-    logger.info("\nSummary:")
-    logger.info(f"  Converted: {len(results['converted'])}")
-    logger.info(f"  Skipped:   {len(results['skipped'])}")
-    logger.info(f"  Failed:    {len(results['failed'])}")
-    if results["failed"]:
-        logger.info("  Failed files:")
-        for f in results["failed"]:
-            logger.info(f"    - {f}")
-    return 0
 
 
 if __name__ == "__main__":

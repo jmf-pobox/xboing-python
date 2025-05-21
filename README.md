@@ -120,7 +120,9 @@ xboing-python/
 │       ├── app_coordinator.py# App entry coordination
 │       └── main.py           # Main entry point
 ├── docs/                     # Documentation and design docs
-├── scripts/                  # Utility scripts for asset conversion, etc.
+├── src/
+│   └── xboing/
+│       └── scripts/         # Utility scripts for asset conversion, etc. (run as modules)
 ├── tests/                    # Test scripts
 │   ├── integration/          # Integration tests
 │   └── unit/                 # Unit tests
@@ -143,22 +145,22 @@ Use the provided conversion scripts in `scripts/` to update or add assets as nee
 hatch run test
 
 # Convert XPM to PNG (for new assets)
-python scripts/convert_xpm_to_png.py path/to/image.xpm output.png
+python -m xboing.scripts.convert_xpm_to_png --input path/to/image.xpm --output output.png
 
 # Convert AU to WAV (for new sounds)
-python scripts/convert_au_to_wav.py path/to/sound.au output.wav
+python -m xboing.scripts.convert_au_to_wav --input path/to/sound.au --output output.wav
 
 # Normalize all audio files in the assets directory
-python scripts/normalize_audio.py
+python -m xboing.scripts.normalize_audio
 
 # Fix background images (formatting, transparency, etc.)
-python scripts/fix_background.py
+python -m xboing.scripts.fix_background
 
 # Fix ball lost sound or related assets
-python scripts/fix_balllost.py
+python -m xboing.scripts.fix_balllost
 
 # Search dependencies in the codebase
-python scripts/dep_grep.py <search_term>
+python -m xboing.scripts.dep_grep <search_term>
 ```
 
 ### Design Documentation
