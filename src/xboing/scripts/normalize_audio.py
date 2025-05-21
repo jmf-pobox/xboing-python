@@ -28,6 +28,7 @@ import argparse
 import logging
 from pathlib import Path
 import subprocess
+from typing import Dict, List
 
 from xboing.scripts.utils import (
     print_conversion_summary,
@@ -60,7 +61,9 @@ def normalize_wav(input_file: Path, output_file: Path) -> bool:
         return False
 
 
-def normalize_directory(input_path, output_path, dry_run=False):
+def normalize_directory(
+    input_path: Path, output_path: Path, dry_run: bool = False
+) -> Dict[str, List[str]]:
     """Normalize all .wav files in the input directory and return a results dict."""
     output_path.mkdir(parents=True, exist_ok=True)
     converted = []
@@ -85,7 +88,9 @@ def main() -> int:
         description="Normalize loudness of .wav files in a directory."
     )
 
-    def conversion_func(input_path, output_path, dry_run=False):
+    def conversion_func(
+        input_path: Path, output_path: Path, dry_run: bool = False
+    ) -> Dict[str, List[str]]:
         return normalize_directory(input_path, output_path, dry_run=dry_run)
 
     return run_cli_conversion(

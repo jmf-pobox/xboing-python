@@ -125,7 +125,9 @@ def main() -> int:
         description="Convert .au audio files from legacy XBoing to .wav for Python port. Requires ffmpeg."
     )
 
-    def conversion_func(input_path, output_path, dry_run=False):
+    def conversion_func(
+        input_path: Path, output_path: Path, dry_run: bool = False
+    ) -> Dict[str, List[str]]:
         if not check_ffmpeg():
             logger.error(
                 "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."

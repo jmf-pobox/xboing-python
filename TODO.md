@@ -41,3 +41,10 @@ Keep the TODO list organized by:
 
 ## Block.__init__ Comments
 - [x] Add comments and logical sections to Block.__init__ in block.py for readability
+
+- [x] Add PEP 484 type annotations and fix mypy errors in src/xboing/scripts/utils.py, normalize_audio.py, dep_grep.py, and convert_au_to_wav.py
+- [x] Run and pass all tests after changes
+- [x] Run and resolve all linter issues (black, ruff, pylint)
+- [ ] Review for further refactoring or doc improvements if needed
+
+All type, linter, and test issues for scripts/utils.py, normalize_audio.py, dep_grep.py, and convert_au_to_wav.py are resolved.

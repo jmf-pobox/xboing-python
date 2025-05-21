@@ -2,10 +2,12 @@
 
 import argparse
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 
-def parse_input_output_args(parser, default_input: str, default_output: str):
+def parse_input_output_args(
+    parser: argparse.ArgumentParser, default_input: str, default_output: str
+) -> argparse.ArgumentParser:
     """Add standard input/output/dry-run arguments to an argparse parser."""
     parser.add_argument(
         "--input",
@@ -29,7 +31,7 @@ def parse_input_output_args(parser, default_input: str, default_output: str):
 
 def resolve_and_validate_paths(
     input_path: Path, output_path: Path, logger: Any
-) -> tuple[Path, Path, bool]:
+) -> Tuple[Path, Path, bool]:
     """Resolve and validate input/output paths. Returns (input_path, output_path, valid)."""
     input_path = input_path.resolve()
     output_path = output_path.resolve()
@@ -41,7 +43,7 @@ def resolve_and_validate_paths(
     return input_path, output_path, True
 
 
-def print_conversion_summary(logger: Any, results: Dict[str, List[str]]):
+def print_conversion_summary(logger: Any, results: Dict[str, List[str]]) -> None:
     """Log a summary of converted, skipped, and failed files."""
     logger.info("\nSummary:")
     logger.info(f"  Converted: {len(results['converted'])}")
@@ -58,8 +60,8 @@ def run_cli_conversion(
     default_input: str,
     default_output: str,
     logger: Any,
-    conversion_func: Callable,
-    summary_func: Optional[Callable] = None,
+    conversion_func: Callable[[Path, Path, bool], Dict[str, List[str]]],
+    summary_func: Optional[Callable[[Any, Dict[str, List[str]]], None]] = None,
 ) -> int:
     """Standardized CLI entrypoint for conversion scripts: parses args, validates paths, runs conversion, prints summary."""
     parse_input_output_args(parser, default_input, default_output)
@@ -76,9 +78,7 @@ def run_cli_conversion(
     logger.info(
         f"Mode:   {'DRY-RUN' if getattr(args, 'dry_run', False) else 'CONVERT'}\\n"
     )
-    results = conversion_func(
-        input_path, output_path, dry_run=getattr(args, "dry_run", False)
-    )
+    results = conversion_func(input_path, output_path, getattr(args, "dry_run", False))
     if summary_func:
         summary_func(logger, results)
     return 0
