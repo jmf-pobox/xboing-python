@@ -228,7 +228,7 @@ def parse_xpm(
         tuple: (width, height, pixels) or None on failure
 
     """
-    with open(xpm_file) as f:
+    with open(xpm_file, encoding="utf-8") as f:
         content = f.read()
 
     logger.info(f"\nParsing {xpm_file}")

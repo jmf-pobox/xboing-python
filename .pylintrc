@@ -19,7 +19,6 @@ disable=
     W0718,  # broad-exception-caught
     W0511,  # fixme
     R0801,  # duplicate-code
-    W1514,  # unspecified-encoding
 
 [FORMAT]
 max-line-length=200
