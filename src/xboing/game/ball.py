@@ -153,7 +153,7 @@ class Ball:
         if self.stuck_to_paddle and paddle:
             self.x = paddle.rect.centerx + self.paddle_offset
             self.y = paddle.rect.top - self.radius - 1
-            self._update_rect()
+            self.update_rect()
             return (True, False, False)
 
         # Calculate movement with framerate independence
@@ -204,7 +204,7 @@ class Ball:
             hit_paddle = True
 
         # Update the collision rectangle
-        self._update_rect()
+        self.update_rect()
 
         # Apply some randomness to prevent predictable patterns
         if changed:
@@ -212,7 +212,7 @@ class Ball:
 
         return (True, hit_paddle, hit_wall)
 
-    def _update_rect(self) -> None:
+    def update_rect(self) -> None:
         """Update the collision rectangle based on current position."""
         self.rect.x = int(self.x - self.radius)
         self.rect.y = int(self.y - self.radius)
@@ -354,7 +354,7 @@ class Ball:
         """
         self.x = float(x)
         self.y = float(y)
-        self._update_rect()
+        self.update_rect()
 
     def set_velocity(self, vx: float, vy: float) -> None:
         """Set the ball's velocity.

@@ -18,7 +18,6 @@ disable=
     W1203,  # logging-fstring-interpolation
     W0718,  # broad-exception-caught
     W0511,  # fixme
-    W0212,  # protected-access
     R0801,  # duplicate-code
     W1514,  # unspecified-encoding
 

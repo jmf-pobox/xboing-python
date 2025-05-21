@@ -438,7 +438,7 @@ class GameController(Controller):
 
         # Log the number of active balls
         logger.debug(f"Active balls after update: {len(active_balls)}")
-        self.ball_manager._balls[:] = active_balls  # Directly update the internal list
+        self.ball_manager.remove_inactive_balls()
 
     def handle_life_loss(self) -> None:
         """Handle the loss of a life, update game state, and post relevant events."""

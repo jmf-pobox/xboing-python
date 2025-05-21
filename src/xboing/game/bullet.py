@@ -54,12 +54,12 @@ class Bullet:
         self.x += self.vx * (delta_ms / 16.67)
         self.y += self.vy * (delta_ms / 16.67)
         logger.debug(f"Bullet updated: ({old_x}, {old_y}) -> ({self.x}, {self.y})")
-        self._update_rect()
+        self.update_rect()
         # Deactivate if off screen (above top)
         if self.y + self.radius < 0:
             self.active = False
 
-    def _update_rect(self) -> None:
+    def update_rect(self) -> None:
         """Update the collision rectangle based on current position."""
         self.rect.x = int(self.x - self.radius)
         self.rect.y = int(self.y - self.radius)

@@ -61,3 +61,7 @@ class BallManager:
     def number_of_active_balls(self) -> int:
         """Return the number of active balls in play."""
         return sum(1 for ball in self._balls if ball.active)
+
+    def remove_inactive_balls(self) -> None:
+        """Remove all balls that are not active, in place."""
+        self._balls[:] = [ball for ball in self._balls if ball.is_active()]

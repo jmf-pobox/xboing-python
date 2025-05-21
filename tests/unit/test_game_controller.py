@@ -375,6 +375,7 @@ def test_update_balls_and_collisions_ball_lost():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (False, False, False)
+    ball.is_active.return_value = False
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
