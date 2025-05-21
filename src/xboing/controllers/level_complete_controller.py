@@ -7,7 +7,7 @@ import pygame
 
 from xboing.controllers.controller import Controller
 from xboing.engine.audio_manager import AudioManager
-from xboing.engine.events import MessageChangedEvent
+from xboing.engine.events import post_level_title_message
 from xboing.ui.ui_manager import UIManager
 
 logger = logging.getLogger("xboing.LevelCompleteController")
@@ -95,16 +95,7 @@ class LevelCompleteController(Controller):
         )
         level_info = self.level_manager.get_level_info()
         level_title = level_info["title"]
-        pygame.event.post(
-            pygame.event.Event(
-                pygame.USEREVENT,
-                {
-                    "event": MessageChangedEvent(
-                        level_title, color=(0, 255, 0), alignment="left"
-                    )
-                },
-            )
-        )
+        post_level_title_message(level_title)
         self.balls.clear()
         self.balls.append(self.game_controller.create_new_ball())
         self.game_view.balls = self.balls

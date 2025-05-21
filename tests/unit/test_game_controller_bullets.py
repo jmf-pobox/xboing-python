@@ -26,7 +26,7 @@ def make_controller():
     gs = GameState()
     lm = LevelManager()
     bm = BallManager()
-    paddle = Paddle(0, 0, 10, 10)
+    paddle = Paddle(0, 0)
     sbm = BlockManager(0, 0)
     im = InputManager()
     layout = GameLayout(495, 580)

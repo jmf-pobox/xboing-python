@@ -15,9 +15,7 @@ Keep the TODO list organized by:
     - Ensure this works for all cases where a ball becomes stuck (new level, after losing a ball, sticky paddle, etc.).
     - Add/adjust tests to verify the auto-launch behavior.
 - [ ] feat(paddle): Implement machine gun powerup (state, UI, firing logic)
-- [ ] feat(paddle): Add paddle movement physics (acceleration, deceleration, speed cap)
-- [ ] feat(paddle): Add missing gun-related sound effects (activation, firing, etc.)
-- [ ] feat(paddle): Update UI to show feedback for gun and other paddle specials
+
 
 ## Overall Coding Standards
 - [ ] chore(lint): Progressive linter enforcement per docs/LINTER-PLAN.md for Ruff and Pylint until full compliance
@@ -40,3 +38,6 @@ Keep the TODO list organized by:
 - [ ] test(paddle): Increase test coverage for paddle gun logic and edge cases
 - [ ] test(paddle): Add/expand integration tests for paddle features
 - [ ] test(blocks): Ensure all block types in block_types.json are covered in tests and code
+
+## Block.__init__ Comments
+- [x] Add comments and logical sections to Block.__init__ in block.py for readability

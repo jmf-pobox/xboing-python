@@ -2,6 +2,8 @@
 
 from typing import Tuple
 
+import pygame
+
 
 class XBoingEvent:
     """Base class for all XBoing game events."""
@@ -240,3 +242,29 @@ class PaddleShrinkEvent(XBoingEvent):
     def __init__(self, size: int, at_min: bool = False) -> None:
         self.size: int = size
         self.at_min: bool = at_min
+
+
+def post_level_title_message(level_title: str) -> None:
+    """Post a MessageChangedEvent for the given level title with standard color and alignment."""
+    pygame.event.post(
+        pygame.event.Event(
+            pygame.USEREVENT,
+            {
+                "event": MessageChangedEvent(
+                    level_title, color=(0, 255, 0), alignment="left"
+                )
+            },
+        )
+    )
+
+
+SPECIAL_EVENT_MAP = {
+    "reverse": SpecialReverseChangedEvent,
+    "sticky": SpecialStickyChangedEvent,
+    "save": SpecialSaveChangedEvent,
+    "fastgun": SpecialFastGunChangedEvent,
+    "nowall": SpecialNoWallChangedEvent,
+    "killer": SpecialKillerChangedEvent,
+    "x2": SpecialX2ChangedEvent,
+    "x4": SpecialX4ChangedEvent,
+}

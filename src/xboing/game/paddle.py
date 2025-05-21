@@ -10,13 +10,14 @@ from typing import Any, Dict, Optional
 
 import pygame
 
+from xboing.game.game_shape import GameShape
 from xboing.utils.asset_paths import get_paddles_dir
 
 # Setup logging
 logger = logging.getLogger("xboing.paddle")
 
 
-class Paddle:
+class Paddle(GameShape):
     """The player-controlled paddle."""
 
     # Paddle sizes - match original XBoing constants
@@ -27,28 +28,20 @@ class Paddle:
     # Distance from bottom of play area to paddle (original XBoing value)
     DIST_BASE = 30  # Matches the original C code's DIST_BASE constant
 
-    def __init__(
-        self, x: int, y: int, width: int, height: int, speed: int = 10
-    ) -> None:
-        """Initialize the paddle.
+    def __init__(self, x: int, y: int, speed: int = 10) -> None:
+        """Initialize the paddle at SIZE_LARGE with correct dimensions.
 
         Args:
-        ----
             x (int): Starting X position
             y (int): Y position (usually fixed)
-            width (int): Paddle width
-            height (int): Paddle height
             speed (int): Movement speed in pixels per frame
 
         """
-        self.x = x
-        self.y = y
-        self.width = int(width)
-        self.height = height
+        self.size = self.SIZE_LARGE  # Start with the large paddle
+        # Temporarily use large paddle dimensions for base class init
+        temp_width, temp_height = 70, 15  # Fallback if assets not loaded yet
+        super().__init__(x, y, temp_width, temp_height)
         self.speed = speed
-        self.size = (
-            self.SIZE_LARGE
-        )  # Start with the large paddle to match original game
         self.moving = False
         self.direction = 0  # -1 for left, 0 for none, 1 for right
         self.sticky = False  # For the sticky powerup
@@ -57,8 +50,8 @@ class Paddle:
         # Load paddle sprites
         self._load_sprites()
 
-        # Get the current paddle sprite and dimensions
-        self._update_rect_size()
+        # Update rect to match actual loaded dimensions
+        self.update_rect()
 
     def _load_sprites(self) -> None:
         """Load paddle sprites from assets."""
@@ -117,16 +110,13 @@ class Paddle:
                 self.SIZE_LARGE: (70, 15),  # padhuge.xpm: 70x15
             }
 
-    def _update_rect_size(self) -> None:
-        """Update the rectangle size based on current paddle size."""
+    def update_rect(self) -> None:
+        """Update the rectangle size and position based on current paddle size and position."""
         width, height = self.paddle_dimensions[self.size]
-        self.rect = pygame.Rect(
-            int(self.x - width // 2),  # Center the paddle horizontally
-            int(self.y),
-            width,
-            height,
-        )
-        self.width = int(width)
+        self.rect.x = int(self.x - width // 2)
+        self.rect.y = int(self.y)
+        self.rect.width = width
+        self.rect.height = height
 
     def update(self, delta_ms: float, play_width: int, offset_x: int = 0) -> None:
         """Update paddle position.
@@ -158,8 +148,7 @@ class Paddle:
         self.x = min(self.x, offset_x + play_width - paddle_half_width)
 
         # Update rectangle
-        self.rect.x = int(self.x - paddle_half_width)
-        self.rect.y = int(self.y)
+        self.update_rect()
 
     def set_direction(self, direction: int) -> None:
         """Set paddle movement direction.
@@ -192,7 +181,7 @@ class Paddle:
         self.x = min(self.x, offset_x + play_width - paddle_half_width)
 
         # Update rectangle
-        self.rect.x = int(self.x - paddle_half_width)
+        self.update_rect()
 
     def set_size(self, size: int) -> None:
         """Set paddle size.
@@ -210,8 +199,8 @@ class Paddle:
             self.size = size
 
             # Update rectangle with new size, maintaining center position
-            self._update_rect_size()
-            self.rect.x = int(center_x - self.rect.width // 2)
+            self.x = center_x
+            self.update_rect()
 
     def toggle_sticky(self) -> None:
         """Toggle sticky paddle state."""

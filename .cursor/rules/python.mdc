@@ -17,10 +17,10 @@ alwaysApply: false
   1. Update `TODO.md` to add tasks.
   2. Mark tasks as in progress with [p].
   3. Run `hatch run lint-fix` and resolve all issues.
-  4. Run `mypy -strict` for src and scripts directories and resolve all issues.
+  4. Run `pylint` for src and scripts directories and resolve all issues.
   5. Run `pytest` to ensure all tests pass.
   6. Make new code changes in both src and tests, while maintaining PEP 8, PEP 484, and PEP 257 compliance.
-  7. Run `mypy -strict` for src and scripts directories and modify code to resolve issues.
+  7. Run `pylint` for src and scripts directories and modify code to resolve issues.
   8. Run `hatch run lint-fix` again to modify code to resolve issues.
   9. Run `pytest` to ensure all tests pass and modify code to resolve issues.
   10. Go back to step 7-9 until no code changes are made.

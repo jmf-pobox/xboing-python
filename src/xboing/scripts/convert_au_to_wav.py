@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=duplicate-code
 """Convert .au audio files from the legacy XBoing C codebase to .wav format for the Python port.
 
 - Default input: xboing2.4-clang/sounds/
@@ -17,6 +18,11 @@ from pathlib import Path
 import subprocess
 import sys
 from typing import Dict, List, Optional
+
+from xboing.scripts.utils import (
+    print_conversion_summary,
+    run_cli_conversion,
+)
 
 logger = logging.getLogger("xboing.scripts.convert_au_to_wav")
 
@@ -118,53 +124,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert .au audio files from legacy XBoing to .wav for Python port. Requires ffmpeg."
     )
-    parser.add_argument(
-        "--input",
-        "-i",
-        default="xboing2.4-clang/sounds",
-        help="Input directory containing .au files (default: xboing2.4-clang/sounds)",
+
+    def conversion_func(input_path, output_path, dry_run=False):
+        if not check_ffmpeg():
+            logger.error(
+                "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."
+            )
+            return {"converted": [], "skipped": [], "failed": ["ffmpeg missing"]}
+        return convert_directory(input_path, output_path, dry_run=dry_run)
+
+    return run_cli_conversion(
+        parser,
+        "xboing2.4-clang/sounds",
+        "assets/sounds",
+        logger,
+        conversion_func,
+        print_conversion_summary,
     )
-    parser.add_argument(
-        "--output",
-        "-o",
-        default="assets/sounds",
-        help="Output directory for .wav files (default: assets/sounds)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview what would be converted, but do not actually convert.",
-    )
-    args = parser.parse_args()
-
-    input_path = Path(args.input).resolve()
-    output_path = Path(args.output).resolve()
-
-    if not input_path.exists() or not input_path.is_dir():
-        logger.error(
-            f"[ERROR] Input directory {input_path} does not exist or is not a directory."
-        )
-        return 1
-    if not check_ffmpeg():
-        logger.error(
-            "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."
-        )
-        return 1
-
-    logger.info(f"Input:  {input_path}")
-    logger.info(f"Output: {output_path}")
-    logger.info(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
-
-    results = convert_directory(input_path, output_path, dry_run=args.dry_run)
-    logger.info("\nSummary:")
-    logger.info(f"  Converted: {len(results['converted'])}")
-    logger.info(f"  Skipped:   {len(results['skipped'])}")
-    logger.info(f"  Failed:    {len(results['failed'])}")
-    if results["failed"]:
-        logger.warning("  Failed files:")
-        for f in results["failed"]:
-            logger.warning(f"    - {f}")
-    return 0
 
 
 if __name__ == "__main__":

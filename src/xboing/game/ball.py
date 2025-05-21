@@ -21,14 +21,14 @@ class Ball:
     """A bouncing ball with physics and collision detection."""
 
     # Class variables for sprites
-    sprites: ClassVar[Optional[List[pygame.Surface]]] = None
-    animation_frames: ClassVar[Optional[List[pygame.Surface]]] = None
+    sprites: ClassVar[List[pygame.Surface]] = []
+    animation_frames: ClassVar[List[pygame.Surface]] = []
     logger: ClassVar[logging.Logger] = logging.getLogger("xboing.Ball")
 
     @classmethod
     def load_sprites(cls) -> None:
         """Load the ball sprites once for all balls."""
-        if cls.sprites is None:
+        if not cls.sprites:
             cls.sprites = []
             cls.animation_frames = []
             assets_dir = get_balls_dir()
@@ -100,7 +100,7 @@ class Ball:
         self.anim_frame_ms = 100  # Animation frame duration in ms (was ANIM_FRAME_MS)
 
         # Ensure sprites are loaded
-        if Ball.sprites is None:
+        if not Ball.sprites:
             Ball.load_sprites()
 
         # Create the collision rect
@@ -153,7 +153,7 @@ class Ball:
         if self.stuck_to_paddle and paddle:
             self.x = paddle.rect.centerx + self.paddle_offset
             self.y = paddle.rect.top - self.radius - 1
-            self._update_rect()
+            self.update_rect()
             return (True, False, False)
 
         # Calculate movement with framerate independence
@@ -204,7 +204,7 @@ class Ball:
             hit_paddle = True
 
         # Update the collision rectangle
-        self._update_rect()
+        self.update_rect()
 
         # Apply some randomness to prevent predictable patterns
         if changed:
@@ -212,7 +212,7 @@ class Ball:
 
         return (True, hit_paddle, hit_wall)
 
-    def _update_rect(self) -> None:
+    def update_rect(self) -> None:
         """Update the collision rectangle based on current position."""
         self.rect.x = int(self.x - self.radius)
         self.rect.y = int(self.y - self.radius)
@@ -298,7 +298,7 @@ class Ball:
             surface (pygame.Surface): Surface to draw on
 
         """
-        if Ball.sprites is None or len(Ball.sprites) == 0:
+        if not Ball.sprites:
             # Fallback to circle drawing if sprites failed to load
             pygame.draw.circle(
                 surface, self.color, (int(self.x), int(self.y)), self.radius
@@ -313,9 +313,8 @@ class Ball:
             pygame.draw.circle(
                 surface, (255, 255, 255), highlight_pos, highlight_radius
             )
-        elif self.birth_animation and Ball.animation_frames is not None:
+        elif self.birth_animation and Ball.animation_frames:
             # Draw birth animation frames
-            assert Ball.animation_frames is not None
             current_frame = Ball.animation_frames[self.animation_frame]
             frame_rect = current_frame.get_rect()
             frame_rect.center = (int(self.x), int(self.y))
@@ -326,14 +325,11 @@ class Ball:
             if self.frame_counter >= 4:  # Speed of animation
                 self.frame_counter = 0
                 self.animation_frame += 1
-                if Ball.animation_frames is not None and self.animation_frame >= len(
-                    Ball.animation_frames
-                ):
+                if self.animation_frame >= len(Ball.animation_frames):
                     self.animation_frame = 0
                     self.birth_animation = False
         else:
             # Draw animated main ball sprite
-            assert Ball.sprites is not None
             sprite = Ball.sprites[self.anim_frame]
             sprite_rect = sprite.get_rect()
             sprite_rect.center = (int(self.x), int(self.y))
@@ -358,7 +354,7 @@ class Ball:
         """
         self.x = float(x)
         self.y = float(y)
-        self._update_rect()
+        self.update_rect()
 
     def set_velocity(self, vx: float, vy: float) -> None:
         """Set the ball's velocity.

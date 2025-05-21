@@ -216,7 +216,7 @@ def test_update_balls_and_collisions_paddle_expand(mock_ball):
     ball.vy = 2
     ball.update.return_value = (True, False, False)
     # Use a real Paddle for size logic
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
@@ -271,7 +271,7 @@ def test_update_balls_and_collisions_paddle_shrink(mock_ball):
     ball.vy = 2
     ball.update.return_value = (True, False, False)
     # Use a real Paddle for size logic
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
@@ -375,6 +375,7 @@ def test_update_balls_and_collisions_ball_lost():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (False, False, False)
+    ball.is_active.return_value = False
     paddle = Mock()
     block_manager = Mock()
     block_manager.check_collisions.return_value = (0, 0, [])
@@ -661,7 +662,7 @@ def test_mouse_movement_reversed():
     ball_manager = BallManager()
     from xboing.game.paddle import Paddle
 
-    paddle = Paddle(x=50, y=90, width=20, height=15)  # Use real Paddle
+    paddle = Paddle(x=50, y=90)  # Use real Paddle; width is always 70 (SIZE_LARGE)
     block_manager = Mock()
     renderer = Mock()
     input_manager = Mock()
@@ -685,13 +686,12 @@ def test_mouse_movement_reversed():
             bullet_manager=bullet_manager,
         )
         controller.reverse = True
-        # Mouse at x=80, paddle width=20, play area center=50, mirrored_x=20
+        # Mouse at x=80, paddle width=70 (SIZE_LARGE), play area center=50, mirrored_x=20
         input_manager.get_mouse_position.return_value = (80, 0)
-        paddle.width = 20
         controller._last_mouse_x = 0  # Ensure this is different from mouse_x (80)
         controller.handle_paddle_mouse_movement()
-        # local_x = mirrored_x - play_rect.x - paddle.width // 2 = 20 - 0 - 10 = 10
-        move_to.assert_called_with(10, 100, 0)
+        # local_x = mirrored_x - play_rect.x - paddle.width // 2 = 20 - 0 - 35 = -15
+        move_to.assert_called_with(-15, 100, 0)
 
 
 def test_paddle_expand_event_fired():
@@ -706,7 +706,7 @@ def test_paddle_expand_event_fired():
     ball.vy = 2
     ball.update.return_value = (True, False, False)
     # Use a real Paddle for size logic
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
@@ -757,7 +757,7 @@ def test_paddle_expand_at_max():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_LARGE)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_EXPAND_BLK])] + [
@@ -809,7 +809,7 @@ def test_paddle_shrink_event_fired():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_MEDIUM)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
@@ -860,7 +860,7 @@ def test_paddle_shrink_at_min():
     ball.vx = 1
     ball.vy = 2
     ball.update.return_value = (True, False, False)
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.set_size(Paddle.SIZE_SMALL)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [(0, 0, [PAD_SHRINK_BLK])] + [
@@ -906,7 +906,7 @@ def test_sticky_paddle_activation_event(mock_ball):
     """Test sticky paddle activates and fires event when sticky block is hit."""
     game_state = Mock()
     level_manager = Mock()
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     block_manager = Mock()
     block_manager.check_collisions.side_effect = [
         (0, 0, [STICKY_BLK]),  # Sticky block hit
@@ -953,7 +953,7 @@ def test_sticky_paddle_deactivation_on_ball_lost():
     game_state.lose_life.return_value = []  # Fix: ensure iterable
     game_state.lives = 1  # Fix: ensure int for comparison
     level_manager = Mock()
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     block_manager = Mock()
     renderer = Mock()
     input_manager = Mock()
@@ -991,7 +991,7 @@ def test_sticky_paddle_deactivation_on_new_level():
     """Test sticky paddle deactivates and fires event on new level loaded."""
     game_state = Mock()
     level_manager = Mock()
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     block_manager = Mock()
     renderer = Mock()
     input_manager = Mock()
@@ -1033,7 +1033,7 @@ def test_ball_sticks_to_paddle_when_sticky():
     pygame.display.set_mode((1, 1))  # Fix: allow rect/collision logic
 
     # Place paddle at y=100, width=40, ball at y=107 (radius=8), x=60 (centered)
-    paddle = Paddle(x=60, y=100, width=40, height=15)
+    paddle = Paddle(x=60, y=100)
     paddle.sticky = True
     ball = Ball(x=60, y=107, radius=8)  # Ball overlaps paddle
     ball.vy = 1  # Ensure downward movement
@@ -1046,7 +1046,7 @@ def test_ball_sticks_to_paddle_when_sticky():
 
 def test_ball_releases_from_paddle():
     """Test that ball releases from paddle on release_from_paddle call."""
-    paddle = Paddle(x=50, y=90, width=40, height=15)
+    paddle = Paddle(x=50, y=90)
     paddle.sticky = True
     ball = Ball(x=60, y=80)
     ball.stuck_to_paddle = True
@@ -1140,7 +1140,7 @@ def test_block_scoring_and_event_on_hit():
     game_state = GameState()
     level_manager = LevelManager()
     ball_manager = BallManager()
-    paddle = Paddle(0, 0, 40, 15)
+    paddle = Paddle(0, 0)
     block_manager = BlockManager(0, 0)
     input_manager = InputManager()
     layout = GameLayout(495, 580)

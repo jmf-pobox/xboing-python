@@ -1,7 +1,7 @@
 """Controller for main game logic, state updates, and event handling in XBoing."""
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Sequence
 
 import pygame
 
@@ -22,6 +22,7 @@ from xboing.engine.events import (
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
     WallHitEvent,
+    post_level_title_message,
 )
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
@@ -158,16 +159,7 @@ class GameController(Controller):
                     )
                     level_info = self.level_manager.get_level_info()
                     level_title = str(level_info["title"])
-                    pygame.event.post(
-                        pygame.event.Event(
-                            pygame.USEREVENT,
-                            {
-                                "event": MessageChangedEvent(
-                                    level_title, color=(0, 255, 0), alignment="left"
-                                )
-                            },
-                        )
-                    )
+                    post_level_title_message(level_title)
                     logger.debug("Ball(s) launched and timer started.")
 
             # --- Section: BallLostEvent Handling ---
@@ -252,7 +244,9 @@ class GameController(Controller):
             changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
             self.post_game_state_events(changes)
 
-    def _handle_block_effects(self, effects, ball=None, bullet=None):
+    def _handle_block_effects(
+        self, effects: Sequence[str], ball: Optional[Ball] = None
+    ) -> None:
         """Handle special block effects for both balls and bullets."""
         logger.debug(f"Handling block effects: len = {len(effects)}")
         for effect in effects:
@@ -387,7 +381,7 @@ class GameController(Controller):
                     pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
                 )
             elif broken > 0:
-                self._handle_block_effects(effects, bullet=bullet)
+                self._handle_block_effects(effects)
 
             if bullet.active:
                 active_bullets.append(bullet)
@@ -438,7 +432,7 @@ class GameController(Controller):
 
         # Log the number of active balls
         logger.debug(f"Active balls after update: {len(active_balls)}")
-        self.ball_manager._balls[:] = active_balls  # Directly update the internal list
+        self.ball_manager.remove_inactive_balls()
 
     def handle_life_loss(self) -> None:
         """Handle the loss of a life, update game state, and post relevant events."""

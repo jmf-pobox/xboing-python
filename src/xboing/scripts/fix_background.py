@@ -45,7 +45,7 @@ def create_background_from_xpm(xpm_path: str, png_path: str) -> bool:
     pattern_data = []
     pixel_data_started = False
 
-    with open(xpm_path) as f:
+    with open(xpm_path, encoding="utf-8") as f:
         for line in f:
             if "/* pixels */" in line.strip():
                 pixel_data_started = True

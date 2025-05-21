@@ -8,11 +8,13 @@ from typing import Tuple
 
 import pygame
 
+from xboing.game.circular_game_shape import CircularGameShape
+
 logger = logging.getLogger("xboing.Bullet")
 
 
-class Bullet:
-    """A projectile bullet fired by the paddle gun."""
+class Bullet(CircularGameShape):
+    """A projectile bullet fired by the paddle gun (inherits from CircularGameShape)."""
 
     def __init__(
         self,
@@ -26,27 +28,19 @@ class Bullet:
         """Initialize a new bullet.
 
         Args:
-            x: Starting X position.
-            y: Starting Y position.
-            vx: X velocity.
-            vy: Y velocity.
-            radius: Bullet radius.
-            color: RGB color tuple.
+            x (float): Starting X position.
+            y (float): Starting Y position.
+            vx (float): X velocity.
+            vy (float): Y velocity.
+            radius (int): Bullet radius.
+            color (Tuple[int, int, int]): RGB color tuple.
 
         """
-        self.x: float = x
-        self.y: float = y
+        super().__init__(x, y, radius)
         self.vx: float = vx
         self.vy: float = vy
-        self.radius: int = radius
         self.color: Tuple[int, int, int] = color
         self.active: bool = True
-        self.rect: pygame.Rect = pygame.Rect(
-            int(self.x - self.radius),
-            int(self.y - self.radius),
-            self.radius * 2,
-            self.radius * 2,
-        )
 
     def update(self, delta_ms: float) -> None:
         """Update the bullet's position based on its velocity and the elapsed time."""
@@ -54,15 +48,10 @@ class Bullet:
         self.x += self.vx * (delta_ms / 16.67)
         self.y += self.vy * (delta_ms / 16.67)
         logger.debug(f"Bullet updated: ({old_x}, {old_y}) -> ({self.x}, {self.y})")
-        self._update_rect()
+        self.update_rect()
         # Deactivate if off screen (above top)
         if self.y + self.radius < 0:
             self.active = False
-
-    def _update_rect(self) -> None:
-        """Update the collision rectangle based on current position."""
-        self.rect.x = int(self.x - self.radius)
-        self.rect.y = int(self.y - self.radius)
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the bullet as a filled circle.

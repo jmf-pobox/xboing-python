@@ -26,7 +26,7 @@ def test_di_provides_ammo_components():
     gs = GameState()
     lm = LevelManager()
     bm = BallManager()
-    paddle = Paddle(0, 0, 10, 10)
+    paddle = Paddle(0, 0)
     sbm = BlockManager(0, 0)
     gc = Mock(spec=GameController)
     gv = Mock(spec=GameView)

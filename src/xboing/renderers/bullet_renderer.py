@@ -2,6 +2,7 @@
 
 import logging
 import os
+from typing import Optional
 
 import pygame
 
@@ -22,11 +23,11 @@ class BulletRenderer:
     def __init__(self) -> None:
         """Initialize the BulletRenderer and load the bullet sprite asset."""
         bullet_sprite_path = get_bullet_sprite_path()
+        self.bullet_sprite: Optional[pygame.Surface] = None
         if os.path.exists(bullet_sprite_path):
             self.bullet_sprite = pygame.image.load(bullet_sprite_path).convert_alpha()
         else:
             self.logger.warning(f"Could not load bullet sprite: {bullet_sprite_path}")
-            self.bullet_sprite = None
 
     def render(self, surface: pygame.Surface, bullet_manager: BulletManager) -> None:
         """Render all active bullets on the given surface.

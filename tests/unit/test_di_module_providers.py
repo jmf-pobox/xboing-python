@@ -25,7 +25,7 @@ def make_module():
     gs = GameState()
     lm = LevelManager()
     bm = BallManager()
-    paddle = Paddle(0, 0, 10, 10)
+    paddle = Paddle(0, 0)
     sbm = BlockManager(0, 0)
     gc = Mock()
     gv = Mock()

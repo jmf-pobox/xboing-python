@@ -3,7 +3,7 @@
 Subscribes to LivesChangedEvent and renders itself in the lives window region.
 """
 
-from typing import List
+from typing import List, Tuple
 
 import pygame
 
@@ -58,7 +58,7 @@ class LivesDisplayComponent:
             ):
                 self.lives = event.event.lives
 
-    def get_y_and_height(self) -> tuple[int, int]:
+    def get_y_and_height(self) -> Tuple[int, int]:
         """Return the y position and height of the lives display for alignment."""
         lives_surf = self.lives_display_util.render(
             self.lives, spacing=10, scale=1.0, max_lives=self.max_lives

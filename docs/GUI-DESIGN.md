@@ -255,7 +255,7 @@ This section documents the precise pixel alignment and spacing for the top bar U
 - **Calculation:**
   ```python
   RIGHT_EDGE_X = 475
-  lives_surf = lives_renderer.render(max_lives, ...)
+  lives_surf = lives_renderer.render(max_lives,...,,
   lives_x = RIGHT_EDGE_X - lives_surf.get_width()
   # Use lives_x for both lives and ammo displays
   ```

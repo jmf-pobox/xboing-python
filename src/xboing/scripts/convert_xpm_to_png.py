@@ -25,6 +25,11 @@ from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 
+from xboing.scripts.utils import (
+    print_conversion_summary,
+    run_cli_conversion,
+)
+
 # Color mapping for XBoing's named colors (based on X11 color names)
 X11_COLORS = {
     "black": (0, 0, 0, 255),
@@ -88,7 +93,7 @@ logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
 def _extract_xpm_lines(content: str) -> List[str]:
     """Extract quoted XPM data lines from the file content."""
     match = re.search(
-        r"static\s+char\s+\*\s*\w+\s*\[\s*\]\s*=\s*{(.*?)};", content, re.DOTALL
+        r"static\s+char\s+\*\s*\w+\s*\[\s*]\s*=\s*{(.*?)};", content, re.DOTALL
     )
     if not match:
         return []
@@ -179,7 +184,6 @@ def _parse_xpm_pixels(
     lines: List[str],
     pixel_start_index: int,
     height: int,
-    width: int,
     chars_per_pixel: int,
     color_table: Dict[str, Tuple[int, int, int, int]],
 ) -> List[List[Tuple[int, int, int, int]]]:
@@ -229,7 +233,7 @@ def parse_xpm(
         tuple: (width, height, pixels) or None on failure
 
     """
-    with open(xpm_file) as f:
+    with open(xpm_file, encoding="utf-8") as f:
         content = f.read()
 
     logger.info(f"\nParsing {xpm_file}")
@@ -257,7 +261,7 @@ def parse_xpm(
 
     pixel_start_index = header_index + num_colors + 1
     pixels = _parse_xpm_pixels(
-        lines, pixel_start_index, height, width, chars_per_pixel, color_table
+        lines, pixel_start_index, height, chars_per_pixel, color_table
     )
     _validate_xpm_pixels(pixels, width, height, xpm_file)
 
@@ -447,48 +451,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert XBoing XPM files to PNG format. Requires Pillow."
     )
-    parser.add_argument(
-        "--input",
-        "-i",
-        default="xboing2.4-clang/bitmaps",
-        help="Input directory containing XPM files (default: xboing2.4-clang/bitmaps)",
+    return run_cli_conversion(
+        parser,
+        "xboing2.4-clang/bitmaps",
+        "assets/images",
+        logger,
+        convert_directory,
+        print_conversion_summary,
     )
-    parser.add_argument(
-        "--output",
-        "-o",
-        default="assets/images",
-        help="Output directory for PNG files (default: assets/images)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Preview what would be converted, but do not actually convert.",
-    )
-    args = parser.parse_args()
-
-    input_path = Path(args.input).resolve()
-    output_path = Path(args.output).resolve()
-
-    if not input_path.exists() or not input_path.is_dir():
-        logger.error(
-            f"[ERROR] Input directory {input_path} does not exist or is not a directory."
-        )
-        return 1
-
-    logger.info(f"Input:  {input_path}")
-    logger.info(f"Output: {output_path}")
-    logger.info(f"Mode:   {'DRY-RUN' if args.dry_run else 'CONVERT'}\n")
-
-    results = convert_directory(input_path, output_path, dry_run=args.dry_run)
-    logger.info("\nSummary:")
-    logger.info(f"  Converted: {len(results['converted'])}")
-    logger.info(f"  Skipped:   {len(results['skipped'])}")
-    logger.info(f"  Failed:    {len(results['failed'])}")
-    if results["failed"]:
-        logger.info("  Failed files:")
-        for f in results["failed"]:
-            logger.info(f"    - {f}")
-    return 0
 
 
 if __name__ == "__main__":
