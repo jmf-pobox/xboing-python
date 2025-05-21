@@ -18,9 +18,7 @@ disable=
     W1203,  # logging-fstring-interpolation
     W0718,  # broad-exception-caught
     W0511,  # fixme
-    E1136,  # unsubscriptable-object
     W0212,  # protected-access
-    W0105,  # pointless-string-statement
     R0801,  # duplicate-code
     W1514,  # unspecified-encoding
 

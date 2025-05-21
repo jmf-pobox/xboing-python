@@ -170,18 +170,29 @@ class Block:
             frame_file = self.explosion_frames[
                 min(self.explosion_frame_index, len(self.explosion_frames) - 1)
             ]
-            BlockRenderer.render(surface=surface, x=self.x, y=self.y,
-                                 width=self.width, height=self.height,
-                                 block_type=self.type, image_file=frame_file,
-                                 is_hit=False)
+            BlockRenderer.render(
+                surface=surface,
+                x=self.x,
+                y=self.y,
+                width=self.width,
+                height=self.height,
+                block_type=self.type,
+                image_file=frame_file,
+                is_hit=False,
+            )
         else:
-            BlockRenderer.render(surface=surface, x=self.x, y=self.y,
-                                 width=self.width, height=self.height,
-                                 block_type=self.type,
-                                 image_file=self.image_file,
-                                 is_hit=self.is_hit,
-                                 animation_frame=self.animation_frame if self.animation_frames else None,
-                                 animation_frames=self.animation_frames)
+            BlockRenderer.render(
+                surface=surface,
+                x=self.x,
+                y=self.y,
+                width=self.width,
+                height=self.height,
+                block_type=self.type,
+                image_file=self.image_file,
+                is_hit=self.is_hit,
+                animation_frame=self.animation_frame if self.animation_frames else None,
+                animation_frames=self.animation_frames,
+            )
 
     def get_rect(self) -> pygame.Rect:
         """Get the block's collision rectangle."""
@@ -228,16 +239,27 @@ class CounterBlock(Block):
             frame_file = self.explosion_frames[
                 min(self.explosion_frame_index, len(self.explosion_frames) - 1)
             ]
-            BlockRenderer.render(surface=surface, x=self.x, y=self.y,
-                                 width=self.width, height=self.height,
-                                 block_type=self.type, image_file=frame_file,
-                                 is_hit=False)
+            BlockRenderer.render(
+                surface=surface,
+                x=self.x,
+                y=self.y,
+                width=self.width,
+                height=self.height,
+                block_type=self.type,
+                image_file=frame_file,
+                is_hit=False,
+            )
         else:
             counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
-            BlockRenderer.render(surface=surface, x=self.x, y=self.y,
-                                 width=self.width, height=self.height,
-                                 block_type=self.type,
-                                 image_file=self.image_file,
-                                 is_hit=self.is_hit,
-                                 animation_frames=self.animation_frames,
-                                 counter_value=counter_value)
+            BlockRenderer.render(
+                surface=surface,
+                x=self.x,
+                y=self.y,
+                width=self.width,
+                height=self.height,
+                block_type=self.type,
+                image_file=self.image_file,
+                is_hit=self.is_hit,
+                animation_frames=self.animation_frames,
+                counter_value=counter_value,
+            )

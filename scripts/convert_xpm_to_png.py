@@ -175,9 +175,13 @@ def _parse_xpm_color_table(
     return color_table
 
 
-def _parse_xpm_pixels(lines: List[str], pixel_start_index: int, height: int,
-                      chars_per_pixel: int,
-                      color_table: Dict[str, Tuple[int, int, int, int]]) -> List[List[Tuple[int, int, int, int]]]:
+def _parse_xpm_pixels(
+    lines: List[str],
+    pixel_start_index: int,
+    height: int,
+    chars_per_pixel: int,
+    color_table: Dict[str, Tuple[int, int, int, int]],
+) -> List[List[Tuple[int, int, int, int]]]:
     """Parse the pixel data from XPM lines."""
     pixels = []
     for i in range(pixel_start_index, pixel_start_index + height):
@@ -251,8 +255,9 @@ def parse_xpm(
         return None
 
     pixel_start_index = header_index + num_colors + 1
-    pixels = _parse_xpm_pixels(lines, pixel_start_index, height,
-                               chars_per_pixel, color_table)
+    pixels = _parse_xpm_pixels(
+        lines, pixel_start_index, height, chars_per_pixel, color_table
+    )
     _validate_xpm_pixels(pixels, width, height, xpm_file)
 
     return width, height, pixels
