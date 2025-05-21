@@ -22,6 +22,7 @@ from xboing.engine.events import (
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
     WallHitEvent,
+    post_level_title_message,
 )
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
@@ -158,16 +159,7 @@ class GameController(Controller):
                     )
                     level_info = self.level_manager.get_level_info()
                     level_title = str(level_info["title"])
-                    pygame.event.post(
-                        pygame.event.Event(
-                            pygame.USEREVENT,
-                            {
-                                "event": MessageChangedEvent(
-                                    level_title, color=(0, 255, 0), alignment="left"
-                                )
-                            },
-                        )
-                    )
+                    post_level_title_message(level_title)
                     logger.debug("Ball(s) launched and timer started.")
 
             # --- Section: BallLostEvent Handling ---

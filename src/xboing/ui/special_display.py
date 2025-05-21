@@ -7,16 +7,7 @@ from typing import Any, Dict, List, Tuple
 
 import pygame
 
-from xboing.engine.events import (
-    SpecialFastGunChangedEvent,
-    SpecialKillerChangedEvent,
-    SpecialNoWallChangedEvent,
-    SpecialReverseChangedEvent,
-    SpecialSaveChangedEvent,
-    SpecialStickyChangedEvent,
-    SpecialX2ChangedEvent,
-    SpecialX4ChangedEvent,
-)
+from xboing.engine.events import SPECIAL_EVENT_MAP
 from xboing.engine.graphics import Renderer
 from xboing.layout.game_layout import GameLayout
 
@@ -37,16 +28,7 @@ class SpecialDisplay:
         ("Killer", "killer"),
         ("x4", "x4"),
     ]
-    EVENT_MAP: Dict[str, Any] = {
-        "reverse": SpecialReverseChangedEvent,
-        "sticky": SpecialStickyChangedEvent,
-        "save": SpecialSaveChangedEvent,
-        "fastgun": SpecialFastGunChangedEvent,
-        "nowall": SpecialNoWallChangedEvent,
-        "killer": SpecialKillerChangedEvent,
-        "x2": SpecialX2ChangedEvent,
-        "x4": SpecialX4ChangedEvent,
-    }
+    EVENT_MAP: Dict[str, Any] = SPECIAL_EVENT_MAP
 
     def __init__(
         self,

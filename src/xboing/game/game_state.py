@@ -4,6 +4,7 @@ import logging
 from typing import Any, Dict, List
 
 from xboing.engine.events import (
+    SPECIAL_EVENT_MAP,
     AmmoCollectedEvent,
     AmmoFiredEvent,
     GameOverEvent,
@@ -11,14 +12,6 @@ from xboing.engine.events import (
     LivesChangedEvent,
     MessageChangedEvent,
     ScoreChangedEvent,
-    SpecialFastGunChangedEvent,
-    SpecialKillerChangedEvent,
-    SpecialNoWallChangedEvent,
-    SpecialReverseChangedEvent,
-    SpecialSaveChangedEvent,
-    SpecialStickyChangedEvent,
-    SpecialX2ChangedEvent,
-    SpecialX4ChangedEvent,
     TimerUpdatedEvent,
 )
 
@@ -57,16 +50,7 @@ class GameState:
             "x2": False,
             "x4": False,
         }
-        self._event_map = {
-            "reverse": SpecialReverseChangedEvent,
-            "sticky": SpecialStickyChangedEvent,
-            "save": SpecialSaveChangedEvent,
-            "fastgun": SpecialFastGunChangedEvent,
-            "nowall": SpecialNoWallChangedEvent,
-            "killer": SpecialKillerChangedEvent,
-            "x2": SpecialX2ChangedEvent,
-            "x4": SpecialX4ChangedEvent,
-        }
+        self._event_map = SPECIAL_EVENT_MAP
         self.ammo = 4  # Initial ammo count matches original C version
 
     # --- Ammo methods ---

@@ -18,7 +18,6 @@ disable=
     W1203,  # logging-fstring-interpolation
     W0718,  # broad-exception-caught
     W0511,  # fixme
-    R0801,  # duplicate-code
 
 [FORMAT]
 max-line-length=200
