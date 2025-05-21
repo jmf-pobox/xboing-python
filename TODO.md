@@ -37,3 +37,6 @@ Keep the TODO list organized by:
 - [ ] test(paddle): Increase test coverage for paddle gun logic and edge cases
 - [ ] test(paddle): Add/expand integration tests for paddle features
 - [ ] test(blocks): Ensure all block types in block_types.json are covered in tests and code
+
+## Completed Items
+- [x] Remove unused key_map attribute and get_key_name method from InputManager in src/xboing/engine/input.py
