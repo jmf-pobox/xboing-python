@@ -45,7 +45,6 @@ include-package-data = true
 exclude = [
     ".gitignore",
     "tests/",
-    "scripts/",
     "docs/",
 ]
 
@@ -76,12 +75,12 @@ game = "python -m xboing"
 # Code quality commands
 lint = "ruff check src/ tests/"
 fmt = [
-    "black src/ tests/ scripts/",
-    "ruff check --fix src/ tests/ scripts/"
+    "black src/ tests/",
+    "ruff check --fix src/ tests/"
 ]
 lint-fix = [
-    "black src/ tests/ scripts/",
-    "ruff check --fix src/ tests/ scripts/"
+    "black src/ tests/",
+    "ruff check --fix src/ tests/"
 ]
 typecheck = "mypy src/"
 # Combined quality check
@@ -106,7 +105,7 @@ cov-game-html = [
   "coverage run --source=src -m xboing",
   "coverage html"
 ]
-format-check = "black --check src/ tests/ scripts/"
+format-check = "black --check src/ tests/"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -181,6 +180,6 @@ test-publish = [
 ]
 
 [tool.hatch.fmt]
-targets = ["src", "tests", "scripts"]
+targets = ["src", "tests"]
 formatter = "black"
 linter = "isort"
