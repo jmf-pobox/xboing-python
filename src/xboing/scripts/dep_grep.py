@@ -76,7 +76,9 @@ def main() -> int:
         description="Find and print the package dependencies."
     )
 
-    def conversion_func(input_path, output_path, dry_run=False):  # pylint: disable=unused-argument
+    def conversion_func(
+        input_path, output_path, dry_run=False
+    ):  # pylint: disable=unused-argument
         # Arguments are unused; required for run_cli_conversion signature
         deps = find_package_dependencies()
         print_dependencies(deps)
