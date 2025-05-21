@@ -16,7 +16,6 @@ Keep the TODO list organized by:
     - Add/adjust tests to verify the auto-launch behavior.
 - [ ] feat(paddle): Implement machine gun powerup (state, UI, firing logic)
 
-
 ## Overall Coding Standards
 - [ ] chore(lint): Progressive linter enforcement per docs/LINTER-PLAN.md for Ruff and Pylint until full compliance
 - [ ] investigate(pygame): Investigate DeprecationWarning from pygame/pkgdata.py about pkg_resources being deprecated. Current analysis: This warning appears to be triggered by test code using `pygame.font.Font(None, ...)`, which loads the default font and causes pygame to use its internal resource loader (which uses pkg_resources). User is not convinced this is the root cause; further investigation may be needed.
@@ -38,13 +37,3 @@ Keep the TODO list organized by:
 - [ ] test(paddle): Increase test coverage for paddle gun logic and edge cases
 - [ ] test(paddle): Add/expand integration tests for paddle features
 - [ ] test(blocks): Ensure all block types in block_types.json are covered in tests and code
-
-## Block.__init__ Comments
-- [x] Add comments and logical sections to Block.__init__ in block.py for readability
-
-- [x] Add PEP 484 type annotations and fix mypy errors in src/xboing/scripts/utils.py, normalize_audio.py, dep_grep.py, and convert_au_to_wav.py
-- [x] Run and pass all tests after changes
-- [x] Run and resolve all linter issues (black, ruff, pylint)
-- [ ] Review for further refactoring or doc improvements if needed
-
-All type, linter, and test issues for scripts/utils.py, normalize_audio.py, dep_grep.py, and convert_au_to_wav.py are resolved.
