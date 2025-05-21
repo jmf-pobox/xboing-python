@@ -35,6 +35,7 @@ class Paddle(GameShape):
             x (int): Starting X position
             y (int): Y position (usually fixed)
             speed (int): Movement speed in pixels per frame
+
         """
         self.size = self.SIZE_LARGE  # Start with the large paddle
         # Temporarily use large paddle dimensions for base class init
