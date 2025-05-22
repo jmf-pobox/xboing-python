@@ -40,3 +40,6 @@ Keep the TODO list organized by:
 
 ## Completed Items
 - [x] Remove unused key_map attribute and get_key_name method from InputManager in src/xboing/engine/input.py
+
+## New Tasks
+- [x] Create docs/DESIGN-SCORING.md: Document all scoring, bonus, and penalty logic, especially rules not already in block_types.json, based on original C code and documentation.
