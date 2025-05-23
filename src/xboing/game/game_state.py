@@ -13,6 +13,7 @@ from xboing.engine.events import (
     MessageChangedEvent,
     ScoreChangedEvent,
     TimerUpdatedEvent,
+    XBoingEvent,
 )
 
 
@@ -28,9 +29,11 @@ class LevelState:
         self._timer_ms_accum: float = 0.0  # Accumulate ms between frames
         # Add more per-level attributes as needed
 
-    def add_bonus_time(self, time_bonus: int) -> None:
+    def add_bonus_time(self, time_bonus: int) -> List[XBoingEvent]:
         """Add time bonus to the level."""
+        self.time_bonus_limit += time_bonus
         self.timer += time_bonus
+        return [TimerUpdatedEvent(self.get_bonus_time())]
 
     def set_bonus_time(self, time_bonus: int) -> None:
         """Set the time bonus limit for the level and reset the timer."""
@@ -273,14 +276,15 @@ class GameState:
         all_events += self._set_ammo(4)
         all_events += self._set_lives(3)
         all_events += self._set_score(0)
-        all_events += self.set_level(1)
+        all_events += self.set_level(1) # Could also be another level if -l flag is used
         for name in self.specials:
             all_events += self.set_special(name, False)
 
         level_manager.load_level(self.level)
-        all_events += self.set_timer(0)
         level_info = level_manager.get_level_info()
         level_title = level_info["title"]
+        time_bonus = level_info.get("time_bonus", 0)
+        all_events += self.set_timer(time_bonus)
         all_events.append(
             MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")
         )

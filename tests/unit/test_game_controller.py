@@ -342,7 +342,9 @@ def test_update_balls_and_collisions_timer(mock_ball):
     # Patch game_state.level_state to have a real timer attribute
     level_state = Mock()
     level_state.timer = 0
+    level_state.get_bonus_time.return_value = 20
     game_state.level_state = level_state
+    game_state.set_timer.return_value = []
     controller = GameController(
         game_state,
         level_manager,
@@ -356,8 +358,7 @@ def test_update_balls_and_collisions_timer(mock_ball):
     )
     with patch("pygame.event.post"):
         controller.update_balls_and_collisions(0.016)
-    # Assert that timer was incremented by 20
-    assert game_state.level_state.timer == 20
+    assert game_state.level_state.get_bonus_time() == 20
 
 
 def test_update_balls_and_collisions_ball_lost():

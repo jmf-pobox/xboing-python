@@ -237,7 +237,6 @@ class LevelManager:
             "level_num": self.current_level,
             "title": self.level_title,
             "time_bonus": self.time_bonus,
-            "time_remaining": 0,
         }
 
     def get_score_multiplier(self) -> int:

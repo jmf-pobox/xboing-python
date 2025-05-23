@@ -351,6 +351,10 @@ class GameController(Controller):
                     )
             elif effect == TIMER_BLK:
                 self.game_state.level_state.add_bonus_time(20)
+                changes = self.game_state.set_timer(
+                    self.game_state.level_state.get_bonus_time()
+                )
+                self.post_game_state_events(changes)
                 pygame.event.post(
                     pygame.event.Event(
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
@@ -615,19 +619,3 @@ class GameController(Controller):
     def on_new_level_loaded(self) -> None:
         """Call this when a new level is loaded to reset sticky state."""
         self.disable_sticky()
-
-    def _start_level(self, level_num: int) -> None:
-        """Start a new level, resetting per-level state and timer."""
-        self.logger.info(f"Starting level {level_num}")
-        self.game_state.start_new_level(level_num)
-        level_info = self.level_manager.get_level_info()
-        time_bonus = level_info.get("time_bonus", 0)
-        self.game_state.level_state.set_bonus_time(time_bonus)
-        # ... existing code ...
-
-    def _update_timer(self, delta_ms: float) -> None:
-        """Update the timer using GameState.level_state."""
-        self.game_state.level_state.decrement_bonus_time(delta_ms)
-        # Post timer update event directly without calling set_timer
-        time_remaining = self.game_state.level_state.get_bonus_time()
-        self.post_game_state_events([TimerUpdatedEvent(time_remaining)])

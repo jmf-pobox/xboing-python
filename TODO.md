@@ -55,3 +55,5 @@ Keep the TODO list organized by:
 - [p] Update LevelCompleteController to set background on game_view after loading next level
 - [ ] Fix test_game_view_draw: add set_play_background stub to MockLayout
 - [x] Fix: Timer UI at game start should show correct time_bonus for level 1 and update as expected
+- [x] Fix pygame.event.Event call for TIMER_BLK in src/xboing/controllers/game_controller.py to use two arguments and post two events.
+- [x] Ensure test mocks in tests/unit/test_game_controller.py return iterables for methods expected to return lists (e.g., set_timer).
