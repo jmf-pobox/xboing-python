@@ -14,12 +14,13 @@ PADDLE_WIDTH = 70
 PADDLE_HEIGHT = 15
 
 
-def create_game_objects(layout: Any) -> Dict[str, Any]:
+def create_game_objects(layout: Any, starting_level: int = 1) -> Dict[str, Any]:
     """Create and initialize core game objects (paddle, ball manager, block manager, level manager).
 
     Args:
     ----
         layout: The game layout object (must have get_play_rect method)
+        starting_level: The level to start at (default: 1)
 
     Returns:
     -------
@@ -32,10 +33,11 @@ def create_game_objects(layout: Any) -> Dict[str, Any]:
     paddle: Paddle = Paddle(paddle_x, paddle_y)
     ball_manager: BallManager = BallManager()
     block_manager: BlockManager = BlockManager(play_rect.x, play_rect.y)
-    level_manager: LevelManager = LevelManager()
+    level_manager: LevelManager = LevelManager(
+        layout=layout, starting_level=starting_level
+    )
     level_manager.set_block_manager(block_manager)
-    level_manager.set_layout(layout)
-    level_manager.load_level(1)
+    level_manager.load_level(starting_level)
     bullet_manager: BulletManager = BulletManager()
     bullet_renderer: BulletRenderer = BulletRenderer()
     return {

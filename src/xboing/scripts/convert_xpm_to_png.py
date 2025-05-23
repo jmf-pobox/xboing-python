@@ -23,7 +23,7 @@ import re
 import sys
 from typing import Dict, List, Optional, Tuple
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 
 from xboing.scripts.utils import (
     print_conversion_summary,
@@ -383,7 +383,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
         img.save(png_path, optimize=True)
         logger.info(f"Successfully converted {xpm_path} to {png_path}")
         result = True
-    except (OSError, ValueError, Image.UnidentifiedImageError) as e:
+    except (OSError, ValueError, UnidentifiedImageError) as e:
         logger.error(f"Failed to save PNG {png_path}: {e}")
         result = False
 
@@ -434,7 +434,7 @@ def convert_directory(
                         )
                     else:
                         results["failed"].append(str(xpm_path.relative_to(input_dir)))
-                except (OSError, ValueError, Image.UnidentifiedImageError) as e:
+                except (OSError, ValueError, UnidentifiedImageError) as e:
                     logger.error(f"[FAIL] Error converting {xpm_path}: {e}")
                     results["failed"].append(str(xpm_path.relative_to(input_dir)))
     return results

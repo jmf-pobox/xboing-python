@@ -16,10 +16,89 @@ from xboing.engine.events import (
 )
 
 
+class LevelState:
+    """Tracks per-level state, such as level number, bonus coins collected, and timer."""
+
+    def __init__(self, level_num: int = 1, time_bonus: int = 0) -> None:
+        """Initialize LevelState with the given level number and time bonus."""
+        self.level_num: int = level_num
+        self.bonus_coins_collected: int = 0
+        self.time_bonus_limit: int = time_bonus  # The starting time for the level
+        self.timer: int = time_bonus  # The current time remaining (seconds)
+        self._timer_ms_accum: float = 0.0  # Accumulate ms between frames
+        # Add more per-level attributes as needed
+
+    def set_bonus_time(self, time_bonus: int) -> None:
+        """Set the time bonus limit for the level and reset the timer."""
+        self.time_bonus_limit = time_bonus
+        self.timer = time_bonus
+        self._timer_ms_accum = 0.0
+
+    def decrement_bonus_time(self, delta_ms: float) -> None:
+        """Decrement the timer by delta_ms milliseconds, 1 second at a time."""
+        if self.timer <= 0:
+            return
+        self._timer_ms_accum += delta_ms
+        while self._timer_ms_accum >= 1000.0 and self.timer > 0:
+            self.timer -= 1
+            self._timer_ms_accum -= 1000.0
+
+    def get_bonus_time(self) -> int:
+        """Return the current time remaining (seconds)."""
+        return self.timer
+
+    def get_bonus_coins_collected(self) -> int:
+        """Return the number of bonus coins collected at this level."""
+        return self.bonus_coins_collected
+
+    def increment_bonus_coins_collected(self, amount: int = 1) -> None:
+        """Increment the number of bonus coins collected at this level."""
+        self.bonus_coins_collected += amount
+
+    def calculate_all_bonuses(self, bullets: int) -> int:
+        """Calculate the level bonus based on the level number."""
+        level_bonus = self.calculate_level_bonus()
+        timer_bonus = self.calculate_time_bonus()
+        bullet_bonus = self.calculate_bullet_bonus(bullets)
+        coin_bonus = self.calculate_coin_bonus()
+        super_bonus = self.calculate_super_bonus()
+        return level_bonus + timer_bonus + bullet_bonus + coin_bonus + super_bonus
+
+    def get_time_bonus(self) -> int:
+        """Return the starting time bonus for the level (seconds)."""
+        return self.time_bonus_limit
+
+    def calculate_super_bonus(self) -> int:
+        """Calculate the super bonus based on the number of bonus coins collected."""
+        super_bonus = 50000 if self.bonus_coins_collected > 8 else 0
+        return super_bonus
+
+    def calculate_coin_bonus(self) -> int:
+        """Calculate the coin bonus based on the number of bonus coins collected."""
+        coin_bonus: int = self.bonus_coins_collected * 3000
+        return coin_bonus
+
+    @staticmethod
+    def calculate_bullet_bonus(bullets: int) -> int:
+        """Calculate the bullet bonus based on the number of bullets fired."""
+        bullet_bonus: int = bullets * 500
+        return bullet_bonus
+
+    def calculate_time_bonus(self) -> int:
+        """Calculate the timer bonus based on the current time remaining (seconds)."""
+        timer_bonus: int = self.get_bonus_time() * 100
+        return timer_bonus
+
+    def calculate_level_bonus(self) -> int:
+        """Calculate the level bonus based on the level number."""
+        level_bonus: int = self.level_num * 100
+        return level_bonus
+
+
 class GameState:
     """Manages the current state of the game, including score, lives, level, timer, and special flags.
 
-    Provides methods to update state and generate corresponding events.
+    Provides methods to update the state and generate corresponding events.
     """
 
     logger: logging.Logger
@@ -31,6 +110,7 @@ class GameState:
     score: int
     specials: Dict[str, bool]
     timer: int
+    level_state: LevelState
 
     def __init__(self) -> None:
         """Initialize the GameState with default values and event mappings."""
@@ -38,7 +118,6 @@ class GameState:
         self.score = 0
         self.lives = 3
         self.level = 1
-        self.timer = 0
         self.game_over = False
         self.specials = {
             "reverse": False,
@@ -52,6 +131,7 @@ class GameState:
         }
         self._event_map = SPECIAL_EVENT_MAP
         self.ammo = 4  # Initial ammo count matches original C version
+        self.level_state = LevelState(level_num=self.level)
 
     # --- Ammo methods ---
 
@@ -88,10 +168,7 @@ class GameState:
         return self.ammo
 
     def _set_ammo(self, ammo: int) -> List[Any]:
-        """Set the ammo count and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set the ammo count and return a list of change events."""
         self.ammo = ammo
         self.logger.info(f"Ammo set to {self.ammo}")
         return [AmmoCollectedEvent(self.ammo)]
@@ -99,19 +176,13 @@ class GameState:
     # --- Score methods ---
 
     def add_score(self, points: int) -> List[Any]:
-        """Add points to the score and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Add points to the score and return a list of change events."""
         self.score += points
         self.logger.info(f"Score increased by {points}, new score: {self.score}")
         return [ScoreChangedEvent(self.score)]
 
     def _set_score(self, score: int) -> List[Any]:
-        """Set the score and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set the score and return a list of change events."""
         self.score = score
         self.logger.info(f"Score set to {self.score}")
         return [ScoreChangedEvent(self.score)]
@@ -125,10 +196,7 @@ class GameState:
         return 0
 
     def lose_life(self) -> List[Any]:
-        """Decrement lives and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Decrement lives and return a list of change events."""
         self.lives -= 1
         self.logger.info(f"Life lost, remaining lives: {self.lives}")
         if self.lives <= 0:
@@ -137,10 +205,7 @@ class GameState:
         return [LivesChangedEvent(self.lives)]
 
     def _set_lives(self, lives: int) -> List[Any]:
-        """Set the number of lives and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set the number of lives and return a list of change events."""
         self.lives = lives
         self.logger.info(f"Lives set to {self.lives}")
         return [LivesChangedEvent(self.lives)]
@@ -148,32 +213,26 @@ class GameState:
     # --- Levels methods ---
 
     def set_level(self, level: int) -> List[Any]:
-        """Set the level and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set the level and return a list of change events."""
+        if self.level == level:
+            return []
         self.level = level
+        self.level_state = LevelState(level_num=level)
         self.logger.info(f"Level set to {self.level}")
         return [LevelChangedEvent(self.level)]
 
     # --- Timer methods ---
 
     def set_timer(self, time_remaining: int) -> List[Any]:
-        """Set the timer and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
-        self.timer = time_remaining
-        self.logger.debug(f"Timer set to {self.timer}")
-        return [TimerUpdatedEvent(self.timer)]
+        """Set the timer and return a list of change events."""
+        self.level_state.set_bonus_time(time_remaining)
+        self.logger.debug(f"Timer set to {self.level_state.get_bonus_time()}")
+        return [TimerUpdatedEvent(self.level_state.get_bonus_time())]
 
     # --- Special methods ---
 
     def set_special(self, name: str, value: bool) -> List[Any]:
-        """Set a special flag and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set a special flag and return a list of change events."""
         if name in self.specials and self.specials[name] != value:
             self.specials[name] = value
             self.logger.info(f"Special '{name}' set to {value}")
@@ -187,10 +246,7 @@ class GameState:
     # --- Game lifecycle (over, restart) methods ---
 
     def set_game_over(self, value: bool) -> List[Any]:
-        """Set the game over flag and return a list of change events.
-
-        Does not fire events directly (side-effect free).
-        """
+        """Set the game-over flag and return a list of change events."""
         if self.game_over != value:
             self.game_over = value
             self.logger.info(f"Game over set to {self.game_over}")
@@ -203,9 +259,8 @@ class GameState:
         return self.game_over
 
     def full_restart(self, level_manager: Any) -> List[Any]:
-        """Reset all game state, load the level, set timer from level manager, and return all change events.
-
-        Does not fire events directly (side-effect free).
+        """Reset the game state, load the level, set the bonus timer from
+        level manager, and return all change events.
         """
         self.logger.info("Full game state restart")
         all_events = []
@@ -219,10 +274,20 @@ class GameState:
             all_events += self.set_special(name, False)
 
         level_manager.load_level(self.level)
-        all_events += self.set_timer(level_manager.get_time_remaining())
+        all_events += self.set_timer(0)
         level_info = level_manager.get_level_info()
         level_title = level_info["title"]
         all_events.append(
             MessageChangedEvent(level_title, color=(0, 255, 0), alignment="left")
         )
         return all_events
+
+    def start_new_level(self, level_num: int) -> None:
+        """Reset level state for a new level."""
+        self.level_state = LevelState(level_num=level_num)
+        self.level = level_num
+        self.logger.info(f"Started new level: {level_num}")
+
+    def get_level_num(self) -> int:
+        """Return the current level number (from LevelState)."""
+        return self.level_state.level_num

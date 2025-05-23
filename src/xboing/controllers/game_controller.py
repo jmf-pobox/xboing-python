@@ -21,6 +21,7 @@ from xboing.engine.events import (
     PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
+    TimerUpdatedEvent,
     WallHitEvent,
     post_level_title_message,
 )
@@ -31,6 +32,7 @@ from xboing.game.ball_manager import BallManager
 from xboing.game.block_manager import BlockManager
 from xboing.game.block_types import (
     BOMB_BLK,
+    BONUS_BLK,
     BULLET_BLK,
     EXTRABALL_BLK,
     MAXAMMO_BLK,
@@ -107,6 +109,7 @@ class GameController(Controller):
         self.reverse: bool = False  # Reverse paddle control state
         self.sticky: bool = False  # Sticky paddle state
         self.bullet_manager: BulletManager = bullet_manager
+        self.logger = logging.getLogger("xboing.GameController")
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -150,10 +153,9 @@ class GameController(Controller):
                     for ball in balls:
                         ball.release_from_paddle()
                     changes = self.game_state.set_timer(
-                        self.level_manager.get_time_remaining()
+                        self.game_state.level_state.get_bonus_time()
                     )
                     self.post_game_state_events(changes)
-                    self.level_manager.start_timer()
                     pygame.event.post(
                         pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()})
                     )
@@ -240,9 +242,9 @@ class GameController(Controller):
         """
         self.block_manager.update(delta_ms)
         if not self.game_state.is_game_over() and not self.level_complete:
-            self.level_manager.update(delta_ms)
-            changes = self.game_state.set_timer(self.level_manager.get_time_remaining())
-            self.post_game_state_events(changes)
+            self.game_state.level_state.decrement_bonus_time(delta_ms)
+            time_remaining = self.game_state.level_state.get_bonus_time()
+            self.post_game_state_events([TimerUpdatedEvent(time_remaining)])
 
     def _handle_block_effects(
         self, effects: Sequence[str], ball: Optional[Ball] = None
@@ -251,7 +253,9 @@ class GameController(Controller):
         logger.debug(f"Handling block effects: len = {len(effects)}")
         for effect in effects:
             logger.debug(f"Handling block effect: {effect}")
-            if effect == BULLET_BLK:
+            if effect == BONUS_BLK:
+                self.game_state.level_state.increment_bonus_coins_collected()
+            elif effect == BULLET_BLK:
                 logger.debug("Bulletblock hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
@@ -346,7 +350,7 @@ class GameController(Controller):
                         )
                     )
             elif effect == TIMER_BLK:
-                self.level_manager.add_time(20)
+                self.game_state.level_state.timer += 20
                 pygame.event.post(
                     pygame.event.Event(
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
@@ -448,7 +452,6 @@ class GameController(Controller):
             return  # Prevent further life loss after game over
 
         # Always show "Balls Terminated!" message a ball / life is lost
-        self.level_manager.stop_timer()
         changes = self.game_state.lose_life()
         self.post_game_state_events(changes)
         logger.debug(f"Life lost. Remaining lives: {self.game_state.lives}")
@@ -612,3 +615,19 @@ class GameController(Controller):
     def on_new_level_loaded(self) -> None:
         """Call this when a new level is loaded to reset sticky state."""
         self.disable_sticky()
+
+    def _start_level(self, level_num: int) -> None:
+        """Start a new level, resetting per-level state and timer."""
+        self.logger.info(f"Starting level {level_num}")
+        self.game_state.start_new_level(level_num)
+        level_info = self.level_manager.get_level_info()
+        time_bonus = level_info.get("time_bonus", 0)
+        self.game_state.level_state.set_bonus_time(time_bonus)
+        # ... existing code ...
+
+    def _update_timer(self, delta_ms: float) -> None:
+        """Update the timer using GameState.level_state."""
+        self.game_state.level_state.decrement_bonus_time(delta_ms)
+        # Post timer update event directly without calling set_timer
+        time_remaining = self.game_state.level_state.get_bonus_time()
+        self.post_game_state_events([TimerUpdatedEvent(time_remaining)])

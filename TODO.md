@@ -40,6 +40,18 @@ Keep the TODO list organized by:
 
 ## Completed Items
 - [x] Remove unused key_map attribute and get_key_name method from InputManager in src/xboing/engine/input.py
+- [x] feat(cli): Add --start-level/-l command line argument to set starting level in XBoing
+- [x] feat(cli): Add -help and -usage command line arguments to match C version
+- [x] refactor(level): Pass starting_level to LevelManager and XBoingApp at construction, remove setattr hack
 
 ## New Tasks
 - [x] Create docs/DESIGN-SCORING.md: Document all scoring, bonus, and penalty logic, especially rules not already in block_types.json, based on original C code and documentation.
+- [x] Create src/xboing/ui/view_with_background.py: Base class for views that render the play area background.
+- [x] Refactor GameView to inherit from ViewWithBackground and use draw_background.
+- [ ] Update UIManager to remove any global background drawing; only views draw backgrounds as needed.
+- [ ] Test that LevelCompleteView and InstructionsView do not render the play area background.
+- [ ] Restore default space background in GameView.deactivate.
+- [p] Add get_current_background_index() to LevelManager
+- [p] Update LevelCompleteController to set background on game_view after loading next level
+- [ ] Fix test_game_view_draw: add set_play_background stub to MockLayout
+- [x] Fix: Timer UI at game start should show correct time_bonus for level 1 and update as expected
