@@ -276,7 +276,9 @@ class GameState:
         all_events += self._set_ammo(4)
         all_events += self._set_lives(3)
         all_events += self._set_score(0)
-        all_events += self.set_level(1) # Could also be another level if -l flag is used
+        all_events += self.set_level(
+            1
+        )  # Could also be another level if -l flag is used
         for name in self.specials:
             all_events += self.set_special(name, False)
 

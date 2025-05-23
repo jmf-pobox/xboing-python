@@ -239,27 +239,6 @@ class LevelManager:
             "time_bonus": self.time_bonus,
         }
 
-    def get_score_multiplier(self) -> int:
-        """Get score multiplier based on remaining time.
-
-        Returns
-        -------
-            int: Score multiplier (1, 2, 3, 4, or 5)
-
-        """
-        multiplier = 1
-        if self.time_bonus != 0:
-            percent = 1.0
-            if percent > 0.8:
-                multiplier = 5
-            elif percent > 0.6:
-                multiplier = 4
-            elif percent > 0.4:
-                multiplier = 3
-            elif percent > 0.2:
-                multiplier = 2
-        return multiplier
-
     def _create_blocks_from_layout(self, layout: List[str]) -> None:
         """Create blocks based on the level layout.
 
