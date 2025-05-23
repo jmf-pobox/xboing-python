@@ -28,6 +28,10 @@ class LevelState:
         self._timer_ms_accum: float = 0.0  # Accumulate ms between frames
         # Add more per-level attributes as needed
 
+    def add_bonus_time(self, time_bonus: int) -> None:
+        """Add time bonus to the level."""
+        self.timer += time_bonus
+
     def set_bonus_time(self, time_bonus: int) -> None:
         """Set the time bonus limit for the level and reset the timer."""
         self.time_bonus_limit = time_bonus

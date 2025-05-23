@@ -350,7 +350,7 @@ class GameController(Controller):
                         )
                     )
             elif effect == TIMER_BLK:
-                self.game_state.level_state.timer += 20
+                self.game_state.level_state.add_bonus_time(20)
                 pygame.event.post(
                     pygame.event.Event(
                         pygame.USEREVENT, {"event": PowerUpCollectedEvent()}
