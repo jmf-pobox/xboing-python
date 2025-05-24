@@ -13,9 +13,9 @@ from xboing.game.ball import Ball
 from xboing.game.game_state import GameState
 from xboing.game.level_manager import LevelManager
 from xboing.layout.game_layout import GameLayout
+from xboing.ui.game_view import GameView
 from xboing.ui.level_complete_view import LevelCompleteView
 from xboing.ui.ui_manager import UIManager
-from xboing.ui.view import View
 
 
 class LevelCompleteController(Controller):
@@ -33,7 +33,7 @@ class LevelCompleteController(Controller):
         self,
         balls: List[Ball],
         ui_manager: UIManager,
-        game_view: View,
+        game_view: GameView,
         layout: GameLayout,
         game_state: GameState,
         game_controller: GameController,
@@ -97,6 +97,7 @@ class LevelCompleteController(Controller):
 
         # Get the events returned by set_level and post them
         level_changed_events = self.game_state.set_level(new_level)
+        
         # Set the correct background index for the new level
         bg_index = self.level_manager.get_current_background_index()
         self.game_view.set_background(bg_index)
@@ -115,7 +116,6 @@ class LevelCompleteController(Controller):
 
         # Post TimerUpdatedEvent to update the UI
         self.post_game_state_events([TimerUpdatedEvent(time_bonus)])
-        self.game_controller.level_complete = False
 
         # Disable sticky paddle on the new level
         self.game_controller.on_new_level_loaded()
@@ -123,7 +123,6 @@ class LevelCompleteController(Controller):
         # Set the balls
         self.balls.clear()
         self.balls.append(self.game_controller.create_new_ball())
-        self.game_view.balls = self.balls
 
         # Change the view
         self.ui_manager.set_view("game")
