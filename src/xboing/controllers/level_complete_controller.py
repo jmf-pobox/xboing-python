@@ -77,7 +77,6 @@ class LevelCompleteController(Controller):
                 LevelCompleteController.logger.debug(
                     "Spacebar pressed on LevelCompleteView. Advancing to next level."
                 )
-                self.add_bonus_to_score()
                 self.advance_to_next_level()
 
     def advance_to_next_level(self) -> None:

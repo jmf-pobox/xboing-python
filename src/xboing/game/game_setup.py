@@ -20,7 +20,7 @@ def create_game_objects(layout: Any, starting_level: int = 1) -> Dict[str, Any]:
     Args:
     ----
         layout: The game layout object (must have get_play_rect method)
-        starting_level: The level to start at (default: 1)
+        starting_level: The level to load (default: 1)
 
     Returns:
     -------

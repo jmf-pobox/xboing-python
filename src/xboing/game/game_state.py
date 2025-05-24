@@ -27,7 +27,15 @@ class LevelState:
         self.time_bonus_limit: int = time_bonus  # The starting time for the level
         self.timer: int = time_bonus  # The current time remaining (seconds)
         self._timer_ms_accum: float = 0.0  # Accumulate ms between frames
-        # Add more per-level attributes as needed
+        self.level_complete: bool = False
+
+    def set_level_complete(self) -> None:
+        """Set the level complete flag."""
+        self.level_complete = True
+
+    def is_level_complete(self) -> bool:
+        """Return True if the level is complete, False otherwise."""
+        return self.level_complete
 
     def add_bonus_time(self, time_bonus: int) -> List[XBoingEvent]:
         """Add time bonus to the level."""
@@ -102,6 +110,10 @@ class LevelState:
         return level_bonus
 
 
+# Initial ammo count
+INITIAL_AMMO_COUNT = 4
+
+
 class GameState:
     """Manages the current state of the game, including score, lives, level, timer, and special flags.
 
@@ -137,7 +149,7 @@ class GameState:
             "x4": False,
         }
         self._event_map = SPECIAL_EVENT_MAP
-        self.ammo = 4  # Initial ammo count matches original C version
+        self.ammo = INITIAL_AMMO_COUNT
         self.level_state = LevelState(level_num=self.level)
 
     # --- Ammo methods ---

@@ -104,7 +104,6 @@ class GameController(Controller):
         self.input_manager: InputManager = input_manager
         self.layout: GameLayout = layout
         self.renderer: Renderer = renderer
-        self.level_complete: bool = False
         self._last_mouse_x: Optional[int] = None
         self.reverse: bool = False  # Reverse paddle control state
         self.sticky: bool = False  # Sticky paddle state
@@ -241,7 +240,10 @@ class GameController(Controller):
 
         """
         self.block_manager.update(delta_ms)
-        if not self.game_state.is_game_over() and not self.level_complete:
+        if (
+            not self.game_state.is_game_over()
+            and not self.game_state.level_state.is_level_complete()
+        ):
             self.game_state.level_state.decrement_bonus_time(delta_ms)
             time_remaining = self.game_state.level_state.get_bonus_time()
             self.post_game_state_events([TimerUpdatedEvent(time_remaining)])
@@ -489,18 +491,19 @@ class GameController(Controller):
 
     def check_level_complete(self) -> None:
         """Check if the level is complete and fire events if so."""
-        level_complete = self.level_manager.is_level_complete()
-        if level_complete and not self.level_complete:
+        if (
+            self.level_manager.is_level_complete()
+            and not self.game_state.level_state.is_level_complete()
+        ):
+            self.game_state.level_state.set_level_complete()
+            events = self.game_state.add_score(
+                self.game_state.level_state.calculate_all_bonuses(self.game_state.ammo)
+            )
+            events += [ApplauseEvent(), LevelCompleteEvent()]
             logger.info(
-                "Level complete detected in GameController. Firing ApplauseEvent and LevelCompleteEvent."
+                f"Level {self.game_state.level} complete, bonus = {self.game_state.level_state.calculate_all_bonuses(self.game_state.ammo)}"
             )
-            self.level_complete = True
-            pygame.event.post(
-                pygame.event.Event(pygame.USEREVENT, {"event": ApplauseEvent()})
-            )
-            pygame.event.post(
-                pygame.event.Event(pygame.USEREVENT, {"event": LevelCompleteEvent()})
-            )
+            self.post_game_state_events(events)
 
     def handle_debug_x_key(self) -> None:
         """Handle the debug 'x' key to break all breakable blocks and advance the level."""
@@ -508,7 +511,7 @@ class GameController(Controller):
             self.input_manager
             and self.input_manager.is_key_down(pygame.K_x)
             and not self.game_state.is_game_over()
-            and not self.level_complete
+            and not self.game_state.level_state.is_level_complete()
         ):
             broken_count = 0
             for block in self.block_manager.blocks:
@@ -522,7 +525,7 @@ class GameController(Controller):
             logger.info(
                 f"DEBUG: X key cheat used, broke {broken_count} blocks and triggered level complete."
             )
-            self.level_complete = True
+            self.game_state.level_state.set_level_complete()
             pygame.event.post(
                 pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
             )

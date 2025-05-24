@@ -1,9 +1,17 @@
 """UI view for displaying the level complete screen in XBoing."""
 
-from typing import Callable, Dict, List, Optional, Tuple, Union
+import logging
+from typing import Callable, Dict, List, Optional, Tuple
 
 import pygame
 
+from xboing.engine.events import (
+    ApplauseEvent,
+    BonusCollectedEvent,
+    DohEvent,
+    TimerUpdatedEvent,
+    post_level_title_message,
+)
 from xboing.engine.graphics import Renderer
 from xboing.game.game_state import GameState
 from xboing.game.level_manager import LevelManager
@@ -12,6 +20,8 @@ from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_asset_path
 
 from .view import View
+
+REVEAL_DELAY_MS = 3000  # Default delay, but now per-element
 
 
 class LevelCompleteView(View):
@@ -61,6 +71,12 @@ class LevelCompleteView(View):
         self.total_bonus: int
         self.final_score: int
         self.time_remaining: int
+        self.message: str = "- Bonus Tally -"
+        self.reveal_step: int = 0
+        self.reveal_timer: float = 0.0
+        self.reveal_delay_ms: int = REVEAL_DELAY_MS
+        self.bonus_elements: List[Tuple[pygame.Surface, object, int]] = []
+        self.logger = logging.getLogger("xboing.ui.LevelCompleteView")
 
         # Load and cache icons using asset loader and asset paths
         bonus_coin_path = get_asset_path("images/blocks/bonus1.png")
@@ -79,9 +95,9 @@ class LevelCompleteView(View):
     def _initialize_fonts() -> Dict[str, pygame.font.Font]:
         """Initialize and return fonts used for rendering text."""
         return {
-            "title": pygame.font.SysFont("Arial", 32, bold=True),
-            "message": pygame.font.SysFont("Arial", 18),
-            "bonus": pygame.font.SysFont("Arial", 20, bold=True),
+            "title": pygame.font.SysFont("Arial", 24),
+            "message": pygame.font.SysFont("Arial", 14),
+            "bonus": pygame.font.SysFont("Arial", 18, bold=True),
             "rank": pygame.font.SysFont("Arial", 18, bold=True),
             "prompt": pygame.font.SysFont("Arial", 16),
         }
@@ -120,6 +136,16 @@ class LevelCompleteView(View):
         """Activate the view and recompute bonuses."""
         self.active = True
         self._compute_bonuses()
+        self.reveal_step = 0
+        self.reveal_timer = 0.0
+        self.bonus_elements = self._prepare_elements()
+        self.reveal_delay_ms = (
+            self.bonus_elements[0][2] if self.bonus_elements else REVEAL_DELAY_MS
+        )
+        self.logger.debug(
+            f"[activate] Called. bonus_elements length: {len(self.bonus_elements)}"
+        )
+        post_level_title_message(self.message)
 
     def deactivate(self) -> None:
         """Deactivate the view."""
@@ -140,54 +166,95 @@ class LevelCompleteView(View):
         ):
             self.on_advance_callback()
 
-    def _prepare_elements(self) -> List[Union[pygame.Surface, Tuple[str, str]]]:
-        """Prepare all elements to be displayed on the level complete screen.
+    def _prepare_elements(self) -> List[Tuple[pygame.Surface, object, int]]:
+        """Prepare all elements to be displayed on the level complete screen, with optional event and per-row delay."""
+        elements: List[Tuple[pygame.Surface, object, int]] = [
+            (
+                self._fonts["title"].render(
+                    f"- Level {self.level_num} -", True, (255, 0, 0)
+                ),
+                None,
+                500,
+            ),
+            (
+                self._fonts["message"].render(
+                    "Congratulations on finishing this level.", True, (255, 255, 255)
+                ),
+                ApplauseEvent(),
+                1500,
+            ),
+        ]
 
-        Returns
-        -------
-            List of rendered text/image surfaces or placeholders for special elements.
+        # Bonus coin logic
+        coins = self.game_state.level_state.get_bonus_coins_collected()
+        if coins == 0:
+            # Show message and fire sound event
+            elements.append(
+                (
+                    self._fonts["message"].render(
+                        "Sorry, no bonus coins collected.", True, (0, 0, 255)
+                    ),
+                    DohEvent(),
+                    1500,
+                )
+            )
+            # TODO: Use a dedicated sound event if needed
+        else:
+            # No-op for now; bonus coins are not yet implemented as non-block elements
+            # TODO: Implement bonus coin row and icon when bonus coins are supported
+            pass
 
-        """
-        bonus_coin_img = pygame.transform.smoothscale(self._bonus_coin_img, (22, 22))
-
-        elements: List[Union[pygame.Surface, Tuple[str, str]]] = [
-            self._fonts["title"].render(
-                f"- Level {self.level_num} -", True, (255, 0, 0)
+        elements += [
+            (
+                self._fonts["bonus"].render(
+                    f"Level bonus - level {self.level_num} x 100 ="
+                    f" {self.level_bonus} "
+                    f"points",
+                    True,
+                    (255, 255, 0),
+                ),
+                BonusCollectedEvent(),
+                900,
             ),
-            self._fonts["message"].render(
-                "Congratulations on finishing this level.", True, (255, 255, 255)
+            (("bullets", ""), None, 700),  # Placeholder for the bullet row, no sound
+            (
+                self._fonts["bonus"].render(
+                    f"Time bonus - {self.time_remaining} x 100 = "
+                    f"{self.time_bonus} "
+                    f"points",
+                    True,
+                    (255, 255, 0),
+                ),
+                TimerUpdatedEvent(self.time_remaining),
+                1200,
             ),
-            bonus_coin_img,
-            self._fonts["bonus"].render(
-                f"Level bonus - level {self.level_num} x 100 ="
-                f" {self.level_bonus} "
-                f"points",
-                True,
-                (255, 255, 0),
+            (
+                self._fonts["rank"].render(
+                    f"You are currently ranked {0}.", True, (255, 0, 0)
+                ),
+                None,
+                1000,
             ),
-            ("bullets", ""),  # Placeholder for the bullet row
-            self._fonts["bonus"].render(
-                f"Time bonus - {self.time_remaining} x 100 = "
-                f"{self.time_bonus} "
-                f"points",
-                True,
-                (255, 255, 0),
+            (
+                self._fonts["message"].render(
+                    f"Prepare for level {self.level_num + 1}", True, (255, 255, 255)
+                ),
+                None,
+                800,
             ),
-            self._fonts["rank"].render(
-                f"You are currently ranked {0}.", True, (255, 0, 0)
-            ),
-            self._fonts["message"].render(
-                f"Prepare for level {self.level_num + 1}", True, (255, 255, 255)
-            ),
-            self._fonts["prompt"].render(
-                "Press space for next level", True, (255, 255, 255)
+            (
+                self._fonts["prompt"].render(
+                    "Press space for next level", True, (255, 255, 255)
+                ),
+                None,
+                800,
             ),
         ]
         return elements
 
     @staticmethod
     def _calculate_total_height(
-        elements: List[Union[pygame.Surface, Tuple[str, str]]],
+        elements: List[Tuple[pygame.Surface, object]],
         bullet_height: int,
         spacing: int,
         icon_spacing: int,
@@ -196,7 +263,7 @@ class LevelCompleteView(View):
 
         Args:
         ----
-            elements (List[Union[pygame.Surface, Tuple[str, str]]]): The elements to display.
+            elements (List[Tuple[pygame.Surface, object]]): The elements to display.
             bullet_height (int): The height of bullet images.
             spacing (int): Standard spacing between elements.
             icon_spacing (int): Extra spacing for icons.
@@ -207,7 +274,7 @@ class LevelCompleteView(View):
 
         """
         total_height = 0
-        for e in elements:
+        for e, _ in elements:
             if isinstance(e, pygame.Surface):
                 total_height += e.get_height()
             elif isinstance(e, tuple) and e[0] == "bullets":
@@ -278,13 +345,44 @@ class LevelCompleteView(View):
 
         return y + bullet_h
 
+    def update(self, delta_ms: float) -> None:
+        """Update the gradual reveal of bonus/info messages and fire sound events."""
+        self.logger.debug(
+            f"[update] Called. reveal_step: {self.reveal_step}, bonus_elements length: {len(self.bonus_elements)}"
+        )
+        if self.active and self.reveal_step < len(self.bonus_elements):
+            self.reveal_timer += delta_ms
+            if self.reveal_timer >= self.reveal_delay_ms:
+                self.reveal_step += 1
+                self.reveal_timer = 0.0
+                self.logger.debug(
+                    f"[update] reveal_step incremented: {self.reveal_step}"
+                )
+                # Fire event for this row if present
+                if self.reveal_step <= len(self.bonus_elements):
+                    _, event, _ = self.bonus_elements[self.reveal_step - 1]
+                    if event is not None:
+                        pygame.event.post(
+                            pygame.event.Event(pygame.USEREVENT, {"event": event})
+                        )
+                    # Set delay for next row if available
+                    if self.reveal_step < len(self.bonus_elements):
+                        self.reveal_delay_ms = self.bonus_elements[self.reveal_step][2]
+                    else:
+                        self.reveal_delay_ms = REVEAL_DELAY_MS
+
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the level-complete overlay content, with improved spacing/formatting and correct icon usage."""
+        self.logger.debug(
+            f"[draw] Called. reveal_step: {self.reveal_step}, bonus_elements length: {len(self.bonus_elements)}"
+        )
         play_rect = self.layout.get_play_rect()
         center_x = play_rect.x + play_rect.width // 2
 
-        # Prepare all elements to be drawn
-        elements = self._prepare_elements()
+        # Prepare all elements to be drawn (now from self.bonus_elements)
+        elements = (
+            self.bonus_elements if self.bonus_elements else self._prepare_elements()
+        )
 
         # Prepare bullet image for calculations and drawing
         bullet_img = pygame.transform.smoothscale(self._bullet_img, (12, 24))
@@ -292,12 +390,17 @@ class LevelCompleteView(View):
 
         # Calculate total height and center block vertically
         total_height = self._calculate_total_height(
-            elements, bullet_height, self.spacing, self.icon_spacing
+            [(e, ev) for (e, ev, d) in elements],
+            bullet_height,
+            self.spacing,
+            self.icon_spacing,
         )
         y = play_rect.y + (play_rect.height - total_height) // 2
 
-        # Draw each element
-        for element in elements:
+        # Draw only up to reveal_step elements
+        for idx, (element, _, _) in enumerate(elements):
+            if idx >= self.reveal_step:
+                break
             if isinstance(element, pygame.Surface):
                 # Draw regular text/image element
                 y = self._draw_centered_element(surface, element, center_x, y)
