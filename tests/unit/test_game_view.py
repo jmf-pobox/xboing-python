@@ -32,11 +32,21 @@ class MockBall:
 
 
 class MockLayout:
+    def __init__(self):
+        class PlayWindow:
+            bg_surface = None
+            bg_color = None
+
+        self.play_window = PlayWindow()
+
     def get_play_rect(self):
         class R:
             x, y, width, height = 0, 0, 100, 100
 
         return R()
+
+    def set_play_background(self, bg_index):
+        pass
 
 
 class MockRenderer:

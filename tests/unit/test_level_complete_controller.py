@@ -20,13 +20,13 @@ def test_level_complete_controller_instantiation_and_methods():
     game_view = Dummy()
     layout = Dummy()
     controller = LevelCompleteController(
-        game_state,
-        level_manager,
         balls,
-        game_controller,
         ui_manager,
         game_view,
         layout,
+        game_state,
+        game_controller,
+        level_manager,
         on_advance_callback=None,
     )
     # Should not raise

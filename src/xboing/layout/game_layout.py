@@ -262,3 +262,13 @@ class GameLayout:
             self.logger.debug(f"Set play area background to: {bg_file}")
         except (pygame.error, FileNotFoundError, OSError) as e:
             self.logger.error(f"Error loading background image: {e}")
+
+    def set_play_background_to_space(self) -> None:
+        """Set the play area background to the default space background image."""
+        backgrounds_dir = get_backgrounds_dir()
+        space_path = os.path.join(backgrounds_dir, "space.png")
+        if os.path.exists(space_path):
+            space_bg = load_image(space_path, alpha=False)
+            self.play_window.set_background_pixmap(space_bg)
+        else:
+            self.play_window.set_background((20, 20, 30))

@@ -95,34 +95,32 @@ class LevelManager:
     }
 
     def __init__(
-        self, levels_dir: Optional[str] = None, layout: Optional[Any] = None
+        self,
+        levels_dir: Optional[str] = None,
+        layout: Optional[Any] = None,
+        starting_level: int = 1,
     ) -> None:
         """Initialize the level manager.
 
         Args:
-        ----
-            levels_dir (str): Directory containing level data files.
-                If None, tries to find the default levels directory.
-            layout (GameLayout): The game layout to set backgrounds on.
+            levels_dir: Directory containing level data files. If None, uses the default.
+            layout: The game layout to set backgrounds on.
+            starting_level: The level to start at (default: 1).
 
         """
         self.logger = logging.getLogger("xboing.LevelManager")
-        self.current_level = 1
-        self.level_title = ""
-        self.time_bonus = 0
+        self.current_level: int = starting_level
+        self.logger.info(
+            f"LevelManager __init__: starting_level={starting_level}, current_level={self.current_level}"
+        )
+        self.level_title: str = ""
+        self.time_bonus: int = 0
         self.block_manager = None
-        self.time_remaining: float = 0.0
-        self.timer_active = False
         self.layout = layout
-
-        # Original XBoing starts with background 2 (bgrnd2.xpm)
-        # BACKGROUND_2 corresponds to background index 0 in our system
-        # which will map to bgrnd2.png
-        self.current_background = self.BACKGROUND_2
-
-        # Set the levels directory
-        self.levels_dir = levels_dir if levels_dir is not None else get_levels_dir()
-
+        self.current_background: int = self.BACKGROUND_2
+        self.levels_dir: str = (
+            levels_dir if levels_dir is not None else get_levels_dir()
+        )
         self.logger.info(f"Using levels directory: {self.levels_dir}")
 
     def set_block_manager(self, block_manager: Any) -> None:
@@ -149,17 +147,16 @@ class LevelManager:
         """Load a specific level.
 
         Args:
-        ----
             level_num (int): Level number to load. If None, uses current_level.
 
         Returns:
-        -------
             bool: True if level was loaded successfully, False otherwise
 
         """
         if level_num is not None:
+            self.logger.info(f"load_level called with level_num={level_num}")
             self.current_level = level_num
-
+        self.logger.info(f"load_level: current_level={self.current_level}")
         self._clamp_level_number()
         level_file = self._get_level_file_path(self.current_level)
 
@@ -176,7 +173,6 @@ class LevelManager:
             else:
                 self.level_title = level_data["title"]
                 self.time_bonus = level_data["time_bonus"]
-                self.time_remaining = float(level_data["time_bonus"])
                 self._create_blocks_from_layout(level_data["layout"])
                 self._set_level_background()
                 result = True
@@ -201,53 +197,21 @@ class LevelManager:
 
     def get_next_level(self) -> bool:
         """Advance to the next level, or reset if at the last level."""
+        self.logger.info(
+            f"get_next_level: current_level before increment={self.current_level}"
+        )
         if self.current_level < self.MAX_LEVELS:
             self.current_level += 1
         else:
             self.current_level = 1
-
+        self.logger.info(
+            f"get_next_level: current_level after increment={self.current_level}"
+        )
         # Update the background cycle (same logic as original XBoing)
-        # In original XBoing: bgrnd++; if (bgrnd == 6) bgrnd = 2;
         self.current_background += 1
-        if self.current_background > self.BACKGROUND_5:  # If past background 5
-            self.current_background = self.BACKGROUND_2  # Reset to background 2
-
+        if self.current_background > self.BACKGROUND_5:
+            self.current_background = self.BACKGROUND_2
         return self.load_level()
-
-    def update(self, delta_ms: float) -> None:
-        """Update level timer and state.
-
-        Args:
-        ----
-            delta_ms (float): Time since last frame in milliseconds
-
-        """
-        # Update time bonus if timer is active
-        if self.timer_active and self.time_remaining > 0:
-            # Original game decrements time once per second
-            self.time_remaining -= delta_ms / 1000
-
-            # Ensure time doesn't go below zero
-            self.time_remaining = max(self.time_remaining, 0)
-            # Could trigger "times up" event here
-
-    def add_time(self, seconds: int) -> None:
-        """Add time to the level timer (for power-ups).
-
-        Args:
-        ----
-            seconds (int): Seconds to add
-
-        """
-        self.time_remaining += float(seconds)
-
-    def start_timer(self) -> None:
-        """Start the level timer."""
-        self.timer_active = True
-
-    def stop_timer(self) -> None:
-        """Stop the level timer."""
-        self.timer_active = False
 
     def is_level_complete(self) -> bool:
         """Check if the level is complete (all breakable blocks destroyed).
@@ -273,39 +237,7 @@ class LevelManager:
             "level_num": self.current_level,
             "title": self.level_title,
             "time_bonus": self.time_bonus,
-            "time_remaining": int(self.time_remaining),
         }
-
-    def get_time_remaining(self) -> int:
-        """Get remaining time in seconds.
-
-        Returns
-        -------
-            int: Remaining time in seconds
-
-        """
-        return int(self.time_remaining)
-
-    def get_score_multiplier(self) -> int:
-        """Get score multiplier based on remaining time.
-
-        Returns
-        -------
-            int: Score multiplier (1, 2, 3, 4, or 5)
-
-        """
-        multiplier = 1
-        if self.time_remaining > 0 and self.time_bonus != 0:
-            percent = self.time_remaining / self.time_bonus
-            if percent > 0.8:
-                multiplier = 5
-            elif percent > 0.6:
-                multiplier = 4
-            elif percent > 0.4:
-                multiplier = 3
-            elif percent > 0.2:
-                multiplier = 2
-        return multiplier
 
     def _create_blocks_from_layout(self, layout: List[str]) -> None:
         """Create blocks based on the level layout.
@@ -481,3 +413,7 @@ class LevelManager:
         except (OSError, ValueError) as e:
             self.logger.error(f"Error parsing level file {file_path}: {e}")
             return None
+
+    def get_current_background_index(self) -> int:
+        """Get the current background index for the play area (0-based, for bgrnd2.png, bgrnd3.png, etc)."""
+        return self.current_background - self.BACKGROUND_2
