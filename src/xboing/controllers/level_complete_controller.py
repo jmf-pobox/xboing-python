@@ -6,10 +6,16 @@ from typing import Any, Callable, List, Optional, cast
 import pygame
 
 from xboing.controllers.controller import Controller
+from xboing.controllers.game_controller import GameController
 from xboing.engine.audio_manager import AudioManager
 from xboing.engine.events import TimerUpdatedEvent, post_level_title_message
+from xboing.game.ball import Ball
+from xboing.game.game_state import GameState
+from xboing.game.level_manager import LevelManager
+from xboing.layout.game_layout import GameLayout
 from xboing.ui.level_complete_view import LevelCompleteView
 from xboing.ui.ui_manager import UIManager
+from xboing.ui.view import View
 
 
 class LevelCompleteController(Controller):
@@ -25,13 +31,13 @@ class LevelCompleteController(Controller):
 
     def __init__(
         self,
-        balls: List[Any],
+        balls: List[Ball],
         ui_manager: UIManager,
-        game_view: Any,
-        layout: Any,
-        game_state: Any,
-        game_controller: Any,
-        level_manager: Any,
+        game_view: View,
+        layout: GameLayout,
+        game_state: GameState,
+        game_controller: GameController,
+        level_manager: LevelManager,
         audio_manager: Optional[AudioManager] = None,
         quit_callback: Optional[Callable[[], None]] = None,
         on_advance_callback: Optional[Callable[[], None]] = None,
