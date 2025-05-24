@@ -143,6 +143,7 @@ class XBoingApp:
         self.bullet_renderer = game_objects["bullet_renderer"]
 
         # --- Initialize timer and LevelState for starting level ---
+
         # Load level info and set timer from time_bonus
         level_info = self.level_manager.get_level_info()
         time_bonus = level_info.get("time_bonus", 120)
@@ -311,6 +312,8 @@ class XBoingApp:
             self.ui_manager.handle_events(events)
             active_controller.update(delta_time * 1000)
             self.layout.draw(self.window.surface)
+            if self.ui_manager.current_view:
+                self.ui_manager.current_view.update(delta_time * 1000)
             self.ui_manager.draw_all(self.window.surface)
             self.window.update()
         pygame.quit()
