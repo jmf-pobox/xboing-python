@@ -198,10 +198,8 @@ class LevelCompleteView(View):
                     1500,
                 )
             )
-            # TODO: Use a dedicated sound event if needed
         else:
             # No-op for now; bonus coins are not yet implemented as non-block elements
-            # TODO: Implement bonus coin row and icon when bonus coins are supported
             pass
 
         elements += [
