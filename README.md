@@ -166,16 +166,16 @@ python -m xboing.scripts.dep_grep <search_term>
 ### Design Documentation
 
 See the `docs/` directory for detailed information:
-- [Audio Design](docs/AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
-- [Block Design](docs/BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
-- [Dependency Injection Design](docs/DI-DESIGN.md) – Dependency injection and modularity
-- [GUI Design](docs/GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
-- [Hatch Usage](docs/HATCH_USAGE.md) – Using Hatch for environment and dependency management
-- [Highscore Design](docs/HIGHSCORE-DESIGN.md) – High score system design
-- [Levels Design](docs/LEVELS-DESIGN.md) – Level format, loading system, and level structure
-- [Logging Design](docs/LOGGING-DESIGN.md) – Logging system and best practices
-- [Project Paths](docs/PROJECT-PATHS.md) – Directory structure and asset locations
-- [Scripts Design](docs/SCRIPTS-DESIGN.md) – Utility and asset conversion scripts
+- [Audio Design](docs/GAME-AUDIO-DESIGN.md) – Audio system, event-driven sound playback, and sound asset management
+- [Block Design](docs/GAME-BLOCKS-DESIGN.md) – How blocks work, their types, and behaviors
+- [Dependency Injection Design](docs/CODE-DI-DESIGN.md) – Dependency injection and modularity
+- [GUI Design](docs/CODE-GUI-DESIGN.md) – Window layout, UI regions, and event-driven UI architecture
+- [Hatch Usage](docs/TOOL-HATCH.md) – Using Hatch for environment and dependency management
+- [Highscore Design](docs/GAME-HIGHSCORE-DESIGN.md) – High score system design
+- [Levels Design](docs/GAME-LEVELS-DESIGN.md) – Level format, loading system, and level structure
+- [Logging Design](docs/CODE-LOGGING-DESIGN.md) – Logging system and best practices
+- [Project Paths](docs/CODE-PATHS.md) – Directory structure and asset locations
+- [Scripts Design](docs/CODE-EXCEPTIONS-DESIGN.md) – Utility and asset conversion scripts
 
 ### Contributing
 
