@@ -272,7 +272,10 @@ class LevelCompleteView(View):
 
         """
         total_height = 0
-        for e, _ in elements:
+        for (
+            e,
+            _,
+        ) in elements:
             if isinstance(e, pygame.Surface):
                 total_height += e.get_height()
             elif isinstance(e, tuple) and e[0] == "bullets":
@@ -388,7 +391,7 @@ class LevelCompleteView(View):
 
         # Calculate total height and center block vertically
         total_height = self._calculate_total_height(
-            [(e, ev) for (e, ev, d) in elements],
+            [(e, ev) for (e, ev, _) in elements],
             bullet_height,
             self.spacing,
             self.icon_spacing,
