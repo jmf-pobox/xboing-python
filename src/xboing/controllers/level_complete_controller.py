@@ -97,7 +97,7 @@ class LevelCompleteController(Controller):
 
         # Get the events returned by set_level and post them
         level_changed_events = self.game_state.set_level(new_level)
-        
+
         # Set the correct background index for the new level
         bg_index = self.level_manager.get_current_background_index()
         self.game_view.set_background(bg_index)
