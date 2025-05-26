@@ -81,7 +81,13 @@ class BonusCollectedEvent(XBoingEvent):
     sound_effect = "bonus"
 
 
-class DohEvent(XBoingEvent):
+class KeySoundEvent(XBoingEvent):
+    """Event: Key pressed."""
+
+    sound_effect = "key"
+
+
+class DohSoundEvent(XBoingEvent):
     """Event: Doh sound."""
 
     sound_effect = "Doh1"
