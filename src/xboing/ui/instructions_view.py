@@ -182,3 +182,7 @@ class InstructionsView(View):
     def deactivate(self) -> None:
         """Deactivate the view (currently a stub)."""
         # No-op for now
+
+    def update(self, delta_ms: float) -> None:
+        """Update the view (currently a stub)."""
+        # No-op for now

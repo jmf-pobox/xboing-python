@@ -85,3 +85,7 @@ class GameView(ViewWithBackground):
         )  # Right
         # Draw all bullets
         self.bullet_renderer.render(surface, self.bullet_manager)
+
+    def update(self, delta_ms: float) -> None:
+        """Update the view (currently a stub)."""
+        # No-op for now

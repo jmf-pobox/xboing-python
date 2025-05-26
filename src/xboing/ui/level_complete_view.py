@@ -1,14 +1,15 @@
 """UI view for displaying the level complete screen in XBoing."""
 
 import logging
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import pygame
 
 from xboing.engine.events import (
     ApplauseEvent,
     BonusCollectedEvent,
-    DohEvent,
+    DohSoundEvent,
+    KeySoundEvent,
     TimerUpdatedEvent,
     post_level_title_message,
 )
@@ -22,6 +23,9 @@ from xboing.utils.asset_paths import get_asset_path
 from .view import View
 
 REVEAL_DELAY_MS = 3000  # Default delay, but now per-element
+BULLET_ANIM_DELAY_MS = 300  # ms per bullet in the animation
+
+BulletRowMarker = Tuple[str, str]
 
 
 class LevelCompleteView(View):
@@ -75,7 +79,13 @@ class LevelCompleteView(View):
         self.reveal_step: int = 0
         self.reveal_timer: float = 0.0
         self.reveal_delay_ms: int = REVEAL_DELAY_MS
-        self.bonus_elements: List[Tuple[pygame.Surface, object, int]] = []
+        self.bonus_elements: List[
+            Tuple[Union[pygame.Surface, BulletRowMarker], object, int]
+        ] = []
+        self.bullet_bonus_animating: bool = False
+        self.bullet_bonus_total: int = 0
+        self.bullet_bonus_shown: int = 0
+        self.bullet_bonus_timer: float = 0.0
         self.logger = logging.getLogger("xboing.ui.LevelCompleteView")
 
         # Load and cache icons using asset loader and asset paths
@@ -142,6 +152,10 @@ class LevelCompleteView(View):
         self.reveal_delay_ms = (
             self.bonus_elements[0][2] if self.bonus_elements else REVEAL_DELAY_MS
         )
+        self.bullet_bonus_animating = False
+        self.bullet_bonus_total = self.game_state.get_ammo()
+        self.bullet_bonus_shown = 0
+        self.bullet_bonus_timer = 0.0
         self.logger.debug(
             f"[activate] Called. bonus_elements length: {len(self.bonus_elements)}"
         )
@@ -166,9 +180,11 @@ class LevelCompleteView(View):
         ):
             self.on_advance_callback()
 
-    def _prepare_elements(self) -> List[Tuple[pygame.Surface, object, int]]:
+    def _prepare_elements(
+        self,
+    ) -> List[Tuple[Union[pygame.Surface, BulletRowMarker], object, int]]:
         """Prepare all elements to be displayed on the level complete screen, with optional event and per-row delay."""
-        elements: List[Tuple[pygame.Surface, object, int]] = [
+        elements: List[Tuple[Union[pygame.Surface, BulletRowMarker], object, int]] = [
             (
                 self._fonts["title"].render(
                     f"- Level {self.level_num} -", True, (255, 0, 0)
@@ -194,7 +210,7 @@ class LevelCompleteView(View):
                     self._fonts["message"].render(
                         "Sorry, no bonus coins collected.", True, (0, 0, 255)
                     ),
-                    DohEvent(),
+                    DohSoundEvent(),
                     1500,
                 )
             )
@@ -214,7 +230,7 @@ class LevelCompleteView(View):
                 BonusCollectedEvent(),
                 900,
             ),
-            (("bullets", ""), None, 700),  # Placeholder for the bullet row, no sound
+            (("bullets", ""), None, 700),  # Bullet row marker
             (
                 self._fonts["bonus"].render(
                     f"Time bonus - {self.time_remaining} x 100 = "
@@ -252,7 +268,7 @@ class LevelCompleteView(View):
 
     @staticmethod
     def _calculate_total_height(
-        elements: List[Tuple[pygame.Surface, object]],
+        elements: List[Tuple[Union[pygame.Surface, BulletRowMarker], object]],
         bullet_height: int,
         spacing: int,
         icon_spacing: int,
@@ -261,7 +277,7 @@ class LevelCompleteView(View):
 
         Args:
         ----
-            elements (List[Tuple[pygame.Surface, object]]): The elements to display.
+            elements (List[Tuple[Union[pygame.Surface, BulletRowMarker], object]]): The elements to display.
             bullet_height (int): The height of bullet images.
             spacing (int): Standard spacing between elements.
             icon_spacing (int): Extra spacing for icons.
@@ -272,10 +288,7 @@ class LevelCompleteView(View):
 
         """
         total_height = 0
-        for (
-            e,
-            _,
-        ) in elements:
+        for e, _ in elements:
             if isinstance(e, pygame.Surface):
                 total_height += e.get_height()
             elif isinstance(e, tuple) and e[0] == "bullets":
@@ -347,30 +360,67 @@ class LevelCompleteView(View):
         return y + bullet_h
 
     def update(self, delta_ms: float) -> None:
-        """Update the gradual reveal of bonus/info messages and fire sound events."""
+        """Update the gradual reveal of bonus/info messages, bullet animation, and fire sound events."""
         self.logger.debug(
             f"[update] Called. reveal_step: {self.reveal_step}, bonus_elements length: {len(self.bonus_elements)}"
         )
         if self.active and self.reveal_step < len(self.bonus_elements):
-            self.reveal_timer += delta_ms
-            if self.reveal_timer >= self.reveal_delay_ms:
-                self.reveal_step += 1
-                self.reveal_timer = 0.0
-                self.logger.debug(
-                    f"[update] reveal_step incremented: {self.reveal_step}"
-                )
-                # Fire event for this row if present
-                if self.reveal_step <= len(self.bonus_elements):
-                    _, event, _ = self.bonus_elements[self.reveal_step - 1]
-                    if event is not None:
+            # Check if we're at the bullet row step
+            bullet_row_idx = None
+            for idx, (element, _, _) in enumerate(self.bonus_elements):
+                if isinstance(element, tuple) and element[0] == "bullets":
+                    bullet_row_idx = idx
+                    break
+            if bullet_row_idx is not None and self.reveal_step == bullet_row_idx:
+                # Animate bullets one at a time
+                if not self.bullet_bonus_animating:
+                    self.bullet_bonus_animating = True
+                    self.bullet_bonus_total = self.game_state.get_ammo()
+                    self.bullet_bonus_shown = 0
+                    self.bullet_bonus_timer = 0.0
+                if self.bullet_bonus_shown < self.bullet_bonus_total:
+                    self.bullet_bonus_timer += delta_ms
+                    if self.bullet_bonus_timer >= BULLET_ANIM_DELAY_MS:
+                        self.bullet_bonus_shown += 1
+                        self.bullet_bonus_timer = 0.0
+                        # Fire AmmoFiredEvent for sound
                         pygame.event.post(
-                            pygame.event.Event(pygame.USEREVENT, {"event": event})
+                            pygame.event.Event(
+                                pygame.USEREVENT,
+                                {"event": KeySoundEvent()},
+                            )
                         )
+                else:
+                    self.bullet_bonus_animating = False
+                    self.reveal_step += 1
                     # Set delay for next row if available
                     if self.reveal_step < len(self.bonus_elements):
                         self.reveal_delay_ms = self.bonus_elements[self.reveal_step][2]
                     else:
                         self.reveal_delay_ms = REVEAL_DELAY_MS
+            else:
+                # Normal reveal logic for other rows
+                self.reveal_timer += delta_ms
+                if self.reveal_timer >= self.reveal_delay_ms:
+                    self.reveal_step += 1
+                    self.reveal_timer = 0.0
+                    self.logger.debug(
+                        f"[update] reveal_step incremented: {self.reveal_step}"
+                    )
+                    # Fire event for this row if present
+                    if self.reveal_step <= len(self.bonus_elements):
+                        _, event, _ = self.bonus_elements[self.reveal_step - 1]
+                        if event is not None:
+                            pygame.event.post(
+                                pygame.event.Event(pygame.USEREVENT, {"event": event})
+                            )
+                        # Set delay for next row if available
+                        if self.reveal_step < len(self.bonus_elements):
+                            self.reveal_delay_ms = self.bonus_elements[
+                                self.reveal_step
+                            ][2]
+                        else:
+                            self.reveal_delay_ms = REVEAL_DELAY_MS
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the level-complete overlay content, with improved spacing/formatting and correct icon usage."""
@@ -398,18 +448,27 @@ class LevelCompleteView(View):
         )
         y = play_rect.y + (play_rect.height - total_height) // 2
 
-        # Draw only up to reveal_step elements
         for idx, (element, _, _) in enumerate(elements):
-            if idx >= self.reveal_step:
+            if idx < self.reveal_step:
+                if isinstance(element, pygame.Surface):
+                    y = self._draw_centered_element(surface, element, center_x, y)
+                    y += self.spacing
+                elif isinstance(element, tuple) and element[0] == "bullets":
+                    y = self._draw_bullets_row(
+                        surface, center_x, y, bullet_img, self.game_state.get_ammo()
+                    )
+                    y += self.spacing
+            elif idx == self.reveal_step:
+                if (
+                    isinstance(element, tuple)
+                    and element[0] == "bullets"
+                    and self.bullet_bonus_animating
+                ):
+                    y = self._draw_bullets_row(
+                        surface, center_x, y, bullet_img, self.bullet_bonus_shown
+                    )
+                    y += self.spacing
+                # Optionally, handle other animated rows here
                 break
-            if isinstance(element, pygame.Surface):
-                # Draw regular text/image element
-                y = self._draw_centered_element(surface, element, center_x, y)
-                y += self.spacing
-            elif isinstance(element, tuple) and element[0] == "bullets":
-                # Draw bullets row (special case)
-                total_bullets = self.game_state.get_ammo()
-                y = self._draw_bullets_row(
-                    surface, center_x, y, bullet_img, total_bullets
-                )
-                y += self.spacing
+            else:
+                break
