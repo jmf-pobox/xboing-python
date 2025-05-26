@@ -57,3 +57,7 @@ Keep the TODO list organized by:
 - [x] Fix: Timer UI at game start should show correct time_bonus for level 1 and update as expected
 - [x] Fix pygame.event.Event call for TIMER_BLK in src/xboing/controllers/game_controller.py to use two arguments and post two events.
 - [x] Ensure test mocks in tests/unit/test_game_controller.py return iterables for methods expected to return lists (e.g., set_timer).
+- [x] Refactor LevelCompleteView layout to match C version: use fixed starting y, increment y for each element, draw bottom prompt at fixed y.
+- [x] Improve LevelCompleteView spacing: use element.get_height() + gap for each line, add extra gap after major sections, and review font/weight for each line to match the C version.
+- [x] Align the bottom of the '- Level 1 -' text in LevelCompleteView to exactly 210px from the window top, matching the C version.
+- [p] Integrate hardcoded y coordinates (from the C version ruler image) into the elements structure and update the draw method in LevelCompleteView to use these y values for pixel-perfect placement.
