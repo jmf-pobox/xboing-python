@@ -177,22 +177,12 @@ See the `docs/` directory for detailed information:
 - [Project Paths](docs/CODE-PATHS.md) – Directory structure and asset locations
 - [Scripts Design](docs/CODE-EXCEPTIONS-DESIGN.md) – Utility and asset conversion scripts
 
-### Contributing
-
-Contributions are welcome! Areas that need work:
-1. Complete implementation of all special block effects
-2. High score system
-3. Game state management and transitions
-4. Enhanced visual effects
-5. Additional sound effects
-6. Level editor
-
 ### Testing & Quality
 
 - The codebase is designed for maintainability, extensibility, and testability, following modern Python best practices.
+- Type hints and docstrings are used throughout for clarity and static analysis.
 - All major UI components (score, lives, level, timer, message window) are event-driven, component-based, and have dedicated unit tests.
 - The test suite includes both unit and integration tests, covering game logic, event-driven UI updates, and core systems.
-- Type hints and docstrings are used throughout for clarity and static analysis.
 - Logging is used for warnings and errors (no print statements in production code).
 
 ## License
