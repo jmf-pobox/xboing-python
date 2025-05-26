@@ -29,3 +29,6 @@ class View(Protocol):
     def deactivate(self) -> None:
         """Deactivate the view."""
         raise NotImplementedError()
+
+    def update(self, delta_ms: float) -> None:
+        """Update the view."""

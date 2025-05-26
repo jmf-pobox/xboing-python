@@ -136,9 +136,6 @@ class DummyLevelManager:
     def load_level(self, level):
         pass
 
-    def get_time_remaining(self):
-        return 60
-
     def get_level_info(self):
         return {"title": "Test Level"}
 
@@ -156,9 +153,6 @@ def test_ammo_reset_on_full_restart(game_state):
     state.ammo = 0
 
     class DummyLevelManager:
-        def get_time_remaining(self):
-            return 0
-
         def get_level_info(self):
             return {"title": "foo"}
 

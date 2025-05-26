@@ -83,8 +83,14 @@ class XBoingModule(Module):
         input_manager: InputManager,
         bullet_manager: BulletManager,
         bullet_renderer: BulletRenderer,
+        starting_level: int = 1,
     ) -> None:
-        """Initialize the registry with all canonical game objects and managers."""
+        """Initialize the registry with all canonical game objects and managers.
+
+        Args:
+            starting_level: The level to start at (default: 1).
+
+        """
         self._game_state = game_state
         self._level_manager = level_manager
         self._ball_manager = ball_manager
@@ -108,6 +114,7 @@ class XBoingModule(Module):
         self._bullet_manager = bullet_manager
         self._bullet_renderer = bullet_renderer
         self._renderer = game_view.renderer
+        self._starting_level = starting_level
         self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
 
     @provider
@@ -297,16 +304,16 @@ class XBoingModule(Module):
     def provide_level_complete_controller(self) -> LevelCompleteController:
         """Return a LevelCompleteController for handling level completion logic."""
         return LevelCompleteController(
-            self._game_state,
-            self._level_manager,
             self._ball_manager.balls,
-            self._game_controller,
             self._ui_manager,
             self._game_view,
             self._layout,
-            on_advance_callback=None,  # To be set in main.py after instantiation
+            self._game_state,
+            self._game_controller,
+            self._level_manager,
             audio_manager=self._audio_manager,
             quit_callback=self._quit_callback,
+            on_advance_callback=None,
         )
 
     @provider

@@ -112,3 +112,7 @@ class GameOverView(View):
             play_rect.centery + 70,
             centered=True,
         )
+
+    def update(self, delta_ms: float) -> None:
+        """Update the view (currently a stub)."""
+        # No-op for now

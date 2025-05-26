@@ -81,6 +81,18 @@ class BonusCollectedEvent(XBoingEvent):
     sound_effect = "bonus"
 
 
+class KeySoundEvent(XBoingEvent):
+    """Event: Key pressed."""
+
+    sound_effect = "key"
+
+
+class DohSoundEvent(XBoingEvent):
+    """Event: Doh sound."""
+
+    sound_effect = "Doh1"
+
+
 class PaddleHitEvent(XBoingEvent):
     """Event: Ball hit the paddle."""
 

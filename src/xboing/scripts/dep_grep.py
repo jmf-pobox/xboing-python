@@ -12,7 +12,7 @@ import argparse
 import logging
 from pathlib import Path
 import re
-from typing import Dict, Set, List
+from typing import Dict, List, Set
 
 from xboing.scripts.utils import run_cli_conversion
 
@@ -77,7 +77,9 @@ def main() -> int:
     )
 
     def conversion_func(
-        input_path: Path, output_path: Path, dry_run: bool = False  # pylint: disable=unused-argument
+        input_path: Path,  # pylint: disable=unused-argument
+        output_path: Path,  # pylint: disable=unused-argument
+        dry_run: bool = False,  # pylint: disable=unused-argument
     ) -> Dict[str, List[str]]:
         # Arguments are unused; required for run_cli_conversion signature
         deps = find_package_dependencies()

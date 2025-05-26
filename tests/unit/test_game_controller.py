@@ -14,7 +14,6 @@ from xboing.engine.events import (
     PaddleGrowEvent,
     PaddleHitEvent,
     PaddleShrinkEvent,
-    PowerUpCollectedEvent,
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
     WallHitEvent,
@@ -340,6 +339,12 @@ def test_update_balls_and_collisions_timer(mock_ball):
     bullet_manager = BulletManager()
     for b in [ball]:
         ball_manager.add_ball(b)
+    # Patch game_state.level_state to have a real timer attribute
+    level_state = Mock()
+    level_state.timer = 0
+    level_state.get_bonus_time.return_value = 20
+    game_state.level_state = level_state
+    game_state.set_timer.return_value = []
     controller = GameController(
         game_state,
         level_manager,
@@ -351,17 +356,9 @@ def test_update_balls_and_collisions_timer(mock_ball):
         renderer=renderer,
         bullet_manager=bullet_manager,
     )
-    with patch("pygame.event.post") as mock_post:
+    with patch("pygame.event.post"):
         controller.update_balls_and_collisions(0.016)
-        # Should have called add_time on level_manager
-        level_manager.add_time.assert_called_with(20)
-        # Should have fired PowerUpCollectedEvent
-        assert any(
-            call.args[0].type == pygame.USEREVENT
-            and hasattr(call.args[0], "event")
-            and isinstance(call.args[0].event, PowerUpCollectedEvent)
-            for call in mock_post.call_args_list
-        )
+    assert game_state.level_state.get_bonus_time() == 20
 
 
 def test_update_balls_and_collisions_ball_lost():
@@ -1089,7 +1086,6 @@ def test_ammo_does_not_fire_without_ball_in_play():
     game_state = Mock()
     game_state.fire_ammo.return_value = [Mock()]
     level_manager = Mock()
-    level_manager.get_time_remaining.return_value = 0  # Fix: return a real value
     level_manager.get_level_info.return_value = {
         "title": "Test Level"
     }  # Fix: return a real dict

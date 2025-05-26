@@ -3,7 +3,9 @@
 This module defines the XBoingApp class, which encapsulates all game setup and the main loop.
 """
 
+import argparse
 import logging
+import sys
 import time
 import typing
 from typing import Dict, cast
@@ -19,6 +21,7 @@ from xboing.controllers.level_complete_controller import LevelCompleteController
 from xboing.controllers.window_controller import WindowController
 from xboing.di_module import XBoingModule
 from xboing.engine.audio_manager import AudioManager
+from xboing.engine.events import TimerUpdatedEvent
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
 from xboing.engine.window import Window
@@ -44,7 +47,7 @@ from xboing.utils.asset_paths import get_asset_path, get_sounds_dir
 from xboing.utils.logging_config import setup_logging
 
 # Setup logging
-setup_logging(logging.CRITICAL)
+setup_logging(logging.INFO)
 
 # Game constants - matching the original XBoing dimensions
 PLAY_WIDTH: int = 495  # Original game's play area width
@@ -106,8 +109,13 @@ class XBoingApp:
     level_complete_view: LevelCompleteView
     window_controller: WindowController
 
-    def __init__(self) -> None:
-        """Initialize the XBoing application and all dependencies."""
+    def __init__(self, starting_level: int = 1) -> None:
+        """Initialize the XBoing application and all dependencies.
+
+        Args:
+            starting_level: The level to start at (default: 1).
+
+        """
         # --- Logging and Pygame/Audio Initialization ---
         self.game_state = GameState()
         pygame.mixer.init()
@@ -125,14 +133,27 @@ class XBoingApp:
         # --- Layout and Core Game Objects ---
         self.layout = GameLayout(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.layout.load_backgrounds()
-        game_objects = create_game_objects(self.layout)
+        game_objects = create_game_objects(self.layout, starting_level=starting_level)
         self.paddle = game_objects["paddle"]
         self.ball_manager = game_objects["ball_manager"]
         self.block_manager = game_objects["block_manager"]
         self.level_manager = game_objects["level_manager"]
+        self.level_manager.current_level = starting_level
         self.bullet_manager = game_objects["bullet_manager"]
         self.bullet_renderer = game_objects["bullet_renderer"]
-        self.game_state.set_timer(self.level_manager.get_time_remaining())
+
+        # --- Initialize timer and LevelState for starting level ---
+
+        # Load level info and set timer from time_bonus
+        level_info = self.level_manager.get_level_info()
+        time_bonus = level_info.get("time_bonus", 120)
+        self.game_state.level_state.set_bonus_time(time_bonus)
+        # Post TimerUpdatedEvent to update the UI
+        pygame.event.post(
+            pygame.event.Event(
+                pygame.USEREVENT, {"event": TimerUpdatedEvent(time_bonus)}
+            )
+        )
 
         # --- UI Manager and Fonts ---
         self.ui_manager = UIManager()
@@ -291,6 +312,8 @@ class XBoingApp:
             self.ui_manager.handle_events(events)
             active_controller.update(delta_time * 1000)
             self.layout.draw(self.window.surface)
+            if self.ui_manager.current_view:
+                self.ui_manager.current_view.update(delta_time * 1000)
             self.ui_manager.draw_all(self.window.surface)
             self.window.update()
         pygame.quit()
@@ -298,7 +321,37 @@ class XBoingApp:
 
 def main() -> None:
     """Application entry point. Instantiates and runs the XBoingApp."""
-    app = XBoingApp()
+    parser = argparse.ArgumentParser(
+        description="XBoing: Python port of the classic blockout game."
+    )
+    parser.add_argument(
+        "-l",
+        "--start-level",
+        type=int,
+        default=1,
+        help="Level to start at (default: 1)",
+    )
+    parser.add_argument(
+        "-usage",
+        action="store_true",
+        help="Print a brief help message and exit.",
+    )
+    parser.add_argument(
+        "-help",
+        action="help",
+        help="Show this help message and exit.",
+    )
+    args = parser.parse_args()
+    if args.usage:
+        print(
+            "Usage: python -m xboing [options]\n\n",
+            "Options:\n",
+            "  -l, --start-level <n>   Level to start at (default: 1)\n",
+            "  -usage                  Print a brief help message and exit.\n",
+            "  -help                   Show this help message and exit.\n",
+        )
+        sys.exit(0)
+    app = XBoingApp(starting_level=args.start_level)
     app.run()
 
 
