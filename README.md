@@ -5,9 +5,6 @@
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
 [![Build](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml)
 
-> **Now available on PyPI!**  
-> Install with `pip install xboing` and run with `python -m xboing`.
-
 ## 🚀 Quick Start
 
 ```bash
@@ -80,21 +77,27 @@ Or use Hatch for advanced development workflows (see below).
 
 ### Project Status
 
-This Python port is under active development and is already playable. Current features include:
+The game is fully playable across all 80 levels, with most core features implemented and tested.
+
+The status and roadmap are as follows:
+
 - ✅ Full conversion of all original XBoing assets (graphics, sounds, levels)
 - ✅ Level loading system that reads and displays original level files
 - ✅ Block implementation with correct behaviors and effects
-- ✅ Ball physics and collision detection
+- ✅ Scoring and level bonus calculations
 - ✅ Paddle movement and control (keyboard and mouse)
+- ✅ Ball physics, collision detection, and explosion animation
 - ✅ Audio system for event-driven sound effects
-- ✅ Event-driven, component-based UI (score, lives, ammo, level, timer, messages)
-- ✅ Paddle gun/ammo feature: ammo state, UI, collection, and sound (Phase 1 complete)
-- 🚧 Special power-ups and effects (in progress)
-- 🚧 Game state management and transitions (polished, but ongoing)
-- 🚧 Score tracking and high scores (basic, more to come)
-- 🚧 Machine gun mode and bullet logic (planned)
+- 🚧 High score boingmaster leaderboard (planned for v0.5.0)
+- 🚧 Special power-ups - random elements (planned for v0.5.1)
+- 🚧 Power-ups requiring randomness (planned for v0.5.2)
+- 🚧 Random messages from original (planned for v0.5.3)
+- 🚧 Machine gun mode (planned for v0.5.4)
+- 🚧 Missing effects (in progress for v0.5.5)
+- 🚧 Missing keyboard controls and command line arguments (in progress for v0.5.6)
+- 🚧 Welcome, instructions, and demo screens (v0.6.0-v0.9.0)
+- 🚧 Editor screen (v1.0.0)
 
-The game is fully playable, with most core features implemented and tested. Remaining work focuses on advanced power-ups, polish, and additional features to match and extend the original XBoing experience.
 
 ## 💻 For Developers
 
@@ -106,7 +109,7 @@ xboing-python/
 │   └── xboing/
 │       ├── assets/           # Game assets (images, sounds, levels, config)
 │       │   ├── images/       # All game images (balls, blocks, backgrounds, etc.)
-│       │   ├── sounds/       # Sound effects (WAV)
+│       │   ├── sounds/       # Sound effects
 │       │   ├── levels/       # Level data files
 │       │   └── config/       # Block types and other config
 │       ├── controllers/      # Controllers for game, window, UI, etc.
@@ -114,29 +117,26 @@ xboing-python/
 │       ├── game/             # Game logic (ball, blocks, paddle, collision, state)
 │       ├── layout/           # Layout helpers and game layout logic
 │       ├── renderers/        # Rendering helpers (digits, lives, etc.)
+│       ├── scripts/          # Utility scripts for asset conversion, etc. (run as modules)
 │       ├── ui/               # User interface components (views, displays)
 │       ├── utils/            # Utility functions and helpers
 │       ├── di_module.py      # Dependency injection setup
 │       ├── app_coordinator.py# App entry coordination
 │       └── main.py           # Main entry point
 ├── docs/                     # Documentation and design docs
-├── src/
-│   └── xboing/
-│       └── scripts/         # Utility scripts for asset conversion, etc. (run as modules)
-├── tests/                    # Test scripts
-│   ├── integration/          # Integration tests
-│   └── unit/                 # Unit tests
-└── xboing2.4-clang/          # Original XBoing C source/assets (reference)
+└── tests/                    # Test scripts
+    ├── integration/          # Integration tests
+    └── unit/                 # Unit tests
 ```
 
 ### Asset Management
 
-All asset path helpers resolve to `src/xboing/assets/` and its subfolders. All images, sounds, and levels are loaded from this canonical directory inside the package. Asset conversion scripts in `scripts/` should use this path for input/output.
+All asset path helpers resolve to `src/xboing/assets/` and its subfolders. All images, sounds, and levels are loaded from this canonical directory inside the package. Asset conversion scripts in `src/xboing/scripts/` should use this path for input/output.
 
 - Original XPM graphics → PNG format (in `src/xboing/assets/images/`)
 - Original AU sound files → WAV format (in `src/xboing/assets/sounds/`)
 
-Use the provided conversion scripts in `scripts/` to update or add assets as needed.
+Assets have been converted  and no further conversions should be necessary unless there is a new feature that uncovers a gap.
 
 ### Asset Migration Tools
 
@@ -189,12 +189,11 @@ Contributions are welcome! Areas that need work:
 
 ### Testing & Quality
 
+- The codebase is designed for maintainability, extensibility, and testability, following modern Python best practices.
 - All major UI components (score, lives, level, timer, message window) are event-driven, component-based, and have dedicated unit tests.
 - The test suite includes both unit and integration tests, covering game logic, event-driven UI updates, and core systems.
-- Tests are run before and after each major change to ensure stability and catch regressions early.
 - Type hints and docstrings are used throughout for clarity and static analysis.
 - Logging is used for warnings and errors (no print statements in production code).
-- The codebase is designed for maintainability, extensibility, and testability, following modern Python best practices.
 
 ## License
 
@@ -222,4 +221,3 @@ feat(gun): implement ammo collection event, state, and UI update
 ```
 
 See the [Conventional Commits documentation](https://www.conventionalcommits.org/) for more details.
-
