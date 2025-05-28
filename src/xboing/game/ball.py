@@ -26,6 +26,7 @@ class Ball:
     animation_frames: ClassVar[List[pygame.Surface]] = []
     guide_images: ClassVar[List[pygame.Surface]] = []
     logger: ClassVar[logging.Logger] = logging.getLogger("xboing.Ball")
+    GUIDE_ANIM_FRAME_MS: ClassVar[float] = 80.0  # ms per guide animation frame
 
     @classmethod
     def load_sprites(cls) -> None:
@@ -184,8 +185,8 @@ class Ball:
             self.update_rect()
             # Guide animation update
             self.guide_anim_counter += delta_ms
-            while self.guide_anim_counter >= 80.0:
-                self.guide_anim_counter -= 80.0
+            while self.guide_anim_counter >= Ball.GUIDE_ANIM_FRAME_MS:
+                self.guide_anim_counter -= Ball.GUIDE_ANIM_FRAME_MS
                 self.guide_pos += self.guide_inc
                 if self.guide_pos == 10:
                     self.guide_inc = -1
