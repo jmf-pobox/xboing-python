@@ -65,12 +65,13 @@ class LogoRenderer:
             logo_rect = logo_surf.get_rect(center=(center_x, y + scaled_h // 2))
             surface.blit(logo_surf, logo_rect)
             return logo_rect.bottom + 10
-        elif self.font:
+        if self.font:
             logo_surf = self.font.render(self.fallback_text, True, self.color)
             logo_rect = logo_surf.get_rect(
                 center=(center_x, y + logo_surf.get_height() // 2)
             )
             surface.blit(logo_surf, logo_rect)
             return logo_rect.bottom + 10
-        else:
-            return y
+        # kwargs is unused, but required for interface compatibility
+        _ = kwargs  # noqa: W0613
+        return y

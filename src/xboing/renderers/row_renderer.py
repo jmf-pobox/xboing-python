@@ -5,12 +5,26 @@ from typing import Optional, Protocol, Tuple
 import pygame
 
 
+# pylint: disable=missing-function-docstring
 class RowRenderer(Protocol):
     """Protocol for all row renderers."""
 
     def render(
         self, surface: pygame.Surface, center_x: int, y: int, **kwargs: object
-    ) -> int: ...
+    ) -> int:
+        """
+        Render the row at the given position. Implemented by subclasses.
+
+        Args:
+            surface (pygame.Surface): The surface to draw on.
+            center_x (int): The x-coordinate to center the row.
+            y (int): The y-coordinate to start drawing.
+            **kwargs: Additional arguments for renderer customization.
+
+        Returns:
+            int: The new y position after drawing the row.
+        """
+        ...
 
 
 class TextRowRenderer:
@@ -41,21 +55,24 @@ class TextRowRenderer:
         self.icon = icon
         self.icon_offset = icon_offset
 
+    # pylint: disable=missing-function-docstring
     def render(
         self, surface: pygame.Surface, center_x: int, y: int, **kwargs: object
     ) -> int:
         """
-        Draw the row centered at (center_x, y). Returns the new y after drawing.
+        Render the row at the given position. Implemented by subclasses.
 
         Args:
             surface (pygame.Surface): The surface to draw on.
             center_x (int): The x-coordinate to center the row.
             y (int): The y-coordinate to start drawing.
+            **kwargs: Additional arguments for renderer customization.
 
         Returns:
             int: The new y position after drawing the row.
-
         """
+        # kwargs is unused, but required for interface compatibility
+        _ = kwargs  # noqa: W0613
         text_surf = self.font.render(self.text, True, self.color)
         text_rect = text_surf.get_rect(
             center=(center_x, y + text_surf.get_height() // 2)
