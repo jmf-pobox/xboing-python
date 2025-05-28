@@ -98,6 +98,11 @@ class LevelCompleteController(Controller):
         # Get the events returned by set_level and post them
         level_changed_events = self.game_state.set_level(new_level)
 
+        # Set the timer for the new level
+        self.level_manager.get_next_level()
+        time_bonus = self.level_manager.get_level_info().get("time_bonus", 120)
+        self.game_state.level_state.set_bonus_time(time_bonus)
+
         # Set the correct background index for the new level
         bg_index = self.level_manager.get_current_background_index()
         self.game_view.set_background(bg_index)
@@ -108,11 +113,6 @@ class LevelCompleteController(Controller):
         level_info = self.level_manager.get_level_info()
         level_title = level_info["title"]
         post_level_title_message(level_title)
-
-        # Set the timer for the new level
-        self.level_manager.get_next_level()
-        time_bonus = self.level_manager.get_level_info().get("time_bonus", 120)
-        self.game_state.level_state.set_bonus_time(time_bonus)
 
         # Post TimerUpdatedEvent to update the UI
         self.post_game_state_events([TimerUpdatedEvent(time_bonus)])

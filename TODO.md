@@ -38,12 +38,19 @@ Keep the TODO list organized by:
 - [ ] test(paddle): Add/expand integration tests for paddle features
 - [ ] test(blocks): Ensure all block types in block_types.json are covered in tests and code
 
-## New Renderer Refactor
-- [p] Add RowRenderer, BulletRowRenderer, and CompositeRenderer classes to src/xboing/renderers/
-- [p] Refactor LevelCompleteView to use new stateless renderers and composite renderer
-- [p] Remove old element rendering logic from LevelCompleteView
-- [ ] Run and verify all tests after refactor
-+ [x] Add RowRenderer, BulletRowRenderer, and CompositeRenderer classes to src/xboing/renderers/
-+ [x] Refactor LevelCompleteView to use new stateless renderers and composite renderer
-+ [x] Remove old element rendering logic from LevelCompleteView
-+ [x] Run and verify all tests after refactor
+## Paddle Guide Animation (Launch Direction Indicator)
+- [p] feat(paddle): Implement animated paddle guide (launch direction indicator) using guide images
+    - Preload guide images (guide1.png to guide11.png) and store in a list.
+    - Add guide animation state (`guide_pos`, `guide_inc`) to the relevant game or ball state.
+    - Integrate guide animation update logic (ping-pong cycling) into the main update loop when a ball is in BALL_READY state.
+    - Draw the correct guide image above the ball in the render/draw method when BALL_READY.
+    - ~~Handle user input (left/right keys, optionally mouse) to adjust `guide_pos` and update the guide image in real time.~~ (Not needed: Python now matches C game, guide is animated only)
+    - [x] On ball launch, set the ball's (dx, dy) velocity according to the current `guide_pos` mapping. (Ball.release_from_paddle now uses guide_pos)
+    - Ensure the guide is hidden as soon as the ball is launched.
+    - Write/adjust tests to verify correct guide animation, input handling, and launch direction.
+    - Ensure all code is PEP 8, PEP 257, and PEP 484 compliant.
+    - Run `hatch run lint-fix`, `pylint`, and `pytest` to ensure full compliance and test coverage.
+    - Update `TODO.md` to mark as complete when done.
+    - Note: Python implementation now matches the original C game—guide is animated only, not user-controlled.
+
+- [x] Fix background cycling bug when advancing to the next level by reordering the background update logic in LevelCompleteController (move get_next_level before setting background index).

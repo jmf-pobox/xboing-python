@@ -12,7 +12,8 @@ from typing import Any, ClassVar, List, Optional, Tuple
 
 import pygame
 
-from xboing.utils.asset_paths import get_balls_dir
+from xboing.utils.asset_loader import load_image
+from xboing.utils.asset_paths import get_balls_dir, get_images_dir
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,9 @@ class Ball:
     # Class variables for sprites
     sprites: ClassVar[List[pygame.Surface]] = []
     animation_frames: ClassVar[List[pygame.Surface]] = []
+    guide_images: ClassVar[List[pygame.Surface]] = []
     logger: ClassVar[logging.Logger] = logging.getLogger("xboing.Ball")
+    GUIDE_ANIM_FRAME_MS: ClassVar[float] = 80.0  # ms per guide animation frame
 
     @classmethod
     def load_sprites(cls) -> None:
@@ -54,6 +57,25 @@ class Ball:
                     cls.animation_frames.append(img)
                 except (pygame.error, FileNotFoundError) as e:
                     cls.logger.warning(f"Failed to load ball animation frame {i}: {e}")
+
+    @classmethod
+    def load_guide_images(cls) -> None:
+        """Load the 11 guide images for the paddle launch direction indicator."""
+        if cls.guide_images:
+            return  # Already loaded
+        guides_dir = os.path.join(get_images_dir(), "guides")
+        cls.guide_images = []
+        for i in range(1, 12):
+            filename = os.path.join(guides_dir, f"guide{i}.png")
+            try:
+                img = load_image(filename, alpha=True)
+                cls.guide_images.append(img)
+            except (pygame.error, FileNotFoundError) as e:
+                cls.logger.warning(f"Failed to load guide image {filename}: {e}")
+                # Fallback: magenta rectangle
+                fallback = pygame.Surface((29, 12), pygame.SRCALPHA)
+                fallback.fill((255, 0, 255))
+                cls.guide_images.append(fallback)
 
     def __init__(
         self,
@@ -99,9 +121,16 @@ class Ball:
         self.anim_counter: float = 0.0
         self.anim_frame_ms = 100  # Animation frame duration in ms (was ANIM_FRAME_MS)
 
-        # Ensure sprites are loaded
+        # Guide animation state
+        self.guide_pos: int = 0  # Index into guide_images (0-10)
+        self.guide_inc: int = 1  # +1 or -1 for ping-pong
+        self.guide_anim_counter: float = 0.0  # ms accumulator
+
+        # Ensure sprites and guide images are loaded
         if not Ball.sprites:
             Ball.load_sprites()
+        if not Ball.guide_images:
+            Ball.load_guide_images()
 
         # Create the collision rect
         self.rect: pygame.Rect = pygame.Rect(
@@ -154,6 +183,15 @@ class Ball:
             self.x = paddle.rect.centerx + self.paddle_offset
             self.y = paddle.rect.top - self.radius - 1
             self.update_rect()
+            # Guide animation update
+            self.guide_anim_counter += delta_ms
+            while self.guide_anim_counter >= Ball.GUIDE_ANIM_FRAME_MS:
+                self.guide_anim_counter -= Ball.GUIDE_ANIM_FRAME_MS
+                self.guide_pos += self.guide_inc
+                if self.guide_pos == 10:
+                    self.guide_inc = -1
+                elif self.guide_pos == 0:
+                    self.guide_inc = 1
             return (True, False, False)
 
         # Calculate movement with framerate independence
@@ -268,9 +306,36 @@ class Ball:
 
         return True
 
+    def get_launch_velocity_from_guide_pos(self) -> Tuple[float, float]:
+        """Get the launch velocity (vx, vy) for the current guide position."""
+        mapping = [
+            (-5, -1),
+            (-4, -2),
+            (-3, -3),
+            (-2, -4),
+            (-1, -5),
+            (0, -5),
+            (1, -5),
+            (2, -4),
+            (3, -3),
+            (4, -2),
+            (5, -1),
+        ]
+        dx, dy = mapping[self.guide_pos]
+        speed = math.sqrt(self.vx * self.vx + self.vy * self.vy)
+        # Normalize to current speed
+        norm = math.sqrt(dx * dx + dy * dy)
+        if norm == 0:
+            return (0.0, -speed)
+        return (speed * dx / norm, speed * dy / norm)
+
     def release_from_paddle(self) -> None:
-        """Release the ball if it's stuck to the paddle."""
+        """Release the ball if it's stuck to the paddle, using guide_pos for launch direction."""
         logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
+        if self.stuck_to_paddle:
+            vx, vy = self.get_launch_velocity_from_guide_pos()
+            self.vx = vx
+            self.vy = vy
         self.stuck_to_paddle = False
         logger.debug(f"[release_from_paddle] Ball released: vx={self.vx}, vy={self.vy}")
 
@@ -298,6 +363,14 @@ class Ball:
             surface (pygame.Surface): Surface to draw on
 
         """
+        # Draw guide if stuck to paddle
+        if self.stuck_to_paddle and Ball.guide_images:
+            guide_img = Ball.guide_images[self.guide_pos]
+            guide_rect = guide_img.get_rect()
+            guide_rect.centerx = int(self.x)
+            guide_rect.bottom = int(self.y) - self.radius - 2  # 2px gap above ball
+            surface.blit(guide_img, guide_rect)
+
         if not Ball.sprites:
             # Fallback to circle drawing if sprites failed to load
             pygame.draw.circle(
