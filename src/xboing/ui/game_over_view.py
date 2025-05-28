@@ -48,7 +48,7 @@ class GameOverView(ViewWithBackground):
         self.active: bool = False
         self.logger = logging.getLogger("xboing.GameOverView")
         self._row_renderers_with_y: List[Tuple[RowRenderer, int]] = []
-        self._composite_renderer: Union[CompositeRenderer, None] = None
+        self._composite_renderer: Optional[CompositeRenderer] = None
 
     def activate(self) -> None:
         """Activate the view and prepare renderers."""
