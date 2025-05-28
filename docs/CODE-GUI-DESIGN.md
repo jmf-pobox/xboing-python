@@ -6,6 +6,7 @@
 - **Modern, event-driven, component-based UI** for maintainability and testability.
 - **Polymorphic, DRY game object design** using a unified shape hierarchy.
 - **All events** (game, UI, input) are routed through the Pygame event queue.
+- **Stateless, modular renderer pattern** for all UI content views, ensuring separation of state and rendering logic, and enabling pixel-perfect, testable UI.
 
 ---
 
@@ -27,11 +28,17 @@
   - Renders itself in its assigned region.
 - **UIManager**: Central manager for all UI components, content views, overlays, and bars. Handles view switching and event routing.
 - **Content Views**: GameView, InstructionsView, GameOverView, LevelCompleteView, etc. Each is a class/component managed by UIManager.
+- **Content View Rendering**: All major content views use a stateless, modular renderer pattern (see 2.3 below) for layout and display, ensuring maintainability and pixel-perfect alignment.
 
 ### 2.3. Renderer Utilities
 
-- Stateless rendering utilities (e.g., for lives, digits) are in `src/renderers/` as `<Thing>Renderer` classes.
-- UI components in `src/ui/` are stateful, subscribe to events, and use these renderers for visual output.
+- Stateless rendering utilities (e.g., for lives, digits, bullets, text, logos) are in `src/xboing/renderers/` as `<Thing>Renderer` classes.
+- All major UI content views (e.g., `GameOverView`, `LevelCompleteView`, `InstructionsView`) use a modular, stateless renderer pattern:
+    - Each row or element is rendered by a `RowRenderer` protocol implementation (`TextRowRenderer`, `BulletRowRenderer`, `LogoRenderer`, etc.).
+    - A `CompositeRenderer` orchestrates the layout and reveal/animation of these rows, using explicit y-coordinates for pixel-perfect alignment.
+    - This approach ensures modularity, testability, and faithful recreation of the original UI layout.
+- Renderer and protocol methods are fully type-annotated (PEP 484), and code is PEP 8/257 compliant.
+- The renderer protocol is unified, making it easy to add new row renderers or composite layouts.
 
 ### 2.4. Asset Management
 
@@ -164,6 +171,7 @@ while running:
 - **Ammo display y-offset:** `lives_y + lives_height + 2`.
 - **Grouping:** Lives, ammo, and level displays are visually grouped in the top bar, with no large gaps.
 - **Rationale:** Ensures the UI is visually compact, grouped, and matches the reference implementation. All calculations are dynamic based on the rendered width of the lives display.
+- **Content views** (e.g., GameOverView, LevelCompleteView, InstructionsView) use explicit y-coordinates for each row renderer, ensuring pixel-perfect vertical alignment as in the original C version.
 
 ---
 
@@ -171,7 +179,9 @@ while running:
 
 - **Adding new shapes or events** is straightforward due to the polymorphic, event-driven, and DI-based architecture.
 - **All code is PEP 8, PEP 257, and PEP 484 compliant.**
+- **Renderer protocol is unified and strictly type-annotated,** making it easy to add new row renderers or composite layouts.
 - **Tests and linters** are run before and after every change to ensure quality and maintainability.
+- **Renderer and UI code** must pass mypy strict mode and linter checks before merging.
 
 ---
 
