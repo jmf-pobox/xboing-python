@@ -1,7 +1,7 @@
 """UI view for displaying the game over screen in XBoing."""
 
 import logging
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Optional, Tuple
 
 from injector import inject
 import pygame
