@@ -23,6 +23,7 @@ class RowRenderer(Protocol):
 
         Returns:
             int: The new y position after drawing the row.
+
         """
         ...
 
@@ -70,9 +71,10 @@ class TextRowRenderer:
 
         Returns:
             int: The new y position after drawing the row.
+
         """
         # kwargs is unused, but required for interface compatibility
-        _ = kwargs  # noqa: W0613
+        _ = kwargs
         text_surf = self.font.render(self.text, True, self.color)
         text_rect = text_surf.get_rect(
             center=(center_x, y + text_surf.get_height() // 2)
