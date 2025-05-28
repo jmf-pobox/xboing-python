@@ -184,7 +184,7 @@ class Ball:
             self.update_rect()
             # Guide animation update
             self.guide_anim_counter += delta_ms
-            if self.guide_anim_counter >= 80.0:
+            while self.guide_anim_counter >= 80.0:
                 self.guide_anim_counter -= 80.0
                 self.guide_pos += self.guide_inc
                 if self.guide_pos == 10:

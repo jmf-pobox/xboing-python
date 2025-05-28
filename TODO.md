@@ -52,3 +52,5 @@ Keep the TODO list organized by:
     - Run `hatch run lint-fix`, `pylint`, and `pytest` to ensure full compliance and test coverage.
     - Update `TODO.md` to mark as complete when done.
     - Note: Python implementation now matches the original C game—guide is animated only, not user-controlled.
+
+- [x] Fix background cycling bug when advancing to the next level by reordering the background update logic in LevelCompleteController (move get_next_level before setting background index).
