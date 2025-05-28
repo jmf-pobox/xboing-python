@@ -8,6 +8,9 @@ import pygame
 
 from xboing.engine.graphics import Renderer
 from xboing.layout.game_layout import GameLayout
+from xboing.renderers.composite_renderer import CompositeRenderer
+from xboing.renderers.logo_renderer import LogoRenderer
+from xboing.renderers.row_renderer import RowRenderer, TextRowRenderer
 from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_backgrounds_dir, get_images_dir
 
@@ -147,22 +150,48 @@ class InstructionsView(View):
         play_surf.blit(amber_surf, amber_rect)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """Draw the instructions view onto the given surface.
-
-        Args:
-        ----
-            surface (pygame.Surface): The Pygame surface to draw on.
-
-        """
+        """Draw the instructions view using stateless renderers and composite renderer."""
         play_rect = self.layout.get_play_rect()
         play_surf = pygame.Surface((play_rect.width, play_rect.height))
         self._draw_background(play_surf)
         centerx = play_rect.width // 2
+        # Prepare rows with y-coords
+        rows_with_y: List[Tuple[RowRenderer, int]] = []
         y = 20
-        y = self._draw_logo(play_surf, centerx, y)
-        y = self._draw_headline(play_surf, centerx, y)
-        self._draw_text_block(play_surf, centerx, y)
-        self._draw_amber_line(play_surf, centerx)
+        # Logo
+        logo_renderer = LogoRenderer(
+            self.logo_image,
+            max_width=min(320, play_rect.width - 40),
+            max_height=100,
+            fallback_text="XBoing",
+            font=self.headline_font,
+            color=(255, 255, 255),
+        )
+        y = logo_renderer.render(play_surf, centerx, y)  # Actually draw and get new y
+        # Headline
+        headline = " - Instructions - "
+        headline_renderer = TextRowRenderer(headline, self.headline_font, (255, 0, 0))
+        rows_with_y.append((headline_renderer, y))
+        y += self.headline_font.get_height() + 20
+        # Instruction lines with paragraph spacing
+        line_height = self.text_font.get_height()
+        green1 = (0, 255, 0)
+        green2 = (0, 200, 0)
+        paragraph_ends = [2, 6, 8, 12, 14]
+        for i, line in enumerate(self.lines):
+            color = green1 if (i // 3) % 2 == 0 else green2
+            rows_with_y.append((TextRowRenderer(line, self.text_font, color), y))
+            y += line_height + 6
+            if i in paragraph_ends:
+                y += 18
+        # Amber line at the bottom
+        amber_text = "Insert coin to start the game"
+        amber_y = play_surf.get_height() - 40 - self.text_font.get_height() // 2
+        amber_renderer = TextRowRenderer(amber_text, self.text_font, self.amber_color)
+        rows_with_y.append((amber_renderer, amber_y))
+        # Use composite renderer to draw all rows (except logo, which is already drawn)
+        composite = CompositeRenderer(rows_with_y)
+        composite.render(play_surf, centerx, len(rows_with_y))
         surface.blit(play_surf, play_rect.topleft)
 
     def handle_event(self, event: pygame.event.Event) -> None:

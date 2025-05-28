@@ -37,3 +37,13 @@ Keep the TODO list organized by:
 - [ ] test(paddle): Increase test coverage for paddle gun logic and edge cases
 - [ ] test(paddle): Add/expand integration tests for paddle features
 - [ ] test(blocks): Ensure all block types in block_types.json are covered in tests and code
+
+## New Renderer Refactor
+- [p] Add RowRenderer, BulletRowRenderer, and CompositeRenderer classes to src/xboing/renderers/
+- [p] Refactor LevelCompleteView to use new stateless renderers and composite renderer
+- [p] Remove old element rendering logic from LevelCompleteView
+- [ ] Run and verify all tests after refactor
++ [x] Add RowRenderer, BulletRowRenderer, and CompositeRenderer classes to src/xboing/renderers/
++ [x] Refactor LevelCompleteView to use new stateless renderers and composite renderer
++ [x] Remove old element rendering logic from LevelCompleteView
++ [x] Run and verify all tests after refactor

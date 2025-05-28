@@ -1,7 +1,7 @@
 """UI view for displaying the level complete screen in XBoing."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pygame
 
@@ -17,6 +17,9 @@ from xboing.engine.graphics import Renderer
 from xboing.game.game_state import GameState
 from xboing.game.level_manager import LevelManager
 from xboing.layout.game_layout import GameLayout
+from xboing.renderers.bullet_row_renderer import BulletRowRenderer
+from xboing.renderers.composite_renderer import CompositeRenderer
+from xboing.renderers.row_renderer import RowRenderer, TextRowRenderer
 from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_asset_path
 
@@ -24,9 +27,6 @@ from .view import View
 
 REVEAL_DELAY_MS = 3000  # Default delay, but now per-element
 BULLET_ANIM_DELAY_MS = 300  # ms per bullet in the animation
-
-BulletRowMarker = Tuple[str, str]
-ElementType = Tuple[Union[pygame.Surface, BulletRowMarker], Optional[Any], int]
 
 
 class LevelCompleteView(View):
@@ -80,9 +80,6 @@ class LevelCompleteView(View):
         self.reveal_step: int = 0
         self.reveal_timer: float = 0.0
         self.reveal_delay_ms: int = REVEAL_DELAY_MS
-        self.bonus_elements: List[
-            Tuple[Union[pygame.Surface, BulletRowMarker], object, int]
-        ] = []
         self.bullet_bonus_animating: bool = False
         self.bullet_bonus_total: int = 0
         self.bullet_bonus_shown: int = 0
@@ -101,6 +98,12 @@ class LevelCompleteView(View):
         # Spacing constants
         self.spacing = 12
         self.icon_spacing = 16
+
+        # Renderer list and composite renderer
+        self.row_renderers_with_y: List[Tuple[RowRenderer, int]] = []
+        self.composite_renderer: Optional[CompositeRenderer] = None
+        self._row_events: List[Optional[Any]] = []
+        self._row_delays: List[int] = []
 
     @staticmethod
     def _initialize_fonts() -> Dict[str, pygame.font.Font]:
@@ -143,22 +146,176 @@ class LevelCompleteView(View):
         # Add total bonus to score
         self.final_score = self.game_state.score
 
+    def _prepare_renderers(self) -> None:
+        """Prepare the list of (renderer, y) pairs, events, and delays for the level complete screen, using pixel-perfect y-coordinates."""
+        self.row_renderers_with_y = []
+        self._row_events = []
+        self._row_delays = []
+        y_coords = [
+            176,  # - Level 1 - (bottom)
+            229,  # Congratulations on finishing this level.
+            295,  # Sorry, no bonus coins collected.
+            369,  # Level bonus - level 1 x 100 = 100 points
+            417,  # [Bullets row] (bottom)
+            466,  # Time bonus - ...
+            495,  # You are currently ranked ...
+            530,  # Prepare for level ...
+            560,  # Press space for next level
+        ]
+        idx = 0
+        # Title row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text=f"- Level {self.level_num} -",
+                    font=self._fonts["title"],
+                    color=(255, 0, 0),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(None)
+        self._row_delays.append(500)
+        idx += 1
+        # Congratulations row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text="Congratulations on finishing this level.",
+                    font=self._fonts["message"],
+                    color=(255, 255, 255),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(ApplauseEvent())
+        self._row_delays.append(1500)
+        idx += 1
+        # Bonus coin row
+        coins = self.game_state.level_state.get_bonus_coins_collected()
+        if coins == 0:
+            self.row_renderers_with_y.append(
+                (
+                    TextRowRenderer(
+                        text="Sorry, no bonus coins collected.",
+                        font=self._fonts["message"],
+                        color=(0, 0, 255),
+                    ),
+                    y_coords[idx],
+                )
+            )
+            self._row_events.append(DohSoundEvent())
+            self._row_delays.append(1500)
+        else:
+            self.row_renderers_with_y.append(
+                (
+                    TextRowRenderer(
+                        text="Bonus coins collected!",
+                        font=self._fonts["message"],
+                        color=(0, 128, 255),
+                        icon=self._bonus_coin_img,
+                        icon_offset=8,
+                    ),
+                    y_coords[idx],
+                )
+            )
+            self._row_events.append(BonusCollectedEvent())
+            self._row_delays.append(1500)
+        idx += 1
+        # Level bonus row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text=f"Level bonus - level {self.level_num} x 100 = {self.level_bonus} points",
+                    font=self._fonts["bonus"],
+                    color=(255, 255, 0),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(BonusCollectedEvent())
+        self._row_delays.append(900)
+        idx += 1
+        # Bullet row (special y adjustment)
+        bullet_img = pygame.transform.smoothscale(self._bullet_img, (7, 15))
+        bullet_y = y_coords[idx] + 22 - bullet_img.get_height()
+        self.row_renderers_with_y.append((BulletRowRenderer(bullet_img), bullet_y))
+        self._row_events.append(None)  # Sound handled in update
+        self._row_delays.append(700)
+        idx += 1
+        # Time bonus row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text=f"Time bonus - {self.time_remaining} seconds x 100 = {self.time_bonus} points",
+                    font=self._fonts["bonus"],
+                    color=(255, 255, 0),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(TimerUpdatedEvent(self.time_remaining))
+        self._row_delays.append(1200)
+        idx += 1
+        # Rank row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text=f"You are currently ranked {0}.",
+                    font=self._fonts["rank"],
+                    color=(255, 0, 0),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(None)
+        self._row_delays.append(1000)
+        idx += 1
+        # Prepare for next level row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text=f"Prepare for level {self.level_num + 1}",
+                    font=self._fonts["message"],
+                    color=(255, 255, 0),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(None)
+        self._row_delays.append(800)
+        idx += 1
+        # Press space row
+        self.row_renderers_with_y.append(
+            (
+                TextRowRenderer(
+                    text="Press space for next level",
+                    font=self._fonts["prompt"],
+                    color=(214, 183, 144),
+                ),
+                y_coords[idx],
+            )
+        )
+        self._row_events.append(None)
+        self._row_delays.append(800)
+        self.composite_renderer = CompositeRenderer(self.row_renderers_with_y)
+
     def activate(self) -> None:
         """Activate the view and recompute bonuses."""
         self.active = True
         self._compute_bonuses()
         self.reveal_step = 0
         self.reveal_timer = 0.0
-        self.bonus_elements = self._prepare_elements()
+        self._prepare_renderers()
         self.reveal_delay_ms = (
-            self.bonus_elements[0][2] if self.bonus_elements else REVEAL_DELAY_MS
+            self._row_delays[0] if self._row_delays else REVEAL_DELAY_MS
         )
         self.bullet_bonus_animating = False
         self.bullet_bonus_total = self.game_state.get_ammo()
         self.bullet_bonus_shown = 0
         self.bullet_bonus_timer = 0.0
         self.logger.debug(
-            f"[activate] Called. bonus_elements length: {len(self.bonus_elements)}"
+            f"[activate] Called. row_renderers_with_y length: {len(self.row_renderers_with_y)}"
         )
         post_level_title_message(self.message)
 
@@ -181,182 +338,16 @@ class LevelCompleteView(View):
         ):
             self.on_advance_callback()
 
-    def _prepare_elements(
-        self,
-    ) -> List[Tuple[Union[pygame.Surface, BulletRowMarker], object, int]]:
-        """Prepare all elements to be displayed on the level complete screen, with optional event and per-row delay."""
-        elements: List[Tuple[Union[pygame.Surface, BulletRowMarker], object, int]] = [
-            (
-                self._fonts["title"].render(
-                    f"- Level {self.level_num} -", True, (255, 0, 0)
-                ),
-                None,
-                500,
-            ),
-            (
-                self._fonts["message"].render(
-                    "Congratulations on finishing this level.", True, (255, 255, 255)
-                ),
-                ApplauseEvent(),
-                1500,
-            ),
-        ]
-
-        # Bonus coin logic
-        coins = self.game_state.level_state.get_bonus_coins_collected()
-        if coins == 0:
-            # Show message and fire sound event
-            elements.append(
-                (
-                    self._fonts["message"].render(
-                        "Sorry, no bonus coins collected.", True, (0, 0, 255)
-                    ),
-                    DohSoundEvent(),
-                    1500,
-                )
-            )
-        else:
-            # No-op for now; bonus coins are not yet implemented as non-block elements
-            pass
-
-        elements += [
-            (
-                self._fonts["bonus"].render(
-                    f"Level bonus - level {self.level_num} x 100 ="
-                    f" {self.level_bonus} "
-                    f"points",
-                    True,
-                    (255, 255, 0),
-                ),
-                BonusCollectedEvent(),
-                900,
-            ),
-            (("bullets", ""), None, 700),  # Bullet row marker
-            (
-                self._fonts["bonus"].render(
-                    f"Time bonus - {self.time_remaining} x 100 = "
-                    f"{self.time_bonus} "
-                    f"points",
-                    True,
-                    (255, 255, 0),
-                ),
-                TimerUpdatedEvent(self.time_remaining),
-                1200,
-            ),
-            (
-                self._fonts["rank"].render(
-                    f"You are currently ranked {0}.", True, (255, 0, 0)
-                ),
-                None,
-                1000,
-            ),
-            (
-                self._fonts["message"].render(
-                    f"Prepare for level {self.level_num + 1}", True, (255, 255, 255)
-                ),
-                None,
-                800,
-            ),
-            (
-                self._fonts["prompt"].render(
-                    "Press space for next level", True, (255, 255, 255)
-                ),
-                None,
-                800,
-            ),
-        ]
-        return elements
-
-    @staticmethod
-    def _calculate_total_height(
-        elements: List[Tuple[Union[pygame.Surface, BulletRowMarker], object]],
-        bullet_height: int,
-        spacing: int,
-        icon_spacing: int,
-    ) -> int:
-        """Calculate the total height required for all elements.
-
-        Args:
-        ----
-            elements (List[Tuple[Union[pygame.Surface, BulletRowMarker], object]]): The elements to display.
-            bullet_height (int): The height of bullet images.
-            spacing (int): Standard spacing between elements.
-            icon_spacing (int): Extra spacing for icons.
-
-        Returns:
-        -------
-            int: The total height needed.
-
-        """
-        total_height = 0
-        for e, _ in elements:
-            if isinstance(e, pygame.Surface):
-                total_height += e.get_height()
-            elif isinstance(e, tuple) and e[0] == "bullets":
-                total_height += bullet_height
-
-        # Add spacing between elements
-        total_height += spacing * (len(elements) - 1)
-
-        # Add extra spacing for icons
-        total_height += icon_spacing
-
-        return total_height
-
-    @staticmethod
-    def _draw_centered_element(
-        surface: pygame.Surface, element: pygame.Surface, center_x: int, y: int
-    ) -> int:
-        """Draw an element centered horizontally and return the new y position.
-
-        Args:
-        ----
-            surface (pygame.Surface): The surface to draw on.
-            element (pygame.Surface): The element to draw.
-            center_x (int): The x-coordinate of the center.
-            y (int): The current y position.
-
-        Returns:
-        -------
-            int: The new y position after drawing the element.
-
-        """
-        element_rect = element.get_rect(
-            center=(center_x, y + element.get_height() // 2)
-        )
-        surface.blit(element, element_rect)
-        return y + element.get_height()
-
-    @staticmethod
-    def _draw_bullets_row(
-        surface: pygame.Surface,
-        center_x: int,
-        y: int,
-        bullet_img: pygame.Surface,
-        total_bullets: int,
-    ) -> int:
-        """Draw the bullet row and return the new y position."""
-        bullet_w, bullet_h = bullet_img.get_size()
-        spacing = 2  # 1px between bullets
-        bullets_width = total_bullets * bullet_w + (total_bullets - 1) * spacing
-        start_x = center_x - bullets_width // 2
-
-        for i in range(total_bullets):
-            bx = start_x + i * (bullet_w + spacing)
-            surface.blit(bullet_img, (bx, y))
-
-        return y + bullet_h
-
     def update(self, delta_ms: float) -> None:
         """Update the gradual reveal of bonus/info messages, bullet animation, and fire sound events."""
         self.logger.debug(
-            f"[update] Called. reveal_step: {self.reveal_step}, bonus_elements length: {len(self.bonus_elements)}"
+            f"[update] Called. reveal_step: {self.reveal_step}, row_renderers_with_y length: {len(self.row_renderers_with_y)}"
         )
-        if self.active and self.reveal_step < len(self.bonus_elements):
+        if self.active and self.reveal_step < len(self.row_renderers_with_y):
             # Check if we're at the bullet row step
             bullet_row_idx = None
-            for idx, (element, _, _) in enumerate(self.bonus_elements):
-                if isinstance(element, tuple) and element[0] == "bullets":
+            for idx, (renderer, _) in enumerate(self.row_renderers_with_y):
+                if isinstance(renderer, BulletRowRenderer):
                     bullet_row_idx = idx
                     break
             if bullet_row_idx is not None and self.reveal_step == bullet_row_idx:
@@ -382,8 +373,8 @@ class LevelCompleteView(View):
                     self.bullet_bonus_animating = False
                     self.reveal_step += 1
                     # Set delay for next row if available
-                    if self.reveal_step < len(self.bonus_elements):
-                        self.reveal_delay_ms = self.bonus_elements[self.reveal_step][2]
+                    if self.reveal_step < len(self._row_delays):
+                        self.reveal_delay_ms = self._row_delays[self.reveal_step]
                     else:
                         self.reveal_delay_ms = REVEAL_DELAY_MS
             else:
@@ -396,183 +387,29 @@ class LevelCompleteView(View):
                         f"[update] reveal_step incremented: {self.reveal_step}"
                     )
                     # Fire event for this row if present
-                    if self.reveal_step <= len(self.bonus_elements):
-                        _, event, _ = self.bonus_elements[self.reveal_step - 1]
+                    if self.reveal_step <= len(self._row_events):
+                        event = self._row_events[self.reveal_step - 1]
                         if event is not None:
                             pygame.event.post(
                                 pygame.event.Event(pygame.USEREVENT, {"event": event})
                             )
                         # Set delay for next row if available
-                        if self.reveal_step < len(self.bonus_elements):
-                            self.reveal_delay_ms = self.bonus_elements[
-                                self.reveal_step
-                            ][2]
+                        if self.reveal_step < len(self._row_delays):
+                            self.reveal_delay_ms = self._row_delays[self.reveal_step]
                         else:
                             self.reveal_delay_ms = REVEAL_DELAY_MS
-
-    def _prepare_elements_with_y(self) -> List[ElementType]:
-        """Prepare all elements to be displayed on the level complete screen, with hardcoded y coordinates for pixel-perfect placement."""
-        # Y coordinates from the C version ruler overlay (in px from window top)
-        y_coords = [
-            (210 - 34),  # - Level 1 - (bottom)
-            (260 - 31),  # Congratulations on finishing this level.
-            (300 - 5),  # Sorry, no bonus coins collected.
-            (350 + 19),  # Level bonus - level 1 x 100 = 100 points
-            (400 + 17),  # [Bullets row] (bottom)
-            (450 + 16),  # Time bonus - ...
-            (500 - 5),  # You are currently ranked ...
-            (540 - 10),  # Prepare for level ...
-            560,  # Press space for next level
-        ]
-        elements: List[ElementType] = []
-        idx = 0
-        # Title
-        elements.append(
-            (
-                self._fonts["title"].render(
-                    f"- Level {self.level_num} -", True, (255, 0, 0)
-                ),
-                None,
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Congratulations
-        elements.append(
-            (
-                self._fonts["message"].render(
-                    "Congratulations on finishing this level.", True, (255, 255, 255)
-                ),
-                ApplauseEvent(),
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Bonus coin logic
-        coins = self.game_state.level_state.get_bonus_coins_collected()
-        if coins == 0:
-            elements.append(
-                (
-                    self._fonts["message"].render(
-                        "Sorry, no bonus coins collected.", True, (0, 0, 255)
-                    ),
-                    DohSoundEvent(),
-                    y_coords[idx],
-                )
-            )
-        else:
-            elements.append(
-                (
-                    self._fonts["message"].render(
-                        "Bonus coins collected!", True, (0, 128, 255)
-                    ),
-                    BonusCollectedEvent(),
-                    y_coords[idx],
-                )
-            )
-        idx += 1
-        # Level bonus
-        elements.append(
-            (
-                self._fonts["bonus"].render(
-                    f"Level bonus - level {self.level_num} x 100 = {self.level_bonus} points",
-                    True,
-                    (255, 255, 0),
-                ),
-                BonusCollectedEvent(),
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Bullets row marker
-        elements.append((("bullets", ""), None, y_coords[idx]))
-        idx += 1
-        # Time bonus
-        elements.append(
-            (
-                self._fonts["bonus"].render(
-                    f"Time bonus - {self.time_remaining} seconds x 100 = {self.time_bonus} points",
-                    True,
-                    (255, 255, 0),
-                ),
-                TimerUpdatedEvent(self.time_remaining),
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Rank
-        elements.append(
-            (
-                self._fonts["rank"].render(
-                    f"You are currently ranked {0}.", True, (255, 0, 0)
-                ),
-                None,
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Prepare for next level
-        elements.append(
-            (
-                self._fonts["message"].render(
-                    f"Prepare for level {self.level_num + 1}", True, (255, 255, 0)
-                ),
-                None,
-                y_coords[idx],
-            )
-        )
-        idx += 1
-        # Press space
-        elements.append(
-            (
-                self._fonts["prompt"].render(
-                    "Press space for next level", True, (214, 183, 144)
-                ),
-                None,
-                y_coords[idx],
-            )
-        )
-        return elements
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the level-complete overlay content using hardcoded y coordinates for pixel-perfect placement."""
         self.logger.debug(
-            f"[draw] Called. reveal_step: {self.reveal_step}, bonus_elements length: {len(self.bonus_elements)}"
+            f"[draw] Called. reveal_step: {self.reveal_step}, row_renderers_with_y length: {len(self.row_renderers_with_y)}"
         )
         play_rect = self.layout.get_play_rect()
         center_x = play_rect.x + play_rect.width // 2
-
-        # Use the new elements structure with y coordinates
-        elements = self._prepare_elements_with_y()
-        # Reduce bullet size to match the C version
-        bullet_img = pygame.transform.smoothscale(self._bullet_img, (7, 15))
-
-        for idx, (element, _, y) in enumerate(elements):
-            if idx < self.reveal_step:
-                if isinstance(element, pygame.Surface):
-                    self._draw_centered_element(surface, element, center_x, y)
-                elif isinstance(element, tuple) and element[0] == "bullets":
-                    # For bullets row, y is the bottom of the row, so adjust upward by bullet height and add 22px adjustment
-                    self._draw_bullets_row(
-                        surface,
-                        center_x,
-                        y + 22 - bullet_img.get_height(),
-                        bullet_img,
-                        self.game_state.get_ammo(),
-                    )
-            elif idx == self.reveal_step:
-                if (
-                    isinstance(element, tuple)
-                    and element[0] == "bullets"
-                    and self.bullet_bonus_animating
-                ):
-                    self._draw_bullets_row(
-                        surface,
-                        center_x,
-                        y + 22 - bullet_img.get_height(),
-                        bullet_img,
-                        self.bullet_bonus_shown,
-                    )
-                break
-            else:
-                break
+        if self.composite_renderer:
+            self.composite_renderer.render(
+                surface,
+                center_x,
+                self.reveal_step,
+                bullet_count=self.bullet_bonus_shown,
+            )

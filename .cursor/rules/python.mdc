@@ -1,7 +1,7 @@
 ---
 description: 
-globs: *.py
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 - All code must comply with [PEP 8](mdc:https:/peps.python.org/pep-0008) (style guide)
 - Use modern, concise docstrings for all public classes, methods, and functions, following PEP 257 conventions.
