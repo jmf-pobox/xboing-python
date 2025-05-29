@@ -41,7 +41,7 @@ class BulletManager:
         """Update all bullets and remove inactive ones.
 
         Args:
-            delta_ms: Time since last frame in milliseconds.
+            delta_ms: Time since the last frame in milliseconds.
 
         """
         logger.debug(f"Updating bullets: {len(self._bullets)} bullets in play")

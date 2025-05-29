@@ -49,7 +49,7 @@ class Bullet(CircularGameShape):
         self.y += self.vy * (delta_ms / 16.67)
         logger.debug(f"Bullet updated: ({old_x}, {old_y}) -> ({self.x}, {self.y})")
         self.update_rect()
-        # Deactivate if off screen (above top)
+        # Deactivate if the bullet is past the top of the game area
         if self.y + self.radius < 0:
             self.active = False
 

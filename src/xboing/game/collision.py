@@ -129,92 +129,93 @@ class CollisionSystem:
 
         return result
 
-    def check_circle_rect_collision(
-        self, circle_x: float, circle_y: float, circle_radius: float, rect: Any
-    ) -> bool:
-        """Check collision between a circle and a rectangle.
 
-        Args:
-        ----
-            circle_x (float): Circle center X coordinate
-            circle_y (float): Circle center Y coordinate
-            circle_radius (float): Circle radius
-            rect (pygame.Rect): Rectangle to check against
+def get_circle_rect_collision_normal(
+    circle_x: float,
+    circle_y: float,
+    prev_x: float,
+    prev_y: float,
+    rect: Any,
+) -> Tuple[int, int]:
+    """Calculate the collision normal vector for a circle-rectangle collision.
 
-        Returns:
-        -------
-            bool: True if collision occurred, False otherwise
+    Args:
+    ----
+        circle_x (float): Current circle center X coordinate
+        circle_y (float): Current circle center Y coordinate
+        prev_x (float): Previous circle center X coordinate
+        prev_y (float): Previous circle center Y coordinate
+        rect (pygame.Rect): Rectangle involved in the collision
 
-        """
-        # Find the closest point in the rectangle to the center of the circle
-        closest_x = max(rect.left, min(circle_x, rect.right))
-        closest_y = max(rect.top, min(circle_y, rect.bottom))
+    Returns:
+    -------
+        tuple: (nx, ny) normalized collision normal vector
 
-        # Calculate the distance between the circle's center and the closest point
-        distance_x = circle_x - closest_x
-        distance_y = circle_y - closest_y
+    """
+    # Default to a vertical collision if we can't determine
+    nx, ny = 0, -1
 
-        # If the distance is less than the circle's radius, an intersection occurs
-        distance_squared = (distance_x * distance_x) + (distance_y * distance_y)
-        return bool(distance_squared < (circle_radius * circle_radius))
+    # Movement vector
+    dx = circle_x - prev_x
+    dy = circle_y - prev_y
 
-    @staticmethod
-    def get_circle_rect_collision_normal(
-        circle_x: float,
-        circle_y: float,
-        prev_x: float,
-        prev_y: float,
-        rect: Any,
-    ) -> Tuple[int, int]:
-        """Calculate the collision normal vector for a circle-rectangle collision.
+    # Rectangle center
+    rect_cx = rect.centerx
+    rect_cy = rect.centery
 
-        Args:
-        ----
-            circle_x (float): Current circle center X coordinate
-            circle_y (float): Current circle center Y coordinate
-            prev_x (float): Previous circle center X coordinate
-            prev_y (float): Previous circle center Y coordinate
-            rect (pygame.Rect): Rectangle involved in the collision
+    # Determine which side was hit by projecting the movement vector
+    # and checking distances from rectangle sides
 
-        Returns:
-        -------
-            tuple: (nx, ny) normalized collision normal vector
-
-        """
-        # Default to a vertical collision if we can't determine
-        nx, ny = 0, -1
-
-        # Movement vector
-        dx = circle_x - prev_x
-        dy = circle_y - prev_y
-
-        # Rectangle center
-        rect_cx = rect.centerx
-        rect_cy = rect.centery
-
-        # Determine which side was hit by projecting the movement vector
-        # and checking distances from rectangle sides
-
-        # If moving mostly horizontally
-        if abs(dx) > abs(dy):
-            if dx > 0 and circle_x < rect.left:
-                nx, ny = -1, 0  # Hit from the left
-            elif dx < 0 and circle_x > rect.right:
-                nx, ny = 1, 0  # Hit from the right
-            # Vertical collision
-            elif circle_y < rect_cy:
-                nx, ny = 0, -1  # Hit from the top
-            else:
-                nx, ny = 0, 1  # Hit from the bottom
-        # Moving mostly vertically
-        elif dy > 0 and circle_y < rect.top:
-            nx, ny = 0, -1  # Hit from the top
-        elif dy < 0 and circle_y > rect.bottom:
-            nx, ny = 0, 1  # Hit from the bottom
-        # Horizontal collision
-        elif circle_x < rect_cx:
+    # If moving mostly horizontally
+    if abs(dx) > abs(dy):
+        if dx > 0 and circle_x < rect.left:
             nx, ny = -1, 0  # Hit from the left
-        else:
+        elif dx < 0 and circle_x > rect.right:
             nx, ny = 1, 0  # Hit from the right
+        # Vertical collision
+        elif circle_y < rect_cy:
+            nx, ny = 0, -1  # Hit from the top
+        else:
+            nx, ny = 0, 1  # Hit from the bottom
+    # Moving mostly vertically
+    elif dy > 0 and circle_y < rect.top:
+        nx, ny = 0, -1  # Hit from the top
+    elif dy < 0 and circle_y > rect.bottom:
+        nx, ny = 0, 1  # Hit from the bottom
+    # Horizontal collision
+    elif circle_x < rect_cx:
+        nx, ny = -1, 0  # Hit from the left
+    else:
+        nx, ny = 1, 0  # Hit from the right
 
-        return nx, ny
+    return nx, ny
+
+
+def check_circle_rect_collision(
+        circle_x: float, circle_y: float, circle_radius: float, rect: Any
+) -> bool:
+    """Check collision between a circle and a rectangle.
+
+    Args:
+    ----
+        circle_x (float): Circle center X coordinate
+        circle_y (float): Circle center Y coordinate
+        circle_radius (float): Circle radius
+        rect (pygame.Rect): Rectangle to check against
+
+    Returns:
+    -------
+        bool: True if collision occurred, False otherwise
+
+    """
+    # Find the closest point in the rectangle to the center of the circle
+    closest_x = max(rect.left, min(circle_x, rect.right))
+    closest_y = max(rect.top, min(circle_y, rect.bottom))
+
+    # Calculate the distance between the circle's center and the closest point
+    distance_x = circle_x - closest_x
+    distance_y = circle_y - closest_y
+
+    # If the distance is less than the circle's radius, an intersection occurs
+    distance_squared = (distance_x * distance_x) + (distance_y * distance_y)
+    return bool(distance_squared < (circle_radius * circle_radius))

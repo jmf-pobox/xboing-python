@@ -38,7 +38,7 @@ class LevelState:
         return self.level_complete
 
     def add_bonus_time(self, time_bonus: int) -> List[XBoingEvent]:
-        """Add time bonus to the level."""
+        """Add the time bonus to the level."""
         self.time_bonus_limit += time_bonus
         self.timer += time_bonus
         return [TimerUpdatedEvent(self.get_bonus_time())]
