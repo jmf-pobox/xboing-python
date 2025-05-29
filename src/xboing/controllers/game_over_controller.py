@@ -81,7 +81,7 @@ class GameOverController(Controller):
                 self.reset_callback()
 
     def reset_game(self) -> None:
-        """Reset the game state and return to gameplay view.
+        """Reset the game state and return to the gameplay view.
 
         Note: controller_manager must be set before calling this method.
         """
@@ -143,7 +143,7 @@ class GameOverController(Controller):
 
         Args:
         ----
-            delta_ms: Time elapsed since last update in milliseconds.
+            delta_ms: Time elapsed since the last update in milliseconds.
 
         """
         # No-op for now

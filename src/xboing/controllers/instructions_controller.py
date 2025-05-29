@@ -56,11 +56,11 @@ class InstructionsController(Controller):
                 self.on_exit_callback()
 
     def update(self, delta_ms: float) -> None:
-        """Update logic for instructions view (usually minimal).
+        """Update logic for the instructions view.
 
         Args:
         ----
-            delta_time: Time elapsed since last update in milliseconds.
+            delta_time: Time elapsed since the last update in milliseconds.
 
         """
         # No-op for now

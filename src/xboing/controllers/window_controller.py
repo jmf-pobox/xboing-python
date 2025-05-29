@@ -94,7 +94,8 @@ class WindowController(Controller):
         """Update logic for this controller.
 
         This base implementation does nothing and should be overridden by subclasses
-        that need to update game state or perform other actions each frame.
+        that need to update the game state or perform other actions each
+        frame.
 
         Args:
         ----

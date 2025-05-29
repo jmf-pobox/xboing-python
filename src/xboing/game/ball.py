@@ -18,6 +18,9 @@ from xboing.utils.asset_paths import get_balls_dir, get_images_dir
 logger = logging.getLogger(__name__)
 
 
+BALL_RADIUS = 8  # Approximated from the original game
+
+
 class Ball:
     """A bouncing ball with physics and collision detection."""
 

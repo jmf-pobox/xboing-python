@@ -1,4 +1,6 @@
-"""Controller for main game logic, state updates, and event handling in XBoing."""
+"""Controller for game play logic, state updates, and event handling in
+XBoing.
+"""
 
 import logging
 from typing import Any, List, Optional, Sequence
@@ -27,7 +29,7 @@ from xboing.engine.events import (
 )
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
-from xboing.game.ball import Ball
+from xboing.game.ball import BALL_RADIUS, Ball
 from xboing.game.ball_manager import BallManager
 from xboing.game.block_manager import BlockManager
 from xboing.game.block_types import (
@@ -59,15 +61,11 @@ class GameController(Controller):
 
     Handles paddle, ball, block, and debug logic.
 
-    **Event decoupling pattern:**
+    **Event decoupling pattern**
     GameState and other model methods do not post events directly. Instead, they return a list of event instances
     representing state changes. GameController is responsible for posting these events to the Pygame event queue
     using the post_game_state_events helper. This enables headless testing and decouples model logic from the event system.
     """
-
-    BALL_RADIUS = (
-        8  # Approximated from original game (move from main.py for consistency)
-    )
 
     def __init__(
         self,
@@ -184,7 +182,7 @@ class GameController(Controller):
 
         Args:
         ----
-            delta_ms: Time elapsed since last update in milliseconds.
+            delta_ms: Time elapsed since the last update in milliseconds.
 
         """
         if self.paused:
@@ -258,7 +256,7 @@ class GameController(Controller):
 
         Args:
         ----
-            delta_ms: Time elapsed since last update in milliseconds.
+            delta_ms: Time elapsed since the last update in milliseconds.
 
         """
         self.block_manager.update(delta_ms)
@@ -280,7 +278,7 @@ class GameController(Controller):
             if effect == BONUS_BLK:
                 self.game_state.level_state.increment_bonus_coins_collected()
             elif effect == BULLET_BLK:
-                logger.debug("Bulletblock hit: adding ammo.")
+                logger.debug("BulletBlock hit: adding ammo.")
                 changes = self.game_state.add_ammo()
                 self.post_game_state_events(changes)
             elif effect == MAXAMMO_BLK:
@@ -479,7 +477,7 @@ class GameController(Controller):
             logger.debug("Game is already over, ignoring life loss.")
             return  # Prevent further life loss after game over
 
-        # Always show "Balls Terminated!" message a ball / life is lost
+        # Show, "Balls Terminated!" message when a ball is lost
         changes = self.game_state.lose_life()
         self.post_game_state_events(changes)
         logger.debug(f"Life lost. Remaining lives: {self.game_state.lives}")
@@ -505,7 +503,7 @@ class GameController(Controller):
             logger.debug(
                 f"Total balls after adding new ball: {len(self.ball_manager.balls)}"
             )
-        # If no lives remain, set game over
+        # If no lives remain, the game is over
         else:
             logger.debug("No lives remain, setting game over.")
             changes = self.game_state.set_game_over(True)
@@ -564,12 +562,12 @@ class GameController(Controller):
 
         """
         logger.debug(
-            f"Creating new ball at paddle position: ({self.paddle.rect.centerx}, {self.paddle.rect.top - self.BALL_RADIUS - 1})"
+            f"Creating new ball at paddle position: ({self.paddle.rect.centerx}, {self.paddle.rect.top - BALL_RADIUS - 1})"
         )
         ball = Ball(
             self.paddle.rect.centerx,
-            self.paddle.rect.top - self.BALL_RADIUS - 1,
-            self.BALL_RADIUS,
+            self.paddle.rect.top - BALL_RADIUS - 1,
+            BALL_RADIUS,
             (255, 255, 255),
         )
         ball.stuck_to_paddle = True
@@ -577,7 +575,7 @@ class GameController(Controller):
         ball.birth_animation = True
         ball.animation_frame = 0
         ball.frame_counter = 0
-        self.stuck_ball_timer = 0.0  # Reset timer when new ball is created
+        self.stuck_ball_timer = 0.0  # Reset timer when a new ball is created
         logger.debug(
             f"New ball created with properties: stuck_to_paddle={ball.stuck_to_paddle}, paddle_offset={ball.paddle_offset}, birth_animation={ball.birth_animation}"
         )
@@ -596,7 +594,8 @@ class GameController(Controller):
             self.handle_life_loss()
         # Add more event handling as needed
 
-    def post_game_state_events(self, changes: List[Any]) -> None:
+    @staticmethod
+    def post_game_state_events(changes: List[Any]) -> None:
         """Post all events returned by GameState/model methods to the Pygame event queue.
 
         This implements the decoupled event firing pattern: models return events, controllers post them.
@@ -643,5 +642,5 @@ class GameController(Controller):
         )
 
     def on_new_level_loaded(self) -> None:
-        """Call this when a new level is loaded to reset sticky state."""
+        """Call this when a new level is loaded to reset the sticky state."""
         self.disable_sticky()
