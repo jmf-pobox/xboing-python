@@ -7,13 +7,14 @@ Keep the TODO list organized by:
  - Grouping items by scope and identifying them as <type>(<scope>): <short summary>
 
 ## Functionality
-- [ ] feat(game): Add auto-launch after 5 seconds for stuck balls
-    - Track the time when each ball becomes stuck to the paddle (e.g., using `pygame.time.get_ticks()` and a `stuck_since` attribute on the Ball).
-    - In the game update loop, check if any ball is still stuck and if 5 seconds (5000 ms) have passed since it became stuck.
+- [x] feat(game): Add auto-launch after 3 seconds for stuck balls
+    - Track the time when each ball becomes stuck to the paddle (e.g., using a timer in GameController, matching the C version's BALL_AUTO_ACTIVE_DELAY = 3000 ms).
+    - In the game update loop, check if any ball is still stuck and if 3 seconds (3000 ms) have passed since it became stuck.
     - If so, automatically release the ball from the paddle as if the user clicked (call `release_from_paddle()` and trigger timer/events as needed).
-    - Reset the `stuck_since` timestamp when the ball is released (by user or auto-launch).
+    - Reset the timer when the ball is released (by user or auto-launch).
     - Ensure this works for all cases where a ball becomes stuck (new level, after losing a ball, sticky paddle, etc.).
     - Add/adjust tests to verify the auto-launch behavior.
+    - The timer does not count down if the game is paused.
 - [ ] feat(paddle): Implement machine gun powerup (state, UI, firing logic)
 
 ## Overall Coding Standards
