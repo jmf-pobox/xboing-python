@@ -109,6 +109,9 @@ class GameController(Controller):
         self.sticky: bool = False  # Sticky paddle state
         self.bullet_manager: BulletManager = bullet_manager
         self.logger = logging.getLogger("xboing.GameController")
+        self.paused: bool = False
+        self.stuck_ball_timer: float = 0.0
+        self.ball_auto_active_delay_ms: float = 3000.0
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -151,6 +154,7 @@ class GameController(Controller):
                     logger.debug("[handle_events] launching ball(s)")
                     for ball in balls:
                         ball.release_from_paddle()
+                    self.stuck_ball_timer = 0.0  # Reset timer on manual launch
                     changes = self.game_state.set_timer(
                         self.game_state.level_state.get_bonus_time()
                     )
@@ -170,6 +174,11 @@ class GameController(Controller):
                 logger.debug("BallLostEvent detected in GameController.")
                 self.handle_life_loss()
 
+            # --- Pause toggle ---
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                self.paused = not self.paused
+                continue
+
     def update(self, delta_ms: float) -> None:
         """Update gameplay logic.
 
@@ -178,6 +187,8 @@ class GameController(Controller):
             delta_ms: Time elapsed since last update in milliseconds.
 
         """
+        if self.paused:
+            return
         self.handle_paddle_arrow_key_movement(delta_ms)
         self.handle_paddle_mouse_movement()
         self.update_blocks_and_timer(delta_ms)
@@ -185,6 +196,17 @@ class GameController(Controller):
         self.bullet_manager.update(delta_ms)
         self.check_level_complete()
         self.handle_debug_x_key()
+
+        # Auto-launch timer for stuck balls
+        stuck_balls = [ball for ball in self.ball_manager.balls if ball.stuck_to_paddle]
+        if stuck_balls:
+            self.stuck_ball_timer += delta_ms
+            if self.stuck_ball_timer >= self.ball_auto_active_delay_ms:
+                for ball in stuck_balls:
+                    ball.release_from_paddle()
+                self.stuck_ball_timer = 0.0
+        else:
+            self.stuck_ball_timer = 0.0
 
     def handle_paddle_arrow_key_movement(self, delta_ms: float) -> None:
         """Handle paddle movement and input (arrow keys and j/k/l keys).
@@ -555,6 +577,7 @@ class GameController(Controller):
         ball.birth_animation = True
         ball.animation_frame = 0
         ball.frame_counter = 0
+        self.stuck_ball_timer = 0.0  # Reset timer when new ball is created
         logger.debug(
             f"New ball created with properties: stuck_to_paddle={ball.stuck_to_paddle}, paddle_offset={ball.paddle_offset}, birth_animation={ball.birth_animation}"
         )
