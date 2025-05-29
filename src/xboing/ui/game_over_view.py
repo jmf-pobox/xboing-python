@@ -102,11 +102,11 @@ class GameOverView(ViewWithBackground):
         self.logger.debug(f"draw called. Drawing overlay in play_rect: {play_rect}")
         # Draw the play area background (via ViewWithBackground)
         super().draw(surface)
-        # Overlay only in play window
+        # Overlay only in the play window
         overlay = pygame.Surface((play_rect.width, play_rect.height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         surface.blit(overlay, (play_rect.x, play_rect.y))
-        # Draw all text rows using composite renderer
+        # Draw all text rows using the composite renderer
         if self._composite_renderer:
             self._composite_renderer.render(
                 surface,

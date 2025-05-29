@@ -57,12 +57,12 @@ class Rect:
 
     @property
     def centerx(self) -> int:
-        """Return the x-coordinate of the center of the rectangle."""
+        """Return the x-coordinate of the rectangle's center."""
         return self.x + self.width // 2
 
     @property
     def centery(self) -> int:
-        """Return the y-coordinate of the center of the rectangle."""
+        """Return the y-coordinate of the rectangle's center."""
         return self.y + self.height // 2
 
 

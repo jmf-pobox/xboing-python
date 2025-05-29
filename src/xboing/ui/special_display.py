@@ -52,7 +52,7 @@ class SpecialDisplay:
         self.state: Dict[str, bool] = {key: False for _, key in self.LABELS}
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """Handle special power-up events and update state.
+        """Handle special power-up events and update the state.
 
         Args:
         ----

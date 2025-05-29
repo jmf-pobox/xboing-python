@@ -160,7 +160,7 @@ class LevelCompleteView(View):
             466,  # Time bonus - ...
             495,  # You are currently ranked ...
             530,  # Prepare for level ...
-            560,  # Press space for next level
+            560,  # Press space for the next level
         ]
         idx = 0
         # Title row
@@ -271,7 +271,7 @@ class LevelCompleteView(View):
         self._row_events.append(None)
         self._row_delays.append(1000)
         idx += 1
-        # Prepare for next level row
+        # Prepare for the next level row
         self.row_renderers_with_y.append(
             (
                 TextRowRenderer(
@@ -285,7 +285,7 @@ class LevelCompleteView(View):
         self._row_events.append(None)
         self._row_delays.append(800)
         idx += 1
-        # Press space row
+        # Press the spacebar row
         self.row_renderers_with_y.append(
             (
                 TextRowRenderer(
@@ -372,7 +372,7 @@ class LevelCompleteView(View):
                 else:
                     self.bullet_bonus_animating = False
                     self.reveal_step += 1
-                    # Set delay for next row if available
+                    # Set delay for the next row if available
                     if self.reveal_step < len(self._row_delays):
                         self.reveal_delay_ms = self._row_delays[self.reveal_step]
                     else:
@@ -393,7 +393,7 @@ class LevelCompleteView(View):
                             pygame.event.post(
                                 pygame.event.Event(pygame.USEREVENT, {"event": event})
                             )
-                        # Set delay for next row if available
+                        # Set delay for the next row if available
                         if self.reveal_step < len(self._row_delays):
                             self.reveal_delay_ms = self._row_delays[self.reveal_step]
                         else:

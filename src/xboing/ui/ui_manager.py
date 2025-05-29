@@ -52,7 +52,7 @@ class UIManager:
         self.views: Dict[str, Any] = {}
         self.current_view: Any = None
         self.current_name: Optional[str] = None
-        self.previous_view: Optional[str] = None  # Track previous view
+        self.previous_view: Optional[str] = None  # Track the previous view
         self._view_change_callbacks: List[Callable[[str], None]] = []
         self.window_controller: Any = window_controller
         self.view_controller_map: Dict[str, Any] = view_controller_map or {}
@@ -115,7 +115,7 @@ class UIManager:
         if name in self.views:
             if self.current_view is not None:
                 self.current_view.deactivate()
-            # Track previous view unless already in instructions
+            # Track the previous view unless already in instructions
             if self.current_name != "instructions":
                 self.previous_view = self.current_name
             self.current_view = self.views[name]
@@ -177,8 +177,7 @@ class UIManager:
             events (List[pygame.event.Event]): List of Pygame events to handle.
 
         """
-        # from engine.events import GameOverEvent, LevelCompleteEvent  # moved to top
-        # Dispatch to always-active window controller
+        # Dispatch to the always-active window controller
         if self.window_controller:
             self.window_controller.handle_events(events)
         # Dispatch to the active view's controller

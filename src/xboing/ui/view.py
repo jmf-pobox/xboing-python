@@ -11,7 +11,7 @@ import pygame
 class View(Protocol):
     """Protocol for content views managed by UIManager.
 
-    Requires draw, handle_event, activate, and deactivate methods.
+    Requires the draw, handle_event, activate, and deactivate methods.
     """
 
     def draw(self, surface: pygame.Surface) -> None:

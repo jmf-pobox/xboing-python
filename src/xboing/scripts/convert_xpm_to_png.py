@@ -339,10 +339,10 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
                 ("tan", (210, 180, 140, 255)),
                 ("black", (40, 40, 40, 255)),
             ]
-            for key, color in color_map:
+            for key, color_from_map in color_map:
                 if key in name:
-                    return color
-            return (150, 150, 150, 255)
+                    return color_from_map
+            return 150, 150, 150, 255
 
         color = get_placeholder_color(base_name)
         # Create a rounded block with a 3D effect

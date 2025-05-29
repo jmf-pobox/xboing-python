@@ -63,7 +63,7 @@ class LivesDisplayComponent:
         lives_surf = self.lives_display_util.render(
             self.lives, spacing=10, scale=1.0, max_lives=self.max_lives
         )
-        return (LIVES_TOP_Y, lives_surf.get_height())
+        return LIVES_TOP_Y, lives_surf.get_height()
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the lives as ball images onto the given surface.

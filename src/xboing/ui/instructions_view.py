@@ -38,7 +38,7 @@ class InstructionsView(View):
             renderer (Renderer): The renderer instance.
             font (pygame.font.Font): The main font.
             headline_font (pygame.font.Font): The font for headlines.
-            text_font (pygame.font.Font): The font for instructions text.
+            text_font (pygame.font.Font): The font for the instructions.
             amber_color (Tuple[int, int, int], optional): Amber color for the bottom line. Defaults to (255, 191, 63).
 
         """
