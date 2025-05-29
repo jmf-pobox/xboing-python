@@ -21,9 +21,9 @@ class Paddle(GameShape):
     """The player-controlled paddle."""
 
     # Paddle sizes - match original XBoing constants
-    SIZE_SMALL = 0  # Corresponds to PADDLE_SMALL in original
-    SIZE_MEDIUM = 1  # Corresponds to PADDLE_MEDIUM in original
-    SIZE_LARGE = 2  # Corresponds to PADDLE_HUGE in original
+    SIZE_SMALL = 0  # Corresponds to PADDLE_SMALL in the original
+    SIZE_MEDIUM = 1  # Corresponds to PADDLE_MEDIUM in the original
+    SIZE_LARGE = 2  # Corresponds to PADDLE_HUGE in the original
 
     # Distance from bottom of play area to paddle (original XBoing value)
     DIST_BASE = 30  # Matches the original C code's DIST_BASE constant
@@ -43,7 +43,7 @@ class Paddle(GameShape):
         super().__init__(x, y, temp_width, temp_height)
         self.speed = speed
         self.moving = False
-        self.direction = 0  # -1 for left, 0 for none, 1 for right
+        self.direction = 0  # -1 for the left, 0 for none, 1 for the right
         self.sticky = False  # For the sticky powerup
         self.old_x = x  # For replicating the original paddle movement logic
 
@@ -111,7 +111,9 @@ class Paddle(GameShape):
             }
 
     def update_rect(self) -> None:
-        """Update the rectangle size and position based on current paddle size and position."""
+        """Update the rectangle size and position based on the current paddle
+        size and position.
+        """
         width, height = self.paddle_dimensions[self.size]
         self.rect.x = int(self.x - width // 2)
         self.rect.y = int(self.y)
@@ -155,13 +157,13 @@ class Paddle(GameShape):
 
         Args:
         ----
-            direction (int): -1 for left, 0 for none, 1 for right
+            direction (int): -1 for the left, 0 for none, 1 for the right
 
         """
         self.direction = direction
 
     def move_to(self, x: int, play_width: int, offset_x: int = 0) -> None:
-        """Move paddle to a specific x position.
+        """Move the paddle to a specific x position.
 
         Args:
         ----

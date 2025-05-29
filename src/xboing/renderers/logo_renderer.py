@@ -36,6 +36,28 @@ class LogoRenderer:
         self.font = font
         self.color = color
 
+    @staticmethod
+    def _render_surface(
+        surface: pygame.Surface, logo_surf: pygame.Surface, center_x: int, y: int
+    ) -> int:
+        """
+        Render a surface centered at the given position.
+
+        Args:
+            surface (pygame.Surface): The surface to draw on.
+            logo_surf (pygame.Surface): The surface to render.
+            center_x (int): The x-coordinate to center the logo.
+            y (int): The y-coordinate to start drawing.
+
+        Returns:
+            int: The new y position after drawing.
+
+        """
+        height = logo_surf.get_height()
+        logo_rect = logo_surf.get_rect(center=(center_x, y + height // 2))
+        surface.blit(logo_surf, logo_rect)
+        return logo_rect.bottom + 10
+
     def render(
         self,
         surface: pygame.Surface,
@@ -55,6 +77,9 @@ class LogoRenderer:
             int: The new y position after drawing the logo.
 
         """
+        # kwargs is unused but required for interface compatibility
+        _ = kwargs  # noqa: W0613
+
         if self.logo_image:
             logo_w, logo_h = self.logo_image.get_width(), self.logo_image.get_height()
             scale = min(self.max_width / logo_w, self.max_height / logo_h, 1.0)
@@ -62,16 +87,10 @@ class LogoRenderer:
             logo_surf = pygame.transform.smoothscale(
                 self.logo_image, (scaled_w, scaled_h)
             )
-            logo_rect = logo_surf.get_rect(center=(center_x, y + scaled_h // 2))
-            surface.blit(logo_surf, logo_rect)
-            return logo_rect.bottom + 10
+            return self._render_surface(surface, logo_surf, center_x, y)
+
         if self.font:
             logo_surf = self.font.render(self.fallback_text, True, self.color)
-            logo_rect = logo_surf.get_rect(
-                center=(center_x, y + logo_surf.get_height() // 2)
-            )
-            surface.blit(logo_surf, logo_rect)
-            return logo_rect.bottom + 10
-        # kwargs is unused, but required for interface compatibility
-        _ = kwargs  # noqa: W0613
+            return self._render_surface(surface, logo_surf, center_x, y)
+
         return y

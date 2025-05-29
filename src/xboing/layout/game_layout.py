@@ -1,9 +1,34 @@
-"""GameLayout and GameWindow: Define and manage the spatial window hierarchy and region layout for XBoing."""
+"""Game layout and window management for XBoing.
+
+This module implements the visual layout system for the game, defining regions within the
+game window and managing their properties, backgrounds, and hierarchical relationships.
+
+Key components:
+- Rect: A simple rectangle class that defines positions and dimensions
+- GameWindow: Represents a UI region with background color/image and parent-child relationships
+- GameLayout: Manages the overall game layout, defining and positioning all UI regions
+
+The module uses a hierarchical window system where child windows are drawn relative to their
+parents. Each window can have either a solid color background (RGB tuple) or a surface
+background image. Backgrounds can be solid colors, images, or tiled pixmaps.
+
+The GameLayout defines all the major UI regions used by the game:
+- Main window: The entire game area
+- Play window: The central gameplay area with balls, blocks, and the paddle
+- Score window: Shows the player's current score
+- Level window: Displays the current level information
+- Message window: Shows game messages and notifications
+- Special window: Displays special power-up status
+- Time window: Shows the remaining bonus time
+
+Background images are loaded from the assets directory with fallback to solid colors
+if image loading fails.
+"""
 
 from dataclasses import dataclass
 import logging
 import os
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import pygame
 
@@ -28,7 +53,7 @@ class Rect:
     @property
     def center(self) -> Tuple[int, int]:
         """Return the center (x, y) of the rectangle."""
-        return (self.x + self.width // 2, self.y + self.height // 2)
+        return self.x + self.width // 2, self.y + self.height // 2
 
     @property
     def centerx(self) -> int:
@@ -84,13 +109,24 @@ class GameWindow:
         """Add a child GameWindow to this window."""
         self.children.append(child)
 
-    def set_background(self, bg: Any) -> None:
-        """Set the background color or surface for this window."""
+    def set_background(
+        self, bg: Union[Tuple[int, int, int], pygame.Surface, None]
+    ) -> None:
+        """Set the background color or surface for this window.
+
+        Args:
+            bg: Either an RGB color tuple (r,g,b), a pygame Surface, or None
+
+        """
         if isinstance(bg, tuple) and len(bg) >= self.MIN_COLOR_TUPLE_LEN:
-            self.bg_color = bg
+            self.bg_color = bg  # Already correctly typed
             self.bg_surface = None
         elif isinstance(bg, pygame.Surface):
             self.bg_surface = bg
+            self.bg_color = None
+        elif bg is None:
+            self.bg_color = None
+            self.bg_surface = None
 
     def set_background_pixmap(self, pixmap: Optional[pygame.Surface]) -> None:
         """Set a tiled background pixmap for this window."""

@@ -25,6 +25,28 @@ class BlockRenderer:
         cls._image_cache.clear()
 
     @classmethod
+    def _load_image(cls, image_file: str, blocks_dir: str) -> bool:
+        """Load a single image into the cache.
+
+        Args:
+            image_file: The image filename to load.
+            blocks_dir: Directory containing block images.
+
+        Returns:
+            bool: True if the image was loaded successfully, False otherwise.
+
+        """
+        path = os.path.join(blocks_dir, image_file)
+        if image_file not in cls._image_cache:
+            try:
+                cls._image_cache[image_file] = pygame.image.load(path).convert_alpha()
+                return True
+            except (pygame.error, FileNotFoundError, OSError) as e:
+                cls.logger.warning(f"Failed to load {image_file}: {e}")
+                return False
+        return False  # Image was already in the cache
+
+    @classmethod
     def preload_images(
         cls,
         block_type_data: Dict[str, Any],
@@ -49,43 +71,26 @@ class BlockRenderer:
         for block_info in block_type_data.values():
             # Preload main sprite
             main_sprite = block_info.get("main_sprite")
-            if main_sprite:
-                path = os.path.join(blocks_dir, main_sprite)
-                if main_sprite not in cls._image_cache:
-                    try:
-                        cls._image_cache[main_sprite] = pygame.image.load(
-                            path
-                        ).convert_alpha()
-                        loaded_count += 1
-                    except (pygame.error, FileNotFoundError, OSError) as e:
-                        cls.logger.warning(f"Failed to load {main_sprite}: {e}")
-                        failed_count += 1
+            if main_sprite and cls._load_image(main_sprite, blocks_dir):
+                loaded_count += 1
+            elif main_sprite:  # If it failed to load
+                failed_count += 1
+
             # Preload explosion frames
             explosion_frames = block_info.get("explosion_frames") or []
             for frame in explosion_frames:
-                path = os.path.join(blocks_dir, frame)
-                if frame not in cls._image_cache:
-                    try:
-                        cls._image_cache[frame] = pygame.image.load(
-                            path
-                        ).convert_alpha()
-                        loaded_count += 1
-                    except (pygame.error, FileNotFoundError, OSError) as e:
-                        cls.logger.warning(f"Failed to load {frame}: {e}")
-                        failed_count += 1
+                if cls._load_image(frame, blocks_dir):
+                    loaded_count += 1
+                else:
+                    failed_count += 1
+
             # Preload animation frames
             animation_frames = block_info.get("animation_frames") or []
             for frame in animation_frames:
-                path = os.path.join(blocks_dir, frame)
-                if frame not in cls._image_cache:
-                    try:
-                        cls._image_cache[frame] = pygame.image.load(
-                            path
-                        ).convert_alpha()
-                        loaded_count += 1
-                    except (pygame.error, FileNotFoundError, OSError) as e:
-                        cls.logger.warning(f"Failed to load {frame}: {e}")
-                        failed_count += 1
+                if cls._load_image(frame, blocks_dir):
+                    loaded_count += 1
+                else:
+                    failed_count += 1
         cls.logger.info(f"Loaded {loaded_count} block images, {failed_count} failed.")
 
     @classmethod
@@ -118,11 +123,11 @@ class BlockRenderer:
             animation_frame: Current animation frame index (if animated).
             animation_frames: List of animation frame filenames.
             direction: For dynamic blocks, the current direction (if any).
-            counter_value: For counter blocks, the current hit count (0-5).
+            counter_value: For CounterBlocks, the current hit count (0-5).
 
         """
         img: Optional[pygame.Surface] = None
-        # Special handling for counter blocks (block_type == COUNTER_BLK)
+        # Special handling for CounterBlocks (block_type == COUNTER_BLK)
         if block_type == COUNTER_BLK and counter_value is not None and animation_frames:
             idx = max(0, min(counter_value, len(animation_frames) - 1))
             frame_file = animation_frames[idx]

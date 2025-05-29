@@ -60,28 +60,28 @@ class CollisionSystem:
         x, y = ball.get_position()
         radius = ball.radius
 
-        # Check left wall
+        # Check the left wall
         if x - radius < 0:
             result["collision"] = True
             result["side"] = "left"
             self.logger.info("Ball collided with left wall.")
             return result
 
-        # Check right wall
+        # Check the right wall
         if x + radius > self.screen_width:
             result["collision"] = True
             result["side"] = "right"
             self.logger.info("Ball collided with right wall.")
             return result
 
-        # Check top wall
+        # Check the top wall
         if y - radius < 0:
             result["collision"] = True
             result["side"] = "top"
             self.logger.info("Ball collided with top wall.")
             return result
 
-        # Check bottom (ball lost)
+        # Check the bottom (ball lost)
         if y + radius > self.screen_height:
             result["collision"] = True
             result["side"] = "bottom"
@@ -158,8 +158,8 @@ class CollisionSystem:
         distance_squared = (distance_x * distance_x) + (distance_y * distance_y)
         return bool(distance_squared < (circle_radius * circle_radius))
 
+    @staticmethod
     def get_circle_rect_collision_normal(
-        self,
         circle_x: float,
         circle_y: float,
         prev_x: float,

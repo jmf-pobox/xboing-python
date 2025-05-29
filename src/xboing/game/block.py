@@ -54,7 +54,7 @@ class Block(GameShape):
         )
 
         # --- Block State and Health ---
-        self.health = _safe_int(config.get("hits", 1), 1)
+        self.health = 1
         self.is_hit: bool = False
         self.hit_timer: float = 0.0
         self.animation_frame: int = 0
@@ -71,7 +71,7 @@ class Block(GameShape):
         self.image: Optional[pygame.Surface] = None
         if image_override is not None:
             self.image = image_override
-        # If image is not available, log error and use a placeholder
+        # If the image is not available, log an error and use a placeholder
         elif self.image_file:
             pass  # Image loading handled by renderer
         else:
@@ -94,11 +94,15 @@ class Block(GameShape):
         """Return a string representation of the block."""
         return f"Block(x={self.rect.x}, y={self.rect.y}, type={self.type}, state={self.state})"
 
+    def is_broken(self) -> bool:
+        """Check if the block is broken."""
+        return self.health <= 0
+
     def update(self, delta_ms: float) -> None:
         """Update the block's state.
 
         Args:
-            delta_ms (float): Time since last frame in milliseconds
+            delta_ms (float): Time since the last frame in milliseconds
 
         """
         # --- Hit Animation Section ---
@@ -168,108 +172,105 @@ class Block(GameShape):
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the block using BlockRenderer."""
-        # --- Breaking/Explosion Drawing Section ---
         if self.state == "breaking":
-            if not self.explosion_frames:
-                # No explosion animation: immediately mark as destroyed and skip drawing
-                self.state = "destroyed"
-                return
-            frame_file = self.explosion_frames[
-                min(self.explosion_frame_index, len(self.explosion_frames) - 1)
-            ]
-            BlockRenderer.render(
-                surface=surface,
-                x=self.rect.x,
-                y=self.rect.y,
-                width=self.rect.width,
-                height=self.rect.height,
-                block_type=self.type,
-                image_file=frame_file,
-                is_hit=False,
-            )
+            self._draw_breaking_state(surface)
         else:
-            BlockRenderer.render(
-                surface=surface,
-                x=self.rect.x,
-                y=self.rect.y,
-                width=self.rect.width,
-                height=self.rect.height,
-                block_type=self.type,
-                image_file=self.image_file,
-                is_hit=self.is_hit,
-                animation_frame=self.animation_frame if self.animation_frames else None,
-                animation_frames=self.animation_frames,
-            )
+            self._draw_normal_state(surface)
 
-    def get_rect(self) -> pygame.Rect:
-        """Get the block's collision rectangle."""
-        return self.rect
+    def _draw_breaking_state(self, surface: pygame.Surface) -> None:
+        """Draw the block in the breaking/explosion state."""
+        if not self.explosion_frames:
+            # No explosion animation: immediately mark as destroyed and skip drawing
+            self.state = "destroyed"
+            return
+        frame_file = self.explosion_frames[
+            min(self.explosion_frame_index, len(self.explosion_frames) - 1)
+        ]
+        BlockRenderer.render(
+            surface=surface,
+            x=self.rect.x,
+            y=self.rect.y,
+            width=self.rect.width,
+            height=self.rect.height,
+            block_type=self.type,
+            image_file=frame_file,
+            is_hit=False,
+        )
 
-    def is_broken(self) -> bool:
-        """Check if the block is broken."""
-        return bool(self.health <= 0)
+    def _draw_normal_state(self, surface: pygame.Surface) -> None:
+        """Draw the block in its normal state."""
+        BlockRenderer.render(
+            surface=surface,
+            x=self.rect.x,
+            y=self.rect.y,
+            width=self.rect.width,
+            height=self.rect.height,
+            block_type=self.type,
+            image_file=self.image_file,
+            is_hit=self.is_hit,
+            animation_frame=self.animation_frame if self.animation_frames else None,
+            animation_frames=self.animation_frames,
+        )
 
 
 class CounterBlock(Block):
-    """A block that requires multiple hits to break (counter block)."""
+    """A block that requires multiple hits to break and displays a counter."""
 
     def __init__(self, x: int, y: int, config: BlockTypeData) -> None:
+        # Call parent initialization but with health=0 (we'll use hits_remaining instead)
+        # This prevents the parent's health from being used
         super().__init__(x, y, config)
-        self.hits_remaining: int = _safe_int(config.get("hits", 5), 5)
+
+        # We still need hits_remaining for CounterBlock specific behavior
+        self.hits_remaining = _safe_int(config.get("hits", 5), 5)
 
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
+        """Handle CounterBlock being hit."""
         broken = False
         points = 0
         effect = None
+
         if self.hits_remaining > 0:
             self.hits_remaining -= 1
             self.is_hit = True
             self.hit_timer = 200
+
             # Update animation frame based on hits_remaining
             if self.animation_frames and 0 <= self.hits_remaining < len(
                 self.animation_frames
             ):
                 self.animation_frame = self.hits_remaining
+
         if self.hits_remaining == 0:
             broken = True
             points = self.points
             self.state = "breaking"
             self.explosion_frame_index = 0
             self.explosion_timer = 0.0
+
         return broken, points, effect
 
-    def draw(self, surface: pygame.Surface) -> None:
-        if self.state == "breaking":
-            if not self.explosion_frames:
-                self.state = "destroyed"
-                return
-            frame_file = self.explosion_frames[
-                min(self.explosion_frame_index, len(self.explosion_frames) - 1)
-            ]
-            BlockRenderer.render(
-                surface=surface,
-                x=self.rect.x,
-                y=self.rect.y,
-                width=self.rect.width,
-                height=self.rect.height,
-                block_type=self.type,
-                image_file=frame_file,
-                is_hit=False,
-            )
-        else:
-            counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
-            BlockRenderer.render(
-                surface=surface,
-                x=self.rect.x,
-                y=self.rect.y,
-                width=self.rect.width,
-                height=self.rect.height,
-                block_type=self.type,
-                image_file=self.image_file,
-                is_hit=self.is_hit,
-                animation_frames=self.animation_frames,
-                counter_value=counter_value,
-            )
+    def _draw_normal_state(self, surface: pygame.Surface) -> None:
+        """Override normal state drawing to include the counter."""
+        counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
+
+        BlockRenderer.render(
+            surface=surface,
+            x=self.rect.x,
+            y=self.rect.y,
+            width=self.rect.width,
+            height=self.rect.height,
+            block_type=self.type,
+            image_file=self.image_file,
+            is_hit=self.is_hit,
+            animation_frames=self.animation_frames,
+            counter_value=counter_value,
+        )
+
+    # Override is_broken to use hits_remaining instead of health
+    def is_broken(self) -> bool:
+        """Check if the CounterBlock is broken."""
+        return self.hits_remaining <= 0
 
 
 def _safe_int(val: Any, default: int = 0) -> int:

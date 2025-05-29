@@ -37,7 +37,7 @@ class DigitRenderer:
             self.digit_height = 40
 
     def _load_digits(self) -> None:
-        """Load digit images into the digits dictionary."""
+        """Load digit images into the digit dictionary."""
         digits_dir = get_digits_dir()
         for i in range(10):
             digit_path = os.path.join(digits_dir, f"digit{i}.png")
@@ -45,6 +45,51 @@ class DigitRenderer:
                 self.digits[i] = pygame.image.load(digit_path).convert_alpha()
             else:
                 self.logger.warning(f"Could not load digit image: {digit_path}")
+
+    def _render_digit(
+        self,
+        digit_char: str,
+        surface: pygame.Surface,
+        x: int,
+        scale: float,
+        scaled_width: int,
+        scaled_height: int,
+        spacing: int,
+        color: Optional[Tuple[int, int, int]] = None,
+    ) -> int:
+        """Render a single-digit character to the surface.
+
+        Args:
+            digit_char: The digit character to render.
+            surface: The surface to render on.
+            x: The x position to render at.
+            scale: The scale factor for the digit.
+            scaled_width: The scaled width of the digit.
+            scaled_height: The scaled height of the digit.
+            spacing: The spacing between digits.
+            color: Optional color to tint the digit.
+
+        Returns:
+            The new x position after rendering the digit.
+
+        """
+        try:
+            digit = int(digit_char)
+            if digit in self.digits:
+                digit_surface = self.digits[digit]
+                if scale != 1.0:
+                    digit_surface = pygame.transform.smoothscale(
+                        digit_surface, (scaled_width, scaled_height)
+                    )
+                if color:
+                    colored_surface = digit_surface.copy()
+                    colored_surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
+                    digit_surface = colored_surface
+                surface.blit(digit_surface, (x, 0))
+                x += scaled_width + spacing
+        except ValueError:
+            x += scaled_width + spacing
+        return x
 
     def render_number(
         self,
@@ -90,24 +135,16 @@ class DigitRenderer:
             if digit_char == " ":
                 x += scaled_width + spacing
                 continue
-            try:
-                digit = int(digit_char)
-                if digit in self.digits:
-                    digit_surface = self.digits[digit]
-                    if scale != 1.0:
-                        digit_surface = pygame.transform.smoothscale(
-                            digit_surface, (scaled_width, scaled_height)
-                        )
-                    if color:
-                        colored_surface = digit_surface.copy()
-                        colored_surface.fill(
-                            color, special_flags=pygame.BLEND_RGBA_MULT
-                        )
-                        digit_surface = colored_surface
-                    surface.blit(digit_surface, (x, 0))
-                    x += scaled_width + spacing
-            except ValueError:
-                x += scaled_width + spacing
+            x = self._render_digit(
+                digit_char,
+                surface,
+                x,
+                scale,
+                scaled_width,
+                scaled_height,
+                spacing,
+                color,
+            )
         self._surface_cache[cache_key] = surface
         return surface
 
@@ -147,19 +184,16 @@ class DigitRenderer:
         colon_color = color if color else (255, 255, 0)
         x = 0
         for digit_char in f"{minutes:02d}":
-            digit = int(digit_char)
-            if digit in self.digits:
-                digit_surface = self.digits[digit]
-                if scale != 1.0:
-                    digit_surface = pygame.transform.smoothscale(
-                        digit_surface, (scaled_width, scaled_height)
-                    )
-                if color:
-                    colored_surface = digit_surface.copy()
-                    colored_surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
-                    digit_surface = colored_surface
-                surface.blit(digit_surface, (x, 0))
-                x += scaled_width + spacing
+            x = self._render_digit(
+                digit_char,
+                surface,
+                x,
+                scale,
+                scaled_width,
+                scaled_height,
+                spacing,
+                color,
+            )
         colon_y1 = scaled_height // 3
         colon_y2 = (scaled_height * 2) // 3
         colon_x = x
@@ -171,18 +205,15 @@ class DigitRenderer:
         )
         x += colon_width + spacing
         for digit_char in f"{secs:02d}":
-            digit = int(digit_char)
-            if digit in self.digits:
-                digit_surface = self.digits[digit]
-                if scale != 1.0:
-                    digit_surface = pygame.transform.smoothscale(
-                        digit_surface, (scaled_width, scaled_height)
-                    )
-                if color:
-                    colored_surface = digit_surface.copy()
-                    colored_surface.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
-                    digit_surface = colored_surface
-                surface.blit(digit_surface, (x, 0))
-                x += scaled_width + spacing
+            x = self._render_digit(
+                digit_char,
+                surface,
+                x,
+                scale,
+                scaled_width,
+                scaled_height,
+                spacing,
+                color,
+            )
         self._surface_cache[cache_key] = surface
         return surface

@@ -144,7 +144,7 @@ class XBoingApp:
 
         # --- Initialize timer and LevelState for starting level ---
 
-        # Load level info and set timer from time_bonus
+        # Load level info and set the timer from time_bonus
         level_info = self.level_manager.get_level_info()
         time_bonus = level_info.get("time_bonus", 120)
         self.game_state.level_state.set_bonus_time(time_bonus)
@@ -163,7 +163,7 @@ class XBoingApp:
         self.instructions_headline_font = create_font(26)
         self.instructions_text_font = create_font(21)
 
-        # --- Dummy GameView and GameController for Partial DI ---
+        # --- Placeholder GameView and GameController for Partial DI ---
         dummy_game_view = GameView(
             self.layout,
             self.block_manager,

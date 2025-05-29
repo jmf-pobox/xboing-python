@@ -46,7 +46,7 @@ from xboing.ui.top_bar_view import TopBarView
 from xboing.ui.ui_manager import UIManager
 from xboing.utils.asset_loader import create_font
 
-WINDOW_WIDTH = 565  # Update if your window width is different
+WINDOW_WIDTH = 565
 RIGHT_MARGIN = 20
 RIGHT_EDGE_X = 475
 

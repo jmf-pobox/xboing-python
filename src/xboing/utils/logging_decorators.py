@@ -1,4 +1,4 @@
-"""Logging decorators for the application."""
+"""Provides logging decorators for the application."""
 
 import functools
 import logging

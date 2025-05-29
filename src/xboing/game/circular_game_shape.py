@@ -32,7 +32,7 @@ class CircularGameShape(GameShape):
 
     def get_position(self) -> Tuple[float, float]:
         """Get the center position of the shape as (x, y)."""
-        return (self.x, self.y)
+        return self.x, self.y
 
     @abstractmethod
     def draw(self, surface: pygame.Surface) -> None:

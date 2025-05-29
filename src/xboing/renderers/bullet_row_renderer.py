@@ -33,9 +33,9 @@ class BulletRowRenderer:
 
         Args:
             surface (pygame.Surface): The surface to draw on.
-            center_x (int): The x-coordinate to center the row.
+            center_x (int): The x-coordinate of row's center
             y (int): The y-coordinate to start drawing.
-            bullet_count (int, in kwargs): The number of bullets to render.
+            **kwargs: (bullet_count) The number of bullets to render.
 
         Returns:
             int: The new y position after drawing the row.

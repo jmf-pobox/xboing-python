@@ -100,7 +100,8 @@ class Ball:
         self.color: Tuple[int, int, int] = color
 
         # Initial velocity
-        angle = random.uniform(math.pi / 4, 3 * math.pi / 4)  # Start with upward angle
+        # Start with an upward angle
+        angle = random.uniform(math.pi / 4, 3 * math.pi / 4)
         speed = 5.0
         self.vx: float = speed * math.cos(angle)
         self.vy: float = -speed * math.sin(
@@ -177,7 +178,7 @@ class Ball:
                 self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
 
         if not self.active:
-            return (False, False, False)
+            return False, False, False
 
         if self.stuck_to_paddle and paddle:
             self.x = paddle.rect.centerx + self.paddle_offset
@@ -192,7 +193,7 @@ class Ball:
                     self.guide_inc = -1
                 elif self.guide_pos == 0:
                     self.guide_inc = 1
-            return (True, False, False)
+            return True, False, False
 
         # Calculate movement with framerate independence
         move_factor = delta_ms / 16.67  # Normalized for 60 FPS
@@ -216,24 +217,24 @@ class Ball:
             self.x = left_boundary + self.radius
             self.vx = abs(self.vx)  # Ensure positive (right) direction
             changed = True
-            hit_wall = True  # Hit left wall
+            hit_wall = True  # Hit the left wall
         elif self.x + self.radius > right_boundary:
             self.x = right_boundary - self.radius
             self.vx = -abs(self.vx)  # Ensure negative (left) direction
             changed = True
-            hit_wall = True  # Hit right wall
+            hit_wall = True  # Hit the right wall
 
         # Top wall
         if self.y - self.radius < top_boundary:
             self.y = top_boundary + self.radius
             self.vy = abs(self.vy)  # Ensure positive (down) direction
             changed = True
-            hit_wall = True  # Hit top wall
+            hit_wall = True  # Hit the top wall
 
-        # Bottom boundary - ball is lost
+        # Bottom boundary - the ball is lost
         if self.y - self.radius > bottom_boundary:
             self.active = False
-            return (False, False, False)
+            return False, False, False
 
         # Handle paddle collision if paddle is provided
         hit_paddle = False
@@ -248,10 +249,10 @@ class Ball:
         if changed:
             self._add_random_factor()
 
-        return (True, hit_paddle, hit_wall)
+        return True, hit_paddle, hit_wall
 
     def update_rect(self) -> None:
-        """Update the collision rectangle based on current position."""
+        """Update the collision rectangle based on the current position."""
         self.rect.x = int(self.x - self.radius)
         self.rect.y = int(self.y - self.radius)
 
@@ -286,7 +287,7 @@ class Ball:
         # Normalize position (-1.0 to 1.0)
         offset = (hit_pos - paddle_center) / (paddle.rect.width / 2)
 
-        # Calculate new angle (between 30 and 150 degrees)
+        # Calculate a new angle (between 30 and 150 degrees)
         angle = math.pi / 2 + (offset * math.pi / 3)  # Pi/3 = 60 degrees
 
         # Calculate ball speed (maintain current speed)
@@ -294,7 +295,7 @@ class Ball:
 
         # Update velocity components
         self.vx = speed * math.cos(angle)
-        self.vy = -speed * math.sin(angle)  # Negative for upward direction
+        self.vy = -speed * math.sin(angle)  # Negative for an upward direction
 
         # Move ball to top of paddle to prevent sticking
         self.y = paddle.rect.top - self.radius - 1
@@ -326,11 +327,13 @@ class Ball:
         # Normalize to current speed
         norm = math.sqrt(dx * dx + dy * dy)
         if norm == 0:
-            return (0.0, -speed)
-        return (speed * dx / norm, speed * dy / norm)
+            return 0.0, -speed
+        return speed * dx / norm, speed * dy / norm
 
     def release_from_paddle(self) -> None:
-        """Release the ball if it's stuck to the paddle, using guide_pos for launch direction."""
+        """Release the ball if it's stuck to the paddle, using guide_pos
+        for the launch direction.
+        """
         logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
         if self.stuck_to_paddle:
             vx, vy = self.get_launch_velocity_from_guide_pos()
@@ -347,7 +350,7 @@ class Ball:
             -self.vy, self.vx
         )  # Note negative vy due to screen coordinates
 
-        # Add small random angle change (up to 5 degrees)
+        # Add a small random angle change (up to 5 degrees)
         angle += random.uniform(-0.087, 0.087)  # ±5 degrees in radians
 
         # Recalculate velocity with a slight random speed boost
@@ -363,12 +366,13 @@ class Ball:
             surface (pygame.Surface): Surface to draw on
 
         """
-        # Draw guide if stuck to paddle
+        # Draw the guide if stuck to paddle
         if self.stuck_to_paddle and Ball.guide_images:
             guide_img = Ball.guide_images[self.guide_pos]
             guide_rect = guide_img.get_rect()
             guide_rect.centerx = int(self.x)
-            guide_rect.bottom = int(self.y) - self.radius - 2  # 2px gap above ball
+            # 2 px gap above ball
+            guide_rect.bottom = int(self.y) - self.radius - 2
             surface.blit(guide_img, guide_rect)
 
         if not Ball.sprites:
@@ -414,7 +418,7 @@ class Ball:
 
     def get_position(self) -> Tuple[float, float]:
         """Get the ball's current position."""
-        return (self.x, self.y)
+        return self.x, self.y
 
     def set_position(self, x: float, y: float) -> None:
         """Set the ball's position.
@@ -434,8 +438,8 @@ class Ball:
 
         Args:
         ----
-            vx (float): X velocity component
-            vy (float): Y velocity component
+            vx (float): X velocity
+            vy (float): Y velocity
 
         """
         self.vx = float(vx)

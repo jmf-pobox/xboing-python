@@ -55,7 +55,7 @@ def load_image_sequence(
 
     Args:
     ----
-        directory (str): Directory containing the images
+        directory (str): Directory containing game images
         pattern (str): Filename pattern with {} for frame number
         num_frames (int): Number of frames to load
         alpha (bool): Whether the images have alpha transparency

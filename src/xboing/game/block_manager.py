@@ -33,7 +33,8 @@ class BlockManager:
         self.brick_height = 20  # BLOCK_HEIGHT in original XBoing
 
         # Based on precise calculations:
-        # (495px play width - 360px for 9 blocks - 20px for wall spacing) / 8 spaces = 14.375px
+        # (495 px play width - 360px for 9 blocks - 20px for wall spacing) /
+        # 8 spaces = 14.375 px
         self.spacing = 14  # Calculated optimal horizontal spacing
 
         # Set vertical spacing to exactly a fixed value of 12 pixels
@@ -44,7 +45,7 @@ class BlockManager:
         self.offset_y = offset_y
         self.blocks: List[Block] = []
 
-        # Get blocks directory using asset path utility
+        # Get blocks directory using the asset path utility
         blocks_dir = get_blocks_dir()
         self.logger.info(f"Using block images from {blocks_dir}")
 
@@ -60,7 +61,7 @@ class BlockManager:
 
     @functools.singledispatchmethod
     def check_collisions(self, obj: object) -> Tuple[int, int, List[Any]]:
-        """Dispatch collision checking based on object type (Ball, Bullet, etc)."""
+        """Dispatch collision checking based on the object type."""
         raise NotImplementedError(f"Unsupported collision object type: {type(obj)}")
 
     @check_collisions.register(Ball)
@@ -79,7 +80,7 @@ class BlockManager:
         """Check for collisions between a bullet and all blocks."""
 
         def remove_bullet() -> None:
-            bullet.active = False  # Mark bullet as inactive (caller should remove)
+            bullet.active = False  # Mark the bullet as inactive
 
         return self._check_block_collision(
             obj=bullet,
@@ -89,23 +90,25 @@ class BlockManager:
             remove_callback=remove_bullet,
         )
 
+    @staticmethod
     def _collides_with_block(
-        self, obj_x: float, obj_y: float, obj_radius: float, block_rect: pygame.Rect
+        obj_x: float, obj_y: float, obj_radius: float, block_rect: pygame.Rect
     ) -> bool:
         """Return True if the object at (obj_x, obj_y) with radius collides with the block rect."""
-        closest_x = max(block_rect.left, min(obj_x, block_rect.right))
-        closest_y = max(block_rect.top, min(obj_y, block_rect.bottom))
+        closest_x = max(block_rect.left, int(min(obj_x, block_rect.right)))
+        closest_y = max(block_rect.top, int(min(obj_y, block_rect.bottom)))
         dx = obj_x - closest_x
         dy = obj_y - closest_y
         distance = (dx * dx + dy * dy) ** 0.5
         return bool(distance <= obj_radius)
 
+    @staticmethod
     def _reflect_ball(
-        self, obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
+        obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
     ) -> None:
         """Reflect the ball's velocity and move it out of collision with the block."""
-        closest_x = max(block.rect.left, min(obj_x, block.rect.right))
-        closest_y = max(block.rect.top, min(obj_y, block.rect.bottom))
+        closest_x = max(block.rect.left, int(min(obj_x, block.rect.right)))
+        closest_y = max(block.rect.top, int(min(obj_y, block.rect.bottom)))
         dx = obj_x - closest_x
         dy = obj_y - closest_y
         distance = (dx * dx + dy * dy) ** 0.5
@@ -152,7 +155,8 @@ class BlockManager:
                 if broken:
                     points += block_points
                     broken_blocks += 1
-                    # Do not remove block here; it will be removed after explosion animation
+                    # Do not remove the block here; it will be removed after
+                    # explosion animation
                     if effect is not None:
                         effects.append(effect)
                 if is_bullet and remove_callback:

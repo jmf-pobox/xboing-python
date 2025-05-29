@@ -150,7 +150,7 @@ class LevelManager:
             level_num (int): Level number to load. If None, uses current_level.
 
         Returns:
-            bool: True if level was loaded successfully, False otherwise
+            bool: True if the level was loaded successfully, False otherwise
 
         """
         if level_num is not None:
@@ -185,7 +185,8 @@ class LevelManager:
         elif self.current_level > self.MAX_LEVELS:
             self.current_level = self.MAX_LEVELS
 
-    def _level_file_exists(self, level_file: str) -> bool:
+    @staticmethod
+    def _level_file_exists(level_file: str) -> bool:
         return os.path.exists(level_file)
 
     def _safe_parse_level_file(self, level_file: str) -> Optional[Dict[str, Any]]:
@@ -196,7 +197,7 @@ class LevelManager:
             return None
 
     def get_next_level(self) -> bool:
-        """Advance to the next level, or reset if at the last level."""
+        """Advance to the next level or reset if at the last level."""
         self.logger.info(
             f"get_next_level: current_level before increment={self.current_level}"
         )
@@ -218,7 +219,7 @@ class LevelManager:
 
         Returns
         -------
-            bool: True if level is complete, False otherwise
+            bool: True if the level is complete, False otherwise
 
         """
         if self.block_manager:
@@ -266,14 +267,14 @@ class LevelManager:
         horizontal_spacing = 14  # Exact spacing between blocks
 
         # Don't recalculate the block width - use the original game's exact values
-        block_width = brick_width  # Use original 40px block width
+        block_width = brick_width  # Use original 40 px block width
 
-        # Calculate total width of blocks + spacing
-        # Calculate total width of blocks + spacing
-        # This should be 494px, almost exactly filling the 495px play_width
+        # Calculate total width of blocks plus spacing
+        # Calculate total width of blocks plus spacing
+        # This should be 494 px, almost exactly filling the 495px play_width
         # print(f"Total calculated width: {total_width}")
 
-        # The left margin is simply the wall spacing (10px)
+        # The left margin is simply the wall spacing (10 px)
         left_margin = wall_spacing
 
         # Set vertical spacing to exactly 12 pixels as requested
@@ -286,7 +287,7 @@ class LevelManager:
                 if char == ".":
                     continue
 
-                # Convert character to block type
+                # Convert each character to a block type
                 block_type = self.CHAR_TO_BLOCK_TYPE.get(char)
                 if block_type is None:
                     continue
@@ -298,7 +299,8 @@ class LevelManager:
                     + col_idx * (block_width + horizontal_spacing)
                 )
 
-                # Add top margin for vertical positioning with 50% block height spacing
+                # Add the top margin for vertical positioning with 50% block
+                # height spacing
                 top_margin = wall_spacing
                 y = (
                     self.block_manager.offset_y
@@ -309,7 +311,7 @@ class LevelManager:
                 # Create the block using the block manager's factory method
                 block = self.block_manager.create_block(x, y, block_type)
 
-                # Handle special properties based on block type
+                # Handle special properties based on the block type
                 if char in "12345":  # Counter blocks 1-5
                     hits = int(char)
                     if isinstance(block, CounterBlock):
@@ -318,7 +320,7 @@ class LevelManager:
                             block.animation_frames
                         ):
                             block.animation_frame = hits - 1
-                elif char == "0":  # Special case for '0' counter blocks
+                elif char == "0":  # Special case for zero counter blocks
                     if isinstance(block, CounterBlock):
                         block.hits_remaining = 1
                         block.animation_frame = 0
@@ -327,7 +329,7 @@ class LevelManager:
                     )
                     block.animation_frames = None
 
-                # Add block to manager
+                # Add block to the manager
                 self.block_manager.blocks.append(block)
 
     def _set_level_background(self) -> None:
@@ -339,7 +341,7 @@ class LevelManager:
             return
 
         # In the original XBoing:
-        # 1. The main window always uses the space background
+        # 1. The main window always uses the space-themed background
         # 2. The play window cycles through backgrounds 2-5 for each level
 
         # Map our background constants to the original XBoing background indices:
@@ -415,5 +417,7 @@ class LevelManager:
             return None
 
     def get_current_background_index(self) -> int:
-        """Get the current background index for the play area (0-based, for bgrnd2.png, bgrnd3.png, etc)."""
+        """Get the current background index for the play area (0-based,
+        for bgrnd2.png, bgrnd3.png, etc.).
+        """
         return self.current_background - self.BACKGROUND_2

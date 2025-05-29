@@ -32,7 +32,7 @@ class GameShape(ABC):
 
     def get_position(self) -> Tuple[float, float]:
         """Get the shape's current position as (x, y)."""
-        return (self.x, self.y)
+        return self.x, self.y
 
     @property
     def width(self) -> int:

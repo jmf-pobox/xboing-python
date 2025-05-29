@@ -1,4 +1,4 @@
-"""Set up logging configuration for the application."""
+"""Set up the logging configuration for the application."""
 
 import logging
 import os
@@ -7,7 +7,7 @@ import os
 def setup_logging(
     default_level: int = logging.INFO, log_file: str = "game_debug.log"
 ) -> None:
-    """Set up logging configuration for the application.
+    """Set up the logging configuration for the application.
 
     Args:
     ----
@@ -21,7 +21,5 @@ def setup_logging(
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
         handlers=[
             logging.FileHandler(log_file, mode="w"),
-            # Uncomment the next line for optional console output
-            # logging.StreamHandler()
         ],
     )

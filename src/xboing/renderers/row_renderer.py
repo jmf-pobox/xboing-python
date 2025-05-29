@@ -1,4 +1,8 @@
-"""Stateless renderer for a single row of text, optionally with an icon."""
+"""Defines row rendering interfaces and implementations.
+
+This module provides the RowRenderer protocol that defines the interface for all row renderers,
+as well as the TextRowRenderer implementation for rendering text rows with optional icons.
+"""
 
 from typing import Optional, Protocol, Tuple
 
@@ -17,7 +21,7 @@ class RowRenderer(Protocol):
 
         Args:
             surface (pygame.Surface): The surface to draw on.
-            center_x (int): The x-coordinate to center the row.
+            center_x (int): The x-coordinate of the row's center.
             y (int): The y-coordinate to start drawing.
             **kwargs: Additional arguments for renderer customization.
 
@@ -29,7 +33,7 @@ class RowRenderer(Protocol):
 
 
 class TextRowRenderer:
-    """Stateless renderer for a single row of text, optionally with an icon."""
+    """Stateless renderer for a single text row, optionally with an icon."""
 
     def __init__(
         self,
@@ -65,7 +69,7 @@ class TextRowRenderer:
 
         Args:
             surface (pygame.Surface): The surface to draw on.
-            center_x (int): The x-coordinate to center the row.
+            center_x (int): The x-coordinate to of the row's center.
             y (int): The y-coordinate to start drawing.
             **kwargs: Additional arguments for renderer customization.
 
@@ -73,7 +77,7 @@ class TextRowRenderer:
             int: The new y position after drawing the row.
 
         """
-        # kwargs is unused, but required for interface compatibility
+        # kwargs is unused but required for interface compatibility
         _ = kwargs
         text_surf = self.font.render(self.text, True, self.color)
         text_rect = text_surf.get_rect(
