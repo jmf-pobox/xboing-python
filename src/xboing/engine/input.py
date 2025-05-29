@@ -35,7 +35,7 @@ class InputManager:
         self.mouse_motion: Tuple[int, int] = (0, 0)
 
     def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
-        """Update input state for the current frame."""
+        """Update the input state for the current frame."""
         if events is None:
             events = pygame.event.get()
         # Clear one-frame states
@@ -53,22 +53,12 @@ class InputManager:
             if event.type == pygame.KEYDOWN:
                 self.keys_pressed[event.key] = True
                 self.keys_down.add(event.key)
-                try:
-                    key_name = pygame.key.name(event.key)
-                except (ValueError, pygame.error) as e:
-                    self.logger.debug(f"Error getting key name for {event.key}: {e}")
-                    key_name = str(event.key)
-                self.logger.debug(f"[InputManager] KEYDOWN: {event.key} ({key_name})")
+                self._log_key_event(event.key, "KEYDOWN")
 
             if event.type == pygame.KEYUP:
                 self.keys_pressed[event.key] = False
                 self.keys_up.add(event.key)
-                try:
-                    key_name = pygame.key.name(event.key)
-                except (ValueError, pygame.error) as e:
-                    self.logger.debug(f"Error getting key name for {event.key}: {e}")
-                    key_name = str(event.key)
-                self.logger.debug(f"[InputManager] KEYUP: {event.key} ({key_name})")
+                self._log_key_event(event.key, "KEYUP")
 
             if event.type == pygame.MOUSEMOTION:
                 self.mouse_pos = event.pos
@@ -97,11 +87,11 @@ class InputManager:
         return self.keys_pressed.get(key, False)
 
     def is_key_down(self, key: int) -> bool:
-        """Check if a key was pressed this frame."""
+        """Check if a key was pressed."""
         return key in self.keys_down
 
     def is_key_up(self, key: int) -> bool:
-        """Check if a key was released this frame."""
+        """Check if a key was released."""
         return key in self.keys_up
 
     def get_mouse_position(self) -> Tuple[int, int]:
@@ -109,7 +99,7 @@ class InputManager:
         return self.mouse_pos
 
     def get_mouse_motion(self) -> Tuple[int, int]:
-        """Get the mouse movement delta for this frame."""
+        """Get the mouse movement delta."""
         return self.mouse_motion
 
     def is_mouse_button_pressed(self, button: int) -> bool:
@@ -147,3 +137,18 @@ class InputManager:
         if 0 <= button < self.MAX_MOUSE_BUTTONS:
             return self.mouse_buttons_up[button]
         return False
+
+    def _log_key_event(self, key: int, event_type: str) -> None:
+        """Helper method to log key events.
+
+        Args:
+        ----
+            key (int): The key code
+            event_type (str): Type of the event (KEYDOWN or KEYUP)
+        """
+        try:
+            key_name = pygame.key.name(key)
+        except (ValueError, pygame.error) as e:
+            self.logger.debug(f"Error getting key name for {key}: {e}")
+            key_name = str(key)
+        self.logger.debug(f"[InputManager] {event_type}: {key} ({key_name})")

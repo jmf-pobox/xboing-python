@@ -136,7 +136,7 @@ class AnimatedSprite(Sprite):
 
         Args:
         ----
-            delta_ms (int): Time passed since last update in milliseconds.
+            delta_ms (int): Time passed since the last update in milliseconds.
 
         """
         if not self.playing:

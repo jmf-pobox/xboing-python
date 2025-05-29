@@ -58,11 +58,12 @@ class Window:
         self.fullscreen = fullscreen
         self.running = True
 
-        # Initialize clock for framerate management
+        # Initialize the clock for framerate management
         self.clock = pygame.time.Clock()
         self.target_fps = 60
 
-    def set_icon(self, icon_surface: pygame.Surface) -> None:
+    @staticmethod
+    def set_icon(icon_surface: pygame.Surface) -> None:
         """Set the window icon."""
         pygame.display.set_icon(icon_surface)
 
@@ -116,6 +117,7 @@ class Window:
 
         return self.running
 
-    def cleanup(self) -> None:
+    @staticmethod
+    def cleanup() -> None:
         """Clean up resources and shut down pygame."""
         pygame.quit()

@@ -70,7 +70,7 @@ class BombExplodedEvent(XBoingEvent):
 
 
 class ApplauseEvent(XBoingEvent):
-    """Event: Level complete, applause sound."""
+    """Event: Level complete."""
 
     sound_effect = "applause"
 
@@ -133,7 +133,7 @@ class TimerUpdatedEvent(XBoingEvent):
     """Event: Timer updated (for UI updates)."""
 
     def __init__(self, time_remaining: int) -> None:
-        """Initialize with the new time remaining value."""
+        """Initialize with the new value of time remaining."""
         self.time_remaining: int = time_remaining
 
 
