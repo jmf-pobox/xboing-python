@@ -32,6 +32,7 @@ from typing import List, Optional, Tuple, Union
 
 import pygame
 
+from xboing.ui.colors import BLACK, DARK_BLUE, MEDIUM_BLUE
 from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_backgrounds_dir
 
@@ -153,15 +154,18 @@ class GameWindow:
 class GameLayout:
     """Manages the game window layout and provides access to all UI region rectangles."""
 
+    # UI positioning constants
+    RIGHT_EDGE_X = 475  # Right-edge X coordinate for UI elements positioning
+
     def __init__(self, width: int, height: int) -> None:
         """Initialize the GameLayout with the given width and height."""
         self.logger = logging.getLogger("xboing.GameLayout")
         self.width = width
         self.height = height
-        self.play_width = 495
-        self.play_height = 580
-        self.main_width = 70
-        self.main_height = 130
+        self.play_width = 495  # Width of the play area in pixels
+        self.play_height = 580  # Height of the play area in pixels
+        self.main_width = 70  # Width of the side panels in pixels
+        self.main_height = 130  # Height of additional UI elements in pixels
         self._create_windows()
 
     def _create_windows(self) -> None:
@@ -169,40 +173,51 @@ class GameLayout:
         self.main_window = GameWindow(
             Rect(0, 0, self.width, self.height),
             name="mainWindow",
-            bg_color=(0, 0, 0),
+            bg_color=BLACK,  # Black background color for the main window
         )
-        offset_x = self.main_width // 2
-        score_width = 224
-        mess_height = 30
+        offset_x = self.main_width // 2  # Half of the side panel width as offset
+        score_width = 224  # Width of the score display area in pixels
+        mess_height = 30  # Height of the message display area in pixels
         self.score_window = GameWindow(
-            Rect(offset_x, 10, score_width, 42),
+            Rect(
+                offset_x, 10, score_width, 42
+            ),  # x=offset_x, y=10, width=score_width, height=42
             name="scoreWindow",
             parent=self.main_window,
             bg_color=None,
         )
         self.level_window = GameWindow(
             Rect(
-                score_width + offset_x + 25,
-                5,
-                self.play_width + offset_x - 20 - score_width,
-                52,
+                score_width
+                + offset_x
+                + 25,  # Position after the score window with a 25 px gap
+                5,  # 5 px from top of screen
+                self.play_width
+                + offset_x
+                - 20
+                - score_width,  # Remaining width with 20px margin
+                52,  # Height of level display in pixels
             ),
             name="levelWindow",
             parent=self.main_window,
             bg_color=None,
         )
         self.play_window = GameWindow(
-            Rect(offset_x, 60, self.play_width, self.play_height),
+            Rect(
+                offset_x, 60, self.play_width, self.play_height
+            ),  # x=offset_x, y=60, width=play_width, height=play_height
             name="playWindow",
             parent=self.main_window,
-            bg_color=(0, 0, 0),
+            bg_color=BLACK,  # Black background color for the play area
         )
         self.mess_window = GameWindow(
             Rect(
-                offset_x + 35,
-                50 + self.play_height + 10,
-                self.play_width // 2,
-                mess_height,
+                offset_x + 35,  # 35 px right of the left edge
+                50
+                + self.play_height
+                + 10,  # 10 px below play area with 50 px additional offset
+                self.play_width // 2,  # Half the width of the play area
+                mess_height,  # Height defined earlier
             ),
             name="messWindow",
             parent=self.main_window,
@@ -210,10 +225,14 @@ class GameLayout:
         )
         self.special_window = GameWindow(
             Rect(
-                offset_x + self.play_width // 2 + 10,
-                65 + self.play_height + 10,
-                180,
-                mess_height + 5,
+                offset_x
+                + self.play_width // 2
+                + 10,  # 10 px right of the play area's middle
+                65
+                + self.play_height
+                + 10,  # 10 px below play area with 65 px additional offset
+                180,  # Width of 180 px for the special display
+                mess_height + 5,  # 5 px taller than message height
             ),
             name="specialWindow",
             parent=self.main_window,
@@ -221,10 +240,16 @@ class GameLayout:
         )
         self.time_window = GameWindow(
             Rect(
-                offset_x - 5 + self.play_width // 2 + 10 + 180 + 5,
-                65 + self.play_height + 10,
-                self.play_width // 8,
-                mess_height + 5,
+                offset_x
+                - 5
+                + self.play_width // 2
+                + 10
+                + 180
+                + 5,  # Position after the special window with 5 px gap
+                65 + self.play_height + 10,  # Same vertical position as
+                # the special window
+                self.play_width // 8,  # One eighth of the play area width
+                mess_height + 5,  # Same height as the special window
             ),
             name="timeWindow",
             parent=self.main_window,
@@ -244,7 +269,9 @@ class GameLayout:
                 self.main_window.set_background_pixmap(space_bg)
                 self.logger.info(f"Loaded main background: {space_path}")
             else:
-                self.main_window.set_background((20, 20, 30))
+                self.main_window.set_background(
+                    DARK_BLUE
+                )  # Dark blue fallback color for the main background
                 self.logger.warning(
                     "Using fallback color for main background (space.png not found)"
                 )
@@ -253,7 +280,9 @@ class GameLayout:
                 self.play_window.set_background_pixmap(play_bg)
                 self.logger.info(f"Loaded play background: {bg_path}")
             else:
-                self.play_window.set_background((40, 40, 50))
+                self.play_window.set_background(
+                    MEDIUM_BLUE
+                )  # Medium blue fallback color for the play area
                 self.logger.warning(
                     "Using fallback color for play background (bgrnd.png not found)"
                 )
@@ -287,7 +316,9 @@ class GameLayout:
     def set_play_background(self, bg_type: int) -> None:
         """Set the play area background to a specific type by loading the corresponding image."""
         backgrounds_dir = get_backgrounds_dir()
-        bg_file = f"bgrnd{bg_type+2}.png"
+        bg_file = (
+            f"bgrnd{bg_type+2}.png"  # +2 offset for background file naming convention
+        )
         bg_path = os.path.join(backgrounds_dir, bg_file)
         if not os.path.exists(bg_path):
             self.logger.warning(f"Background image not found: {bg_path}")
@@ -307,4 +338,6 @@ class GameLayout:
             space_bg = load_image(space_path, alpha=False)
             self.play_window.set_background_pixmap(space_bg)
         else:
-            self.play_window.set_background((20, 20, 30))
+            self.play_window.set_background(
+                DARK_BLUE
+            )  # Dark blue fallback color (same as the main background)

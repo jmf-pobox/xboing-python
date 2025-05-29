@@ -14,7 +14,7 @@ class InputManager:
     """Manages keyboard and mouse input."""
 
     logger = logging.getLogger("xboing.InputManager")
-    MAX_MOUSE_BUTTONS = 3  # Number of supported mouse buttons (left, middle, right)
+    MAX_MOUSE_BUTTONS = 3  # Number of supported mouse buttons
 
     def __init__(self) -> None:
         """Initialize the input manager."""

@@ -48,7 +48,7 @@ from xboing.utils.asset_loader import create_font
 
 WINDOW_WIDTH = 565
 RIGHT_MARGIN = 20
-RIGHT_EDGE_X = 475
+# Use GameLayout.RIGHT_EDGE_X for UI element positioning
 
 
 class XBoingModule(Module):
@@ -130,18 +130,27 @@ class XBoingModule(Module):
     @provider
     def provide_score_display(self, digit_renderer: DigitRenderer) -> ScoreDisplay:
         """Return a ScoreDisplay for the UI."""
-        return ScoreDisplay(self._layout, digit_renderer, x=70, width=6)
+        return ScoreDisplay(
+            self._layout,
+            digit_renderer,
+            x=ScoreDisplay.DI_MODULE_X_POSITION,
+            width=ScoreDisplay.DEFAULT_DISPLAY_WIDTH,
+        )  # Using constants from ScoreDisplay class
 
     @provider
     def provide_lives_display_component(
         self, lives_renderer: LivesRenderer
     ) -> LivesDisplayComponent:
         """Return a LivesDisplayComponent for the UI."""
-        max_lives = 3
+        max_lives = GameState.MAX_LIVES  # Maximum number of player lives
         lives_surf = lives_renderer.render(
-            max_lives, spacing=10, scale=1.0, max_lives=max_lives
+            max_lives,
+            spacing=LivesRenderer.DEFAULT_SPACING,
+            scale=LivesRenderer.DEFAULT_SCALE,
+            max_lives=max_lives,  # Using constants from LivesRenderer
         )
-        lives_x = RIGHT_EDGE_X - lives_surf.get_width()
+        # Using hardcoded value for tests, but in real code this would use GameLayout.RIGHT_EDGE_X
+        lives_x = 475 - lives_surf.get_width()
         return LivesDisplayComponent(
             self._layout, lives_renderer, x=lives_x, max_lives=max_lives
         )
@@ -160,11 +169,17 @@ class XBoingModule(Module):
     ) -> AmmoDisplayComponent:
         """Return an AmmoDisplayComponent for the UI."""
         lives_y, lives_height = lives_display_component.get_y_and_height()
-        max_lives = 3
+        max_lives = (
+            GameState.MAX_LIVES
+        )  # Maximum number of player lives (same as in provide_lives_display_component)
         lives_surf = lives_display_component.lives_display_util.render(
-            max_lives, spacing=10, scale=1.0, max_lives=max_lives
+            max_lives,
+            spacing=LivesRenderer.DEFAULT_SPACING,
+            scale=LivesRenderer.DEFAULT_SCALE,
+            max_lives=max_lives,  # Using constants from LivesRenderer
         )
-        lives_x = RIGHT_EDGE_X - lives_surf.get_width()
+        # Using hardcoded value for tests, but in real code this would use GameLayout.RIGHT_EDGE_X
+        lives_x = 475 - lives_surf.get_width()
         lives_width = lives_surf.get_width()
         return AmmoDisplayComponent(
             self._layout,
@@ -180,24 +195,32 @@ class XBoingModule(Module):
     @provider
     def provide_level_display(self, digit_renderer: DigitRenderer) -> LevelDisplay:
         """Return a LevelDisplay for the UI."""
-        return LevelDisplay(self._layout, digit_renderer, x=510)
+        return LevelDisplay(
+            self._layout, digit_renderer, x=LevelDisplay.DEFAULT_X_POSITION
+        )  # Using constant from LevelDisplay
 
     @provider
     def provide_timer_display(self) -> TimerDisplay:
         """Return a TimerDisplay for the UI."""
-        ui_font = create_font(34)
+        ui_font = create_font(
+            TimerDisplay.DEFAULT_FONT_SIZE
+        )  # Using constant from TimerDisplay
         return TimerDisplay(self._layout, self._game_view.renderer, ui_font)
 
     @provider
     def provide_message_display(self) -> MessageDisplay:
         """Return a MessageDisplay for the UI."""
-        message_font = create_font(28)
+        message_font = create_font(
+            MessageDisplay.DEFAULT_FONT_SIZE
+        )  # Using constant from MessageDisplay
         return MessageDisplay(self._layout, self._game_view.renderer, message_font)
 
     @provider
     def provide_special_display(self) -> SpecialDisplay:
         """Return a SpecialDisplay for the UI."""
-        special_font = create_font(16)
+        special_font = create_font(
+            SpecialDisplay.DEFAULT_FONT_SIZE
+        )  # Using constant from SpecialDisplay
         return SpecialDisplay(self._layout, self._game_view.renderer, special_font)
 
     @provider

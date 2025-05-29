@@ -9,6 +9,10 @@ from typing import List, Optional, Tuple
 
 import pygame
 
+from xboing.ui.colors import BLACK
+
+DEFAULT_LINE_WIDTH = 1
+
 
 class Sprite:
     """Sprite class for rendering images with various transformations."""
@@ -195,7 +199,9 @@ class Renderer:
         self.surface: pygame.Surface = window_surface
         self.width: int = window_surface.get_width()
         self.height: int = window_surface.get_height()
-        self.background_color: Tuple[int, int, int] = (0, 0, 0)
+        self.background_color: Tuple[int, int, int] = (
+            BLACK  # Default black background color
+        )
         self.logger.info(f"Renderer initialized: {self.width}x{self.height}")
 
     def clear(self, color: Optional[Tuple[int, int, int]] = None) -> None:
@@ -211,7 +217,7 @@ class Renderer:
         rect: pygame.Rect,
         color: Tuple[int, int, int],
         filled: bool = True,
-        width: int = 1,
+        width: int = DEFAULT_LINE_WIDTH,
     ) -> None:
         """Draw a rectangle."""
         if filled:
@@ -224,7 +230,7 @@ class Renderer:
         start_pos: Tuple[int, int],
         end_pos: Tuple[int, int],
         color: Tuple[int, int, int],
-        width: int = 1,
+        width: int = DEFAULT_LINE_WIDTH,
     ) -> None:
         """Draw a line."""
         pygame.draw.line(self.surface, color, start_pos, end_pos, width)

@@ -19,11 +19,14 @@ class LevelDisplay:
     Allows manual x positioning for layout compatibility.
     """
 
+    # Default values
+    DEFAULT_X_POSITION = 510  # Default X position for level display in the UI
+
     def __init__(
         self,
         layout: GameLayout,
         digit_display: DigitRenderer,
-        x: int = 510,
+        x: int = DEFAULT_X_POSITION,
     ) -> None:
         """Initialize the LevelDisplay.
 

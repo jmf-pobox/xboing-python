@@ -11,6 +11,11 @@ class BallManager:
     Provides methods to add, remove, reset, and iterate balls.
     """
 
+    # Default values
+    DEFAULT_AUTO_ACTIVE_DELAY_MS = (
+        3000.0  # Auto-activation delay for balls in milliseconds (3 seconds)
+    )
+
     def __init__(self) -> None:
         """Initialize the BallManager with an empty list of balls."""
         self._balls: List[Ball] = []

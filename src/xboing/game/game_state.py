@@ -113,12 +113,18 @@ class LevelState:
 # Initial ammo count
 INITIAL_AMMO_COUNT = 4
 
+# Maximum number of player lives
+MAX_LIVES = 3
+
 
 class GameState:
     """Manages the current state of the game, including score, lives, level, timer, and special flags.
 
     Provides methods to update the state and generate corresponding events.
     """
+
+    # Reference to module-level MAX_LIVES for class-level access
+    MAX_LIVES = MAX_LIVES
 
     logger: logging.Logger
     ammo: int
@@ -135,7 +141,7 @@ class GameState:
         """Initialize the GameState with default values and event mappings."""
         self.logger = logging.getLogger("xboing.GameState")
         self.score = 0
-        self.lives = 3
+        self.lives = MAX_LIVES
         self.level = 1
         self.game_over = False
         self.specials = {

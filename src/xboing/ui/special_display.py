@@ -18,6 +18,9 @@ class SpecialDisplay:
     Subscribes to events for each special and renders their state as colored labels.
     """
 
+    # Font sizes
+    DEFAULT_FONT_SIZE = 16  # Default font size for special display (smaller text)
+
     LABELS: List[Tuple[str, str]] = [
         ("Reverse", "reverse"),
         ("Save", "save"),

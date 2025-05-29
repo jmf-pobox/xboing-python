@@ -20,12 +20,19 @@ class ScoreDisplay:
     Renders as a fixed-width, right-justified display (default 6 digits).
     """
 
+    # Default values
+    DEFAULT_X_POSITION = 220  # Default X position for score display
+    DEFAULT_DISPLAY_WIDTH = 6  # Default number of digits to display
+
+    # Values used in di_module.py
+    DI_MODULE_X_POSITION = 70  # X position for score display in di_module.py
+
     def __init__(
         self,
         layout: GameLayout,
         digit_display: DigitRenderer,
-        x: int = 220,
-        width: int = 6,
+        x: int = DEFAULT_X_POSITION,
+        width: int = DEFAULT_DISPLAY_WIDTH,
     ) -> None:
         """Initialize the ScoreDisplay.
 

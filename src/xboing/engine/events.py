@@ -4,6 +4,9 @@ from typing import Tuple
 
 import pygame
 
+from xboing.game.bullet import DEFAULT_AMMO_QUANTITY
+from xboing.ui.colors import GREEN
+
 
 class XBoingEvent:
     """Base class for all XBoing game events."""
@@ -23,7 +26,8 @@ class AmmoCollectedEvent(XBoingEvent):
 
     sound_effect = "ammo"
 
-    def __init__(self, ammo: int = 4):
+    def __init__(self, ammo: int = DEFAULT_AMMO_QUANTITY):  # Default
+        # amount of ammo collected (4 bullets)
         self.ammo = ammo
 
 
@@ -143,7 +147,7 @@ class MessageChangedEvent(XBoingEvent):
     def __init__(
         self,
         message: str,
-        color: Tuple[int, int, int] = (0, 255, 0),
+        color: Tuple[int, int, int] = GREEN,  # Default green color for messages
         alignment: str = "left",
     ) -> None:
         """Initialize with the message, color, and alignment."""
@@ -263,7 +267,9 @@ def post_level_title_message(level_title: str) -> None:
             pygame.USEREVENT,
             {
                 "event": MessageChangedEvent(
-                    level_title, color=(0, 255, 0), alignment="left"
+                    level_title,
+                    color=GREEN,
+                    alignment="left",  # Green color for level title messages
                 )
             },
         )

@@ -40,6 +40,7 @@ from xboing.ui.game_view import GameView
 from xboing.ui.instructions_view import InstructionsView
 from xboing.ui.level_complete_view import LevelCompleteView
 from xboing.ui.top_bar_view import TopBarView
+from xboing.ui.ui_config import SMALL_FONT_SIZE, STANDARD_FONT_SIZE
 from xboing.ui.ui_manager import UIManager
 from xboing.ui.view import View
 from xboing.utils.asset_loader import create_font, load_image
@@ -69,6 +70,8 @@ BLOCK_WIDTH: int = 40  # Original block width
 BLOCK_HEIGHT: int = 20  # Original block height
 BLOCK_MARGIN: int = 7  # Original spacing (SPACE constant)
 GAME_TITLE: str = "- XBoing II -"
+
+MILLISECONDS_PER_SECOND : int = 1000
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -146,7 +149,9 @@ class XBoingApp:
 
         # Load level info and set the timer from time_bonus
         level_info = self.level_manager.get_level_info()
-        time_bonus = level_info.get("time_bonus", 120)
+        time_bonus = level_info.get(
+            "time_bonus", self.level_manager.DEFAULT_TIME_BONUS
+        )  # Default time bonus if not specified in level info
         self.game_state.level_state.set_bonus_time(time_bonus)
         # Post TimerUpdatedEvent to update the UI
         pygame.event.post(
@@ -158,10 +163,18 @@ class XBoingApp:
         # --- UI Manager and Fonts ---
         self.ui_manager = UIManager()
         self.nonlocal_vars = {"running": True}
-        self.font = create_font(24)
-        self.small_font = create_font(18)
-        self.instructions_headline_font = create_font(26)
-        self.instructions_text_font = create_font(21)
+        self.font = create_font(
+            STANDARD_FONT_SIZE
+        )  # Standard font size for most UI text
+        self.small_font = create_font(
+            SMALL_FONT_SIZE
+        )  # Smaller font size for secondary UI elements
+        self.instructions_headline_font = create_font(
+            InstructionsView.HEADLINE_FONT_SIZE
+        )  # Font size for instruction headlines
+        self.instructions_text_font = create_font(
+            InstructionsView.TEXT_FONT_SIZE
+        )  # Font size for instruction body text
 
         # --- Placeholder GameView and GameController for Partial DI ---
         dummy_game_view = GameView(
@@ -310,10 +323,14 @@ class XBoingApp:
             active_controller.handle_events(events)
             self.audio_manager.handle_events(events)
             self.ui_manager.handle_events(events)
-            active_controller.update(delta_time * 1000)
+            active_controller.update(
+                delta_time * MILLISECONDS_PER_SECOND
+            )  # Convert delta_time from seconds to milliseconds
             self.layout.draw(self.window.surface)
             if self.ui_manager.current_view:
-                self.ui_manager.current_view.update(delta_time * 1000)
+                self.ui_manager.current_view.update(
+                    delta_time * MILLISECONDS_PER_SECOND
+                )  # Convert delta_time from seconds to milliseconds
             self.ui_manager.draw_all(self.window.surface)
             self.window.update()
         pygame.quit()

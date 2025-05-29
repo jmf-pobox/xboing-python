@@ -19,6 +19,9 @@ class MessageDisplay:
     Style matches the timer: bright green, same font size.
     """
 
+    # Font sizes
+    DEFAULT_FONT_SIZE = 28  # Default font size for message display
+
     def __init__(
         self,
         layout: GameLayout,

@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional
 
 import pygame
 
+from xboing.game.game_state import MAX_LIVES
 from xboing.utils.asset_paths import get_images_dir
 
 
@@ -13,6 +14,10 @@ class LivesRenderer:
     """Stateless renderer for displaying the number of lives as ball images."""
 
     logger = logging.getLogger("xboing.LivesRenderer")
+
+    # Default values for rendering
+    DEFAULT_SPACING = 10  # Default spacing between life icons in pixels
+    DEFAULT_SCALE = 1.0  # Default scale factor for life icons
 
     ball_image: Optional[pygame.Surface]
     ball_width: int
@@ -45,9 +50,9 @@ class LivesRenderer:
     def render(
         self,
         num_lives: int,
-        spacing: int = 4,
-        scale: float = 1.0,
-        max_lives: int = 3,
+        spacing: int = DEFAULT_SPACING,
+        scale: float = DEFAULT_SCALE,
+        max_lives: int = MAX_LIVES,
     ) -> pygame.Surface:
         """Render the number of lives as ball images.
 

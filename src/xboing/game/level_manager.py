@@ -45,6 +45,9 @@ class LevelManager:
     # Maximum number of levels in the original XBoing
     MAX_LEVELS = 80
 
+    # Default time bonus in seconds if not specified in level info
+    DEFAULT_TIME_BONUS = 120
+
     # Background types (matching original XBoing)
     BACKGROUND_SPACE = 0
     BACKGROUND_SEE_THRU = 1
@@ -402,7 +405,7 @@ class LevelManager:
                     time_bonus = int(f.readline().strip())
                 except ValueError:
                     # Default if parsing fails
-                    time_bonus = 120
+                    time_bonus = self.DEFAULT_TIME_BONUS
 
                 # Read block layout (remaining lines)
                 layout = []

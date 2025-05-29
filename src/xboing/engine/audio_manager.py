@@ -8,6 +8,8 @@ import pygame
 
 from xboing.engine.events import XBoingEvent
 
+DEFAULT_VOLUME = 0.4
+
 
 class AudioManager:
     """Event-driven audio manager that listens to game events and plays
@@ -31,7 +33,7 @@ class AudioManager:
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
         self.sounds: Dict[str, pygame.mixer.Sound] = {}
-        self.volume: float = 0.4
+        self.volume: float = DEFAULT_VOLUME
         self.muted: bool = False
 
     def handle_events(self, events: Sequence[pygame.event.Event]) -> None:

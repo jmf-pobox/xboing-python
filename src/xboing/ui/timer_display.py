@@ -18,6 +18,9 @@ class TimerDisplay:
     Subscribes to TimerUpdatedEvent and renders itself using the renderer.
     """
 
+    # Font sizes
+    DEFAULT_FONT_SIZE = 34  # Default font size for timer display
+
     def __init__(
         self, layout: GameLayout, renderer: Renderer, font: pygame.font.Font
     ) -> None:

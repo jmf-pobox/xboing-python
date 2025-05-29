@@ -8,6 +8,10 @@ from typing import Any, Sequence
 
 import pygame
 
+from xboing.ui.colors import BLACK
+
+FPS = 60
+
 
 class Window:
     """Window management for the game, abstracting pygame's display system."""
@@ -60,7 +64,7 @@ class Window:
 
         # Initialize the clock for framerate management
         self.clock = pygame.time.Clock()
-        self.target_fps = 60
+        self.target_fps = FPS
 
     @staticmethod
     def set_icon(icon_surface: pygame.Surface) -> None:
@@ -77,7 +81,9 @@ class Window:
         else:
             self.surface = pygame.display.set_mode((self.width, self.height))
 
-    def clear(self, color: Any = (0, 0, 0)) -> None:
+    def clear(
+        self, color: Any = BLACK
+    ) -> None:  # Default black color for clearing the window
         """Clear the window with the specified color."""
         self.surface.fill(color)
 

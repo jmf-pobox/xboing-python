@@ -109,7 +109,9 @@ class GameController(Controller):
         self.logger = logging.getLogger("xboing.GameController")
         self.paused: bool = False
         self.stuck_ball_timer: float = 0.0
-        self.ball_auto_active_delay_ms: float = 3000.0
+        self.ball_auto_active_delay_ms: float = (
+            BallManager.DEFAULT_AUTO_ACTIVE_DELAY_MS  # Using constant from BallManager class
+        )
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
@@ -138,13 +140,21 @@ class GameController(Controller):
                         if isinstance(change, AmmoFiredEvent):
                             x, _ = self.paddle.get_center()
                             play_rect = self.layout.get_play_rect()
-                            bullet_radius = 4
-                            y = self.paddle.rect.top - bullet_radius - 1
+                            bullet_radius = (
+                                Bullet.DEFAULT_RADIUS
+                            )  # Using constant from Bullet class
+                            y = (
+                                self.paddle.rect.top
+                                - bullet_radius
+                                - Bullet.DEFAULT_PADDLE_GAP
+                            )  # Position bullet above paddle with gap
                             logger.warning(f"Firing bullet at y={y}")
                             logger.warning(
                                 f"Playfield: {play_rect}, Paddle: {self.paddle.rect}"
                             )
-                            bullet = Bullet(x, y, vy=-10.0, radius=bullet_radius)
+                            bullet = Bullet(
+                                x, y, vy=Bullet.DEFAULT_VELOCITY_Y, radius=bullet_radius
+                            )  # Using constants from Bullet class
                             self.bullet_manager.add_bullet(bullet)
                 else:
                     # Launch ball(s)

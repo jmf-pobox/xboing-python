@@ -20,6 +20,10 @@ from .view import View
 class InstructionsView(View):
     """View for displaying game instructions in the XBoing UI."""
 
+    # Font sizes
+    HEADLINE_FONT_SIZE = 26  # Larger font size for instruction headlines
+    TEXT_FONT_SIZE = 21  # Medium font size for instruction body text
+
     @inject
     def __init__(
         self,

@@ -12,17 +12,24 @@ from xboing.game.circular_game_shape import CircularGameShape
 
 logger = logging.getLogger("xboing.Bullet")
 
+DEFAULT_AMMO_QUANTITY: int = 4
+
 
 class Bullet(CircularGameShape):
     """A projectile bullet fired by the paddle gun (inherits from CircularGameShape)."""
+
+    # Default values
+    DEFAULT_RADIUS = 4  # Default radius of bullets in pixels
+    DEFAULT_VELOCITY_Y = -10.0  # Default upward velocity of bullets (negative is up)
+    DEFAULT_PADDLE_GAP = 1  # Default gap in pixels between bullet and paddle
 
     def __init__(
         self,
         x: float,
         y: float,
         vx: float = 0.0,
-        vy: float = -10.0,
-        radius: int = 4,
+        vy: float = DEFAULT_VELOCITY_Y,
+        radius: int = DEFAULT_RADIUS,
         color: Tuple[int, int, int] = (255, 255, 0),
     ) -> None:
         """Initialize a new bullet.
