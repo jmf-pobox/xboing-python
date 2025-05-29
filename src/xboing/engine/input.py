@@ -139,12 +139,13 @@ class InputManager:
         return False
 
     def _log_key_event(self, key: int, event_type: str) -> None:
-        """Helper method to log key events.
+        """Log key event.
 
         Args:
         ----
             key (int): The key code
             event_type (str): Type of the event (KEYDOWN or KEYUP)
+
         """
         try:
             key_name = pygame.key.name(key)
