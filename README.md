@@ -162,7 +162,21 @@ python -m xboing.scripts.fix_balllost
 
 # Search dependencies in the codebase
 python -m xboing.scripts.dep_grep <search_term>
+
+# Build standalone executable
+hatch run build-exe
 ```
+
+### Building Standalone Executables
+
+XBoing can be packaged as a standalone executable using PyInstaller:
+
+```bash
+# Build the executable
+hatch run build-exe
+```
+
+This creates a standalone executable in the `dist` directory that can be distributed without requiring Python installation. For detailed instructions and troubleshooting, see [Building XBoing Executables](docs/DISTRIBUTION-PYINSTALLER.md).
 
 ### Design Documentation
 

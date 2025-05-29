@@ -5,11 +5,18 @@ project directory structure with a single canonical path for each asset type.
 """
 
 import os
+import sys
 
 # Definitive assets directory (now inside xboing package)
-ASSETS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
-)
+# Check if running as PyInstaller bundle
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    # Running as PyInstaller bundle
+    ASSETS_DIR = os.path.join(sys._MEIPASS, "assets")
+else:
+    # Running in normal Python environment
+    ASSETS_DIR = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
+    )
 
 
 def get_asset_path(relative_path: str, create_dirs: bool = False) -> str:
