@@ -192,7 +192,7 @@ def get_circle_rect_collision_normal(
 
 
 def check_circle_rect_collision(
-        circle_x: float, circle_y: float, circle_radius: float, rect: Any
+    circle_x: float, circle_y: float, circle_radius: float, rect: Any
 ) -> bool:
     """Check collision between a circle and a rectangle.
 
