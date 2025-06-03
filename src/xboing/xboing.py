@@ -71,7 +71,7 @@ BLOCK_HEIGHT: int = 20  # Original block height
 BLOCK_MARGIN: int = 7  # Original spacing (SPACE constant)
 GAME_TITLE: str = "- XBoing II -"
 
-MILLISECONDS_PER_SECOND : int = 1000
+MILLISECONDS_PER_SECOND: int = 1000
 
 logger: logging.Logger = logging.getLogger(__name__)
 

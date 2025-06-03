@@ -78,7 +78,7 @@ class LogoRenderer:
 
         """
         # kwargs is unused but required for interface compatibility
-        _ = kwargs  # noqa: W0613
+        _ = kwargs
 
         if self.logo_image:
             logo_w, logo_h = self.logo_image.get_width(), self.logo_image.get_height()

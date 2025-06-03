@@ -65,8 +65,6 @@ dependencies = [
     "pylint",
     # Dev tools
     "pillow",
-    # Distribution
-    "pyinstaller"
 ]
 path = ".venv"
 
@@ -96,8 +94,6 @@ fix = [
     "format",
     "lint-fix"
 ]
-# Distribution commands
-build-exe = "python -m xboing.scripts.build_executable"
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
 # Run the game with coverage and then show the report
