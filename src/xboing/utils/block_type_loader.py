@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import Dict, List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict, cast
 
 from .asset_paths import get_asset_path
 
@@ -48,8 +48,9 @@ def get_block_types() -> Dict[str, BlockTypeData]:
         data = json.load(f)
     if not isinstance(data, list):
         raise ValueError("block_types.json must be a list of block type objects")
+    data_list = cast("List[Dict[str, Any]]", data)
     block_types: Dict[str, BlockTypeData] = {}
-    for entry in data:
+    for entry in data_list:
         # Validate required fields
         missing = [
             field
@@ -61,6 +62,6 @@ def get_block_types() -> Dict[str, BlockTypeData]:
                 f"Block type entry missing fields: {missing} (entry: {entry})"
             )
             continue
-        block_type = entry["blockType"]
-        block_types[block_type] = entry
+        block_type: str = entry["blockType"]
+        block_types[block_type] = cast("BlockTypeData", entry)
     return block_types

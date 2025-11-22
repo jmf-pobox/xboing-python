@@ -216,9 +216,7 @@ class GameState:
 
     def get_lives(self) -> int:
         """Return the current number of lives."""
-        if self.lives is not None:
-            return self.lives
-        return 0
+        return self.lives
 
     def lose_life(self) -> List[Any]:
         """Decrement lives and return a list of change events."""
@@ -288,7 +286,7 @@ class GameState:
         level manager, and return all change events.
         """
         self.logger.info("Full game state restart")
-        all_events = []
+        all_events: List[Any] = []
 
         self.game_over = False
         all_events += self._set_ammo(4)

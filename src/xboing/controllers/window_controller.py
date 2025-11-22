@@ -36,6 +36,65 @@ class WindowController(Controller):
         self.ui_manager = ui_manager
         self.logger = logging.getLogger(f"xboing.{self.__class__.__name__}")
 
+    def _handle_volume_up(self) -> None:
+        """Increase volume by 10%."""
+        if self.audio_manager:
+            new_volume = min(1.0, self.audio_manager.get_volume() + 0.1)
+            self.audio_manager.set_volume(new_volume)
+
+    def _handle_volume_down(self) -> None:
+        """Decrease volume by 10%."""
+        if self.audio_manager:
+            new_volume = max(0.0, self.audio_manager.get_volume() - 0.1)
+            self.audio_manager.set_volume(new_volume)
+
+    def _handle_mute_toggle(self) -> None:
+        """Toggle audio mute state."""
+        if not self.audio_manager:
+            return
+        if self.audio_manager.is_muted():
+            self.audio_manager.unmute()
+        else:
+            self.audio_manager.mute()
+
+    def _is_quit_key(self, event: pygame.event.Event) -> bool:
+        """Check if event is a quit key combination."""
+        return bool(
+            event.key == pygame.K_q
+            and (
+                event.mod & pygame.KMOD_CTRL
+                or event.mod & pygame.KMOD_META
+                or event.mod == 0
+            )
+        )
+
+    def _is_instructions_key(self, event: pygame.event.Event) -> bool:
+        """Check if event is instructions key (Shift+/)."""
+        return (
+            event.key == pygame.K_SLASH
+            and (event.mod & pygame.KMOD_SHIFT)
+            and self.ui_manager is not None
+        )
+
+    def _handle_keydown(self, event: pygame.event.Event) -> None:
+        """Handle keyboard down events."""
+        # Volume up
+        if event.key in (pygame.K_PLUS, pygame.K_KP_PLUS, pygame.K_EQUALS):
+            self._handle_volume_up()
+        # Volume down
+        elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
+            self._handle_volume_down()
+        # Mute toggle
+        elif event.key == pygame.K_m:
+            self._handle_mute_toggle()
+        # Quit (Ctrl+Q or Q)
+        elif self._is_quit_key(event):
+            if self.quit_callback:
+                self.quit_callback()
+        # Instructions hotkey (Shift + / for '?')
+        elif self._is_instructions_key(event):
+            self.ui_manager.set_view("instructions")  # type: ignore[union-attr]
+
     def handle_events(self, events: List[pygame.event.Event]) -> None:
         """Handle input/events for this controller, including global controls.
 
@@ -53,38 +112,7 @@ class WindowController(Controller):
         """
         for event in events:
             if event.type == pygame.KEYDOWN:
-                # Volume up
-                if event.key in (pygame.K_PLUS, pygame.K_KP_PLUS, pygame.K_EQUALS):
-                    if self.audio_manager:
-                        new_volume = min(1.0, self.audio_manager.get_volume() + 0.1)
-                        self.audio_manager.set_volume(new_volume)
-                # Volume down
-                elif event.key in (pygame.K_MINUS, pygame.K_KP_MINUS):
-                    if self.audio_manager:
-                        new_volume = max(0.0, self.audio_manager.get_volume() - 0.1)
-                        self.audio_manager.set_volume(new_volume)
-                # Mute toggle
-                elif event.key == pygame.K_m:
-                    if self.audio_manager:
-                        if self.audio_manager.is_muted():
-                            self.audio_manager.unmute()
-                        else:
-                            self.audio_manager.mute()
-                # Quit (Ctrl+Q or Q)
-                elif event.key == pygame.K_q and (
-                    event.mod & pygame.KMOD_CTRL
-                    or event.mod & pygame.KMOD_META
-                    or event.mod == 0
-                ):
-                    if self.quit_callback:
-                        self.quit_callback()
-                # Instructions hotkey (Shift + / for '?')
-                elif (
-                    event.key == pygame.K_SLASH
-                    and (event.mod & pygame.KMOD_SHIFT)
-                    and self.ui_manager
-                ):
-                    self.ui_manager.set_view("instructions")
+                self._handle_keydown(event)
             elif event.type == pygame.WINDOWENTER:
                 pygame.mouse.set_visible(False)
             elif event.type == pygame.WINDOWLEAVE:

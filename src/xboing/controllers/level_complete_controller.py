@@ -122,7 +122,11 @@ class LevelCompleteController(Controller):
 
         # Set the balls
         self.balls.clear()
-        self.balls.append(self.game_controller.create_new_ball())
+        self.balls.append(
+            self.game_controller.ball_manager.create_new_ball(
+                self.game_controller.paddle
+            )
+        )
 
         # Change the view
         self.ui_manager.set_view("game")
@@ -130,7 +134,7 @@ class LevelCompleteController(Controller):
     def add_bonus_to_score(self) -> None:
         """Add bonuses to the score and post the events to trigger a UI update."""
         level_complete_view: LevelCompleteView = cast(
-            LevelCompleteView, self.ui_manager.views["level_complete"]
+            "LevelCompleteView", self.ui_manager.views["level_complete"]
         )
         bonus = level_complete_view.total_bonus
         score_events = self.game_state.add_score(bonus)

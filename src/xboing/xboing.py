@@ -258,7 +258,9 @@ class XBoingApp:
         assert (
             self.controller_manager is not None
         ), "controller_manager should never be None after DI setup"
-        self.ball_manager.add_ball(self.game_controller.create_new_ball())
+        self.ball_manager.add_ball(
+            self.ball_manager.create_new_ball(self.game_controller.paddle)
+        )
         self.views = {
             "game": self.game_view,
             "instructions": self.injector.get(InstructionsView),
@@ -267,8 +269,10 @@ class XBoingApp:
         }
         self.top_bar_view = self.injector.get(TopBarView)
         self.bottom_bar_view = self.injector.get(BottomBarView)
-        self.game_over_view = cast(GameOverView, self.views["game_over"])
-        self.level_complete_view = cast(LevelCompleteView, self.views["level_complete"])
+        self.game_over_view = cast("GameOverView", self.views["game_over"])
+        self.level_complete_view = cast(
+            "LevelCompleteView", self.views["level_complete"]
+        )
 
         # --- UI Wiring and App Coordination ---
         self.ui_manager.setup_ui(
@@ -319,7 +323,7 @@ class XBoingApp:
             assert (
                 active_controller is not None
             ), "active_controller should never be None in main loop"
-            active_controller = typing.cast(Controller, active_controller)
+            active_controller = typing.cast("Controller", active_controller)
             active_controller.handle_events(events)
             self.audio_manager.handle_events(events)
             self.ui_manager.handle_events(events)

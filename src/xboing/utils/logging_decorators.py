@@ -34,7 +34,7 @@ def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
             log.debug(f"Exiting {func.__qualname__} with result={result}")
             return result
 
-        return cast(F, wrapper)
+        return cast("F", wrapper)
 
     return decorator
 
@@ -66,7 +66,7 @@ def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
                 log.exception(f"Exception in {func.__qualname__}: {e}")
                 raise
 
-        return cast(F, wrapper)
+        return cast("F", wrapper)
 
     return decorator
 
@@ -98,6 +98,6 @@ def log_timing(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
             log.debug(f"{func.__qualname__} took {elapsed:.3f}s")
             return result
 
-        return cast(F, wrapper)
+        return cast("F", wrapper)
 
     return decorator

@@ -65,7 +65,7 @@ def load_image_sequence(
         list[pygame.Surface]: List of loaded image surfaces
 
     """
-    frames = []
+    frames: List[pygame.Surface] = []
     for i in range(num_frames):
         filename = os.path.join(directory, pattern.format(i))
         surface = load_image(filename, alpha)

@@ -40,6 +40,21 @@
 - Full parity with C version: Some special block behaviors and animations are not yet ported.
 - Ensure all block types in `block_types.json` are covered in tests and code.
 
+## Counter Block Logic (Canonical Behavior)
+
+- Counter blocks are created for any digit ('0'-'9') in the level data.
+- The digit value N means the block requires N+1 hits to break:
+    - '0' → 1 hit (shows blank, i.e., cntblk.png)
+    - '1' → 2 hits (shows '1', then blank)
+    - '2' → 3 hits (shows '2', then '1', then blank)
+    - etc.
+- Rendering:
+    - If hits_remaining > 1: show the corresponding numbered image (cntblkN.png, where N = hits_remaining-1)
+    - If hits_remaining == 1: show cntblk.png (no number)
+    - When hits_remaining == 0: block is destroyed
+- This matches the original C logic and ensures full parity with the intended gameplay.
+- The mapping from level data to block creation and rendering is now systematic and data-driven.
+
 ---
 
 The XBoing Python block system is now fully data-driven, using canonical constants and JSON configuration for all block types and behaviors. Rendering, animation, and special effects are handled by dedicated, stateless classes. The codebase is clean, modern, and maintainable, with only a few advanced features (like chain explosions and overlays) remaining for full parity with the original.

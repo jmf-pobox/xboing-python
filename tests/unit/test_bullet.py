@@ -26,7 +26,8 @@ def test_bullet_update_moves_and_deactivates():
     b = Bullet(10, 10, vy=-10)
     b.update(16.67)  # 1 frame at 60fps
     assert b.y < 10
-    b.y = -10  # Move bullet off screen
+    # Set the position in the physics component
+    b.physics.set_position((b.x, -10))
     b.update(16.67)
     assert not b.active
 

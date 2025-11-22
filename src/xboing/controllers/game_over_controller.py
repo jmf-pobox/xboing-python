@@ -102,7 +102,9 @@ class GameOverController(Controller):
         if self.layout:
             self.layout.get_play_rect()
         self.game_controller.ball_manager.clear()
-        new_ball = self.game_controller.create_new_ball()
+        new_ball = self.game_controller.ball_manager.create_new_ball(
+            self.game_controller.paddle
+        )
         self.game_controller.ball_manager.add_ball(new_ball)
         logger.debug(
             f"[reset_game] New ball created: id={id(new_ball)}, stuck_to_paddle={new_ball.stuck_to_paddle}"
@@ -120,10 +122,7 @@ class GameOverController(Controller):
             logger.error("[reset_game] controller_manager is not set or None!")
 
         # Switch UI view to 'game'
-        if self.ui_manager is not None:
-            self.ui_manager.set_view("game")
-        else:
-            logger.error("[reset_game] ui_manager is not set or None!")
+        self.ui_manager.set_view("game")
         logger.debug(
             f"[reset_game] EXIT id(self)={id(self)}, id(self.game_controller)={id(self.game_controller)}, id(self.game_controller.ball_manager)={id(self.game_controller.ball_manager)}"
         )

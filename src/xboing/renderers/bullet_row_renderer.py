@@ -41,7 +41,7 @@ class BulletRowRenderer:
             int: The new y position after drawing the row.
 
         """
-        bullet_count = typing.cast(int, kwargs.get("bullet_count", 0))
+        bullet_count = typing.cast("int", kwargs.get("bullet_count", 0))
         bullet_w, bullet_h = self.bullet_img.get_size()
         total_width = (
             bullet_count * bullet_w + (bullet_count - 1) * self.spacing

@@ -3,7 +3,7 @@
 Subscribes to special events and renders their state as colored labels.
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, ClassVar, Dict, List, Tuple
 
 import pygame
 
@@ -21,7 +21,7 @@ class SpecialDisplay:
     # Font sizes
     DEFAULT_FONT_SIZE = 16  # Default font size for special display (smaller text)
 
-    LABELS: List[Tuple[str, str]] = [
+    LABELS: ClassVar[List[Tuple[str, str]]] = [
         ("Reverse", "reverse"),
         ("Save", "save"),
         ("NoWall", "nowall"),
@@ -31,7 +31,7 @@ class SpecialDisplay:
         ("Killer", "killer"),
         ("x4", "x4"),
     ]
-    EVENT_MAP: Dict[str, Any] = SPECIAL_EVENT_MAP
+    EVENT_MAP: ClassVar[Dict[str, Any]] = SPECIAL_EVENT_MAP
 
     def __init__(
         self,

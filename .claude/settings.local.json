@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(hatch run check:*)",
+      "Bash(hatch run test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(black:*)",
+      "Bash(hatch run lint)",
+      "Bash(hatch run black:*)",
+      "Bash(git push:*)",
+      "Bash(hatch run type-pyright:*)",
+      "Bash(hatch run:*)",
+      "Bash(sed:*)",
+      "Bash(cut:*)",
+      "Bash(gh run list:*)",
+      "Bash(python -m radon cc:*)",
+      "Bash(python:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh api:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

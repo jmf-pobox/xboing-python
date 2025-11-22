@@ -1,15 +1,12 @@
-"""Paddle implementation for XBoing.
-
-This module contains the paddle class that manages the player-controlled paddle
-and its interactions with the game, matching the original XBoing implementation.
-"""
+"""Paddle: The player-controlled paddle that moves horizontally at the bottom of the screen."""
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pygame
 
+from xboing.game.collision import CollisionType
 from xboing.game.game_shape import GameShape
 from xboing.utils.asset_paths import get_paddles_dir
 
@@ -120,7 +117,9 @@ class Paddle(GameShape):
         self.rect.width = width
         self.rect.height = height
 
-    def update(self, delta_ms: float, play_width: int, offset_x: int = 0) -> None:
+    def update(
+        self, delta_ms: float, play_width: int = 0, offset_x: int = 0
+    ) -> List[pygame.event.Event]:
         """Update paddle position.
 
         Args:
@@ -129,7 +128,11 @@ class Paddle(GameShape):
             play_width (int): Play area width for boundary checking
             offset_x (int): X offset of the play area
 
+        Returns:
+            List[pygame.event.Event]: List of events generated during the update.
+
         """
+        events: List[pygame.event.Event] = []
         if self.direction != 0:
             self.moving = True
 
@@ -151,6 +154,8 @@ class Paddle(GameShape):
 
         # Update rectangle
         self.update_rect()
+
+        return events
 
     def set_direction(self, direction: int) -> None:
         """Set paddle movement direction.
@@ -249,3 +254,42 @@ class Paddle(GameShape):
     def get_center(self) -> Any:
         """Get the center position of the paddle."""
         return self.rect.center
+
+    def collides_with(self, other: Any) -> bool:
+        """Check if this paddle collides with another collidable object.
+
+        Args:
+            other: Another collidable object to check collision with.
+
+        Returns:
+            True if the objects collide, False otherwise.
+
+        """
+        return self.rect.colliderect(other.get_rect())
+
+    def is_active(self) -> bool:
+        """Check if the paddle is currently active.
+
+        Returns:
+            True if the paddle is active, False otherwise.
+
+        """
+        return True  # Paddle is always active in the game
+
+    def set_active(self, active: bool) -> None:
+        """Set the paddle's active state.
+
+        Args:
+            active: The new active state.
+
+        """
+        # Paddle is always active, so this method does nothing
+        del active  # Remove unused argument warning
+
+    def get_collision_type(self) -> str:
+        """Return the collision type for Paddle."""
+        return CollisionType.PADDLE.value
+
+    def handle_collision(self, other: object) -> None:
+        """Handle collision with another object (no-op for Paddle stub)."""
+        del other  # Remove unused argument warning

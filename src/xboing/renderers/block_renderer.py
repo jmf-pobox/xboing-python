@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 import pygame
 
@@ -16,7 +16,7 @@ class BlockRenderer:
     logger = logging.getLogger("xboing.BlockRenderer")
 
     # Internal image cache
-    _image_cache: Dict[str, pygame.Surface] = {}
+    _image_cache: ClassVar[Dict[str, pygame.Surface]] = {}
 
     @classmethod
     def clear_cache(cls) -> None:
@@ -77,7 +77,7 @@ class BlockRenderer:
                 failed_count += 1
 
             # Preload explosion frames
-            explosion_frames = block_info.get("explosion_frames") or []
+            explosion_frames: List[str] = block_info.get("explosion_frames") or []
             for frame in explosion_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1
@@ -85,7 +85,7 @@ class BlockRenderer:
                     failed_count += 1
 
             # Preload animation frames
-            animation_frames = block_info.get("animation_frames") or []
+            animation_frames: List[str] = block_info.get("animation_frames") or []
             for frame in animation_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1
@@ -128,12 +128,17 @@ class BlockRenderer:
         """
         img: Optional[pygame.Surface] = None
         # Special handling for CounterBlocks (block_type == COUNTER_BLK)
-        if block_type == COUNTER_BLK and counter_value is not None and animation_frames:
-            idx = max(0, min(counter_value, len(animation_frames) - 1))
-            frame_file = animation_frames[idx]
-            img = cls._image_cache.get(frame_file)
-            if img is None:
+        if block_type == COUNTER_BLK and counter_value is not None:
+            # For counter blocks, use the main image file if no animation frames
+            if not animation_frames:
                 img = cls._image_cache.get(image_file)
+            else:
+                # If animation frames are provided (shouldn't happen for counter blocks)
+                idx = max(0, min(counter_value, len(animation_frames) - 1))
+                frame_file = animation_frames[idx]
+                img = cls._image_cache.get(frame_file)
+                if img is None:
+                    img = cls._image_cache.get(image_file)
         else:
             # Animation frame selection for other blocks
             if (

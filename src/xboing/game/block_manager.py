@@ -6,9 +6,10 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 
 import pygame
 
+from xboing.engine.events import BlockHitEvent
 from xboing.game.ball import Ball
 from xboing.game.block import Block, CounterBlock
-from xboing.game.block_types import BLACK_BLK, COUNTER_BLK
+from xboing.game.block_types import BLACK_BLK, COUNTER_BLK, SPECIAL_BLOCK_TYPES
 from xboing.game.bullet import Bullet
 from xboing.renderers.block_renderer import BlockRenderer
 from xboing.utils.asset_paths import get_blocks_dir
@@ -56,6 +57,8 @@ class BlockManager:
         """Update all blocks and remove those whose explosion animation is finished."""
         for block in self.blocks:
             block.update(delta_ms)
+            # Reset hit_this_frame flag at the end of each frame
+            block.hit_this_frame = False
         # Remove blocks whose explosion animation is finished
         self.blocks = [b for b in self.blocks if b.state != "destroyed"]
 
@@ -95,40 +98,223 @@ class BlockManager:
         obj_x: float, obj_y: float, obj_radius: float, block_rect: pygame.Rect
     ) -> bool:
         """Return True if the object at (obj_x, obj_y) with radius collides with the block rect."""
-        closest_x = max(block_rect.left, int(min(obj_x, block_rect.right)))
-        closest_y = max(block_rect.top, int(min(obj_y, block_rect.bottom)))
+        # First do a quick AABB check to avoid expensive distance calculations
+        # Use a slightly larger radius for more reliable collision detection
+        effective_radius = obj_radius * 1.05  # 5% larger radius for better detection
+
+        if not (
+            block_rect.left - effective_radius
+            <= obj_x
+            <= block_rect.right + effective_radius
+            and block_rect.top - effective_radius
+            <= obj_y
+            <= block_rect.bottom + effective_radius
+        ):
+            return False
+
+        # Find the closest point on the block to the object
+        closest_x = max(block_rect.left, min(obj_x, block_rect.right))
+        closest_y = max(block_rect.top, min(obj_y, block_rect.bottom))
+
+        # Calculate distance to closest point
         dx = obj_x - closest_x
         dy = obj_y - closest_y
-        distance = (dx * dx + dy * dy) ** 0.5
-        return bool(distance <= obj_radius)
+        distance_squared = dx * dx + dy * dy
+
+        # Check if distance is less than radius (using effective radius)
+        return distance_squared <= effective_radius * effective_radius
 
     @staticmethod
     def _reflect_ball(
         obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
     ) -> None:
         """Reflect the ball's velocity and move it out of collision with the block."""
-        closest_x = max(block.rect.left, int(min(obj_x, block.rect.right)))
-        closest_y = max(block.rect.top, int(min(obj_y, block.rect.bottom)))
+        # Find the closest point on the block to the object
+        closest_x = max(block.rect.left, min(obj_x, block.rect.right))
+        closest_y = max(block.rect.top, min(obj_y, block.rect.bottom))
+
+        # Calculate normal vector
         dx = obj_x - closest_x
         dy = obj_y - closest_y
         distance = (dx * dx + dy * dy) ** 0.5
-        if distance > 0:
+
+        # Check if ball is inside or very close to the block
+        is_inside = (
+            block.rect.left <= obj_x <= block.rect.right
+            and block.rect.top <= obj_y <= block.rect.bottom
+        )
+
+        # Handle edge case where ball is exactly at closest point or inside block
+        if distance < 0.0001 or is_inside:
+            # If ball is inside block, use a more aggressive approach to push it out
+            # First, find the nearest edge
+            left_dist = abs(obj_x - block.rect.left)
+            right_dist = abs(obj_x - block.rect.right)
+            top_dist = abs(obj_y - block.rect.top)
+            bottom_dist = abs(obj_y - block.rect.bottom)
+
+            # Find the minimum distance to an edge
+            min_dist = min(left_dist, right_dist, top_dist, bottom_dist)
+
+            # Push out in the direction of the nearest edge
+            if min_dist == left_dist:
+                nx, ny = -1, 0  # Push left
+            elif min_dist == right_dist:
+                nx, ny = 1, 0  # Push right
+            elif min_dist == top_dist:
+                nx, ny = 0, -1  # Push up
+            else:  # bottom_dist
+                nx, ny = 0, 1  # Push down
+
+            # Set a minimum distance to ensure the ball is pushed out
+            distance = min(distance, 0.0001)
+        else:
             nx = dx / distance
             ny = dy / distance
+
+        # Determine if this is a corner collision
+        is_corner = closest_x != obj_x and closest_y != obj_y
+
+        # For corner collisions, use a more precise reflection
+        if is_corner:
+            # Calculate reflection based on corner normal
+            dot = obj.vx * nx + obj.vy * ny
+            obj.vx -= 2 * dot * nx
+            obj.vy -= 2 * dot * ny
+        # For edge collisions, use a simpler reflection
+        # Determine which side was hit
+        elif closest_x in (block.rect.left, block.rect.right):
+            # Horizontal collision (left or right side)
+            obj.vx = -obj.vx
         else:
-            nx, ny = 0, -1
-        dot = obj.vx * nx + obj.vy * ny
-        obj.vx -= 2 * dot * nx
-        obj.vy -= 2 * dot * ny
+            # Vertical collision (top or bottom)
+            obj.vy = -obj.vy
+
+        # Move ball out of collision with a larger buffer for more reliable separation
         overlap = obj.radius - distance
-        obj.x += nx * overlap
-        obj.y += ny * overlap
-        obj.update_rect()
+        if overlap > 0 or is_inside:
+            # Add a larger buffer to prevent getting between blocks
+            # Use an even larger buffer if the ball is inside the block
+            buffer = 3.0 if is_inside else 1.5
+            overlap += buffer
+            obj.x += nx * overlap
+            obj.y += ny * overlap
+            obj.update_rect()
+
+        # Ensure minimum velocity to prevent getting stuck
+        min_speed = 3.0  # Minimum speed
+        current_speed = (obj.vx * obj.vx + obj.vy * obj.vy) ** 0.5
+        if current_speed < min_speed:
+            scale = min_speed / current_speed if current_speed > 0 else 1.0
+            obj.vx *= scale
+            obj.vy *= scale
+
+        # Normalize velocity to maintain consistent speed
+        target_speed = 5.0  # Target speed after collision
+        current_speed = (obj.vx * obj.vx + obj.vy * obj.vy) ** 0.5
+        if current_speed > 0:
+            scale = target_speed / current_speed
+            obj.vx *= scale
+            obj.vy *= scale
 
     def _handle_block_hit(self, block: Block) -> Tuple[bool, int, Any]:
         """Handle the result of hitting a block."""
         self.logger.debug(f"Block hit: [{block}]")
-        return block.hit()
+        broken, points, effect = block.hit()
+
+        # Post BlockHitEvent for normal blocks
+        if broken and effect not in SPECIAL_BLOCK_TYPES:
+            pygame.event.post(
+                pygame.event.Event(pygame.USEREVENT, {"event": BlockHitEvent()})
+            )
+
+        return broken, points, effect
+
+    @staticmethod
+    def _should_skip_block(block: Block) -> bool:
+        """Check if block should be skipped for collision detection."""
+        return block.state != "normal" or block.hit_this_frame
+
+    def _process_ball_collision(
+        self,
+        obj: Union[Ball, Bullet],
+        obj_x: float,
+        obj_y: float,
+        obj_radius: float,
+    ) -> Tuple[int, int, List[Any]]:
+        """Process ball collision with blocks (finds closest and reflects)."""
+        points = 0
+        broken_blocks = 0
+        effects: List[Any] = []
+
+        # Find the closest block for reflection
+        closest_block = None
+        min_distance = float("inf")
+
+        for block in self.blocks[:]:
+            if self._should_skip_block(block):
+                continue
+            if not self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
+                continue
+
+            # Calculate distance to block center
+            block_center_x = block.rect.centerx
+            block_center_y = block.rect.centery
+            dx = obj_x - block_center_x
+            dy = obj_y - block_center_y
+            distance = (dx * dx + dy * dy) ** 0.5
+
+            if distance < min_distance:
+                min_distance = distance
+                closest_block = block
+
+        # Reflect off the closest block if found
+        if closest_block is not None:
+            self._reflect_ball(obj, obj_x, obj_y, closest_block)
+            broken, block_points, effect = self._handle_block_hit(closest_block)
+            if broken:
+                points += block_points
+                broken_blocks += 1
+                if effect is not None:
+                    effects.append(effect)
+                    # Check for death effect immediately after adding it
+                    if effect == "death":
+                        obj.active = False
+
+        return points, broken_blocks, effects
+
+    def _process_bullet_collision(
+        self,
+        obj_x: float,
+        obj_y: float,
+        obj_radius: float,
+        remove_callback: Optional[Callable[[], None]],
+    ) -> Tuple[int, int, List[Any]]:
+        """Process bullet collision with blocks (hits first block encountered)."""
+        points = 0
+        broken_blocks = 0
+        effects: List[Any] = []
+
+        for block in self.blocks[:]:
+            if self._should_skip_block(block):
+                continue
+            if not self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
+                continue
+
+            # Process hit for the block
+            broken, block_points, effect = self._handle_block_hit(block)
+            if broken:
+                points += block_points
+                broken_blocks += 1
+                if effect is not None:
+                    effects.append(effect)
+
+            if remove_callback:
+                remove_callback()
+            # Bullets stop after first collision
+            break
+
+        return points, broken_blocks, effects
 
     def _check_block_collision(
         self,
@@ -139,32 +325,15 @@ class BlockManager:
         remove_callback: Optional[Callable[[], None]] = None,
     ) -> Tuple[int, int, List[Any]]:
         """Shared collision logic for balls and bullets."""
-        points = 0
-        broken_blocks = 0
-        effects: List[Any] = []
         obj_x, obj_y = get_position()
         obj_radius = radius
-        for block in self.blocks[:]:
-            # Skip blocks that are breaking or destroyed
-            if block.state != "normal":
-                continue
-            if self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
-                if not is_bullet:
-                    self._reflect_ball(obj, obj_x, obj_y, block)
-                broken, block_points, effect = self._handle_block_hit(block)
-                if broken:
-                    points += block_points
-                    broken_blocks += 1
-                    # Do not remove the block here; it will be removed after
-                    # explosion animation
-                    if effect is not None:
-                        effects.append(effect)
-                if is_bullet and remove_callback:
-                    remove_callback()
-                if effect == "death" and not is_bullet:
-                    obj.active = False
-                break
-        return points, broken_blocks, effects
+
+        if is_bullet:
+            return self._process_bullet_collision(
+                obj_x, obj_y, obj_radius, remove_callback
+            )
+        else:
+            return self._process_ball_collision(obj, obj_x, obj_y, obj_radius)
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw all blocks.
@@ -190,11 +359,31 @@ class BlockManager:
         count: int = len([b for b in self.blocks if not b.is_broken()])
         return count
 
-    def create_block(self, x: int, y: int, block_type_key: str) -> Block:
-        """Create a Block using the canonical key and config from block_types.json."""
-        config = self.block_type_data.get(block_type_key)
-        if config is None:
-            raise ValueError(f"Unknown block type key {block_type_key}")
-        if block_type_key == COUNTER_BLK:
-            return CounterBlock(x, y, config)
-        return Block(x, y, config)
+    def reflect_ball(
+        self, obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
+    ) -> None:
+        """Reflect the ball's velocity and move it out of collision with the block.
+
+        Args:
+            obj: The ball or bullet to reflect
+            obj_x: The x-coordinate of the object
+            obj_y: The y-coordinate of the object
+            block: The block the object collided with
+
+        """
+        self._reflect_ball(obj, obj_x, obj_y, block)
+
+    def create_block(
+        self, x: int, y: int, width: int, height: int, block_type: str = "normal"
+    ) -> Union[Block, CounterBlock]:
+        """Create a block at the specified position."""
+        config = self.block_type_data.get(block_type, {})
+        config["width"] = width
+        config["height"] = height
+
+        # Create the appropriate block type
+        if block_type == COUNTER_BLK:
+            block: Union[Block, CounterBlock] = CounterBlock(x, y, config)
+        else:
+            block = Block(x, y, config)
+        return block
