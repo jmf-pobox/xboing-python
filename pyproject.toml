@@ -98,6 +98,8 @@ type-all-code = "mypy src/ tests/"
 type-pyright-all = "pyright src/ tests/"
 # Combined quality check (production code only - must pass)
 check = ["lint", "type", "type-pyright", "test"]
+# CI quality check (matches exact CI workflow checks)
+ci-check = ["lint", "format-check", "type-pyright", "test"]
 check-cov = ["lint", "type", "type-pyright", "test-cov"]
 # Check everything including test code (for tracking progress)
 check-all = ["lint-all", "type-all-code", "type-pyright-all", "test"]
