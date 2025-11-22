@@ -81,8 +81,8 @@ lint = "ruff check src/"
 format = "black src/"
 format-check = "black --check src/"
 type = "mypy src/"
-type-pyright = "pyright src/xboing/controllers src/xboing/engine src/xboing/game src/xboing/layout src/xboing/renderers src/xboing/ui src/xboing/utils src/xboing/__init__.py"
-type-pyright-stats = "pyright --stats src/xboing/controllers src/xboing/engine src/xboing/game src/xboing/layout src/xboing/renderers src/xboing/ui src/xboing/utils src/xboing/__init__.py"
+type-pyright = "pyright"
+type-pyright-stats = "pyright --stats"
 type-all = ["type", "type-pyright"]
 # Test code quality commands (tests/ only)
 lint-test = "ruff check tests/"
@@ -95,7 +95,7 @@ lint-all = "ruff check src/ tests/"
 format-all = "black src/ tests/"
 format-check-all = "black --check src/ tests/"
 type-all-code = "mypy src/ tests/"
-type-pyright-all = "pyright"
+type-pyright-all = "pyright src/ tests/"
 # Combined quality check (production code only - must pass)
 check = ["lint", "type", "type-pyright", "test"]
 check-cov = ["lint", "type", "type-pyright", "test-cov"]

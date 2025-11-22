@@ -1,14 +1,21 @@
 {
   "include": [
-    "src",
-    "tests"
+    "src/xboing/controllers",
+    "src/xboing/engine",
+    "src/xboing/game",
+    "src/xboing/layout",
+    "src/xboing/renderers",
+    "src/xboing/ui",
+    "src/xboing/utils",
+    "src/xboing/__init__.py"
   ],
   "exclude": [
     "**/__pycache__",
     "**/node_modules",
     ".venv",
     "build",
-    "dist"
+    "dist",
+    "src/xboing/scripts"
   ],
   "typeCheckingMode": "strict",
   "reportUnknownMemberType": "information",
@@ -20,10 +27,6 @@
     "src/xboing"
   ],
   "executionEnvironments": [
-    {
-      "root": "tests",
-      "reportPrivateUsage": "none"
-    },
     {
       "root": "src"
     }
