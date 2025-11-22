@@ -4,6 +4,17 @@ Components for game objects in XBoing Python.
 This module defines reusable components that can be composed with game objects
 to provide common functionality. These components enhance reusability across
 different games and enable a more modular approach to game object design.
+
+Architecture Note:
+------------------
+PhysicsComponent is a low-level composition component used internally by
+PhysicsMixin. It provides pure physics calculations without any game-specific
+behavior. PhysicsMixin (in physics_mixin.py) wraps this component to provide
+a convenient mixin interface with property access (vx, vy) for game objects.
+
+This is intentional layering, not duplication:
+- PhysicsComponent: Low-level physics calculations (composition)
+- PhysicsMixin: Convenience wrapper for game objects (mixin pattern)
 """
 
 from typing import Tuple

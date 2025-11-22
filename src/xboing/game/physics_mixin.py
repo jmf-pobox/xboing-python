@@ -1,4 +1,18 @@
-"""PhysicsMixin: A mixin class that provides common physics-related functionality."""
+"""PhysicsMixin: A mixin class that provides common physics-related functionality.
+
+Architecture Note:
+------------------
+This mixin wraps PhysicsComponent (from components.py) to provide a convenient
+mixin interface for game objects. It adds property-based access (vx, vy) and
+convenience methods while delegating physics calculations to PhysicsComponent.
+
+This is intentional layering, not duplication:
+- PhysicsComponent: Low-level physics calculations (composition)
+- PhysicsMixin: Convenience wrapper for game objects (mixin pattern)
+
+The two-layer design allows PhysicsComponent to remain pure and reusable while
+PhysicsMixin provides game-specific convenience features.
+"""
 
 from typing import Any, Tuple
 
@@ -8,7 +22,11 @@ from xboing.game.components import PhysicsComponent
 
 
 class PhysicsMixin:
-    """Mixin class that provides common physics-related functionality."""
+    """Mixin class providing convenient physics functionality for game objects.
+
+    This mixin wraps PhysicsComponent to provide property access (vx, vy) and
+    convenient methods for game objects that need physics behavior.
+    """
 
     def __init__(self, x: float, y: float, vx: float, vy: float) -> None:
         """Initialize the physics component.
