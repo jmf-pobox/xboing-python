@@ -230,6 +230,92 @@ class BlockManager:
 
         return broken, points, effect
 
+    @staticmethod
+    def _should_skip_block(block: Block) -> bool:
+        """Check if block should be skipped for collision detection."""
+        return block.state != "normal" or block.hit_this_frame
+
+    def _process_ball_collision(
+        self,
+        obj: Union[Ball, Bullet],
+        obj_x: float,
+        obj_y: float,
+        obj_radius: float,
+    ) -> Tuple[int, int, List[Any]]:
+        """Process ball collision with blocks (finds closest and reflects)."""
+        points = 0
+        broken_blocks = 0
+        effects: List[Any] = []
+
+        # Find the closest block for reflection
+        closest_block = None
+        min_distance = float("inf")
+
+        for block in self.blocks[:]:
+            if self._should_skip_block(block):
+                continue
+            if not self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
+                continue
+
+            # Calculate distance to block center
+            block_center_x = block.rect.centerx
+            block_center_y = block.rect.centery
+            dx = obj_x - block_center_x
+            dy = obj_y - block_center_y
+            distance = (dx * dx + dy * dy) ** 0.5
+
+            if distance < min_distance:
+                min_distance = distance
+                closest_block = block
+
+        # Reflect off the closest block if found
+        if closest_block is not None:
+            self._reflect_ball(obj, obj_x, obj_y, closest_block)
+            broken, block_points, effect = self._handle_block_hit(closest_block)
+            if broken:
+                points += block_points
+                broken_blocks += 1
+                if effect is not None:
+                    effects.append(effect)
+                    # Check for death effect immediately after adding it
+                    if effect == "death":
+                        obj.active = False
+
+        return points, broken_blocks, effects
+
+    def _process_bullet_collision(
+        self,
+        obj_x: float,
+        obj_y: float,
+        obj_radius: float,
+        remove_callback: Optional[Callable[[], None]],
+    ) -> Tuple[int, int, List[Any]]:
+        """Process bullet collision with blocks (hits first block encountered)."""
+        points = 0
+        broken_blocks = 0
+        effects: List[Any] = []
+
+        for block in self.blocks[:]:
+            if self._should_skip_block(block):
+                continue
+            if not self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
+                continue
+
+            # Process hit for the block
+            broken, block_points, effect = self._handle_block_hit(block)
+            if broken:
+                points += block_points
+                broken_blocks += 1
+                if effect is not None:
+                    effects.append(effect)
+
+            if remove_callback:
+                remove_callback()
+            # Bullets stop after first collision
+            break
+
+        return points, broken_blocks, effects
+
     def _check_block_collision(
         self,
         obj: Union[Ball, Bullet],
@@ -239,72 +325,15 @@ class BlockManager:
         remove_callback: Optional[Callable[[], None]] = None,
     ) -> Tuple[int, int, List[Any]]:
         """Shared collision logic for balls and bullets."""
-        points = 0
-        broken_blocks = 0
-        effects: List[Any] = []
         obj_x, obj_y = get_position()
         obj_radius = radius
 
-        # Find the closest block for reflection
-        closest_block = None
-        min_distance = float("inf")
-
-        # First pass: find the closest block for reflection
-        if not is_bullet:
-            for block in self.blocks[:]:
-                # Skip destroyed blocks and blocks in breaking state for collision
-                if block.state != "normal":
-                    continue
-                # Skip blocks that have already been hit this frame
-                if block.hit_this_frame:
-                    continue
-                if self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
-                    # Calculate distance to block center
-                    block_center_x = block.rect.centerx
-                    block_center_y = block.rect.centery
-                    dx = obj_x - block_center_x
-                    dy = obj_y - block_center_y
-                    distance = (dx * dx + dy * dy) ** 0.5
-
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_block = block
-
-        # Reflect off the closest block if found
-        if not is_bullet and closest_block is not None:
-            self._reflect_ball(obj, obj_x, obj_y, closest_block)
-            # Process hit for the closest block
-            broken, block_points, effect = self._handle_block_hit(closest_block)
-            if broken:
-                points += block_points
-                broken_blocks += 1
-                if effect is not None:
-                    effects.append(effect)
-                    # Check for death effect immediately after adding it
-                    if effect == "death" and not is_bullet:
-                        obj.active = False
-        # For bullets, process all collisions
-        elif is_bullet:
-            for block in self.blocks[:]:
-                # Skip destroyed blocks and blocks in breaking state for collision
-                if block.state != "normal":
-                    continue
-                # Skip blocks that have already been hit this frame
-                if block.hit_this_frame:
-                    continue
-                if self._collides_with_block(obj_x, obj_y, obj_radius, block.rect):
-                    # Process hit for the block
-                    broken, block_points, effect = self._handle_block_hit(block)
-                    if broken:
-                        points += block_points
-                        broken_blocks += 1
-                        if effect is not None:
-                            effects.append(effect)
-                    if remove_callback:
-                        remove_callback()
-                        # For bullets, we still break after the first collision
-                        break
-        return points, broken_blocks, effects
+        if is_bullet:
+            return self._process_bullet_collision(
+                obj_x, obj_y, obj_radius, remove_callback
+            )
+        else:
+            return self._process_ball_collision(obj, obj_x, obj_y, obj_radius)
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw all blocks.
