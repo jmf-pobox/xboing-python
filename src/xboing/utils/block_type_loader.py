@@ -48,7 +48,7 @@ def get_block_types() -> Dict[str, BlockTypeData]:
         data = json.load(f)
     if not isinstance(data, list):
         raise ValueError("block_types.json must be a list of block type objects")
-    data_list = cast(List[Dict[str, Any]], data)
+    data_list = cast("List[Dict[str, Any]]", data)
     block_types: Dict[str, BlockTypeData] = {}
     for entry in data_list:
         # Validate required fields
@@ -63,5 +63,5 @@ def get_block_types() -> Dict[str, BlockTypeData]:
             )
             continue
         block_type: str = entry["blockType"]
-        block_types[block_type] = cast(BlockTypeData, entry)
+        block_types[block_type] = cast("BlockTypeData", entry)
     return block_types

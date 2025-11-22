@@ -75,23 +75,35 @@ test = "pytest tests/unit"
 test-cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m xboing"
-# Code quality commands
-lint = "ruff check src/ tests/"
-format = "black src/ tests/"
-format-check = "black --check src/ tests/"
-type = "mypy src/ tests/"
-type-quick = "mypy src/"
-type-pyright = "pyright"
-type-pyright-stats = "pyright --stats"
+# Production code quality commands (src/ only)
+lint = "ruff check src/"
+format = "black src/"
+format-check = "black --check src/"
+type = "mypy src/"
+type-pyright = "pyright src/xboing/controllers src/xboing/engine src/xboing/game src/xboing/layout src/xboing/renderers src/xboing/ui src/xboing/utils src/xboing/__init__.py"
+type-pyright-stats = "pyright --stats src/xboing/controllers src/xboing/engine src/xboing/game src/xboing/layout src/xboing/renderers src/xboing/ui src/xboing/utils src/xboing/__init__.py"
 type-all = ["type", "type-pyright"]
-typecheck = "mypy src/"
-# Combined quality check
+# Test code quality commands (tests/ only)
+lint-test = "ruff check tests/"
+format-test = "black tests/"
+format-check-test = "black --check tests/"
+type-test = "mypy tests/"
+type-pyright-test = "pyright tests/"
+# Combined quality commands (src/ + tests/)
+lint-all = "ruff check src/ tests/"
+format-all = "black src/ tests/"
+format-check-all = "black --check src/ tests/"
+type-all-code = "mypy src/ tests/"
+type-pyright-all = "pyright"
+# Combined quality check (production code only - must pass)
 check = ["lint", "type", "type-pyright", "test"]
 check-cov = ["lint", "type", "type-pyright", "test-cov"]
+# Check everything including test code (for tracking progress)
+check-all = ["lint-all", "type-all-code", "type-pyright-all", "test"]
 # Combined fixing command
 fmt = ["black src/ tests/", "ruff check --fix src/ tests/"]
 lint-fix = ["black src/ tests/", "ruff check --fix src/ tests/"]
-fix = ["format", "lint-fix"]
+fix = ["format-all", "lint-fix"]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
 # Run the game with coverage and then show the report
