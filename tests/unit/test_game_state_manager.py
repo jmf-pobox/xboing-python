@@ -1,5 +1,7 @@
 """Tests for GameStateManager."""
 
+import logging
+
 import pytest
 
 from xboing.engine.events import (
@@ -252,8 +254,6 @@ class TestGameStateManagerResetLevel:
 
     def test_reset_level_logs(self, manager, caplog):
         """Test that reset_level logs a message."""
-        import logging
-
         caplog.set_level(logging.DEBUG)
 
         manager.reset_level()

@@ -118,7 +118,7 @@ def test_ball_check_paddle_collision():
     collided = b._check_paddle_collision(DummyPaddle())
     assert collided
     # Should bounce upward
-    vx, vy = b.physics.get_velocity()
+    _vx, vy = b.physics.get_velocity()
     assert vy < 0
 
     # Test that update generates PaddleHitEvent

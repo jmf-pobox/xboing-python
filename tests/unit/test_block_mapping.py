@@ -4,7 +4,7 @@
 import pygame
 import pytest
 
-from xboing.game.block import Block
+from xboing.game.block import Block, CounterBlock
 from xboing.game.block_manager import BlockManager
 from xboing.game.block_types import (
     BLUE_BLK,
@@ -17,7 +17,7 @@ from xboing.game.block_types import (
     YELLOW_BLK,
 )
 from xboing.game.level_manager import LevelManager
-from xboing.utils.block_type_loader import get_block_types
+from xboing.utils.block_type_loader import BlockTypeData, get_block_types
 
 
 @pytest.fixture
@@ -129,9 +129,6 @@ def test_block_removal_after_explosion_animation():
 
 
 def test_counterblock_initialization_and_hit_logic():
-    from xboing.game.block import CounterBlock
-    from xboing.utils.block_type_loader import BlockTypeData
-
     # Minimal config for a counter block with 3 hits and 4 animation frames
     config: BlockTypeData = {
         "blockType": "COUNTER_BLK",
@@ -150,25 +147,25 @@ def test_counterblock_initialization_and_hit_logic():
     block.animation_frame = 2  # Should match hits_remaining - 1
 
     # Hit 1: hits_remaining should decrement, animation_frame should update
-    broken, points, effect = block.hit()
+    broken, points, _effect = block.hit()
     assert not broken
     assert block.hits_remaining == 2
     assert block.animation_frame == 2  # Should match hits_remaining
 
     # Hit 2
-    broken, points, effect = block.hit()
+    broken, points, _effect = block.hit()
     assert not broken
     assert block.hits_remaining == 1
     assert block.animation_frame == 1
 
     # Hit 3: block should break
-    broken, points, effect = block.hit()
+    broken, points, _effect = block.hit()
     assert broken
     assert points == 200
     assert block.hits_remaining == 0
     assert block.state == "breaking"
 
     # After breaking, further hits should not decrement below 0
-    broken, points, effect = block.hit()
+    broken, points, _effect = block.hit()
     assert block.hits_remaining == 0
     assert block.state == "breaking"

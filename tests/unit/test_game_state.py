@@ -31,7 +31,7 @@ def game_state():
 
 
 def test_score_event(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     # Test _set_score returns correct event (private method, used for resets)
     changes = state._set_score(42)
     assert len(changes) == 1
@@ -40,7 +40,7 @@ def test_score_event(game_state):
 
 
 def test_lives_event(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     # Test _set_lives returns correct event (private method, used for resets)
     changes = state._set_lives(5)
     assert len(changes) == 1
@@ -49,7 +49,7 @@ def test_lives_event(game_state):
 
 
 def test_level_event(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     # Test set_level returns correct event
     changes = state.set_level(3)
     assert len(changes) == 1
@@ -59,7 +59,7 @@ def test_level_event(game_state):
 
 
 def test_timer_event(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     # Test set_timer returns correct event
     changes = state.set_timer(99)
     assert len(changes) == 1
@@ -69,7 +69,7 @@ def test_timer_event(game_state):
 
 
 def test_special_events(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     specials = [
         ("reverse", SpecialReverseChangedEvent),
         ("sticky", SpecialStickyChangedEvent),
@@ -97,7 +97,7 @@ def test_special_events(game_state):
 
 
 def test_game_over_event(game_state):
-    state, mock_post = game_state
+    state, _mock_post = game_state
     # Should return GameOverEvent when setting to True
     changes = state.set_game_over(True)
     if not changes:

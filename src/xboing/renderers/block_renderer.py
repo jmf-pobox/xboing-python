@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 import pygame
 
@@ -16,7 +16,7 @@ class BlockRenderer:
     logger = logging.getLogger("xboing.BlockRenderer")
 
     # Internal image cache
-    _image_cache: Dict[str, pygame.Surface] = {}
+    _image_cache: ClassVar[Dict[str, pygame.Surface]] = {}
 
     @classmethod
     def clear_cache(cls) -> None:

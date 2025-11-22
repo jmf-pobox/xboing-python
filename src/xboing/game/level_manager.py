@@ -6,7 +6,7 @@ It interfaces with the BlockManager to create the appropriate block layout.
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 from xboing.game.block import CounterBlock
 from xboing.game.block_types import (
@@ -61,7 +61,7 @@ class LevelManager:
     BACKGROUND_5 = 9
 
     # Map level file characters to canonical block type keys
-    CHAR_TO_BLOCK_TYPE = {
+    CHAR_TO_BLOCK_TYPE: ClassVar[Dict[str, Optional[str]]] = {
         ".": None,  # Empty space (don't create a block)
         " ": None,  # Also empty space
         "\n": None,  # Newline character (don't create a block)

@@ -173,11 +173,6 @@ def disabled_test_update_balls_and_collisions_multiball(mock_ball):
 
 @patch("pygame.event.post")
 def test_update_balls_and_collisions_bomb(mock_post):
-    from xboing.controllers.game_controller import GameController
-    from xboing.game.ball import Ball
-    from xboing.game.block_manager import BlockManager
-    from xboing.game.paddle import Paddle
-
     game_state = Mock()
     game_state.add_score = Mock(return_value=[])  # Return empty list for add_score
     level_manager = Mock()

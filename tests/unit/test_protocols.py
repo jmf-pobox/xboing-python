@@ -6,6 +6,7 @@ This module contains tests for the protocol definitions in the protocols module.
 
 import pygame
 
+from xboing.game.collision import CollisionType
 from xboing.game.protocols import (
     Activatable,
     Collidable,
@@ -45,8 +46,6 @@ class MockCollidable:
 
     def get_collision_type(self):
         """Get the collision type of this object."""
-        from xboing.game.collision import CollisionType
-
         return CollisionType.BLOCK.value
 
     def handle_collision(self, other):

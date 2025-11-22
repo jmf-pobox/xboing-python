@@ -6,7 +6,7 @@ This module contains tests for the collision system defined in the collision mod
 
 import pygame
 
-from xboing.game.collision import CollisionSystem
+from xboing.game.collision import CollisionSystem, CollisionType
 
 
 class MockCollidable:
@@ -26,8 +26,6 @@ class MockCollidable:
 
     def get_collision_type(self):
         """Get the collision type of this object."""
-        from xboing.game.collision import CollisionType
-
         return CollisionType.BLOCK.value
 
     def handle_collision(self, other):
