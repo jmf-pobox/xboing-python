@@ -11,6 +11,7 @@ from xboing.game.block_types import (
     SPECIAL_BLOCK_TYPES,
     UNBREAKABLE_BLOCK_TYPES,
 )
+from xboing.game.collision import CollisionType
 from xboing.game.game_shape import GameShape
 from xboing.renderers.block_renderer import BlockRenderer
 from xboing.utils.block_type_loader import BlockTypeData
@@ -60,6 +61,7 @@ class Block(GameShape):
         self.animation_frame: int = 0
         self.animation_timer: float = 0.0
         self.animation_speed: int = 200  # ms per frame
+        self.hit_this_frame: bool = False  # Track if block was hit in current frame
 
         # --- Special Block Animation/Image Setup ---
         image_override: Optional[pygame.Surface] = None
@@ -98,13 +100,17 @@ class Block(GameShape):
         """Check if the block is broken."""
         return self.health <= 0
 
-    def update(self, delta_ms: float) -> None:
+    def update(self, delta_ms: float) -> List[pygame.event.Event]:
         """Update the block's state.
 
         Args:
             delta_ms (float): Time since the last frame in milliseconds
 
+        Returns:
+            List[pygame.event.Event]: List of events generated during the update
+
         """
+        events: List[pygame.event.Event] = []
         # --- Hit Animation Section ---
         if self.is_hit:
             self.hit_timer -= delta_ms
@@ -135,6 +141,8 @@ class Block(GameShape):
                 if self.explosion_frame_index >= len(self.explosion_frames):
                     self.state = "destroyed"
 
+        return events
+
     def set_random_direction(self) -> None:
         """Set a random direction for roamer blocks."""
         directions = ["idle", "up", "down", "left", "right"]
@@ -148,6 +156,13 @@ class Block(GameShape):
             tuple: (broken, points, effect) - Whether the block was broken, points earned, and any special effect
 
         """
+        # If the block was already hit this frame, don't process it again
+        if self.hit_this_frame:
+            return False, 0, None
+
+        # Mark the block as hit this frame
+        self.hit_this_frame = True
+
         broken = False
         points = 0
         effect = None
@@ -212,6 +227,48 @@ class Block(GameShape):
             animation_frames=self.animation_frames,
         )
 
+    def collides_with(self, other: Any) -> bool:
+        """Check if this block collides with another collidable object.
+
+        Args:
+            other: Another collidable object to check collision with.
+
+        Returns:
+            True if the objects collide, False otherwise.
+
+        """
+        return self.rect.colliderect(other.get_rect())
+
+    def is_active(self) -> bool:
+        """Check if the block is currently active.
+
+        Returns:
+            True if the block is active (not destroyed), False otherwise.
+
+        """
+        # Only consider blocks in normal state as active for collision purposes
+        return self.state == "normal"
+
+    def set_active(self, active: bool) -> None:
+        """Set the block's active state.
+
+        Args:
+            active: The new active state. If False, the block will be marked as destroyed.
+
+        """
+        if not active:
+            self.state = "destroyed"
+        elif self.state == "destroyed":
+            self.state = "normal"
+
+    def get_collision_type(self) -> str:
+        """Return the collision type for Block."""
+        return CollisionType.BLOCK.value
+
+    def handle_collision(self, other: object) -> None:
+        """Handle collision with another object (no-op for Block stub)."""
+        del other  # Remove unused argument warning
+
 
 class CounterBlock(Block):
     """A block that requires multiple hits to break and displays a counter."""
@@ -220,9 +277,13 @@ class CounterBlock(Block):
         # Call parent initialization but with health=0 (we'll use hits_remaining instead)
         # This prevents the parent's health from being used
         super().__init__(x, y, config)
+        self.logger = logging.getLogger("xboing.CounterBlock")
 
         # We still need hits_remaining for CounterBlock specific behavior
         self.hits_remaining = _safe_int(config.get("hits", 5), 5)
+        self.logger.debug(
+            f"CounterBlock initialized at ({x}, {y}) with {self.hits_remaining} hits"
+        )
 
     def hit(self) -> Tuple[bool, int, Optional[Any]]:
         """Handle CounterBlock being hit."""
@@ -234,12 +295,16 @@ class CounterBlock(Block):
             self.hits_remaining -= 1
             self.is_hit = True
             self.hit_timer = 200
+            self.logger.debug(
+                f"CounterBlock hit, remaining hits: {self.hits_remaining}, animation_frames: {self.animation_frames}"
+            )
 
-            # Update animation frame based on hits_remaining
+            # Only update animation frame if animation frames are enabled
             if self.animation_frames and 0 <= self.hits_remaining < len(
                 self.animation_frames
             ):
                 self.animation_frame = self.hits_remaining
+                self.logger.debug(f"Updated animation frame to {self.animation_frame}")
 
         if self.hits_remaining == 0:
             broken = True
@@ -247,12 +312,21 @@ class CounterBlock(Block):
             self.state = "breaking"
             self.explosion_frame_index = 0
             self.explosion_timer = 0.0
+            self.logger.debug("CounterBlock broken")
 
         return broken, points, effect
 
     def _draw_normal_state(self, surface: pygame.Surface) -> None:
         """Override normal state drawing to include the counter."""
-        counter_value = self.hits_remaining - 2 if self.hits_remaining > 1 else None
+        # Decide which image to use
+        if self.hits_remaining > 1 and self.animation_frames:
+            image_file = self.animation_frames[self.hits_remaining - 2]
+        else:
+            image_file = "cntblk.png"
+        counter_value = self.hits_remaining if self.hits_remaining > 1 else None
+        self.logger.debug(
+            f"Drawing CounterBlock with hits_remaining={self.hits_remaining}, image_file={image_file}, animation_frames={self.animation_frames}, animation_frame={self.animation_frame}"
+        )
 
         BlockRenderer.render(
             surface=surface,
@@ -261,9 +335,9 @@ class CounterBlock(Block):
             width=self.rect.width,
             height=self.rect.height,
             block_type=self.type,
-            image_file=self.image_file,
+            image_file=image_file,
             is_hit=self.is_hit,
-            animation_frames=self.animation_frames,
+            animation_frames=None,  # Don't animate
             counter_value=counter_value,
         )
 

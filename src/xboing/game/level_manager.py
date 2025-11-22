@@ -73,12 +73,12 @@ class LevelManager:
         "p": PURPLE_BLK,  # Purple block
         "w": BLACK_BLK,  # Black/wall block
         "X": BOMB_BLK,  # Bomb block
-        "0": COUNTER_BLK,  # Counter block (0 hits)
-        "1": COUNTER_BLK,  # Counter block (1 hit)
-        "2": COUNTER_BLK,  # Counter block (2 hits)
-        "3": COUNTER_BLK,  # Counter block (3 hits)
-        "4": COUNTER_BLK,  # Counter block (4 hits)
-        "5": COUNTER_BLK,  # Counter block (5 hits)
+        "0": COUNTER_BLK,  # Counter block (no number, 1 hit)
+        "1": COUNTER_BLK,  # Counter block (shows 1, 2 hits)
+        "2": COUNTER_BLK,  # Counter block (shows 2, 3 hits)
+        "3": COUNTER_BLK,  # Counter block (shows 3, 4 hits)
+        "4": COUNTER_BLK,  # Counter block (shows 4, 5 hits)
+        "5": COUNTER_BLK,  # Counter block (shows 5, 6 hits)
         "B": BULLET_BLK,  # Bullet block
         "c": MAXAMMO_BLK,  # Max ammo block
         "H": HYPERSPACE_BLK,  # Hyperspace block
@@ -244,13 +244,8 @@ class LevelManager:
         }
 
     def _create_blocks_from_layout(self, layout: List[str]) -> None:
-        """Create blocks based on the level layout.
-
-        Args:
-        ----
-            layout (list): List of rows, each a string of characters representing blocks
-
-        """
+        """Create blocks from the level layout."""
+        self.logger.debug("Creating blocks from layout")
         if not self.block_manager:
             self.logger.error("Block manager not set")
             return
@@ -262,78 +257,82 @@ class LevelManager:
         # Clear existing blocks
         self.block_manager.blocks = []
 
-        # Get play area width from the block manager's offset
-        # The original XBoing uses 495 pixels for the play width
-        # The original XBoing uses 495 pixels for the play width
         # Calculate grid dimensions
         wall_spacing = 10  # Wall spacing on each side
         horizontal_spacing = 14  # Exact spacing between blocks
-
-        # Don't recalculate the block width - use the original game's exact values
-        block_width = brick_width  # Use original 40 px block width
-
-        # Calculate total width of blocks plus spacing
-        # Calculate total width of blocks plus spacing
-        # This should be 494 px, almost exactly filling the 495px play_width
-        # print(f"Total calculated width: {total_width}")
+        vertical_spacing = 12  # Exact spacing between rows
 
         # The left margin is simply the wall spacing (10 px)
         left_margin = wall_spacing
 
-        # Set vertical spacing to exactly 12 pixels as requested
-        vertical_spacing = 12
-
         # Create blocks based on layout
         for row_idx, row in enumerate(layout):
             for col_idx, char in enumerate(row):
-                # Skip empty spaces
-                if char == ".":
+                if char == " ":
                     continue
 
-                # Convert each character to a block type
-                block_type = self.CHAR_TO_BLOCK_TYPE.get(char)
-                if block_type is None:
-                    continue
-
-                # Calculate position with precise spacing from walls and between blocks
+                # Calculate block position with proper spacing
                 x = (
                     self.block_manager.offset_x
                     + left_margin
-                    + col_idx * (block_width + horizontal_spacing)
+                    + col_idx * (brick_width + horizontal_spacing)
                 )
-
-                # Add the top margin for vertical positioning with 50% block
-                # height spacing
-                top_margin = wall_spacing
                 y = (
                     self.block_manager.offset_y
-                    + top_margin
+                    + wall_spacing
                     + row_idx * (brick_height + vertical_spacing)
                 )
 
-                # Create the block using the block manager's factory method
-                block = self.block_manager.create_block(x, y, block_type)
-
-                # Handle special properties based on the block type
-                if char in "12345":  # Counter blocks 1-5
-                    hits = int(char)
-                    if isinstance(block, CounterBlock):
-                        block.hits_remaining = hits + 1
-                        if block.animation_frames and 0 <= (hits - 1) < len(
-                            block.animation_frames
-                        ):
-                            block.animation_frame = hits - 1
-                elif char == "0":  # Special case for zero counter blocks
-                    if isinstance(block, CounterBlock):
-                        block.hits_remaining = 1
-                        block.animation_frame = 0
-                    block.image_file = (
-                        "cntblk.png"  # The base counter block image without a number
+                # Create block based on character
+                block = None
+                self.logger.debug(
+                    f"Processing character '{char}' at position ({x}, {y})"
+                )
+                if char in "0123456789":  # Counter blocks 0-9
+                    hits = int(char) + 1
+                    self.logger.debug(
+                        f"Creating counter block with value {char}, hits_required={hits}"
                     )
-                    block.animation_frames = None
+                    block = self.block_manager.create_block(
+                        x, y, brick_width, brick_height, COUNTER_BLK
+                    )
+                    self.logger.debug(f"Created block: {block}, type: {type(block)}")
+                    if isinstance(block, CounterBlock):
+                        block.hits_remaining = hits
+                        # Set animation frame for numbers > 1
+                        if (
+                            block.animation_frames
+                            and hits > 1
+                            and 0 <= (hits - 2) < len(block.animation_frames)
+                        ):
+                            block.animation_frame = hits - 2
+                            self.logger.debug(
+                                f"Set animation frame to {block.animation_frame}"
+                            )
+                        else:
+                            block.animation_frame = 0
+                        self.logger.debug(
+                            f"Counter block created with {block.hits_remaining} hits remaining"
+                        )
+                    else:
+                        self.logger.error(
+                            f"Failed to create CounterBlock for character '{char}'"
+                        )
+                else:
+                    # Handle other block types
+                    block_type = self.CHAR_TO_BLOCK_TYPE.get(char)
+                    if block_type:
+                        block = self.block_manager.create_block(
+                            x, y, brick_width, brick_height, block_type
+                        )
+                        self.logger.debug(f"Created block of type {block_type}")
 
-                # Add block to the manager
-                self.block_manager.blocks.append(block)
+                # Add block to the manager if it was created successfully
+                if block is not None:
+                    self.block_manager.blocks.append(block)
+                    self.logger.debug(f"Added block to manager: {block}")
+                else:
+                    self.logger.debug(f"No block created for character '{char}'")
 
     def _set_level_background(self) -> None:
         """Set the appropriate background for the current level.

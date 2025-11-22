@@ -1,19 +1,26 @@
-"""Ball implementation for XBoing.
-
-This module contains the ball class that handles physics, movement,
-and collision detection with walls and the paddle.
-"""
+"""Ball: The main game object that bounces around the screen."""
 
 import logging
 import math
 import os
 import random
-from typing import Any, ClassVar, List, Optional, Tuple
+from typing import Any, ClassVar, List, Optional, Tuple, Union
 
 import pygame
 
+from xboing.engine.events import (
+    BallLostEvent,
+    PaddleHitEvent,
+    WallHitEvent,
+)
+from xboing.game.circular_game_shape import CircularGameShape
+from xboing.game.collision import CollisionType
+from xboing.game.physics_mixin import PhysicsMixin
 from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_balls_dir, get_images_dir
+
+# Type alias for events used in this module
+Event = Union[BallLostEvent, PaddleHitEvent, WallHitEvent]
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +28,8 @@ logger = logging.getLogger(__name__)
 BALL_RADIUS = 8  # Approximated from the original game
 
 
-class Ball:
-    """A bouncing ball with physics and collision detection."""
+class Ball(CircularGameShape, PhysicsMixin):
+    """The main game object that bounces around the screen."""
 
     # Class variables for sprites
     sprites: ClassVar[List[pygame.Surface]] = []
@@ -84,35 +91,30 @@ class Ball:
         self,
         x: float,
         y: float,
-        radius: int = 8,
+        vx: float = 0.0,
+        vy: float = 0.0,
+        radius: int = 5,
         color: Tuple[int, int, int] = (255, 255, 255),
     ) -> None:
-        """Initialize a new ball.
+        """Initialize the ball.
 
         Args:
-        ----
-            x (float): Starting X position
-            y (float): Starting Y position
-            radius (int): Ball radius
-            color (tuple): RGB color tuple
+            x: Initial x position
+            y: Initial y position
+            vx: Initial x velocity
+            vy: Initial y velocity
+            radius: Ball radius
+            color: Ball color
 
         """
-        self.x: float = float(x)
-        self.y: float = float(y)
-        self.radius: int = radius
-        self.color: Tuple[int, int, int] = color
-
-        # Initial velocity
-        # Start with an upward angle
-        angle = random.uniform(math.pi / 4, 3 * math.pi / 4)
-        speed = 5.0
-        self.vx: float = speed * math.cos(angle)
-        self.vy: float = -speed * math.sin(
-            angle
-        )  # Negative because Y increases downward
+        # Initialize the CircularGameShape
+        super().__init__(x, y, radius)
+        # Initialize the PhysicsMixin
+        PhysicsMixin.__init__(self, x, y, vx, vy)
+        self.color = color
+        self.active = True
 
         # State
-        self.active: bool = True
         self.stuck_to_paddle: bool = False
         self.paddle_offset: float = 0.0
 
@@ -136,23 +138,15 @@ class Ball:
         if not Ball.guide_images:
             Ball.load_guide_images()
 
-        # Create the collision rect
-        self.rect: pygame.Rect = pygame.Rect(
-            int(self.x - self.radius),
-            int(self.y - self.radius),
-            self.radius * 2,
-            self.radius * 2,
-        )
-
     def update(
         self,
         delta_ms: float,
-        screen_width: int,
-        screen_height: int,
+        screen_width: int = 0,
+        screen_height: int = 0,
         paddle: Optional[Any] = None,
         offset_x: int = 0,
         offset_y: int = 0,
-    ) -> Tuple[bool, bool, bool]:
+    ) -> List[Event]:
         """Update ball position and handle collisions.
 
         Args:
@@ -166,9 +160,11 @@ class Ball:
 
         Returns:
         -------
-            tuple: (is_active, hit_paddle, hit_wall) - ball status and collision info
+            List[Event]: List of events generated during the update
 
         """
+        events: List[Event] = []
+
         # Animate main ball (not during birth animation)
         if (
             not self.birth_animation
@@ -181,12 +177,16 @@ class Ball:
                 self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
 
         if not self.active:
-            return False, False, False
+            return events
 
         if self.stuck_to_paddle and paddle:
+            # Update position to stick to paddle
             self.x = paddle.rect.centerx + self.paddle_offset
             self.y = paddle.rect.top - self.radius - 1
+            # Update physics component position
+            self.physics.set_position((self.x, self.y))
             self.update_rect()
+
             # Guide animation update
             self.guide_anim_counter += delta_ms
             while self.guide_anim_counter >= Ball.GUIDE_ANIM_FRAME_MS:
@@ -196,18 +196,20 @@ class Ball:
                     self.guide_inc = -1
                 elif self.guide_pos == 0:
                     self.guide_inc = 1
-            return True, False, False
+            return events
 
-        # Calculate movement with framerate independence
-        move_factor = delta_ms / 16.67  # Normalized for 60 FPS
+        # Update position using physics component
+        self.physics.update(delta_ms)
+        # Get updated position from physics component
+        self.x, self.y = self.physics.get_position()
+        self.update_rect()
 
-        # Update position
-        self.x += self.vx * move_factor
-        self.y += self.vy * move_factor
+        # Get current velocity
+        vx, vy = self.physics.get_velocity()
+        logger.debug(f"Ball velocity: vx={vx}, vy={vy}")
 
         # Handle wall collisions
         changed = False
-        hit_wall = False
 
         # Define the play area boundaries with offsets
         left_boundary = offset_x
@@ -218,32 +220,37 @@ class Ball:
         # Left and right walls
         if self.x - self.radius < left_boundary:
             self.x = left_boundary + self.radius
-            self.vx = abs(self.vx)  # Ensure positive (right) direction
+            vx = abs(vx)  # Ensure positive (right) direction
             changed = True
-            hit_wall = True  # Hit the left wall
-        elif self.x + self.radius > right_boundary:
+            events.append(WallHitEvent())
+        if self.x + self.radius > right_boundary:
             self.x = right_boundary - self.radius
-            self.vx = -abs(self.vx)  # Ensure negative (left) direction
+            vx = -abs(vx)  # Ensure negative (left) direction
             changed = True
-            hit_wall = True  # Hit the right wall
+            events.append(WallHitEvent())
 
         # Top wall
         if self.y - self.radius < top_boundary:
             self.y = top_boundary + self.radius
-            self.vy = abs(self.vy)  # Ensure positive (down) direction
+            vy = abs(vy)  # Ensure positive (down) direction
             changed = True
-            hit_wall = True  # Hit the top wall
+            events.append(WallHitEvent())
 
         # Bottom boundary - the ball is lost
         if self.y - self.radius > bottom_boundary:
             self.active = False
-            return False, False, False
+            events.append(BallLostEvent())
+            return events
+
+        # Update physics component with new position and velocity
+        if changed:
+            self.physics.set_position((self.x, self.y))
+            self.physics.set_velocity((vx, vy))
 
         # Handle paddle collision if paddle is provided
-        hit_paddle = False
         if paddle and self._check_paddle_collision(paddle):
             changed = True
-            hit_paddle = True
+            events.append(PaddleHitEvent())
 
         # Update the collision rectangle
         self.update_rect()
@@ -252,12 +259,14 @@ class Ball:
         if changed:
             self._add_random_factor()
 
-        return True, hit_paddle, hit_wall
+        return events
 
     def update_rect(self) -> None:
         """Update the collision rectangle based on the current position."""
-        self.rect.x = int(self.x - self.radius)
-        self.rect.y = int(self.y - self.radius)
+        # Update the CircularGameShape position from the physics component
+        self.x, self.y = self.get_position()
+        # Use the CircularGameShape's update_rect method
+        super().update_rect()
 
     def _check_paddle_collision(self, paddle: Any) -> bool:
         """Check for collision with the paddle and handle bouncing.
@@ -275,8 +284,11 @@ class Ball:
         if not pygame.Rect(self.rect).colliderect(paddle.rect):
             return False
 
+        # Get current velocity from physics component
+        vx, vy = self.get_velocity()
+
         # If we're moving upward, ignore the collision (already bounced)
-        if self.vy < 0:
+        if vy < 0:
             return False
 
         # Sound will be triggered from the return value
@@ -294,14 +306,16 @@ class Ball:
         angle = math.pi / 2 + (offset * math.pi / 3)  # Pi/3 = 60 degrees
 
         # Calculate ball speed (maintain current speed)
-        speed = math.sqrt(self.vx * self.vx + self.vy * self.vy)
+        speed = math.sqrt(vx * vx + vy * vy)
 
         # Update velocity components
-        self.vx = speed * math.cos(angle)
-        self.vy = -speed * math.sin(angle)  # Negative for an upward direction
+        new_vx = speed * math.cos(angle)
+        new_vy = -speed * math.sin(angle)  # Negative for an upward direction
+        self.set_velocity(new_vx, new_vy)
 
         # Move ball to top of paddle to prevent sticking
         self.y = paddle.rect.top - self.radius - 1
+        self.set_position(self.x, self.y)
 
         # Handle sticky paddle
         if paddle.is_sticky():
@@ -312,6 +326,9 @@ class Ball:
 
     def get_launch_velocity_from_guide_pos(self) -> Tuple[float, float]:
         """Get the launch velocity (vx, vy) for the current guide position."""
+        # Default speed if no current velocity
+        default_speed = 5.0
+
         mapping = [
             (-5, -1),
             (-4, -2),
@@ -325,13 +342,34 @@ class Ball:
             (4, -2),
             (5, -1),
         ]
+
+        # Get current velocity and speed
+        vx, vy = self.get_velocity()
+        current_speed = math.sqrt(vx * vx + vy * vy)
+
+        # If no current speed, use default
+        if current_speed < 0.1:
+            current_speed = default_speed
+            logger.debug(f"Using default speed: {default_speed}")
+
+        # Get direction from guide position
         dx, dy = mapping[self.guide_pos]
-        speed = math.sqrt(self.vx * self.vx + self.vy * self.vy)
-        # Normalize to current speed
+        logger.debug(
+            f"Guide position {self.guide_pos} gives direction: dx={dx}, dy={dy}"
+        )
+
+        # Normalize direction vector
         norm = math.sqrt(dx * dx + dy * dy)
-        if norm == 0:
-            return 0.0, -speed
-        return speed * dx / norm, speed * dy / norm
+        if norm < 0.1:  # Avoid division by zero
+            logger.debug("Direction vector too small, using straight up")
+            return 0.0, -current_speed
+
+        # Scale direction by current speed
+        final_vx = current_speed * dx / norm
+        final_vy = current_speed * dy / norm
+
+        logger.debug(f"Calculated launch velocity: vx={final_vx}, vy={final_vy}")
+        return final_vx, final_vy
 
     def release_from_paddle(self) -> None:
         """Release the ball if it's stuck to the paddle, using guide_pos
@@ -340,26 +378,35 @@ class Ball:
         logger.debug(f"Ball released from paddle at x={self.x}, y={self.y}")
         if self.stuck_to_paddle:
             vx, vy = self.get_launch_velocity_from_guide_pos()
-            self.vx = vx
-            self.vy = vy
+            logger.debug(f"Initial launch velocity: vx={vx}, vy={vy}")
+
+            # If velocity is zero or too small, set a default upward velocity
+            speed = math.sqrt(vx * vx + vy * vy)
+            if speed < 1.0:
+                logger.debug("Velocity too small, using default upward velocity")
+                vx = 0.0
+                vy = -5.0
+
+            self.set_velocity(vx, vy)
+            # Verify velocity was set correctly
+            final_vx, final_vy = self.get_velocity()
+            logger.debug(f"Final velocity after release: vx={final_vx}, vy={final_vy}")
+
         self.stuck_to_paddle = False
-        logger.debug(f"[release_from_paddle] Ball released: vx={self.vx}, vy={self.vy}")
 
     def _add_random_factor(self) -> None:
         """Add a slight randomness to prevent predictable patterns."""
-        # Apply up to 5% random variance to speed
-        speed = math.sqrt(self.vx * self.vx + self.vy * self.vy)
-        angle = math.atan2(
-            -self.vy, self.vx
-        )  # Note negative vy due to screen coordinates
-
-        # Add a small random angle change (up to 5 degrees)
-        angle += random.uniform(-0.087, 0.087)  # ±5 degrees in radians
-
-        # Recalculate velocity with a slight random speed boost
+        vx, vy = self.get_velocity()
+        speed = math.sqrt(vx * vx + vy * vy)
+        angle = math.atan2(-vy, vx)
+        angle += random.uniform(-0.087, 0.087)
         speed_factor = random.uniform(0.95, 1.05)
-        self.vx = speed * speed_factor * math.cos(angle)
-        self.vy = -speed * speed_factor * math.sin(angle)  # Negative for upward
+        new_vx = speed * speed_factor * math.cos(angle)
+        new_vy = -speed * speed_factor * math.sin(angle)
+        # Ensure the new velocity is not exactly the same as before
+        if abs(new_vx - vx) < 1e-6 and abs(new_vy - vy) < 1e-6:
+            new_vx += 0.1
+        self.set_velocity(new_vx, new_vy)
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the ball.
@@ -434,6 +481,7 @@ class Ball:
         """
         self.x = float(x)
         self.y = float(y)
+        self.physics.set_position((self.x, self.y))
         self.update_rect()
 
     def set_velocity(self, vx: float, vy: float) -> None:
@@ -445,9 +493,29 @@ class Ball:
             vy (float): Y velocity
 
         """
-        self.vx = float(vx)
-        self.vy = float(vy)
+        logger.debug(f"Setting ball velocity: vx={vx}, vy={vy}")
+        self.physics.set_velocity((float(vx), float(vy)))
+        # Get current position from physics component
+        self.x, self.y = self.physics.get_position()
+        self.update_rect()
 
     def is_active(self) -> bool:
         """Check if the ball is still active."""
         return self.active
+
+    def set_active(self, active: bool) -> None:
+        """Set the ball's active state.
+
+        Args:
+            active: The new active state.
+
+        """
+        self.active = active
+
+    def get_collision_type(self) -> str:
+        """Return the collision type for Ball."""
+        return CollisionType.BALL.value
+
+    def handle_collision(self, other: object) -> None:
+        """Handle collision with another object (no-op for Ball stub)."""
+        del other  # Remove unused argument warning

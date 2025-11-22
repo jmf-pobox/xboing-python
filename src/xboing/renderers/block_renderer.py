@@ -128,12 +128,17 @@ class BlockRenderer:
         """
         img: Optional[pygame.Surface] = None
         # Special handling for CounterBlocks (block_type == COUNTER_BLK)
-        if block_type == COUNTER_BLK and counter_value is not None and animation_frames:
-            idx = max(0, min(counter_value, len(animation_frames) - 1))
-            frame_file = animation_frames[idx]
-            img = cls._image_cache.get(frame_file)
-            if img is None:
+        if block_type == COUNTER_BLK and counter_value is not None:
+            # For counter blocks, use the main image file if no animation frames
+            if not animation_frames:
                 img = cls._image_cache.get(image_file)
+            else:
+                # If animation frames are provided (shouldn't happen for counter blocks)
+                idx = max(0, min(counter_value, len(animation_frames) - 1))
+                frame_file = animation_frames[idx]
+                img = cls._image_cache.get(frame_file)
+                if img is None:
+                    img = cls._image_cache.get(image_file)
         else:
             # Animation frame selection for other blocks
             if (
