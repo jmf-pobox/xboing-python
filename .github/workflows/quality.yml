@@ -1,10 +1,10 @@
-name: Tests
+name: Code Quality
 on: [push, pull_request]
 permissions:
   contents: read
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,11 +24,17 @@ jobs:
     - name: Create virtual environment and install all dependencies
       run: hatch env create
 
-    - name: Run tests with coverage
-      run: hatch run test-cov
+    - name: Run lint (ruff)
+      run: hatch run lint
 
-    - name: Upload coverage to Codecov
-      if: matrix.python-version == '3.10'
-      uses: codecov/codecov-action@v3
-      with:
-        fail_ci_if_error: false
+    - name: Run format check (black)
+      run: hatch run format-check
+
+    - name: Run type check (mypy)
+      run: hatch run type
+
+    - name: Run type check (pyright)
+      run: hatch run type-pyright
+
+    - name: Run tests
+      run: hatch run test

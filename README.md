@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/xboing.svg)](https://pypi.org/project/xboing/)
 <a href="https://pypi.org/project/xboing"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/xboing?color=blue"></a>
-[![Pylint](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/pylint.yml)
+[![Code Quality](https://github.com/jmf-pobox/xboing-python/actions/workflows/quality.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/quality.yml)
 [![Tests](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/tests.yml)
 [![Build](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml/badge.svg)](https://github.com/jmf-pobox/xboing-python/actions/workflows/build.yml)
 
