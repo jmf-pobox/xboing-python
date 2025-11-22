@@ -112,9 +112,7 @@ class PowerUpManager:
             at_max = True
 
         events.append(PaddleGrowEvent(size=self.paddle.width, at_max=at_max))
-        self.logger.debug(
-            f"Paddle grow - size now {self.paddle.size}, at_max={at_max}"
-        )
+        self.logger.debug(f"Paddle grow - size now {self.paddle.size}, at_max={at_max}")
 
         return events
 
