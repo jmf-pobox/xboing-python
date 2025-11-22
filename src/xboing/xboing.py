@@ -258,7 +258,9 @@ class XBoingApp:
         assert (
             self.controller_manager is not None
         ), "controller_manager should never be None after DI setup"
-        self.ball_manager.add_ball(self.game_controller.create_new_ball())
+        self.ball_manager.add_ball(
+            self.ball_manager.create_new_ball(self.game_controller.paddle)
+        )
         self.views = {
             "game": self.game_view,
             "instructions": self.injector.get(InstructionsView),
