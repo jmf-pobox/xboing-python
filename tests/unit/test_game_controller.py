@@ -296,7 +296,10 @@ def test_paddle_expand_event_fired(game_setup, mock_game_objects):
     block = Mock()
     block.get_collision_type = Mock(return_value="block")
     block.is_active = Mock(return_value=True)
-    block.get_rect = Mock(return_value=pygame.Rect(400, 450, 32, 16))
+    block.rect = pygame.Rect(400, 450, 32, 16)  # Direct attribute, not method
+    block.get_rect = Mock(return_value=block.rect)
+    block.state = "normal"  # Required by collision handler
+    block.hit_this_frame = False  # Required by collision handler
     block.type = PAD_EXPAND_BLK
     block.hit = Mock(return_value=(True, 0, PAD_EXPAND_BLK))  # Return effect when hit
     block.collides_with = Mock(return_value=True)  # Always collide
@@ -322,14 +325,9 @@ def test_paddle_expand_event_fired(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    # Register collision handlers
-    controller.collision_system.register_collision_handler(
-        "ball", "block", controller._handle_ball_block_collision
-    )
-
     with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision directly
-        controller._handle_ball_block_collision(ball, block)
+        # Simulate ball-block collision using collision handlers directly
+        controller.collision_handlers.handle_ball_block_collision(ball, block)
 
         # Verify PaddleGrowEvent was posted
         paddle_grow_events = [
@@ -358,7 +356,10 @@ def test_paddle_shrink_event_fired(game_setup, mock_game_objects):
     block = Mock()
     block.get_collision_type = Mock(return_value="block")
     block.is_active = Mock(return_value=True)
-    block.get_rect = Mock(return_value=pygame.Rect(400, 450, 32, 16))
+    block.rect = pygame.Rect(400, 450, 32, 16)  # Direct attribute, not method
+    block.get_rect = Mock(return_value=block.rect)
+    block.state = "normal"  # Required by collision handler
+    block.hit_this_frame = False  # Required by collision handler
     block.type = PAD_SHRINK_BLK
     block.hit = Mock(return_value=(True, 0, PAD_SHRINK_BLK))  # Return effect when hit
     block.collides_with = Mock(return_value=True)  # Always collide
@@ -384,14 +385,9 @@ def test_paddle_shrink_event_fired(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    # Register collision handlers
-    controller.collision_system.register_collision_handler(
-        "ball", "block", controller._handle_ball_block_collision
-    )
-
     with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision directly
-        controller._handle_ball_block_collision(ball, block)
+        # Simulate ball-block collision using collision handlers directly
+        controller.collision_handlers.handle_ball_block_collision(ball, block)
 
         # Verify PaddleShrinkEvent was posted
         paddle_shrink_events = [
@@ -422,7 +418,10 @@ def test_sticky_paddle_activation_event(game_setup, mock_game_objects):
     block = Mock()
     block.get_collision_type = Mock(return_value="block")
     block.is_active = Mock(return_value=True)
-    block.get_rect = Mock(return_value=pygame.Rect(400, 450, 32, 16))
+    block.rect = pygame.Rect(400, 450, 32, 16)  # Direct attribute, not method
+    block.get_rect = Mock(return_value=block.rect)
+    block.state = "normal"  # Required by collision handler
+    block.hit_this_frame = False  # Required by collision handler
     block.type = STICKY_BLK
     block.hit = Mock(return_value=(True, 0, STICKY_BLK))  # Return effect when hit
     block.collides_with = Mock(return_value=True)  # Always collide
@@ -448,14 +447,9 @@ def test_sticky_paddle_activation_event(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    # Register collision handlers
-    controller.collision_system.register_collision_handler(
-        "ball", "block", controller._handle_ball_block_collision
-    )
-
     with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision directly
-        controller._handle_ball_block_collision(ball, block)
+        # Simulate ball-block collision using collision handlers directly
+        controller.collision_handlers.handle_ball_block_collision(ball, block)
 
         # Verify SpecialStickyChangedEvent was posted
         sticky_events = [
@@ -545,7 +539,7 @@ def test_arrow_key_movement_reversed(game_setup, mock_game_objects):
     )
 
     # Activate reverse mode
-    controller.reverse = True
+    controller.set_reverse(True)
 
     # Update game state to trigger movement
     controller.update(0.016)
@@ -584,8 +578,8 @@ def test_mouse_movement_reversed(game_setup, mock_game_objects):
     )
 
     # Activate reverse mode and set initial mouse position
-    controller.reverse = True
-    controller._last_mouse_x = (
+    controller.set_reverse(True)
+    controller.paddle_input.set_last_mouse_x(
         10  # Set different from current mouse x to trigger movement
     )
 
@@ -635,11 +629,10 @@ def test_ball_sticks_to_paddle_when_sticky(game_setup, mock_game_objects):
     )
 
     # Activate sticky mode
-    controller.sticky = True
-    game_setup["paddle"].sticky = True
+    controller.enable_sticky()
 
     # Simulate ball hitting paddle
-    controller._handle_ball_paddle_collision(ball, game_setup["paddle"])
+    controller.collision_handlers.handle_ball_paddle_collision(ball, game_setup["paddle"])
 
     assert (
         ball.stuck_to_paddle is True
@@ -704,9 +697,12 @@ def test_block_scoring_and_event_on_hit(game_setup, mock_game_objects):
     block = Mock()
     block.get_collision_type = Mock(return_value="block")
     block.is_active = Mock(return_value=True)
-    block.get_rect = Mock(return_value=pygame.Rect(400, 450, 32, 16))
+    block.rect = pygame.Rect(400, 450, 32, 16)  # Direct attribute
+    block.get_rect = Mock(return_value=block.rect)
     block.hit = Mock(return_value=(True, 100, None))  # Return score when hit
     block.collides_with = Mock(return_value=True)  # Always collide
+    block.state = "normal"  # Required by collision handler
+    block.hit_this_frame = False  # Required by collision handler
     game_setup["block_manager"].blocks = [block]
 
     # Set up play rect for ball update
@@ -732,14 +728,9 @@ def test_block_scoring_and_event_on_hit(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    # Register collision handlers
-    controller.collision_system.register_collision_handler(
-        "ball", "block", controller._handle_ball_block_collision
-    )
-
     with patch("pygame.event.post") as mock_post:
         # Simulate ball-block collision directly
-        controller._handle_ball_block_collision(ball, block)
+        controller.collision_handlers.handle_ball_block_collision(ball, block)
 
         # Verify score was updated
         game_setup["game_state"].add_score.assert_called_with(100)
