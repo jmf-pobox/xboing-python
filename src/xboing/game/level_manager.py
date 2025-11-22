@@ -118,7 +118,7 @@ class LevelManager:
         )
         self.level_title: str = ""
         self.time_bonus: int = 0
-        self.block_manager = None
+        self.block_manager: Optional[Any] = None
         self.layout = layout
         self.current_background: int = self.BACKGROUND_2
         self.levels_dir: str = (

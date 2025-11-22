@@ -58,8 +58,6 @@ class AudioManager:
 
     def load_sound(self, name: str, filename: str) -> None:
         """Load a sound file by name."""
-        if pygame is None:
-            return
         path = os.path.join(self.sound_dir, filename)
         if os.path.exists(path):
             self.sounds[name] = pygame.mixer.Sound(path)
@@ -70,8 +68,6 @@ class AudioManager:
 
     def play_sound(self, name: str) -> None:
         """Play a loaded sound by name."""
-        if pygame is None:
-            return
         sound = self.sounds.get(name)
         if sound:
             sound.set_volume(0 if self.muted else self.volume)

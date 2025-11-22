@@ -59,11 +59,8 @@ class PaddleInputController:
             paddle_direction = 1
 
         play_rect = self.layout.get_play_rect()
-        if play_rect:
-            self.paddle.set_direction(paddle_direction)
-            self.paddle.update(delta_ms, play_rect.width, play_rect.x)
-        else:
-            self.paddle.set_direction(0)
+        self.paddle.set_direction(paddle_direction)
+        self.paddle.update(delta_ms, play_rect.width, play_rect.x)
 
     def handle_mouse_movement(self) -> None:
         """Handle paddle movement via mouse."""

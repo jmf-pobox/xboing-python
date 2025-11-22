@@ -194,8 +194,6 @@ class Renderer:
 
         """
         self.logger: logging.Logger = logging.getLogger("xboing.Renderer")
-        if window_surface is None:
-            self.logger.error("Renderer initialized with None window_surface!")
         self.surface: pygame.Surface = window_surface
         self.width: int = window_surface.get_width()
         self.height: int = window_surface.get_height()

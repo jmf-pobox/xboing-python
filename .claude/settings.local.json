@@ -10,7 +10,9 @@
       "Bash(hatch run black:*)",
       "Bash(git push:*)",
       "Bash(hatch run type-pyright:*)",
-      "Bash(hatch run:*)"
+      "Bash(hatch run:*)",
+      "Bash(sed:*)",
+      "Bash(cut:*)"
     ],
     "deny": [],
     "ask": []
