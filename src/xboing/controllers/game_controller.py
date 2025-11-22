@@ -55,21 +55,7 @@ class GameController(Controller):
         renderer: Renderer,
         bullet_manager: BulletManager,
     ) -> None:
-        """Initialize the GameController.
-
-        Args:
-        ----
-            game_state: The main GameState instance.
-            level_manager: The LevelManager instance.
-            ball_manager: The BallManager instance for managing balls.
-            paddle: The Paddle instance.
-            block_manager: The BlockManager instance.
-            input_manager: The InputManager instance.
-            layout: The GameLayout instance.
-            renderer: The Renderer instance.
-            bullet_manager: The BulletManager instance for managing bullets.
-
-        """
+        """Initialize the GameController with game components and create managers."""
         self.game_state: GameState = game_state
         self.level_manager: LevelManager = level_manager
         self.ball_manager: BallManager = ball_manager
@@ -135,13 +121,7 @@ class GameController(Controller):
         )
 
     def handle_events(self, events: List[pygame.event.Event]) -> None:
-        """Handle Pygame events for gameplay, including launching balls and handling BallLostEvent.
-
-        Args:
-        ----
-            events: List of Pygame events to process.
-
-        """
+        """Handle Pygame events for gameplay, delegating to input controllers."""
         # Check for game events
         for event in events:
             if event.type == pygame.USEREVENT:
@@ -160,13 +140,7 @@ class GameController(Controller):
             pygame.event.post(event)
 
     def update(self, delta_ms: float) -> None:
-        """Update gameplay logic.
-
-        Args:
-        ----
-            delta_ms: Time elapsed since the last update in milliseconds.
-
-        """
+        """Update gameplay logic: paddle, blocks, balls, bullets, and check completion."""
         # Check if game is paused
         if self.game_input.is_paused():
             return
@@ -191,13 +165,7 @@ class GameController(Controller):
             pygame.event.post(event)
 
     def update_blocks_and_timer(self, delta_ms: float) -> None:
-        """Update blocks and timer if appropriate.
-
-        Args:
-        ----
-            delta_ms: Time elapsed since the last update in milliseconds.
-
-        """
+        """Update blocks and timer, posting timer events."""
         # Update blocks
         self.block_manager.update(delta_ms)
 
@@ -212,17 +180,12 @@ class GameController(Controller):
         self.post_game_state_events(events)
 
     def update_balls_and_collisions(self, delta_ms: float) -> None:
-        """Update balls and bullets, check for collisions, and handle block effects using CollisionSystem."""
-        logger.debug("Starting update_balls_and_collisions")
-        # Update balls
+        """Update balls and bullets, check for collisions, and handle block effects."""
         play_rect = self.layout.get_play_rect()
-        logger.debug(f"Got play_rect: {play_rect}")
-        balls_to_remove: List[Any] = []  # Track balls that need to be removed
-        logger.debug(f"Number of balls to process: {len(self.ball_manager.balls)}")
+        balls_to_remove: List[Any] = []
 
+        # Update balls and collect events
         for ball in self.ball_manager.balls:
-            logger.debug(f"Processing ball: {ball}")
-            logger.debug("About to call ball.update")
             events = ball.update(
                 delta_ms,
                 play_rect.width,
@@ -231,44 +194,32 @@ class GameController(Controller):
                 play_rect.x,
                 play_rect.y,
             )
-            logger.debug(f"Ball update returned events: {events}")
 
-            # Handle events returned from ball update
             for event in events:
-                logger.debug(f"Processing event: {event}")
                 pygame.event.post(
                     pygame.event.Event(pygame.USEREVENT, {"event": event})
                 )
-                # Mark ball for removal if it's lost, but don't handle life loss here
                 if isinstance(event, BallLostEvent):
-                    logger.debug("BallLostEvent detected")
-                    balls_to_remove.append(ball)  # Mark ball for removal
+                    balls_to_remove.append(ball)
                     break
 
-        logger.debug("Removing marked balls")
-        # Remove marked balls
+        # Remove lost balls
         for ball in balls_to_remove:
-            if ball in self.ball_manager.balls:  # Check if ball is still in the list
+            if ball in self.ball_manager.balls:
                 self.ball_manager.remove_ball(ball)
 
-        logger.debug("Updating bullets")
         # Update bullets
         self.bullet_manager.update(delta_ms)
 
-        logger.debug("Registering collidables")
-        # Register all collidables and check collisions
+        # Check collisions
         self._register_all_collidables()
-        logger.debug("Checking collisions")
         self.collision_system.check_collisions()
 
-        logger.debug("Removing inactive objects")
-        # Remove inactive balls and bullets
+        # Remove inactive objects
         self.ball_manager.remove_inactive_balls()
         for bullet in list(self.bullet_manager.bullets):
             if not bullet.is_active():
                 self.bullet_manager.remove_bullet(bullet)
-
-        logger.debug("Finished update_balls_and_collisions")
 
     def handle_life_loss(self) -> None:
         """Handle the loss of a life, update game state, and post relevant events."""
@@ -304,13 +255,7 @@ class GameController(Controller):
         self.post_game_state_events(events)
 
     def handle_event(self, event: Any) -> None:
-        """Handle a single event.
-
-        Args:
-        ----
-            event: The event to handle.
-
-        """
+        """Handle a single event (legacy compatibility)."""
         if isinstance(event, BallLostEvent):
             self.handle_life_loss()
 
