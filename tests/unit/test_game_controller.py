@@ -325,17 +325,14 @@ def test_paddle_expand_event_fired(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision using collision handlers directly
-        controller.collision_handlers.handle_ball_block_collision(ball, block)
+    # Simulate ball-block collision using collision handlers directly
+    events = controller.collision_handlers.handle_ball_block_collision(ball, block)
 
-        # Verify PaddleGrowEvent was posted
-        paddle_grow_events = [
-            call
-            for call in mock_post.call_args_list
-            if isinstance(call.args[0].event, PaddleGrowEvent)
-        ]
-        assert len(paddle_grow_events) == 1, "Expected exactly one PaddleGrowEvent"
+    # Verify PaddleGrowEvent was returned
+    paddle_grow_events = [
+        event for event in events if isinstance(event.event, PaddleGrowEvent)
+    ]
+    assert len(paddle_grow_events) == 1, "Expected exactly one PaddleGrowEvent"
 
 
 @pytest.mark.timeout(5)
@@ -385,20 +382,17 @@ def test_paddle_shrink_event_fired(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision using collision handlers directly
-        controller.collision_handlers.handle_ball_block_collision(ball, block)
+    # Simulate ball-block collision using collision handlers directly
+    events = controller.collision_handlers.handle_ball_block_collision(ball, block)
 
-        # Verify PaddleShrinkEvent was posted
-        paddle_shrink_events = [
-            call
-            for call in mock_post.call_args_list
-            if isinstance(call.args[0].event, PaddleShrinkEvent)
-        ]
-        assert len(paddle_shrink_events) == 1, "Expected exactly one PaddleShrinkEvent"
-        assert (
-            game_setup["paddle"].size == Paddle.SIZE_SMALL
-        ), "Paddle should be small after shrinking"
+    # Verify PaddleShrinkEvent was returned
+    paddle_shrink_events = [
+        event for event in events if isinstance(event.event, PaddleShrinkEvent)
+    ]
+    assert len(paddle_shrink_events) == 1, "Expected exactly one PaddleShrinkEvent"
+    assert (
+        game_setup["paddle"].size == Paddle.SIZE_SMALL
+    ), "Paddle should be small after shrinking"
 
 
 @pytest.mark.timeout(5)
@@ -447,20 +441,17 @@ def test_sticky_paddle_activation_event(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision using collision handlers directly
-        controller.collision_handlers.handle_ball_block_collision(ball, block)
+    # Simulate ball-block collision using collision handlers directly
+    events = controller.collision_handlers.handle_ball_block_collision(ball, block)
 
-        # Verify SpecialStickyChangedEvent was posted
-        sticky_events = [
-            call
-            for call in mock_post.call_args_list
-            if isinstance(call.args[0].event, SpecialStickyChangedEvent)
-        ]
-        assert len(sticky_events) == 1, "Expected exactly one SpecialStickyChangedEvent"
-        assert (
-            sticky_events[0].args[0].event.active is True
-        ), "Sticky paddle should be activated"
+    # Verify SpecialStickyChangedEvent was returned
+    sticky_events = [
+        event for event in events if isinstance(event.event, SpecialStickyChangedEvent)
+    ]
+    assert len(sticky_events) == 1, "Expected exactly one SpecialStickyChangedEvent"
+    assert (
+        sticky_events[0].event.active is True
+    ), "Sticky paddle should be activated"
 
 
 @pytest.mark.timeout(5)
@@ -730,20 +721,17 @@ def test_block_scoring_and_event_on_hit(game_setup, mock_game_objects):
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    with patch("pygame.event.post") as mock_post:
-        # Simulate ball-block collision directly
-        controller.collision_handlers.handle_ball_block_collision(ball, block)
+    # Simulate ball-block collision directly
+    events = controller.collision_handlers.handle_ball_block_collision(ball, block)
 
-        # Verify score was updated
-        game_setup["game_state"].add_score.assert_called_with(100)
+    # Verify score was updated
+    game_setup["game_state"].add_score.assert_called_with(100)
 
-        # Verify BlockHitEvent was posted
-        block_hit_events = [
-            call
-            for call in mock_post.call_args_list
-            if isinstance(call.args[0].event, BlockHitEvent)
-        ]
-        assert len(block_hit_events) == 1, "Expected exactly one BlockHitEvent"
+    # Verify BlockHitEvent was returned
+    block_hit_events = [
+        event for event in events if isinstance(event.event, BlockHitEvent)
+    ]
+    assert len(block_hit_events) == 1, "Expected exactly one BlockHitEvent"
 
 
 @pytest.mark.timeout(5)

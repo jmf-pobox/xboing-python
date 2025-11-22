@@ -144,9 +144,6 @@ def test_bullet_block_collision_removes_bullet_and_block(game_setup, mock_game_o
         bullet_manager=game_setup["bullet_manager"],
     )
 
-    # Mock event posting
-    controller.collision_handlers.post_game_state_events = Mock()
-
     # Update game state
     controller.update_balls_and_collisions(0.016)
 
@@ -156,4 +153,3 @@ def test_bullet_block_collision_removes_bullet_and_block(game_setup, mock_game_o
     ), "Bullet should remain if still active"
     game_setup["block_manager"].check_collisions.assert_called_with(bullet)
     game_setup["game_state"].add_score.assert_called_with(100)
-    controller.collision_handlers.post_game_state_events.assert_called()

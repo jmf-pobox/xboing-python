@@ -93,15 +93,16 @@ def test_collision_system_check_collisions():
     system.add_collidable(obj2)
 
     # Check for collisions (should be none)
-    collisions = system.check_collisions()
+    collisions, events = system.check_collisions()
     assert len(collisions) == 0
+    assert len(events) == 0
 
     # Create a collidable that collides with obj1
     obj3 = MockCollidable(5, 5, 10, 10)
     system.add_collidable(obj3)
 
     # Check for collisions (should be one pair)
-    collisions = system.check_collisions()
+    collisions, events = system.check_collisions()
     assert len(collisions) == 1
     assert (obj1, obj3) in collisions
 
@@ -110,7 +111,7 @@ def test_collision_system_check_collisions():
     system.add_collidable(obj4)
 
     # Check for collisions (should be two pairs)
-    collisions = system.check_collisions()
+    collisions, events = system.check_collisions()
     assert len(collisions) == 2
     assert (obj1, obj3) in collisions
     assert (obj2, obj4) in collisions

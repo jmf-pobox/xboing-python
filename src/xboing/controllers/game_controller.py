@@ -211,9 +211,11 @@ class GameController(Controller):
         # Update bullets
         self.bullet_manager.update(delta_ms)
 
-        # Check collisions
+        # Check collisions and post collision events
         self._register_all_collidables()
-        self.collision_system.check_collisions()
+        _collisions, collision_events = self.collision_system.check_collisions()
+        for event in collision_events:
+            pygame.event.post(event)
 
         # Remove inactive objects
         self.ball_manager.remove_inactive_balls()
