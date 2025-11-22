@@ -194,15 +194,15 @@ def test_game_controller_handles_ball_lost_event(game_controller, mock_game_obje
     # Create a BallLostEvent
     event = pygame.event.Event(pygame.USEREVENT, {"event": BallLostEvent()})
 
-    # Mock the game input handle_events method to return the event
-    game_controller.game_input.handle_events = Mock(return_value=[event])
+    # Mock the game input handle_events method to return empty list
+    game_controller.game_input.handle_events = Mock(return_value=[])
 
     # Mock the handle_life_loss method
     game_controller.handle_life_loss = Mock()
 
-    # Call the handle_events method
+    # Call the handle_events method with the BallLostEvent
     with patch("pygame.event.post"):
-        game_controller.handle_events([Mock()])
+        game_controller.handle_events([event])
 
     # Verify handle_life_loss was called
     game_controller.handle_life_loss.assert_called_once()
