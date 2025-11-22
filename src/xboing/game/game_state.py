@@ -286,7 +286,7 @@ class GameState:
         level manager, and return all change events.
         """
         self.logger.info("Full game state restart")
-        all_events = []
+        all_events: List[Any] = []
 
         self.game_over = False
         all_events += self._set_ammo(4)

@@ -166,11 +166,7 @@ class Ball(CircularGameShape, PhysicsMixin):
         events: List[Event] = []
 
         # Animate main ball (not during birth animation)
-        if (
-            not self.birth_animation
-            and Ball.sprites is not None
-            and len(Ball.sprites) > 1
-        ):
+        if not self.birth_animation and len(Ball.sprites) > 1:
             self.anim_counter += delta_ms
             if self.anim_counter >= self.anim_frame_ms:
                 self.anim_counter -= self.anim_frame_ms

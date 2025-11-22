@@ -349,10 +349,8 @@ class BlockManager:
     ) -> Union[Block, CounterBlock]:
         """Create a block at the specified position."""
         config = self.block_type_data.get(block_type, {})
-        if width is not None:
-            config["width"] = width
-        if height is not None:
-            config["height"] = height
+        config["width"] = width
+        config["height"] = height
 
         # Create the appropriate block type
         if block_type == COUNTER_BLK:

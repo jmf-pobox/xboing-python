@@ -79,7 +79,7 @@ class GameInputController:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post = []
+        events_to_post: List[pygame.event.Event] = []
 
         for event in events:
             # Handle quit event
@@ -153,7 +153,7 @@ class GameInputController:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post = []
+        events_to_post: List[pygame.event.Event] = []
 
         # Handle debug X key (destroy all blocks)
         if self.input_manager.is_key_pressed(pygame.K_x):
@@ -180,7 +180,7 @@ class GameInputController:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post = []
+        events_to_post: List[pygame.event.Event] = []
         stuck_balls = [ball for ball in self.ball_manager.balls if ball.stuck_to_paddle]
 
         if stuck_balls:

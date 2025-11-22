@@ -6,7 +6,10 @@ It interfaces with the BlockManager to create the appropriate block layout.
 
 import logging
 import os
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from xboing.game.block_manager import BlockManager
 
 from xboing.game.block import CounterBlock
 from xboing.game.block_types import (
@@ -118,7 +121,7 @@ class LevelManager:
         )
         self.level_title: str = ""
         self.time_bonus: int = 0
-        self.block_manager: Optional[Any] = None
+        self.block_manager: Optional["BlockManager"] = None
         self.layout = layout
         self.current_background: int = self.BACKGROUND_2
         self.levels_dir: str = (
@@ -126,7 +129,7 @@ class LevelManager:
         )
         self.logger.info(f"Using levels directory: {self.levels_dir}")
 
-    def set_block_manager(self, block_manager: Any) -> None:
+    def set_block_manager(self, block_manager: "BlockManager") -> None:
         """Set the block manager to use for creating blocks.
 
         Args:
@@ -407,7 +410,7 @@ class LevelManager:
                     time_bonus = self.DEFAULT_TIME_BONUS
 
                 # Read block layout (remaining lines)
-                layout = []
+                layout: List[str] = []
                 for line in f:
                     row = line.strip()
                     if row:  # Skip empty lines

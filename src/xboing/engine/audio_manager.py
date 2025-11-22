@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Dict, Sequence
+from typing import Dict, Sequence, Set
 
 import pygame
 
@@ -109,7 +109,7 @@ class AudioManager:
 
     def load_sounds_from_events(self) -> None:
         """Load all sounds referenced by XBoingEvent subclasses."""
-        sound_names = set()
+        sound_names: Set[str] = set()
         for cls in XBoingEvent.__subclasses__():
             sound = getattr(cls, "sound_effect", None)
             if sound:

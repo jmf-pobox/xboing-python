@@ -77,7 +77,7 @@ class BlockRenderer:
                 failed_count += 1
 
             # Preload explosion frames
-            explosion_frames = block_info.get("explosion_frames") or []
+            explosion_frames: List[str] = block_info.get("explosion_frames") or []
             for frame in explosion_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1
@@ -85,7 +85,7 @@ class BlockRenderer:
                     failed_count += 1
 
             # Preload animation frames
-            animation_frames = block_info.get("animation_frames") or []
+            animation_frames: List[str] = block_info.get("animation_frames") or []
             for frame in animation_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1

@@ -123,7 +123,7 @@ class CollisionSystem:
             A list of pairs of colliding objects.
 
         """
-        collisions = []
+        collisions: List[Tuple[Collidable, Collidable]] = []
         for i, obj1 in enumerate(self.collidables):
             for obj2 in self.collidables[i + 1 :]:
                 if obj1.collides_with(obj2):
@@ -159,7 +159,7 @@ class CollisionSystem:
         if collidable not in self.collidables:
             return []
 
-        collisions = []
+        collisions: List[Collidable] = []
         for other in self.collidables:
             if other is not collidable and collidable.collides_with(other):
                 collisions.append(other)
