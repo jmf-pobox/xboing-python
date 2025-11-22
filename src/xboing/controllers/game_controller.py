@@ -3,7 +3,7 @@ XBoing.
 """
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, List
 
 import pygame
 
@@ -12,7 +12,6 @@ from xboing.controllers.game_input_controller import GameInputController
 from xboing.controllers.paddle_input_controller import PaddleInputController
 from xboing.engine.events import (
     BallLostEvent,
-    BlockHitEvent,
     SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
 )
