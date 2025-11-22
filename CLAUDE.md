@@ -24,20 +24,37 @@ Essential reading for understanding the project:
 **🚨 ABSOLUTE REQUIREMENTS - NO EXCEPTIONS:**
 
 ### Required Quality Gates (Run After EVERY Code Change)
+
+**Production Code (src/) - MUST PASS ALWAYS:**
 ```bash
-hatch run lint           # 1. ZERO Ruff violations
-hatch run format         # 2. Perfect formatting
-hatch run type           # 3. ZERO MyPy errors (strict mode)
-hatch run type-pyright   # 4. ZERO Pyright errors (strict mode)
+hatch run lint           # 1. ZERO Ruff violations (src/ only)
+hatch run format         # 2. Perfect formatting (src/ only)
+hatch run type           # 3. ZERO MyPy errors (src/ only, strict mode)
+hatch run type-pyright   # 4. ZERO Pyright errors (src/ only, strict mode)
 hatch run test           # 5. ALL tests pass (currently 170 tests)
 ```
 
-### Full Quality Check Commands
+**Test Code (tests/) - Fix Gradually:**
 ```bash
-hatch run check          # Run lint + type + type-pyright + test
-hatch run check-cov      # Run lint + type + type-pyright + test-cov
-hatch run type-all       # Run both mypy and pyright
+hatch run lint-test          # Check test code lint (438 mypy, 814 pyright errors to fix)
+hatch run type-test          # Check test code types with mypy
+hatch run type-pyright-test  # Check test code types with pyright
 ```
+
+**Combined Checks:**
+```bash
+hatch run check          # Production code only (lint + type + type-pyright + test)
+hatch run check-all      # Everything including test code (for progress tracking)
+hatch run lint-all       # Check src/ + tests/
+hatch run format-all     # Format src/ + tests/
+hatch run type-all       # Run both mypy and pyright on src/
+hatch run type-all-code  # Run mypy on src/ + tests/
+hatch run type-pyright-all  # Run pyright on everything
+```
+
+**Quality Status:**
+- Production code (src/): 100% type-clean ✅
+- Test code (tests/): Fix gradually during refactoring
 
 ### Code Standards (MANDATORY)
 - **Type hints**: Full type annotations on all functions and methods
