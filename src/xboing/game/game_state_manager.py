@@ -98,6 +98,10 @@ class GameStateManager:
         """
         events: List[object] = []
 
+        # Check if level is already marked complete to avoid duplicate events
+        if self.game_state.level_state.is_level_complete():
+            return events
+
         # Level is complete when no blocks remain
         if blocks_remaining == 0:
             self.logger.debug("Level complete! No blocks remaining.")

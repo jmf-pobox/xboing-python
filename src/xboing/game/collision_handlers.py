@@ -214,24 +214,6 @@ class CollisionHandlers:
         changes = self.power_up_manager.handle_power_up_effect(effect, block)
         return self._create_events_from_changes(changes)
 
-    def set_sticky(self, value: bool) -> None:
-        """Set the sticky paddle state.
-
-        Args:
-            value: The new sticky state.
-
-        """
-        self.power_up_manager.set_sticky(value)
-
-    def set_reverse(self, value: bool) -> None:
-        """Set the reverse paddle control state.
-
-        Args:
-            value: The new reverse state.
-
-        """
-        self.power_up_manager.set_reverse(value)
-
     @property
     def sticky(self) -> bool:
         """Get the sticky paddle state for backward compatibility.

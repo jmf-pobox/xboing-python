@@ -16,7 +16,8 @@
       "Bash(gh run list:*)",
       "Bash(python -m radon cc:*)",
       "Bash(python:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "ask": []
