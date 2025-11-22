@@ -30,6 +30,10 @@ from .view import View
 REVEAL_DELAY_FRAMES = 180  # Default delay (3000ms / 16.67ms ≈ 180 frames)
 BULLET_ANIM_DELAY_FRAMES = 18  # Frames per bullet (300ms / 16.67ms ≈ 18 frames)
 
+# Layout constants (from original bonus.c)
+GAP = 30  # Vertical spacing unit between elements
+Y_START = 135  # Starting Y position for bonus screen content
+
 
 class BonusState(Enum):
     """Enum representing the states of the bonus screen animation."""
@@ -179,22 +183,14 @@ class LevelCompleteView(View):
         self.final_score = self.game_state.score
 
     def _prepare_renderers(self) -> None:
-        """Prepare the list of (renderer, y) pairs, events, and delays for the level complete screen, using pixel-perfect y-coordinates."""
+        """Prepare the list of (renderer, y) pairs, events, and delays for the level complete screen using dynamic font-based positioning."""
         self.row_renderers_with_y = []
         self._row_events = []
         self._row_delays = []
-        y_coords = [
-            176,  # - Level 1 - (bottom)
-            229,  # Congratulations on finishing this level.
-            295,  # Sorry, no bonus coins collected.
-            369,  # Level bonus - level 1 x 100 = 100 points
-            417,  # [Bullets row] (bottom)
-            466,  # Time bonus - ...
-            495,  # You are currently ranked ...
-            530,  # Prepare for level ...
-            560,  # Press space for the next level
-        ]
-        idx = 0
+
+        # Dynamic Y positioning using font metrics (from original bonus.c)
+        ypos = Y_START
+
         # Title row
         self.row_renderers_with_y.append(
             (
@@ -203,12 +199,12 @@ class LevelCompleteView(View):
                     font=self._fonts["title"],
                     color=(255, 0, 0),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(None)
         self._row_delays.append(30)  # 500ms -> 30 frames
-        idx += 1
+        ypos += self._fonts["title"].get_ascent() + GAP
         # Congratulations row
         self.row_renderers_with_y.append(
             (
@@ -217,12 +213,13 @@ class LevelCompleteView(View):
                     font=self._fonts["message"],
                     color=(255, 255, 255),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(ApplauseEvent())
         self._row_delays.append(90)  # 1500ms -> 90 frames
-        idx += 1
+        ypos += self._fonts["message"].get_ascent() + int(GAP * 1.5)  # 1.5x spacing
+
         # Bonus coin row
         coins = self.game_state.level_state.get_bonus_coins_collected()
         if coins == 0:
@@ -233,7 +230,7 @@ class LevelCompleteView(View):
                         font=self._fonts["message"],
                         color=(0, 0, 255),
                     ),
-                    y_coords[idx],
+                    ypos,
                 )
             )
             self._row_events.append(DohSoundEvent())
@@ -248,12 +245,12 @@ class LevelCompleteView(View):
                         icon=self._bonus_coin_img,
                         icon_offset=8,
                     ),
-                    y_coords[idx],
+                    ypos,
                 )
             )
             self._row_events.append(BonusCollectedEvent())
             self._row_delays.append(90)  # 1500ms -> 90 frames
-        idx += 1
+        ypos += self._fonts["message"].get_ascent() + int(GAP * 1.5)  # 1.5x spacing
         # Level bonus row
         self.row_renderers_with_y.append(
             (
@@ -262,19 +259,20 @@ class LevelCompleteView(View):
                     font=self._fonts["bonus"],
                     color=(255, 255, 0),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(BonusCollectedEvent())
         self._row_delays.append(54)  # 900ms -> 54 frames
-        idx += 1
-        # Bullet row (special y adjustment)
+        ypos += self._fonts["bonus"].get_ascent() + GAP
+
+        # Bullet row
         bullet_img = pygame.transform.smoothscale(self._bullet_img, (7, 15))
-        bullet_y = y_coords[idx] + 22 - bullet_img.get_height()
-        self.row_renderers_with_y.append((BulletRowRenderer(bullet_img), bullet_y))
+        self.row_renderers_with_y.append((BulletRowRenderer(bullet_img), ypos))
         self._row_events.append(None)  # Sound handled in update
         self._row_delays.append(42)  # 700ms -> 42 frames
-        idx += 1
+        ypos += bullet_img.get_height() + GAP
+
         # Time bonus row
         self.row_renderers_with_y.append(
             (
@@ -283,12 +281,13 @@ class LevelCompleteView(View):
                     font=self._fonts["bonus"],
                     color=(255, 255, 0),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(TimerUpdatedEvent(self.time_remaining))
         self._row_delays.append(72)  # 1200ms -> 72 frames
-        idx += 1
+        ypos += self._fonts["bonus"].get_ascent() + GAP
+
         # Rank row
         self.row_renderers_with_y.append(
             (
@@ -297,12 +296,13 @@ class LevelCompleteView(View):
                     font=self._fonts["rank"],
                     color=(255, 0, 0),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(None)
         self._row_delays.append(60)  # 1000ms -> 60 frames
-        idx += 1
+        ypos += self._fonts["rank"].get_ascent() + GAP
+
         # Prepare for the next level row
         self.row_renderers_with_y.append(
             (
@@ -311,12 +311,13 @@ class LevelCompleteView(View):
                     font=self._fonts["message"],
                     color=(255, 255, 0),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(None)
         self._row_delays.append(48)  # 800ms -> 48 frames
-        idx += 1
+        ypos += self._fonts["message"].get_ascent() + GAP
+
         # Press the spacebar row
         self.row_renderers_with_y.append(
             (
@@ -325,7 +326,7 @@ class LevelCompleteView(View):
                     font=self._fonts["prompt"],
                     color=(214, 183, 144),
                 ),
-                y_coords[idx],
+                ypos,
             )
         )
         self._row_events.append(None)
