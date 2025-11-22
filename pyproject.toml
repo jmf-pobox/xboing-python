@@ -65,6 +65,9 @@ dependencies = [
     "ruff>=0.13.0",
     "black",
     "pylint",
+    # Complexity metrics
+    "radon>=6.0.1",
+    "xenon>=0.9.1",
     # Dev tools
     "pillow",
     "aiohttp",  # Required by black language server
@@ -109,6 +112,14 @@ lint-fix = ["black src/ tests/", "ruff check --fix src/ tests/"]
 fix = ["format-all", "lint-fix"]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
+# Complexity metrics
+complexity = "radon cc src/ -s -a"
+complexity-detailed = "radon cc src/ -s"
+complexity-json = "radon cc src/ -j"
+maintainability = "radon mi src/ -s"
+raw-metrics = "radon raw src/ -s"
+complexity-check = "xenon --max-absolute B --max-modules B --max-average A src/"
+complexity-monitor = ["complexity", "maintainability"]
 # Run the game with coverage and then show the report
 cov-game = ["coverage run --source=src -m xboing", "coverage report -m"]
 cov-game-html = ["coverage run --source=src -m xboing", "coverage html"]
@@ -219,3 +230,12 @@ test-publish = [
 targets = ["src", "tests"]
 formatter = "black"
 linter = "isort"
+
+# Radon complexity thresholds
+# Cyclomatic Complexity grades: A=1-5, B=6-10, C=11-20, D=21-50, E=51-100, F=100+
+# Maintainability Index grades: A=20-100, B=10-19, C=0-9
+[tool.radon]
+exclude = "tests/*,*/__init__.py,*/scripts/*"
+# Set thresholds for failing
+cc_min = "B"  # Fail if any function has CC > 10
+mi_min = "B"  # Fail if any module has MI < 10
