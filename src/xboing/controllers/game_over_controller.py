@@ -102,7 +102,9 @@ class GameOverController(Controller):
         if self.layout:
             self.layout.get_play_rect()
         self.game_controller.ball_manager.clear()
-        new_ball = self.game_controller.create_new_ball()
+        new_ball = self.game_controller.ball_manager.create_new_ball(
+            self.game_controller.paddle
+        )
         self.game_controller.ball_manager.add_ball(new_ball)
         logger.debug(
             f"[reset_game] New ball created: id={id(new_ball)}, stuck_to_paddle={new_ball.stuck_to_paddle}"

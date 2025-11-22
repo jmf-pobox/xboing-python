@@ -1,8 +1,11 @@
 """Manages ball objects and their state in XBoing."""
 
-from typing import Iterator, List, Optional
+from typing import TYPE_CHECKING, Iterator, List, Optional
 
-from .ball import Ball
+from .ball import BALL_RADIUS, Ball
+
+if TYPE_CHECKING:
+    from .paddle import Paddle
 
 
 class BallManager:
@@ -40,6 +43,26 @@ class BallManager:
     def clear(self) -> None:
         """Remove all balls from the manager."""
         self._balls.clear()
+
+    def create_new_ball(self, paddle: "Paddle") -> Ball:
+        """Create a new ball at the paddle position.
+
+        Args:
+            paddle: The paddle to position the ball relative to.
+
+        Returns:
+            A new Ball instance stuck to the paddle.
+
+        """
+        ball = Ball(
+            x=paddle.rect.centerx,
+            y=paddle.rect.top - BALL_RADIUS,
+            radius=BALL_RADIUS,
+        )
+        # Stick the ball to the paddle
+        ball.stuck_to_paddle = True
+        ball.paddle_offset = 0.0
+        return ball
 
     def reset(self, initial_ball: Optional[Ball] = None) -> None:
         """Clear all balls and optionally add a new one."""

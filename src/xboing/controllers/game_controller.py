@@ -17,7 +17,6 @@ from xboing.engine.events import (
 )
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
-from xboing.game.ball import BALL_RADIUS, Ball
 from xboing.game.ball_manager import BallManager
 from xboing.game.block_manager import BlockManager
 from xboing.game.bullet_manager import BulletManager
@@ -291,7 +290,7 @@ class GameController(Controller):
 
         # Create a new ball if we still have lives and no balls remain
         if not self.game_state.is_game_over() and not has_active_balls:
-            new_ball = self.create_new_ball()
+            new_ball = self.ball_manager.create_new_ball(self.paddle)
             self.ball_manager.add_ball(new_ball)
             logger.debug("Created new ball after life loss")
 
@@ -303,24 +302,6 @@ class GameController(Controller):
 
         # Post events returned by GameStateManager
         self.post_game_state_events(events)
-
-    def create_new_ball(self) -> Ball:
-        """Create a new ball at the paddle position.
-
-        Returns
-        -------
-            A new Ball instance.
-
-        """
-        ball = Ball(
-            x=self.paddle.rect.centerx,
-            y=self.paddle.rect.top - BALL_RADIUS,
-            radius=BALL_RADIUS,
-        )
-        # Stick the ball to the paddle
-        ball.stuck_to_paddle = True
-        ball.paddle_offset = 0.0
-        return ball
 
     def handle_event(self, event: Any) -> None:
         """Handle a single event.

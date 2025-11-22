@@ -12,7 +12,8 @@
       "Bash(hatch run type-pyright:*)",
       "Bash(hatch run:*)",
       "Bash(sed:*)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": [],
     "ask": []

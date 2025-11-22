@@ -122,7 +122,11 @@ class LevelCompleteController(Controller):
 
         # Set the balls
         self.balls.clear()
-        self.balls.append(self.game_controller.create_new_ball())
+        self.balls.append(
+            self.game_controller.ball_manager.create_new_ball(
+                self.game_controller.paddle
+            )
+        )
 
         # Change the view
         self.ui_manager.set_view("game")
