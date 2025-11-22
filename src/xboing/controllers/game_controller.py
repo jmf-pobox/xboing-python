@@ -215,6 +215,11 @@ class GameController(Controller):
         self._register_all_collidables()
         _collisions, collision_events = self.collision_system.check_collisions()
         for pygame_event in collision_events:
+            # Sync paddle input immediately for reverse changes to avoid one-frame delay
+            if hasattr(pygame_event, "event") and isinstance(
+                pygame_event.event, SpecialReverseChangedEvent
+            ):
+                self.paddle_input.set_reverse(pygame_event.event.active)
             pygame.event.post(pygame_event)
 
         # Remove inactive objects
