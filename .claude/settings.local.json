@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(hatch run check:*)",
+      "Bash(hatch run test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(black:*)",
+      "Bash(hatch run lint)",
+      "Bash(hatch run black:*)",
+      "Bash(git push:*)",
+      "Bash(hatch run type-pyright:*)",
+      "Bash(hatch run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

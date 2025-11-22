@@ -59,8 +59,9 @@ dependencies = [
     "pytest",
     "pytest-cov",
     # Code quality
-    "mypy",
-    "ruff",
+    "mypy>=1.18.1",
+    "pyright>=1.1.0",
+    "ruff>=0.13.0",
     "black",
     "pylint",
     # Dev tools
@@ -71,42 +72,31 @@ path = ".venv"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest tests/unit"
+test-cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 cov = "pytest --cov-report=term-missing --cov=src {args:tests/}"
 game = "python -m xboing"
 # Code quality commands
 lint = "ruff check src/ tests/"
-fmt = [
-    "black src/ tests/",
-    "ruff check --fix src/ tests/"
-]
-lint-fix = [
-    "black src/ tests/",
-    "ruff check --fix src/ tests/"
-]
+format = "black src/ tests/"
+format-check = "black --check src/ tests/"
+type = "mypy src/ tests/"
+type-quick = "mypy src/"
+type-pyright = "pyright"
+type-pyright-stats = "pyright --stats"
+type-all = ["type", "type-pyright"]
 typecheck = "mypy src/"
 # Combined quality check
-check = [
-    "format-check",
-    "lint",
-    "typecheck"
-]
+check = ["lint", "type", "type-pyright", "test"]
+check-cov = ["lint", "type", "type-pyright", "test-cov"]
 # Combined fixing command
-fix = [
-    "format",
-    "lint-fix"
-]
+fmt = ["black src/ tests/", "ruff check --fix src/ tests/"]
+lint-fix = ["black src/ tests/", "ruff check --fix src/ tests/"]
+fix = ["format", "lint-fix"]
 count-lines = "python -c \"import pathlib; print(sum(1 for f in pathlib.Path('src').rglob('*.py') for _ in open(f)))\""
 pylint = "python -m pylint --rcfile=.pylintrc src"
 # Run the game with coverage and then show the report
-cov-game = [
-  "coverage run --source=src -m xboing",
-  "coverage report -m"
-]
-cov-game-html = [
-  "coverage run --source=src -m xboing",
-  "coverage html"
-]
-format-check = "black --check src/ tests/"
+cov-game = ["coverage run --source=src -m xboing", "coverage report -m"]
+cov-game-html = ["coverage run --source=src -m xboing", "coverage html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -140,13 +130,32 @@ target-version = "py38"
 
 [tool.ruff.lint]
 select = [
-    "E", "F", "B", "I", "UP", "PL", "D", "N", "C4", "SIM", "A", "C90",
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "RUF", # Ruff-specific rules
+    "PL",  # pylint
+    "D",   # pydocstyle
+    "A",   # flake8-builtins
+    "C90", # mccabe complexity
 ]
+extend-select = ["PLC0415"]
+
 ignore = [
     "E203", "E501", "D203", "D213",
     "D100", "D101", "D102", "D103", "D107", "D205", "D212",
     "PLR2004", "C408",
-    "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417"
+    "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417",
+    "TCH001",  # Move import into TYPE_CHECKING - too aggressive for runtime imports
+    "TCH003",  # Move standard lib import into TYPE_CHECKING - unnecessary overhead
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
 
@@ -155,14 +164,25 @@ known-first-party = ["src"]
 combine-as-imports = true
 force-sort-within-sections = true
 
-# MyPy configuration 
+# MyPy configuration
 [tool.mypy]
-# Maximum strictness, check tests as strictly as source
-python_version = "3.8"
+python_version = "3.10"
 strict = true
-warn_unused_ignores = true
 warn_return_any = true
-# No test ignore override: tests are checked strictly
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
 
 [tool.hatch.envs.publish]
 dependencies = [

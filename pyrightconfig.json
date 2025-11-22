@@ -1,7 +1,31 @@
 {
-    "typeCheckingMode": "basic",
-    "pythonVersion": "3.13",
-    "include": ["src", "tests", "scripts"],
-    "exclude": ["**/node_modules", "**/__pycache__"],
-    "extraPaths": ["src", ".venv/lib/python3.13/site-packages"]
-  }
+  "include": [
+    "src",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules",
+    ".venv",
+    "build",
+    "dist"
+  ],
+  "typeCheckingMode": "strict",
+  "reportUnknownMemberType": "information",
+  "reportUnknownVariableType": "information",
+  "reportMissingTypeStubs": "none",
+  "pythonVersion": "3.10",
+  "pythonPlatform": "Darwin",
+  "strict": [
+    "src/xboing"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "tests",
+      "reportPrivateUsage": "none"
+    },
+    {
+      "root": "src"
+    }
+  ]
+}
