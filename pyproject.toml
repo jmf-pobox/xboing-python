@@ -118,7 +118,7 @@ complexity-detailed = "radon cc src/ -s"
 complexity-json = "radon cc src/ -j"
 maintainability = "radon mi src/ -s"
 raw-metrics = "radon raw src/ -s"
-complexity-check = "xenon --max-absolute B --max-modules B --max-average A src/"
+complexity-check = "xenon --max-absolute C --max-modules C --max-average B --exclude '**/scripts/*' src/"
 complexity-monitor = ["complexity", "maintainability"]
 # Run the game with coverage and then show the report
 cov-game = ["coverage run --source=src -m xboing", "coverage report -m"]

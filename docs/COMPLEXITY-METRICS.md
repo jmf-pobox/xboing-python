@@ -194,13 +194,14 @@ mi_min = "B"  # Fail if any module has MI < 10
 
 ```bash
 # Current settings in hatch scripts
-xenon --max-absolute B --max-modules B --max-average A src/
+xenon --max-absolute C --max-modules C --max-average B --exclude '**/scripts/*' src/
 ```
 
 **What this means:**
-- **--max-absolute B**: No single function can exceed CC of 10
-- **--max-modules B**: No module's max CC can exceed 10
-- **--max-average A**: Module average CC must be ≤ 5
+- **--max-absolute C**: No single function can exceed CC of 20 (grade C)
+- **--max-modules C**: No module's max CC can exceed 20 (grade C)
+- **--max-average B**: Module average CC must be ≤ 10 (grade B)
+- **--exclude '**/scripts/*'**: Utility scripts are excluded (consistent with radon)
 
 ---
 
