@@ -154,8 +154,8 @@ ignore = [
     "D100", "D101", "D102", "D103", "D107", "D205", "D212",
     "PLR2004", "C408",
     "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417",
-    "TCH001",  # Move import into TYPE_CHECKING - too aggressive for runtime imports
-    "TCH003",  # Move standard lib import into TYPE_CHECKING - unnecessary overhead
+    "TC001",  # Move import into TYPE_CHECKING - too aggressive for runtime imports
+    "TC003",  # Move standard lib import into TYPE_CHECKING - unnecessary overhead
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
 
