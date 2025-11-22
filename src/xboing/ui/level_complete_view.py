@@ -110,6 +110,12 @@ class LevelCompleteView(View):
         self.bullet_bonus_shown: int = 0
         self.bullet_bonus_frame_counter: int = 0
 
+        # Score animation variables
+        self.score_animation_active: bool = False
+        self.score_animation_target: int = 0
+        self.score_animation_accumulated: float = 0.0
+        self.score_animation_increment_per_frame: float = 0.0
+
         self.logger = logging.getLogger("xboing.ui.LevelCompleteView")
 
         # Load and cache icons using asset loader and asset paths
@@ -349,6 +355,12 @@ class LevelCompleteView(View):
         self.bullet_bonus_shown = 0
         self.bullet_bonus_frame_counter = 0
 
+        # Initialize score animation
+        self.score_animation_active = False
+        self.score_animation_target = 0
+        self.score_animation_accumulated = 0.0
+        self.score_animation_increment_per_frame = 0.0
+
         self.logger.debug(
             f"[activate] Called. row_renderers_with_y length: {len(self.row_renderers_with_y)}"
         )
@@ -425,69 +437,228 @@ class LevelCompleteView(View):
         else:  # BONUS_FINISH or unknown
             return BonusState.BONUS_FINISH
 
-    def update(self, delta_ms: float) -> None:
-        """Update the gradual reveal of bonus/info messages, bullet animation, and fire sound events."""
-        self.logger.debug(
-            f"[update] Called. reveal_step: {self.reveal_step}, row_renderers_with_y length: {len(self.row_renderers_with_y)}"
-        )
-        if self.active and self.reveal_step < len(self.row_renderers_with_y):
-            # Check if we're at the bullet row step
-            bullet_row_idx = None
-            for idx, (renderer, _) in enumerate(self.row_renderers_with_y):
-                if isinstance(renderer, BulletRowRenderer):
-                    bullet_row_idx = idx
-                    break
-            if bullet_row_idx is not None and self.reveal_step == bullet_row_idx:
-                # Animate bullets one at a time (frame-based)
-                if not self.bullet_bonus_animating:
-                    self.bullet_bonus_animating = True
-                    self.bullet_bonus_total = self.game_state.get_ammo()
-                    self.bullet_bonus_shown = 0
-                    self.bullet_bonus_frame_counter = 0
-                if self.bullet_bonus_shown < self.bullet_bonus_total:
-                    self.bullet_bonus_frame_counter += 1
-                    if self.bullet_bonus_frame_counter >= BULLET_ANIM_DELAY_FRAMES:
-                        self.bullet_bonus_shown += 1
-                        self.bullet_bonus_frame_counter = 0
-                        # Fire AmmoFiredEvent for sound
-                        pygame.event.post(
-                            pygame.event.Event(
-                                pygame.USEREVENT,
-                                {"event": KeySoundEvent()},
-                            )
-                        )
-                else:
-                    self.bullet_bonus_animating = False
-                    self.reveal_step += 1
-                    self.frame_counter = 0
-                    # Set delay for the next row if available
-                    if self.reveal_step < len(self._row_delays):
-                        self.reveal_frame_threshold = self._row_delays[self.reveal_step]
-                    else:
-                        self.reveal_frame_threshold = REVEAL_DELAY_FRAMES
-            else:
-                # Normal reveal logic for other rows (frame-based)
-                self.frame_counter += 1
-                if self.frame_counter >= self.reveal_frame_threshold:
-                    self.reveal_step += 1
-                    self.frame_counter = 0
-                    self.logger.debug(
-                        f"[update] reveal_step incremented: {self.reveal_step}"
+    def _get_state_duration_frames(self, state: BonusState) -> int:
+        """Get the frame duration for a given bonus state.
+
+        Args:
+        ----
+            state (BonusState): The state to get duration for.
+
+        Returns:
+        -------
+            int: Number of frames this state should last.
+
+        """
+        # Map states to their durations (in frames at 60 FPS)
+        if state == BonusState.BONUS_TEXT:
+            return 30  # Title row
+        elif state == BonusState.BONUS_SCORE:
+            return 90  # Congratulations row
+        elif state == BonusState.BONUS_DELAY:
+            return 0  # No delay, transition immediately
+        elif state == BonusState.BONUS_COINS:
+            return 90  # Bonus coin row
+        elif state == BonusState.BONUS_LEVEL:
+            return 54  # Level bonus row
+        elif state == BonusState.BONUS_BULLETS:
+            # Dynamic based on bullet count * frames per bullet
+            return self.bullet_bonus_total * BULLET_ANIM_DELAY_FRAMES
+        elif state == BonusState.BONUS_TIME:
+            return 72  # Time bonus row
+        elif state == BonusState.BONUS_RANK:
+            return 60  # Rank row
+        elif state == BonusState.BONUS_PREPARE:
+            return 48  # Prepare for next level row
+        else:  # BONUS_FINISH
+            return 0
+
+    def _get_state_reveal_step(self, state: BonusState) -> int:
+        """Map BonusState to reveal_step index for rendering compatibility.
+
+        Args:
+        ----
+            state (BonusState): The current state.
+
+        Returns:
+        -------
+            int: The reveal_step index (how many rows to show).
+
+        """
+        # Map states to reveal_step indices
+        if state == BonusState.BONUS_TEXT:
+            return 1  # Show title row
+        elif state == BonusState.BONUS_SCORE:
+            return 2  # Show title + congratulations
+        elif state == BonusState.BONUS_DELAY:
+            return 2  # Keep showing title + congratulations
+        elif state == BonusState.BONUS_COINS:
+            return 3  # Show up to coin row
+        elif state == BonusState.BONUS_LEVEL:
+            return 4  # Show up to level bonus row
+        elif state == BonusState.BONUS_BULLETS:
+            return 5  # Show up to bullet row
+        elif state == BonusState.BONUS_TIME:
+            return 6  # Show up to time bonus row
+        elif state == BonusState.BONUS_RANK:
+            return 7  # Show up to rank row
+        elif state == BonusState.BONUS_PREPARE:
+            return 8  # Show up to prepare row
+        else:  # BONUS_FINISH
+            return 9  # Show all rows
+
+    def _start_score_animation(self, bonus_amount: int, duration_frames: int) -> None:
+        """Start animating score increase for a bonus.
+
+        Args:
+        ----
+            bonus_amount (int): The total bonus points to add.
+            duration_frames (int): Number of frames over which to animate.
+
+        """
+        if bonus_amount > 0 and duration_frames > 0:
+            self.score_animation_active = True
+            self.score_animation_target = self.game_state.score + bonus_amount
+            self.score_animation_accumulated = 0.0
+            self.score_animation_increment_per_frame = bonus_amount / duration_frames
+            self.logger.debug(
+                f"Starting score animation: {bonus_amount} points over {duration_frames} frames"
+            )
+
+    def _update_score_animation(self) -> None:
+        """Update score animation by one frame, incrementing score gradually."""
+        if not self.score_animation_active:
+            return
+
+        # Accumulate fractional score
+        self.score_animation_accumulated += self.score_animation_increment_per_frame
+
+        # Add integer portion to score
+        score_to_add = int(self.score_animation_accumulated)
+        if score_to_add > 0:
+            self.score_animation_accumulated -= score_to_add
+
+            # Don't exceed target
+            new_score = self.game_state.score + score_to_add
+            if new_score >= self.score_animation_target:
+                score_to_add = self.score_animation_target - self.game_state.score
+                new_score = self.score_animation_target
+                self.score_animation_active = False
+
+            # Update score and post event
+            if score_to_add > 0:
+                score_events = self.game_state.add_score(score_to_add)
+                for event in score_events:
+                    pygame.event.post(
+                        pygame.event.Event(pygame.USEREVENT, {"event": event})
                     )
-                    # Fire event for this row if present
-                    if self.reveal_step <= len(self._row_events):
-                        event = self._row_events[self.reveal_step - 1]
-                        if event is not None:
-                            pygame.event.post(
-                                pygame.event.Event(pygame.USEREVENT, {"event": event})
-                            )
-                        # Set delay for the next row if available
-                        if self.reveal_step < len(self._row_delays):
-                            self.reveal_frame_threshold = self._row_delays[
-                                self.reveal_step
-                            ]
-                        else:
-                            self.reveal_frame_threshold = REVEAL_DELAY_FRAMES
+
+    def update(self, delta_ms: float) -> None:
+        """Update state machine, score animation, and bonus screen progression."""
+        if not self.active or self.current_state == BonusState.BONUS_FINISH:
+            return
+
+        self.logger.debug(
+            f"[update] state={self.current_state}, frame={self.state_frame_counter}"
+        )
+
+        # Update score animation every frame
+        self._update_score_animation()
+
+        # Special handling for BONUS_BULLETS state (bullet animation)
+        if self.current_state == BonusState.BONUS_BULLETS:
+            if not self.bullet_bonus_animating:
+                self.bullet_bonus_animating = True
+                self.bullet_bonus_shown = 0
+                self.bullet_bonus_frame_counter = 0
+
+            if self.bullet_bonus_shown < self.bullet_bonus_total:
+                self.bullet_bonus_frame_counter += 1
+                if self.bullet_bonus_frame_counter >= BULLET_ANIM_DELAY_FRAMES:
+                    self.bullet_bonus_shown += 1
+                    self.bullet_bonus_frame_counter = 0
+                    # Fire sound event for each bullet
+                    pygame.event.post(
+                        pygame.event.Event(
+                            pygame.USEREVENT,
+                            {"event": KeySoundEvent()},
+                        )
+                    )
+            else:
+                # Bullets animation complete, transition to next state
+                self.bullet_bonus_animating = False
+                self._transition_to_next_state()
+                return
+
+        # Check if current state duration has elapsed
+        state_duration = self._get_state_duration_frames(self.current_state)
+        if state_duration == 0 or self.state_frame_counter >= state_duration:
+            self._transition_to_next_state()
+        else:
+            # Increment frame counter
+            self.state_frame_counter += 1
+
+    def _transition_to_next_state(self) -> None:
+        """Transition to the next state, fire events, and start animations."""
+        next_state = self._get_next_state(self.current_state)
+
+        self.logger.debug(f"Transitioning from {self.current_state} to {next_state}")
+
+        # Update state
+        self.current_state = next_state
+        self.state_frame_counter = 0
+
+        # Update reveal_step for rendering
+        self.reveal_step = self._get_state_reveal_step(next_state)
+
+        # Fire events and start animations based on new state
+        if next_state == BonusState.BONUS_TEXT:
+            # Post title event (none currently)
+            pass
+        elif next_state == BonusState.BONUS_SCORE:
+            # Post congratulations event
+            pygame.event.post(
+                pygame.event.Event(pygame.USEREVENT, {"event": ApplauseEvent()})
+            )
+        elif next_state == BonusState.BONUS_COINS:
+            # Post coin event and start score animation
+            coins = self.game_state.level_state.get_bonus_coins_collected()
+            if coins > 0:
+                pygame.event.post(
+                    pygame.event.Event(
+                        pygame.USEREVENT, {"event": BonusCollectedEvent()}
+                    )
+                )
+                self._start_score_animation(
+                    self.coin_bonus, self._get_state_duration_frames(next_state)
+                )
+            else:
+                pygame.event.post(
+                    pygame.event.Event(pygame.USEREVENT, {"event": DohSoundEvent()})
+                )
+        elif next_state == BonusState.BONUS_LEVEL:
+            # Post level bonus event and start score animation
+            pygame.event.post(
+                pygame.event.Event(pygame.USEREVENT, {"event": BonusCollectedEvent()})
+            )
+            self._start_score_animation(
+                self.level_bonus, self._get_state_duration_frames(next_state)
+            )
+        elif next_state == BonusState.BONUS_BULLETS:
+            # Bullet animation handled in update()
+            pass
+        elif next_state == BonusState.BONUS_TIME:
+            # Post time bonus event and start score animation
+            pygame.event.post(
+                pygame.event.Event(
+                    pygame.USEREVENT, {"event": TimerUpdatedEvent(self.time_remaining)}
+                )
+            )
+            self._start_score_animation(
+                self.time_bonus, self._get_state_duration_frames(next_state)
+            )
+        elif next_state == BonusState.BONUS_FINISH:
+            # All done
+            self.logger.debug("Bonus screen animation complete")
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the level-complete overlay content using hardcoded y coordinates for pixel-perfect placement."""
