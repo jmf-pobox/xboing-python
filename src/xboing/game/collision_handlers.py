@@ -12,29 +12,16 @@ import pygame
 from xboing.engine.events import (
     BallLostEvent,
     BlockHitEvent,
-    BombExplodedEvent,
-    PaddleGrowEvent,
     PaddleHitEvent,
-    PaddleShrinkEvent,
-    SpecialReverseChangedEvent,
-    SpecialStickyChangedEvent,
 )
 from xboing.game.ball_manager import BallManager
 from xboing.game.block import Block
 from xboing.game.block_manager import BlockManager
-from xboing.game.block_types import (
-    BOMB_BLK,
-    BULLET_BLK,
-    MAXAMMO_BLK,
-    PAD_EXPAND_BLK,
-    PAD_SHRINK_BLK,
-    REVERSE_BLK,
-    SPECIAL_BLOCK_TYPES,
-    STICKY_BLK,
-)
+from xboing.game.block_types import SPECIAL_BLOCK_TYPES
 from xboing.game.bullet_manager import BulletManager
 from xboing.game.game_state import GameState
 from xboing.game.paddle import Paddle
+from xboing.game.power_up_manager import PowerUpManager
 
 
 class CollisionHandlers:
@@ -46,6 +33,7 @@ class CollisionHandlers:
         paddle: Paddle,
         ball_manager: BallManager,
         bullet_manager: BulletManager,
+        power_up_manager: PowerUpManager,
         block_manager: Optional[BlockManager] = None,
     ) -> None:
         """Initialize the collision handlers.
@@ -55,6 +43,7 @@ class CollisionHandlers:
             paddle: The paddle instance.
             ball_manager: The ball manager instance.
             bullet_manager: The bullet manager instance.
+            power_up_manager: The power-up manager instance.
             block_manager: The block manager instance.
 
         """
@@ -62,9 +51,8 @@ class CollisionHandlers:
         self.paddle = paddle
         self.ball_manager = ball_manager
         self.bullet_manager = bullet_manager
+        self.power_up_manager = power_up_manager
         self.block_manager = block_manager
-        self.sticky = False
-        self.reverse = False
         self.logger = logging.getLogger("xboing.CollisionHandlers")
 
     def handle_ball_block_collision(self, ball: Any, block: Any) -> None:
@@ -122,7 +110,7 @@ class CollisionHandlers:
         pygame.event.post(
             pygame.event.Event(pygame.USEREVENT, {"event": PaddleHitEvent()})
         )
-        if self.sticky and not ball.stuck_to_paddle:
+        if self.power_up_manager.is_sticky_active() and not ball.stuck_to_paddle:
             ball.stuck_to_paddle = True
             ball.paddle_offset = ball.x - paddle.rect.centerx
 
@@ -178,55 +166,9 @@ class CollisionHandlers:
             block: The block object that was hit.
 
         """
-        del block  # Remove unused argument warning
-        if effect == BOMB_BLK:
-            pygame.event.post(
-                pygame.event.Event(pygame.USEREVENT, {"event": BombExplodedEvent()})
-            )
-        elif effect in (BULLET_BLK, MAXAMMO_BLK):
-            changes = self.game_state.add_ammo()
-            self.post_game_state_events(changes)
-        elif effect == PAD_EXPAND_BLK:
-            if self.paddle.size < Paddle.SIZE_LARGE:
-                self.paddle.set_size(self.paddle.size + 1)
-                at_max = self.paddle.size == Paddle.SIZE_LARGE
-            else:
-                at_max = True
-            pygame.event.post(
-                pygame.event.Event(
-                    pygame.USEREVENT,
-                    {"event": PaddleGrowEvent(size=self.paddle.width, at_max=at_max)},
-                )
-            )
-        elif effect == PAD_SHRINK_BLK:
-            if self.paddle.size > Paddle.SIZE_SMALL:
-                self.paddle.set_size(self.paddle.size - 1)
-                at_min = self.paddle.size == Paddle.SIZE_SMALL
-            else:
-                at_min = True
-            pygame.event.post(
-                pygame.event.Event(
-                    pygame.USEREVENT,
-                    {"event": PaddleShrinkEvent(size=self.paddle.width, at_min=at_min)},
-                )
-            )
-        elif effect == REVERSE_BLK:
-            self.reverse = not self.reverse
-            pygame.event.post(
-                pygame.event.Event(
-                    pygame.USEREVENT,
-                    {"event": SpecialReverseChangedEvent(active=self.reverse)},
-                )
-            )
-        elif effect == STICKY_BLK:
-            self.sticky = True
-            self.paddle.sticky = True
-            pygame.event.post(
-                pygame.event.Event(
-                    pygame.USEREVENT,
-                    {"event": SpecialStickyChangedEvent(active=True)},
-                )
-            )
+        # Delegate to PowerUpManager for all power-up effects
+        events = self.power_up_manager.handle_power_up_effect(effect, block)
+        self.post_game_state_events(events)
 
     def set_sticky(self, value: bool) -> None:
         """Set the sticky paddle state.
@@ -235,8 +177,7 @@ class CollisionHandlers:
             value: The new sticky state.
 
         """
-        self.sticky = value
-        self.paddle.sticky = value
+        self.power_up_manager.set_sticky(value)
 
     def set_reverse(self, value: bool) -> None:
         """Set the reverse paddle control state.
@@ -245,7 +186,27 @@ class CollisionHandlers:
             value: The new reverse state.
 
         """
-        self.reverse = value
+        self.power_up_manager.set_reverse(value)
+
+    @property
+    def sticky(self) -> bool:
+        """Get the sticky paddle state for backward compatibility.
+
+        Returns:
+            True if sticky is active, False otherwise.
+
+        """
+        return self.power_up_manager.is_sticky_active()
+
+    @property
+    def reverse(self) -> bool:
+        """Get the reverse controls state for backward compatibility.
+
+        Returns:
+            True if reverse is active, False otherwise.
+
+        """
+        return self.power_up_manager.is_reverse_active()
 
     @staticmethod
     def post_game_state_events(changes: List[Any]) -> None:

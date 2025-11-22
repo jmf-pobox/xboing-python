@@ -27,6 +27,7 @@ from xboing.game.game_state import GameState
 from xboing.game.game_state_manager import GameStateManager
 from xboing.game.level_manager import LevelManager
 from xboing.game.paddle import Paddle
+from xboing.game.power_up_manager import PowerUpManager
 from xboing.layout.game_layout import GameLayout
 
 logger = logging.getLogger(__name__)
@@ -96,10 +97,18 @@ class GameController(Controller):
         # Create game state manager
         self.game_state_manager = GameStateManager(game_state, level_manager)
 
+        # Create power-up manager
+        self.power_up_manager = PowerUpManager(game_state, paddle)
+
         # Create collision system
         self.collision_system = CollisionSystem()
         self.collision_handlers = CollisionHandlers(
-            game_state, paddle, ball_manager, bullet_manager, block_manager
+            game_state,
+            paddle,
+            ball_manager,
+            bullet_manager,
+            self.power_up_manager,
+            block_manager,
         )
         self._register_collision_handlers()
 
@@ -175,17 +184,17 @@ class GameController(Controller):
     @property
     def sticky(self) -> bool:
         """Get the sticky paddle state for test compatibility."""
-        return self.collision_handlers.sticky
+        return self.power_up_manager.is_sticky_active()
 
     @sticky.setter
     def sticky(self, value: bool) -> None:
         """Set the sticky paddle state for test compatibility."""
-        self.collision_handlers.set_sticky(value)
+        self.power_up_manager.set_sticky(value)
 
     @property
     def reverse(self) -> bool:
         """Get the reverse paddle control state for test compatibility."""
-        return self.collision_handlers.reverse
+        return self.power_up_manager.is_reverse_active()
 
     @reverse.setter
     def reverse(self, value: bool) -> None:
@@ -211,13 +220,15 @@ class GameController(Controller):
             events: List of Pygame events to process.
 
         """
-        # Check for BallLostEvent in all events
+        # Check for game events
         for event in events:
-            if event.type == pygame.USEREVENT and isinstance(
-                event.event, BallLostEvent
-            ):
-                logger.debug("BallLostEvent detected in GameController.")
-                self.handle_life_loss()
+            if event.type == pygame.USEREVENT:
+                if isinstance(event.event, BallLostEvent):
+                    logger.debug("BallLostEvent detected in GameController.")
+                    self.handle_life_loss()
+                elif isinstance(event.event, SpecialReverseChangedEvent):
+                    # Sync paddle input controller when reverse changes via block collision
+                    self.paddle_input.set_reverse(event.event.active)
 
         # Delegate event handling to the game input controller
         events_to_post = self.game_input.handle_events(events)
@@ -420,8 +431,8 @@ class GameController(Controller):
 
     def toggle_reverse(self) -> None:
         """Toggle the reverse paddle control state."""
-        new_value = not self.collision_handlers.reverse
-        self.collision_handlers.set_reverse(new_value)
+        new_value = not self.power_up_manager.is_reverse_active()
+        self.power_up_manager.set_reverse(new_value)
         self.paddle_input.set_reverse(new_value)
 
     def set_reverse(self, value: bool) -> None:
@@ -431,12 +442,12 @@ class GameController(Controller):
             value: The new reverse state.
 
         """
-        self.collision_handlers.set_reverse(value)
+        self.power_up_manager.set_reverse(value)
         self.paddle_input.set_reverse(value)
 
     def enable_sticky(self) -> None:
         """Enable sticky paddle mode."""
-        self.collision_handlers.set_sticky(True)
+        self.power_up_manager.set_sticky(True)
         pygame.event.post(
             pygame.event.Event(
                 pygame.USEREVENT, {"event": SpecialStickyChangedEvent(active=True)}
@@ -445,8 +456,8 @@ class GameController(Controller):
 
     def disable_sticky(self) -> None:
         """Disable sticky paddle mode."""
-        if self.collision_handlers.sticky:
-            self.collision_handlers.set_sticky(False)
+        if self.power_up_manager.is_sticky_active():
+            self.power_up_manager.set_sticky(False)
             pygame.event.post(
                 pygame.event.Event(
                     pygame.USEREVENT, {"event": SpecialStickyChangedEvent(active=False)}
@@ -456,9 +467,7 @@ class GameController(Controller):
     def on_new_level_loaded(self) -> None:
         """Handle new level loaded event."""
         self.disable_sticky()
-        self.set_reverse(False)
-        # Reset any other state in input controllers
-        self.paddle_input.set_reverse(False)
+        self.set_reverse(False)  # This already calls paddle_input.set_reverse(False)
 
     def _register_all_collidables(self) -> None:
         """Register all collidable objects with the collision system."""
