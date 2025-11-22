@@ -268,7 +268,9 @@ class XBoingApp:
         self.top_bar_view = self.injector.get(TopBarView)
         self.bottom_bar_view = self.injector.get(BottomBarView)
         self.game_over_view = cast("GameOverView", self.views["game_over"])
-        self.level_complete_view = cast("LevelCompleteView", self.views["level_complete"])
+        self.level_complete_view = cast(
+            "LevelCompleteView", self.views["level_complete"]
+        )
 
         # --- UI Wiring and App Coordination ---
         self.ui_manager.setup_ui(
