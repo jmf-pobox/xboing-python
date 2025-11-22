@@ -13,6 +13,7 @@ from xboing.controllers.paddle_input_controller import PaddleInputController
 from xboing.engine.events import (
     BallLostEvent,
     BlockHitEvent,
+    SpecialReverseChangedEvent,
     SpecialStickyChangedEvent,
 )
 from xboing.engine.graphics import Renderer
