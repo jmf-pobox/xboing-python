@@ -197,7 +197,9 @@ class CollisionHandlers:
 
         return events
 
-    def handle_block_effects(self, effect: str, block: Block) -> List[pygame.event.Event]:
+    def handle_block_effects(
+        self, effect: str, block: Block
+    ) -> List[pygame.event.Event]:
         """Handle special block effects and return appropriate events.
 
         Args:
@@ -265,5 +267,6 @@ class CollisionHandlers:
 
         """
         return [
-            pygame.event.Event(pygame.USEREVENT, {"event": change}) for change in changes
+            pygame.event.Event(pygame.USEREVENT, {"event": change})
+            for change in changes
         ]

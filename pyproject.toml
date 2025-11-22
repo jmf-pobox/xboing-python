@@ -100,10 +100,10 @@ format-check-all = "black --check src/ tests/"
 type-all-code = "mypy src/ tests/"
 type-pyright-all = "pyright src/ tests/"
 # Combined quality check (production code only - must pass)
-check = ["lint", "type", "type-pyright", "test"]
+check = ["lint", "format-check", "type", "type-pyright", "test"]
 # CI quality check (matches exact CI workflow checks)
 ci-check = ["lint", "format-check", "type-pyright", "test"]
-check-cov = ["lint", "type", "type-pyright", "test-cov"]
+check-cov = ["lint", "format-check", "type", "type-pyright", "test-cov"]
 # Check everything including test code (for tracking progress)
 check-all = ["lint-all", "type-all-code", "type-pyright-all", "test"]
 # Combined fixing command
@@ -127,6 +127,8 @@ cov-game-html = ["coverage run --source=src -m xboing", "coverage html"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+timeout = 5
+timeout_method = "thread"
 
 # Black configuration
 [tool.black]

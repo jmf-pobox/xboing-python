@@ -214,8 +214,8 @@ class GameController(Controller):
         # Check collisions and post collision events
         self._register_all_collidables()
         _collisions, collision_events = self.collision_system.check_collisions()
-        for event in collision_events:
-            pygame.event.post(event)
+        for pygame_event in collision_events:
+            pygame.event.post(pygame_event)
 
         # Remove inactive objects
         self.ball_manager.remove_inactive_balls()
