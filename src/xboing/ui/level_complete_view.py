@@ -1,5 +1,6 @@
 """UI view for displaying the level complete screen in XBoing."""
 
+from enum import Enum, auto
 import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -25,8 +26,24 @@ from xboing.utils.asset_paths import get_asset_path
 
 from .view import View
 
-REVEAL_DELAY_MS = 3000  # Default delay, but now per-element
-BULLET_ANIM_DELAY_MS = 300  # ms per bullet in the animation
+# Frame-based timing constants (assuming 60 FPS)
+REVEAL_DELAY_FRAMES = 180  # Default delay (3000ms / 16.67ms ≈ 180 frames)
+BULLET_ANIM_DELAY_FRAMES = 18  # Frames per bullet (300ms / 16.67ms ≈ 18 frames)
+
+
+class BonusState(Enum):
+    """Enum representing the states of the bonus screen animation."""
+
+    BONUS_TEXT = auto()  # Display level title and congratulations
+    BONUS_SCORE = auto()  # Display score (currently not used, but reserved for future)
+    BONUS_DELAY = auto()  # Delay between elements
+    BONUS_COINS = auto()  # Display bonus coins (skip if zero)
+    BONUS_LEVEL = auto()  # Display level bonus
+    BONUS_BULLETS = auto()  # Display bullet bonus (skip if zero)
+    BONUS_TIME = auto()  # Display time bonus (skip if zero)
+    BONUS_RANK = auto()  # Display player ranking
+    BONUS_PREPARE = auto()  # Display prepare for next level
+    BONUS_FINISH = auto()  # Completion state
 
 
 class LevelCompleteView(View):
@@ -77,13 +94,22 @@ class LevelCompleteView(View):
         self.final_score: int
         self.time_remaining: int
         self.message: str = "- Bonus Tally -"
+
+        # State machine variables
+        self.current_state: BonusState = BonusState.BONUS_TEXT
+        self.state_frame_counter: int = 0
+
+        # Legacy reveal system (kept for now for compatibility)
         self.reveal_step: int = 0
-        self.reveal_timer: float = 0.0
-        self.reveal_delay_ms: int = REVEAL_DELAY_MS
+        self.frame_counter: int = 0
+        self.reveal_frame_threshold: int = REVEAL_DELAY_FRAMES
+
+        # Bullet animation variables
         self.bullet_bonus_animating: bool = False
         self.bullet_bonus_total: int = 0
         self.bullet_bonus_shown: int = 0
-        self.bullet_bonus_timer: float = 0.0
+        self.bullet_bonus_frame_counter: int = 0
+
         self.logger = logging.getLogger("xboing.ui.LevelCompleteView")
 
         # Load and cache icons using asset loader and asset paths
@@ -175,7 +201,7 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(None)
-        self._row_delays.append(500)
+        self._row_delays.append(30)  # 500ms -> 30 frames
         idx += 1
         # Congratulations row
         self.row_renderers_with_y.append(
@@ -189,7 +215,7 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(ApplauseEvent())
-        self._row_delays.append(1500)
+        self._row_delays.append(90)  # 1500ms -> 90 frames
         idx += 1
         # Bonus coin row
         coins = self.game_state.level_state.get_bonus_coins_collected()
@@ -205,7 +231,7 @@ class LevelCompleteView(View):
                 )
             )
             self._row_events.append(DohSoundEvent())
-            self._row_delays.append(1500)
+            self._row_delays.append(90)  # 1500ms -> 90 frames
         else:
             self.row_renderers_with_y.append(
                 (
@@ -220,7 +246,7 @@ class LevelCompleteView(View):
                 )
             )
             self._row_events.append(BonusCollectedEvent())
-            self._row_delays.append(1500)
+            self._row_delays.append(90)  # 1500ms -> 90 frames
         idx += 1
         # Level bonus row
         self.row_renderers_with_y.append(
@@ -234,14 +260,14 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(BonusCollectedEvent())
-        self._row_delays.append(900)
+        self._row_delays.append(54)  # 900ms -> 54 frames
         idx += 1
         # Bullet row (special y adjustment)
         bullet_img = pygame.transform.smoothscale(self._bullet_img, (7, 15))
         bullet_y = y_coords[idx] + 22 - bullet_img.get_height()
         self.row_renderers_with_y.append((BulletRowRenderer(bullet_img), bullet_y))
         self._row_events.append(None)  # Sound handled in update
-        self._row_delays.append(700)
+        self._row_delays.append(42)  # 700ms -> 42 frames
         idx += 1
         # Time bonus row
         self.row_renderers_with_y.append(
@@ -255,7 +281,7 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(TimerUpdatedEvent(self.time_remaining))
-        self._row_delays.append(1200)
+        self._row_delays.append(72)  # 1200ms -> 72 frames
         idx += 1
         # Rank row
         self.row_renderers_with_y.append(
@@ -269,7 +295,7 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(None)
-        self._row_delays.append(1000)
+        self._row_delays.append(60)  # 1000ms -> 60 frames
         idx += 1
         # Prepare for the next level row
         self.row_renderers_with_y.append(
@@ -283,7 +309,7 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(None)
-        self._row_delays.append(800)
+        self._row_delays.append(48)  # 800ms -> 48 frames
         idx += 1
         # Press the spacebar row
         self.row_renderers_with_y.append(
@@ -297,23 +323,32 @@ class LevelCompleteView(View):
             )
         )
         self._row_events.append(None)
-        self._row_delays.append(800)
+        self._row_delays.append(48)  # 800ms -> 48 frames
         self.composite_renderer = CompositeRenderer(self.row_renderers_with_y)
 
     def activate(self) -> None:
         """Activate the view and recompute bonuses."""
         self.active = True
         self._compute_bonuses()
+
+        # Initialize state machine
+        self.current_state = BonusState.BONUS_TEXT
+        self.state_frame_counter = 0
+
+        # Initialize legacy reveal system
         self.reveal_step = 0
-        self.reveal_timer = 0.0
+        self.frame_counter = 0
         self._prepare_renderers()
-        self.reveal_delay_ms = (
-            self._row_delays[0] if self._row_delays else REVEAL_DELAY_MS
+        self.reveal_frame_threshold = (
+            self._row_delays[0] if self._row_delays else REVEAL_DELAY_FRAMES
         )
+
+        # Initialize bullet animation
         self.bullet_bonus_animating = False
         self.bullet_bonus_total = self.game_state.get_ammo()
         self.bullet_bonus_shown = 0
-        self.bullet_bonus_timer = 0.0
+        self.bullet_bonus_frame_counter = 0
+
         self.logger.debug(
             f"[activate] Called. row_renderers_with_y length: {len(self.row_renderers_with_y)}"
         )
@@ -338,6 +373,58 @@ class LevelCompleteView(View):
         ):
             self.on_advance_callback()
 
+    def _get_next_state(self, current: BonusState) -> BonusState:
+        """Get the next state in the bonus screen state machine with conditional skipping.
+
+        Args:
+        ----
+            current (BonusState): The current state.
+
+        Returns:
+        -------
+            BonusState: The next state, potentially skipping states with zero bonuses.
+
+        """
+        # State transition map
+        if current == BonusState.BONUS_TEXT:
+            return BonusState.BONUS_SCORE
+        elif current == BonusState.BONUS_SCORE:
+            return BonusState.BONUS_DELAY
+        elif current == BonusState.BONUS_DELAY:
+            # Skip to BONUS_COINS, or skip if no coins
+            if self.coin_bonus > 0:
+                return BonusState.BONUS_COINS
+            else:
+                # Skip coins, go directly to level
+                return BonusState.BONUS_LEVEL
+        elif current == BonusState.BONUS_COINS:
+            return BonusState.BONUS_LEVEL
+        elif current == BonusState.BONUS_LEVEL:
+            # Skip to BONUS_BULLETS, or skip if no bullets
+            if self.bullet_bonus_total > 0:
+                return BonusState.BONUS_BULLETS
+            # Skip bullets, check time
+            elif self.time_bonus > 0:
+                return BonusState.BONUS_TIME
+            else:
+                # Skip time too, go to rank
+                return BonusState.BONUS_RANK
+        elif current == BonusState.BONUS_BULLETS:
+            # Check if we should skip time bonus
+            if self.time_bonus > 0:
+                return BonusState.BONUS_TIME
+            else:
+                # Skip time, go to rank
+                return BonusState.BONUS_RANK
+        elif current == BonusState.BONUS_TIME:
+            return BonusState.BONUS_RANK
+        elif current == BonusState.BONUS_RANK:
+            return BonusState.BONUS_PREPARE
+        elif current == BonusState.BONUS_PREPARE:
+            return BonusState.BONUS_FINISH
+        else:  # BONUS_FINISH or unknown
+            return BonusState.BONUS_FINISH
+
     def update(self, delta_ms: float) -> None:
         """Update the gradual reveal of bonus/info messages, bullet animation, and fire sound events."""
         self.logger.debug(
@@ -351,17 +438,17 @@ class LevelCompleteView(View):
                     bullet_row_idx = idx
                     break
             if bullet_row_idx is not None and self.reveal_step == bullet_row_idx:
-                # Animate bullets one at a time
+                # Animate bullets one at a time (frame-based)
                 if not self.bullet_bonus_animating:
                     self.bullet_bonus_animating = True
                     self.bullet_bonus_total = self.game_state.get_ammo()
                     self.bullet_bonus_shown = 0
-                    self.bullet_bonus_timer = 0.0
+                    self.bullet_bonus_frame_counter = 0
                 if self.bullet_bonus_shown < self.bullet_bonus_total:
-                    self.bullet_bonus_timer += delta_ms
-                    if self.bullet_bonus_timer >= BULLET_ANIM_DELAY_MS:
+                    self.bullet_bonus_frame_counter += 1
+                    if self.bullet_bonus_frame_counter >= BULLET_ANIM_DELAY_FRAMES:
                         self.bullet_bonus_shown += 1
-                        self.bullet_bonus_timer = 0.0
+                        self.bullet_bonus_frame_counter = 0
                         # Fire AmmoFiredEvent for sound
                         pygame.event.post(
                             pygame.event.Event(
@@ -372,17 +459,18 @@ class LevelCompleteView(View):
                 else:
                     self.bullet_bonus_animating = False
                     self.reveal_step += 1
+                    self.frame_counter = 0
                     # Set delay for the next row if available
                     if self.reveal_step < len(self._row_delays):
-                        self.reveal_delay_ms = self._row_delays[self.reveal_step]
+                        self.reveal_frame_threshold = self._row_delays[self.reveal_step]
                     else:
-                        self.reveal_delay_ms = REVEAL_DELAY_MS
+                        self.reveal_frame_threshold = REVEAL_DELAY_FRAMES
             else:
-                # Normal reveal logic for other rows
-                self.reveal_timer += delta_ms
-                if self.reveal_timer >= self.reveal_delay_ms:
+                # Normal reveal logic for other rows (frame-based)
+                self.frame_counter += 1
+                if self.frame_counter >= self.reveal_frame_threshold:
                     self.reveal_step += 1
-                    self.reveal_timer = 0.0
+                    self.frame_counter = 0
                     self.logger.debug(
                         f"[update] reveal_step incremented: {self.reveal_step}"
                     )
@@ -395,9 +483,11 @@ class LevelCompleteView(View):
                             )
                         # Set delay for the next row if available
                         if self.reveal_step < len(self._row_delays):
-                            self.reveal_delay_ms = self._row_delays[self.reveal_step]
+                            self.reveal_frame_threshold = self._row_delays[
+                                self.reveal_step
+                            ]
                         else:
-                            self.reveal_delay_ms = REVEAL_DELAY_MS
+                            self.reveal_frame_threshold = REVEAL_DELAY_FRAMES
 
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the level-complete overlay content using hardcoded y coordinates for pixel-perfect placement."""
