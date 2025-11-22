@@ -7,7 +7,7 @@ CollisionHandlers and GameController.
 """
 
 import logging
-from typing import Any, List
+from typing import List
 
 from xboing.engine.events import (
     BombExplodedEvent,
