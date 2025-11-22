@@ -196,7 +196,11 @@ class TestPowerUpManagerReverseEffect:
 
         assert manager.reverse is True
         assert any(isinstance(e, SpecialReverseChangedEvent) for e in events)
-        assert any(e.active is True for e in events if isinstance(e, SpecialReverseChangedEvent))
+        assert any(
+            e.active is True
+            for e in events
+            if isinstance(e, SpecialReverseChangedEvent)
+        )
 
     def test_reverse_toggles_from_true_to_false(self, manager, dummy_block):
         """Test that reverse toggles from true to false."""
@@ -206,7 +210,11 @@ class TestPowerUpManagerReverseEffect:
 
         assert manager.reverse is False
         assert any(isinstance(e, SpecialReverseChangedEvent) for e in events)
-        assert any(e.active is False for e in events if isinstance(e, SpecialReverseChangedEvent))
+        assert any(
+            e.active is False
+            for e in events
+            if isinstance(e, SpecialReverseChangedEvent)
+        )
 
     def test_reverse_multiple_toggles(self, manager, dummy_block):
         """Test multiple reverse toggles."""
@@ -239,7 +247,9 @@ class TestPowerUpManagerStickyEffect:
         assert manager.sticky is True
         assert paddle.sticky is True
         assert any(isinstance(e, SpecialStickyChangedEvent) for e in events)
-        assert any(e.active is True for e in events if isinstance(e, SpecialStickyChangedEvent))
+        assert any(
+            e.active is True for e in events if isinstance(e, SpecialStickyChangedEvent)
+        )
 
     def test_sticky_when_already_active(self, manager, paddle, dummy_block):
         """Test sticky activation when already active."""

@@ -138,6 +138,82 @@ class Ball(CircularGameShape, PhysicsMixin):
         if not Ball.guide_images:
             Ball.load_guide_images()
 
+    def _update_animation(self, delta_ms: float) -> None:
+        """Update ball animation frame."""
+        if self.birth_animation or len(Ball.sprites) <= 1:
+            return
+        self.anim_counter += delta_ms
+        if self.anim_counter >= self.anim_frame_ms:
+            self.anim_counter -= self.anim_frame_ms
+            self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
+
+    def _update_stuck_to_paddle(self, paddle: Any, delta_ms: float) -> None:
+        """Update ball position and guide animation when stuck to paddle."""
+        # Update position to stick to paddle
+        self.x = paddle.rect.centerx + self.paddle_offset
+        self.y = paddle.rect.top - self.radius - 1
+        # Update physics component position
+        self.physics.set_position((self.x, self.y))
+        self.update_rect()
+
+        # Guide animation update
+        self.guide_anim_counter += delta_ms
+        while self.guide_anim_counter >= Ball.GUIDE_ANIM_FRAME_MS:
+            self.guide_anim_counter -= Ball.GUIDE_ANIM_FRAME_MS
+            self.guide_pos += self.guide_inc
+            if self.guide_pos == 10:
+                self.guide_inc = -1
+            elif self.guide_pos == 0:
+                self.guide_inc = 1
+
+    def _handle_wall_collisions(
+        self,
+        offset_x: int,
+        offset_y: int,
+        screen_width: int,
+        screen_height: int,
+    ) -> tuple[bool, list[Event], tuple[float, float]]:
+        """Handle collisions with walls.
+
+        Returns:
+            tuple: (changed, events, (vx, vy))
+
+        """
+        events: List[Event] = []
+        changed = False
+        vx, vy = self.physics.get_velocity()
+
+        left_boundary = offset_x
+        right_boundary = offset_x + screen_width
+        top_boundary = offset_y
+        bottom_boundary = offset_y + screen_height
+
+        # Left and right walls
+        if self.x - self.radius < left_boundary:
+            self.x = left_boundary + self.radius
+            vx = abs(vx)
+            changed = True
+            events.append(WallHitEvent())
+        if self.x + self.radius > right_boundary:
+            self.x = right_boundary - self.radius
+            vx = -abs(vx)
+            changed = True
+            events.append(WallHitEvent())
+
+        # Top wall
+        if self.y - self.radius < top_boundary:
+            self.y = top_boundary + self.radius
+            vy = abs(vy)
+            changed = True
+            events.append(WallHitEvent())
+
+        # Bottom boundary - ball is lost
+        if self.y - self.radius > bottom_boundary:
+            self.active = False
+            events.append(BallLostEvent())
+
+        return changed, events, (vx, vy)
+
     def update(
         self,
         delta_ms: float,
@@ -165,80 +241,31 @@ class Ball(CircularGameShape, PhysicsMixin):
         """
         events: List[Event] = []
 
-        # Animate main ball (not during birth animation)
-        if not self.birth_animation and len(Ball.sprites) > 1:
-            self.anim_counter += delta_ms
-            if self.anim_counter >= self.anim_frame_ms:
-                self.anim_counter -= self.anim_frame_ms
-                self.anim_frame = (self.anim_frame + 1) % len(Ball.sprites)
+        self._update_animation(delta_ms)
 
         if not self.active:
             return events
 
         if self.stuck_to_paddle and paddle:
-            # Update position to stick to paddle
-            self.x = paddle.rect.centerx + self.paddle_offset
-            self.y = paddle.rect.top - self.radius - 1
-            # Update physics component position
-            self.physics.set_position((self.x, self.y))
-            self.update_rect()
-
-            # Guide animation update
-            self.guide_anim_counter += delta_ms
-            while self.guide_anim_counter >= Ball.GUIDE_ANIM_FRAME_MS:
-                self.guide_anim_counter -= Ball.GUIDE_ANIM_FRAME_MS
-                self.guide_pos += self.guide_inc
-                if self.guide_pos == 10:
-                    self.guide_inc = -1
-                elif self.guide_pos == 0:
-                    self.guide_inc = 1
+            self._update_stuck_to_paddle(paddle, delta_ms)
             return events
 
         # Update position using physics component
         self.physics.update(delta_ms)
-        # Get updated position from physics component
         self.x, self.y = self.physics.get_position()
         self.update_rect()
 
-        # Get current velocity
-        vx, vy = self.physics.get_velocity()
-        logger.debug(f"Ball velocity: vx={vx}, vy={vy}")
-
         # Handle wall collisions
-        changed = False
+        changed, wall_events, (vx, vy) = self._handle_wall_collisions(
+            offset_x, offset_y, screen_width, screen_height
+        )
+        events.extend(wall_events)
 
-        # Define the play area boundaries with offsets
-        left_boundary = offset_x
-        right_boundary = offset_x + screen_width
-        top_boundary = offset_y
-        bottom_boundary = offset_y + screen_height
-
-        # Left and right walls
-        if self.x - self.radius < left_boundary:
-            self.x = left_boundary + self.radius
-            vx = abs(vx)  # Ensure positive (right) direction
-            changed = True
-            events.append(WallHitEvent())
-        if self.x + self.radius > right_boundary:
-            self.x = right_boundary - self.radius
-            vx = -abs(vx)  # Ensure negative (left) direction
-            changed = True
-            events.append(WallHitEvent())
-
-        # Top wall
-        if self.y - self.radius < top_boundary:
-            self.y = top_boundary + self.radius
-            vy = abs(vy)  # Ensure positive (down) direction
-            changed = True
-            events.append(WallHitEvent())
-
-        # Bottom boundary - the ball is lost
-        if self.y - self.radius > bottom_boundary:
-            self.active = False
-            events.append(BallLostEvent())
+        # Return early if ball was lost at bottom boundary
+        if any(isinstance(e, BallLostEvent) for e in wall_events):
             return events
 
-        # Update physics component with new position and velocity
+        # Update physics with new position and velocity if changed
         if changed:
             self.physics.set_position((self.x, self.y))
             self.physics.set_velocity((vx, vy))

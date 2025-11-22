@@ -632,7 +632,9 @@ def test_ball_sticks_to_paddle_when_sticky(game_setup, mock_game_objects):
     controller.enable_sticky()
 
     # Simulate ball hitting paddle
-    controller.collision_handlers.handle_ball_paddle_collision(ball, game_setup["paddle"])
+    controller.collision_handlers.handle_ball_paddle_collision(
+        ball, game_setup["paddle"]
+    )
 
     assert (
         ball.stuck_to_paddle is True

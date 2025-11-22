@@ -67,6 +67,53 @@ class GameInputController:
         self.stuck_ball_timer = 0.0
         self.ball_auto_active_delay_ms = 3000.0  # 3 seconds
 
+    def _fire_ammo(self) -> List[pygame.event.Event]:
+        """Fire ammo if available."""
+        events: List[pygame.event.Event] = []
+        if self.game_state.ammo <= 0:
+            return events
+
+        changes = self.game_state.fire_ammo()
+        for change in changes:
+            events.append(pygame.event.Event(pygame.USEREVENT, {"event": change}))
+        events.append(
+            pygame.event.Event(
+                pygame.USEREVENT,
+                {"event": AmmoFiredEvent(ammo=self.game_state.ammo)},
+            )
+        )
+        # Create and add bullet
+        bullet_x = self.paddle.rect.centerx
+        bullet_y = self.paddle.rect.top
+        bullet = Bullet(bullet_x, bullet_y)
+        self.bullet_manager.add_bullet(bullet)
+        return events
+
+    def _launch_balls(self) -> List[pygame.event.Event]:
+        """Launch all stuck balls."""
+        events: List[pygame.event.Event] = []
+        balls = self.ball_manager.balls
+        for ball in balls:
+            ball.release_from_paddle()
+        self.stuck_ball_timer = 0.0  # Reset timer on manual launch
+        changes = self.game_state.set_timer(
+            self.game_state.level_state.get_bonus_time()
+        )
+        for change in changes:
+            events.append(pygame.event.Event(pygame.USEREVENT, {"event": change}))
+        events.append(pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()}))
+        level_info = self.level_manager.get_level_info()
+        level_title = str(level_info["title"])
+        post_level_title_message(level_title)
+        return events
+
+    def _handle_fire_or_launch(self) -> List[pygame.event.Event]:
+        """Handle K key or mouse button: fire ammo or launch balls."""
+        if self.ball_manager.has_ball_in_play():
+            return self._fire_ammo()
+        else:
+            return self._launch_balls()
+
     def handle_events(
         self, events: List[pygame.event.Event]
     ) -> List[pygame.event.Event]:
@@ -93,44 +140,7 @@ class GameInputController:
             is_k_key = event.type == pygame.KEYDOWN and event.key == pygame.K_k
             is_mouse_button = event.type == pygame.MOUSEBUTTONDOWN
             if is_k_key or is_mouse_button:
-                if self.ball_manager.has_ball_in_play():
-                    # Fire ammo
-                    if self.game_state.ammo > 0:  # Only fire if we have ammo
-                        changes = self.game_state.fire_ammo()
-                        for change in changes:
-                            events_to_post.append(
-                                pygame.event.Event(pygame.USEREVENT, {"event": change})
-                            )
-                        events_to_post.append(
-                            pygame.event.Event(
-                                pygame.USEREVENT,
-                                {"event": AmmoFiredEvent(ammo=self.game_state.ammo)},
-                            )
-                        )
-                        # Create and add bullet
-                        bullet_x = self.paddle.rect.centerx
-                        bullet_y = self.paddle.rect.top
-                        bullet = Bullet(bullet_x, bullet_y)
-                        self.bullet_manager.add_bullet(bullet)
-                else:
-                    # Launch ball(s)
-                    balls = self.ball_manager.balls
-                    for ball in balls:
-                        ball.release_from_paddle()
-                    self.stuck_ball_timer = 0.0  # Reset timer on manual launch
-                    changes = self.game_state.set_timer(
-                        self.game_state.level_state.get_bonus_time()
-                    )
-                    for change in changes:
-                        events_to_post.append(
-                            pygame.event.Event(pygame.USEREVENT, {"event": change})
-                        )
-                    events_to_post.append(
-                        pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()})
-                    )
-                    level_info = self.level_manager.get_level_info()
-                    level_title = str(level_info["title"])
-                    post_level_title_message(level_title)
+                events_to_post.extend(self._handle_fire_or_launch())
 
             # Handle BallLostEvent - don't re-post it to avoid duplicate sound effects
             # The event is already in the event queue and will be handled by GameController
