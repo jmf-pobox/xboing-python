@@ -65,6 +65,7 @@ dependencies = [
     "pylint",
     # Dev tools
     "pillow",
+    "aiohttp",  # Required by black language server
 ]
 path = ".venv"
 
