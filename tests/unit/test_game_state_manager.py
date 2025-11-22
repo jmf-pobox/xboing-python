@@ -97,12 +97,12 @@ class TestGameStateManagerLifeLoss:
         game_state.lives = 3
 
         # Lose first life
-        events1 = manager.handle_life_loss(has_active_balls=False)
+        manager.handle_life_loss(has_active_balls=False)
         assert game_state.lives == 2
         assert not game_state.is_game_over()
 
         # Lose second life
-        events2 = manager.handle_life_loss(has_active_balls=False)
+        manager.handle_life_loss(has_active_balls=False)
         assert game_state.lives == 1
         assert not game_state.is_game_over()
 
@@ -208,7 +208,7 @@ class TestGameStateManagerTimer:
         assert isinstance(timer_event, TimerUpdatedEvent)
 
         # Event should contain current time
-        assert hasattr(timer_event, 'time_remaining')
+        assert hasattr(timer_event, "time_remaining")
         assert timer_event.time_remaining == game_state.level_state.get_bonus_time()
 
 
@@ -253,6 +253,7 @@ class TestGameStateManagerResetLevel:
     def test_reset_level_logs(self, manager, caplog):
         """Test that reset_level logs a message."""
         import logging
+
         caplog.set_level(logging.DEBUG)
 
         manager.reset_level()
@@ -270,33 +271,31 @@ class TestGameStateManagerIntegration:
         game_state.lives = 3
 
         # Play and lose first life
-        events1 = manager.handle_life_loss(has_active_balls=False)
+        manager.handle_life_loss(has_active_balls=False)
         assert game_state.lives == 2
         assert not manager.is_game_over()
 
         # Complete a level
-        events2 = manager.check_level_complete(blocks_remaining=0)
+        manager.check_level_complete(blocks_remaining=0)
         assert game_state.level_state.is_level_complete()
 
         # Continue playing, lose second life
-        events3 = manager.handle_life_loss(has_active_balls=False)
+        manager.handle_life_loss(has_active_balls=False)
         assert game_state.lives == 1
 
         # Lose final life
-        events4 = manager.handle_life_loss(has_active_balls=False)
+        manager.handle_life_loss(has_active_balls=False)
         assert game_state.lives == 0
         assert manager.is_game_over()
 
     def test_timer_and_level_complete_interaction(self, manager, game_state):
         """Test timer behavior around level completion."""
-        initial_time = game_state.level_state.get_bonus_time()
-
         # Update timer while playing
         events1 = manager.update_timer(delta_ms=100.0, is_active=True)
         assert len(events1) == 1
 
         # Complete level
-        events2 = manager.check_level_complete(blocks_remaining=0)
+        manager.check_level_complete(blocks_remaining=0)
         assert game_state.level_state.is_level_complete()
 
         # Timer should not update after level complete

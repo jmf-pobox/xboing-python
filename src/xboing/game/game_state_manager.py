@@ -10,9 +10,7 @@ from typing import List
 
 from xboing.engine.events import (
     ApplauseEvent,
-    GameOverEvent,
     LevelCompleteEvent,
-    LivesChangedEvent,
     TimerUpdatedEvent,
 )
 from xboing.game.game_state import GameState
@@ -82,7 +80,9 @@ class GameStateManager:
                 self.logger.debug("Game over after life loss.")
                 # game_state.lose_life() should have added GameOverEvent
         else:
-            self.logger.debug("Ball lost but other balls still in play, not losing a life.")
+            self.logger.debug(
+                "Ball lost but other balls still in play, not losing a life."
+            )
 
         return events
 

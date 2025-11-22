@@ -500,9 +500,13 @@ def test_lives_display_and_game_over_event_order():
     ball = Ball(x=400, y=500, radius=8)
     game_objects["ball_manager"].add_ball(ball)
 
+    # Remove all balls to trigger life loss
+    for b in list(game_objects["ball_manager"].balls):
+        game_objects["ball_manager"].remove_ball(b)
+
     with patch("pygame.event.post") as mock_post:
-        # Directly call handle_life_loss to simulate ball lost event
-        controller.handle_life_loss(force_life_loss=True)
+        # Call handle_life_loss to simulate ball lost event
+        controller.handle_life_loss()
 
         # Extract LivesChangedEvent and GameOverEvent from mock_post calls
         events = [

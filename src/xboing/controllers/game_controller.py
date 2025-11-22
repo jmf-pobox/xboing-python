@@ -11,12 +11,9 @@ from xboing.controllers.controller import Controller
 from xboing.controllers.game_input_controller import GameInputController
 from xboing.controllers.paddle_input_controller import PaddleInputController
 from xboing.engine.events import (
-    ApplauseEvent,
     BallLostEvent,
     BlockHitEvent,
-    LevelCompleteEvent,
     SpecialStickyChangedEvent,
-    TimerUpdatedEvent,
 )
 from xboing.engine.graphics import Renderer
 from xboing.engine.input import InputManager
@@ -27,6 +24,7 @@ from xboing.game.bullet_manager import BulletManager
 from xboing.game.collision import CollisionSystem, CollisionType
 from xboing.game.collision_handlers import CollisionHandlers
 from xboing.game.game_state import GameState
+from xboing.game.game_state_manager import GameStateManager
 from xboing.game.level_manager import LevelManager
 from xboing.game.paddle import Paddle
 from xboing.layout.game_layout import GameLayout
@@ -94,6 +92,9 @@ class GameController(Controller):
             input_manager,
             layout,
         )
+
+        # Create game state manager
+        self.game_state_manager = GameStateManager(game_state, level_manager)
 
         # Create collision system
         self.collision_system = CollisionSystem()
@@ -264,14 +265,18 @@ class GameController(Controller):
             delta_ms: Time elapsed since the last update in milliseconds.
 
         """
+        # Update blocks
         self.block_manager.update(delta_ms)
-        if (
+
+        # Delegate timer management to GameStateManager
+        is_active = (
             not self.game_state.is_game_over()
             and not self.game_state.level_state.is_level_complete()
-        ):
-            self.game_state.level_state.decrement_bonus_time(delta_ms)
-            time_remaining = self.game_state.level_state.get_bonus_time()
-            self.post_game_state_events([TimerUpdatedEvent(time_remaining)])
+        )
+        events = self.game_state_manager.update_timer(delta_ms, is_active)
+
+        # Post events returned by GameStateManager
+        self.post_game_state_events(events)
 
     def update_balls_and_collisions(self, delta_ms: float) -> None:
         """Update balls and bullets, check for collisions, and handle block effects using CollisionSystem."""
@@ -332,50 +337,38 @@ class GameController(Controller):
 
         logger.debug("Finished update_balls_and_collisions")
 
-    def handle_life_loss(self, force_life_loss: bool = False) -> None:
-        """Handle the loss of a life, update game state, and post relevant events.
-
-        Args:
-            force_life_loss: If True, lose a life even if there are still balls in play.
-                             This is used for testing purposes.
-
-        """
+    def handle_life_loss(self) -> None:
+        """Handle the loss of a life, update game state, and post relevant events."""
         logger.debug(
-            f"handle_life_loss called. Current lives: {self.game_state.lives}, Balls in play: {len(self.ball_manager.balls)}, Active balls: {self.ball_manager.number_of_active_balls()}"
+            f"handle_life_loss called. Current lives: {self.game_state.lives}, "
+            f"Balls in play: {len(self.ball_manager.balls)}, "
+            f"Active balls: {self.ball_manager.number_of_active_balls()}"
         )
 
         # Always disable sticky on life loss
         self.disable_sticky()
 
-        if self.game_state.is_game_over():
-            logger.debug("Game is already over, ignoring life loss.")
-            return  # Prevent further life loss after game over
+        # Delegate life loss logic to GameStateManager
+        has_active_balls = self.ball_manager.active_ball()
+        events = self.game_state_manager.handle_life_loss(has_active_balls)
 
-        # Only lose a life if there are no active balls in play or if force_life_loss is True
-        if not self.ball_manager.active_ball() or force_life_loss:
-            # Show, "Balls Terminated!" message when a ball is lost
-            changes = self.game_state.lose_life()
-            self.post_game_state_events(changes)
-            logger.debug(f"Life lost. Remaining lives: {self.game_state.lives}")
+        # Post events returned by GameStateManager
+        self.post_game_state_events(events)
 
-            # Create a new ball if we still have lives
-            if not self.game_state.is_game_over():
-                new_ball = self.create_new_ball()
-                self.ball_manager.add_ball(new_ball)
-                logger.debug("Created new ball after life loss")
-        else:
-            logger.debug("Ball lost but other balls still in play, not losing a life.")
+        # Create a new ball if we still have lives and no balls remain
+        if not self.game_state.is_game_over() and not has_active_balls:
+            new_ball = self.create_new_ball()
+            self.ball_manager.add_ball(new_ball)
+            logger.debug("Created new ball after life loss")
 
     def check_level_complete(self) -> None:
         """Check if the level is complete and handle level completion."""
-        if len(self.block_manager.blocks) == 0:
-            self.game_state.level_state.set_level_complete()
-            pygame.event.post(
-                pygame.event.Event(pygame.USEREVENT, {"event": LevelCompleteEvent()})
-            )
-            pygame.event.post(
-                pygame.event.Event(pygame.USEREVENT, {"event": ApplauseEvent()})
-            )
+        # Delegate level completion check to GameStateManager
+        blocks_remaining = len(self.block_manager.blocks)
+        events = self.game_state_manager.check_level_complete(blocks_remaining)
+
+        # Post events returned by GameStateManager
+        self.post_game_state_events(events)
 
     def create_new_ball(self) -> Ball:
         """Create a new ball at the paddle position.
