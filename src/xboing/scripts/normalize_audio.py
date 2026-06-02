@@ -11,11 +11,11 @@ Purpose:
     This script should be run after converting or adding new audio files to the project.
 
 Usage:
-    python scripts/normalize_audio.py --input <input_dir> --output <output_dir>
+    python -m xboing.scripts.normalize_audio --input <input_dir> --output <output_dir>
     (Defaults: input=assets/sounds, output=assets/sounds/normalized)
 
 Dependencies:
-    - Python 3.7+
+    - Python 3.10+
     - ffmpeg (must be installed and available in your PATH)
 
 Notes:
