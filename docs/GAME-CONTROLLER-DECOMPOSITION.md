@@ -23,57 +23,41 @@ This monolithic design leads to several issues:
 4. **Maintenance Challenges**: Large methods with mixed responsibilities
 5. **Limited Reusability**: Components are tightly integrated
 
-## Current Status (as of June 2023)
+## Current Status (as of November 2025)
 
-The decomposition of the `GameController` is progressing according to the phased approach outlined in this document. Here's the current status of each phase:
+All phases of the `GameController` decomposition have been completed and merged (PR #32, 2025-11-22).
 
 ### Phase 1: Complete Collision System Integration ✅
 
 - **Status: Completed**
-- The `CollisionSystem` has been fully implemented and integrated into the `GameController`
-- The `CollisionHandlers` class has been created and handles all collision logic:
-  - Ball-Block collisions
-  - Ball-Paddle collisions
-  - Bullet-Block collisions
-  - Bullet-Ball collisions
-- Special block effects are handled by the `CollisionHandlers` class
-- Collision handlers are properly registered in the `GameController`
-- The `_register_all_collidables` method centralizes collidable registration
+- `CollisionSystem` fully implemented and integrated
+- `CollisionHandlers` handles all collision logic (ball-block, ball-paddle, bullet-block, bullet-ball)
+- Collision handlers registered via `_register_all_collidables`
 
 ### Phase 2: Input Handling Extraction ✅
 
 - **Status: Completed**
-- The `PaddleInputController` has been implemented and handles:
-  - Keyboard-based paddle movement
-  - Mouse-based paddle movement
-  - Reverse controls functionality
-- The `GameInputController` has been implemented and handles:
-  - Game control events (pause, quit)
-  - Ammo firing and ball launching
-  - Debug keys
-  - Stuck ball timer management
-- Both controllers are properly integrated with the `GameController`
+- `PaddleInputController`: keyboard/mouse paddle movement, reverse controls
+- `GameInputController`: game events, ammo firing, ball launching, debug keys
 
-### Phase 3: Game State Management Extraction ❌
+### Phase 3: Game State Management Extraction ✅
 
-- **Status: Not Started**
-- The `GameStateManager` has not been implemented yet
-- Life management and level completion logic are still handled directly in the `GameController`
-- Event handling for game state changes is still in the `GameController`
+- **Status: Completed**
+- `GameStateManager` (`src/xboing/game/game_state_manager.py`) handles life management, level completion, and game state transitions
+- Fully integrated with `GameController`
 
-### Phase 4: Power-Up Management Extraction ❌
+### Phase 4: Power-Up Management Extraction ✅
 
-- **Status: Not Started**
-- The `PowerUpManager` has not been implemented yet
-- Power-up effects and state are currently handled by the `CollisionHandlers` class
-- Special effects like sticky paddle and reverse controls are managed through properties in the `GameController`
+- **Status: Completed**
+- `PowerUpManager` (`src/xboing/game/power_up_manager.py`) manages power-up effects, duration tracking, and state
+- Wired through `GameController` and `CollisionHandlers`
 
-### Phase 5: Final Integration ❌
+### Phase 5: Final Integration ✅
 
-- **Status: Not Started**
-- The `GameController` still handles many responsibilities that should be delegated to specialized components
-- Tests have not been updated to reflect the new architecture
-- Documentation needs to be updated to reflect the current state of the implementation
+- **Status: Completed**
+- Legacy compatibility code removed from `GameController`
+- Tests updated for new architecture
+- `GameController` reduced to coordinator role
 
 ## Progress So Far
 
@@ -86,9 +70,11 @@ Significant progress has already been made:
 
 ## Revised Decomposition Strategy
 
-### Phase 0: Event System Implementation ✅
+### Phase 0: Event System (Proposed, Not Implemented)
 
-#### 0.1 Create EventBus
+Note: The actual implementation uses Pygame's built-in event queue rather than a custom EventBus. The design below was a proposed approach that was not adopted.
+
+#### 0.1 EventBus Design (Not Implemented)
 
 ```python
 class EventBus:

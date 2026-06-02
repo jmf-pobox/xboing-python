@@ -36,5 +36,6 @@ While attempting to achieve high coverage and robust unit tests for `GameControl
 - The controller's reliance on real attribute values and the way it accesses its dependencies makes it difficult to fully isolate for unit testing without significant refactoring.
 
 ## Conclusion
-- Some unit tests for `GameController` could not be made to pass reliably due to these complications.
-- As a result, the problematic tests will be removed until a more robust testing or refactoring strategy can be implemented. 
+- Some early `GameController` unit tests were unreliable due to these complications.
+- The problematic tests were replaced with tests targeting the extracted managers (`GameStateManager`, `PowerUpManager`, etc.), which are easier to test in isolation.
+- New tests should target individual managers rather than the monolithic `GameController` directly. 

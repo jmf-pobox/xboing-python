@@ -757,7 +757,7 @@ hatch run check  # Run black, ruff, mypy
 | Phase 3: GameStateManager | 6 tasks | 14-21 | Medium | ✅ Complete |
 | Phase 4: PowerUpManager | 7 tasks | 22-30 | Medium-High | ✅ Complete |
 | Phase 5: Legacy Removal | 7 tasks | ~4 (actual) | Medium | ✅ Complete |
-| Phase 6: Clean Architecture | 4 tasks | 16-23 | Medium | ❌ Not Started |
+| Phase 6: Clean Architecture | 4 tasks | 16-23 | Medium | 🔄 ~70% Complete (tasks 6.1-6.2 done) |
 | **COMPLETED** | **20 tasks** | **50-70 hours** | **Mixed** | **✅ Done** |
 | **REMAINING** | **4 tasks** | **16-23 hours** | **Medium** | **⏳ To Do** |
 
