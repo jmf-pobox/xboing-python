@@ -24,6 +24,7 @@ Notes:
     - Run this script after converting or adding new audio files to ensure all sounds are normalized.
 
 """
+
 import argparse
 import logging
 from pathlib import Path
