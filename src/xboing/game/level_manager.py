@@ -4,8 +4,6 @@ This module handles loading, parsing, and managing XBoing level files.
 It interfaces with the BlockManager to create the appropriate block layout.
 """
 
-from __future__ import annotations
-
 import logging
 import os
 from typing import TYPE_CHECKING, Any, ClassVar

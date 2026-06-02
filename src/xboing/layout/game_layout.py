@@ -25,8 +25,6 @@ Background images are loaded from the assets directory with fallback to solid co
 if image loading fails.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 import logging
 import os

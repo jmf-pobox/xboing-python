@@ -3,7 +3,6 @@
 from collections.abc import Callable
 from enum import Enum, auto
 import logging
-from typing import Any
 
 import pygame
 
@@ -42,10 +41,10 @@ class BonusState(Enum):
     BONUS_TEXT = auto()  # Display level title
     BONUS_SCORE = auto()  # Display congratulations message
     BONUS_DELAY = auto()  # Delay before bonus breakdown
-    BONUS_COINS = auto()  # Display bonus coins (skip if zero)
+    BONUS_COINS = auto()  # Display bonus coins
     BONUS_LEVEL = auto()  # Display level bonus
-    BONUS_BULLETS = auto()  # Display bullet bonus (skip if zero)
-    BONUS_TIME = auto()  # Display time bonus (skip if zero)
+    BONUS_BULLETS = auto()  # Display bullet bonus
+    BONUS_TIME = auto()  # Display time bonus
     BONUS_RANK = auto()  # Display player ranking
     BONUS_PREPARE = auto()  # Display prepare for next level
     BONUS_FINISH = auto()  # Completion state
@@ -89,14 +88,10 @@ class LevelCompleteView(View):
         self.on_advance_callback: Callable[[], None] | None = on_advance_callback
         self.active: bool = False
         self.level_num: int
-        self.level_title: str
         self.coin_bonus: int
-        self.super_bonus: int
         self.level_bonus: int
         self.bullet_bonus: int
         self.time_bonus: int
-        self.total_bonus: int
-        self.final_score: int
         self.time_remaining: int
         self.message: str = "- Bonus Tally -"
 
@@ -129,15 +124,9 @@ class LevelCompleteView(View):
         # Font definitions for drawing
         self._fonts = self._initialize_fonts()
 
-        # Spacing constants
-        self.spacing = 12
-        self.icon_spacing = 16
-
         # Renderer list and composite renderer
         self.row_renderers_with_y: list[tuple[RowRenderer, int]] = []
         self.composite_renderer: CompositeRenderer | None = None
-        self._row_events: list[Any | None] = []
-        self._row_delays: list[int] = []
 
     @staticmethod
     def _initialize_fonts() -> dict[str, pygame.font.Font]:
@@ -153,38 +142,16 @@ class LevelCompleteView(View):
     def _compute_bonuses(self) -> None:
         """Gather stats and compute bonuses for the level complete screen."""
         self.level_num = self.game_state.get_level_num()
-        self.level_title = str(
-            self.level_manager.get_level_info().get("title", f"Level {self.level_num}")
-        )
-        # Coin bonus
-        # coins = self.game_state.level_state.get_bonus_coins_collected()
         self.coin_bonus = self.game_state.level_state.calculate_coin_bonus()
-
-        # Super bonus
-        self.super_bonus = self.game_state.level_state.calculate_super_bonus()
-
-        # Level bonus
         self.level_bonus = self.game_state.level_state.calculate_level_bonus()
-
-        # Bullet bonus
         bullets = self.game_state.get_ammo()
         self.bullet_bonus = self.game_state.level_state.calculate_bullet_bonus(bullets)
-
-        # Time bonus
         self.time_remaining = self.game_state.level_state.get_bonus_time()
         self.time_bonus = self.game_state.level_state.calculate_time_bonus()
 
-        # Total bonus
-        self.total_bonus = self.game_state.level_state.calculate_all_bonuses(bullets)
-
-        # Add total bonus to score
-        self.final_score = self.game_state.score
-
     def _prepare_renderers(self) -> None:
-        """Prepare the list of (renderer, y) pairs, events, and delays for the level complete screen using dynamic font-based positioning."""
+        """Prepare the list of (renderer, y) pairs for the level complete screen."""
         self.row_renderers_with_y = []
-        self._row_events = []
-        self._row_delays = []
 
         # Dynamic Y positioning using font metrics (from original bonus.c)
         ypos = Y_START
@@ -200,8 +167,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(None)
-        self._row_delays.append(30)  # 500ms -> 30 frames
         ypos += self._fonts["title"].get_ascent() + GAP
         # Congratulations row
         self.row_renderers_with_y.append(
@@ -214,8 +179,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(ApplauseEvent())
-        self._row_delays.append(90)  # 1500ms -> 90 frames
         ypos += self._fonts["message"].get_ascent() + int(GAP * 1.5)  # 1.5x spacing
 
         # Bonus coin row
@@ -231,8 +194,6 @@ class LevelCompleteView(View):
                     ypos,
                 )
             )
-            self._row_events.append(DohSoundEvent())
-            self._row_delays.append(90)  # 1500ms -> 90 frames
         else:
             self.row_renderers_with_y.append(
                 (
@@ -246,8 +207,6 @@ class LevelCompleteView(View):
                     ypos,
                 )
             )
-            self._row_events.append(BonusCollectedEvent())
-            self._row_delays.append(90)  # 1500ms -> 90 frames
         ypos += self._fonts["message"].get_ascent() + int(GAP * 1.5)  # 1.5x spacing
         # Level bonus row
         self.row_renderers_with_y.append(
@@ -260,15 +219,11 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(BonusCollectedEvent())
-        self._row_delays.append(54)  # 900ms -> 54 frames
         ypos += self._fonts["bonus"].get_ascent() + GAP
 
         # Bullet row
         bullet_img = pygame.transform.smoothscale(self._bullet_img, (7, 15))
         self.row_renderers_with_y.append((BulletRowRenderer(bullet_img), ypos))
-        self._row_events.append(None)  # Sound handled in update
-        self._row_delays.append(42)  # 700ms -> 42 frames
         ypos += bullet_img.get_height() + GAP
 
         # Time bonus row
@@ -282,8 +237,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(TimerUpdatedEvent(self.time_remaining))
-        self._row_delays.append(72)  # 1200ms -> 72 frames
         ypos += self._fonts["bonus"].get_ascent() + GAP
 
         # Rank row
@@ -297,8 +250,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(None)
-        self._row_delays.append(60)  # 1000ms -> 60 frames
         ypos += self._fonts["rank"].get_ascent() + GAP
 
         # Prepare for the next level row
@@ -312,8 +263,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(None)
-        self._row_delays.append(48)  # 800ms -> 48 frames
         ypos += self._fonts["message"].get_ascent() + GAP
 
         # Press the spacebar row
@@ -327,8 +276,6 @@ class LevelCompleteView(View):
                 ypos,
             )
         )
-        self._row_events.append(None)
-        self._row_delays.append(48)  # 800ms -> 48 frames
         self.composite_renderer = CompositeRenderer(self.row_renderers_with_y)
 
     def activate(self) -> None:
@@ -380,7 +327,7 @@ class LevelCompleteView(View):
             self.on_advance_callback()
 
     def _get_next_state(self, current: BonusState) -> BonusState:
-        """Get the next state in the bonus screen state machine with conditional skipping.
+        """Get the next state in the bonus screen state machine.
 
         Args:
         ----
@@ -388,7 +335,7 @@ class LevelCompleteView(View):
 
         Returns:
         -------
-            BonusState: The next state, potentially skipping states with zero bonuses.
+            BonusState: The next state in sequence.
 
         """
         transitions: dict[BonusState, BonusState] = {
@@ -611,8 +558,9 @@ class LevelCompleteView(View):
                 self.level_bonus, self._get_state_duration_frames(next_state)
             )
         elif next_state == BonusState.BONUS_BULLETS:
-            # Bullet animation handled in update()
-            pass
+            self._start_score_animation(
+                self.bullet_bonus, self._get_state_duration_frames(next_state)
+            )
         elif next_state == BonusState.BONUS_TIME:
             # Post time bonus event and start score animation
             pygame.event.post(

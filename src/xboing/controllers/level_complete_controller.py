@@ -137,7 +137,12 @@ class LevelCompleteController(Controller):
         level_complete_view: LevelCompleteView = cast(
             "LevelCompleteView", self.ui_manager.views["level_complete"]
         )
-        bonus = level_complete_view.total_bonus
+        bonus = (
+            level_complete_view.coin_bonus
+            + level_complete_view.level_bonus
+            + level_complete_view.bullet_bonus
+            + level_complete_view.time_bonus
+        )
         score_events = self.game_state.add_score(bonus)
         self.post_game_state_events(score_events)
 
