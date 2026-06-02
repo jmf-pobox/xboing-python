@@ -89,6 +89,7 @@ class LevelCompleteView(View):
         self.active: bool = False
         self.level_num: int
         self.coin_bonus: int
+        self.super_bonus: int
         self.level_bonus: int
         self.bullet_bonus: int
         self.time_bonus: int
@@ -143,6 +144,7 @@ class LevelCompleteView(View):
         """Gather stats and compute bonuses for the level complete screen."""
         self.level_num = self.game_state.get_level_num()
         self.coin_bonus = self.game_state.level_state.calculate_coin_bonus()
+        self.super_bonus = self.game_state.level_state.calculate_super_bonus()
         self.level_bonus = self.game_state.level_state.calculate_level_bonus()
         bullets = self.game_state.get_ammo()
         self.bullet_bonus = self.game_state.level_state.calculate_bullet_bonus(bullets)

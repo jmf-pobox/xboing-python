@@ -139,6 +139,7 @@ class LevelCompleteController(Controller):
         )
         bonus = (
             level_complete_view.coin_bonus
+            + level_complete_view.super_bonus
             + level_complete_view.level_bonus
             + level_complete_view.bullet_bonus
             + level_complete_view.time_bonus
