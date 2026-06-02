@@ -352,7 +352,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 > **"If it doesn't pass all quality gates, it doesn't get committed."**
 
 Every commit must pass:
-1. All tests (170+ passing)
+1. All tests passing
 2. Type checking (mypy + pyright strict)
 3. Linting (ruff)
 4. Formatting (black)
