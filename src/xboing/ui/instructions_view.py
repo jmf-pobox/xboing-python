@@ -1,7 +1,6 @@
 """UI view for displaying game instructions in XBoing."""
 
 import os
-from typing import List, Tuple
 
 from injector import inject
 import pygame
@@ -32,7 +31,7 @@ class InstructionsView(View):
         font: pygame.font.Font,
         headline_font: pygame.font.Font,
         text_font: pygame.font.Font,
-        amber_color: Tuple[int, int, int] = (255, 191, 63),
+        amber_color: tuple[int, int, int] = (255, 191, 63),
     ) -> None:
         """Initialize the InstructionsView.
 
@@ -51,9 +50,9 @@ class InstructionsView(View):
         self.font: pygame.font.Font = font
         self.headline_font: pygame.font.Font = headline_font
         self.text_font: pygame.font.Font = text_font
-        self.amber_color: Tuple[int, int, int] = amber_color
+        self.amber_color: tuple[int, int, int] = amber_color
         # Manually broken lines to match the original game's style
-        self.lines: List[str] = [
+        self.lines: list[str] = [
             # Paragraph 1 (3 lines)
             "XBoing is a blockout game where you use a paddle to bounce",
             "a proton ball around an arena full of nasties while keeping",
@@ -160,7 +159,7 @@ class InstructionsView(View):
         self._draw_background(play_surf)
         centerx = play_rect.width // 2
         # Prepare rows with y-coords
-        rows_with_y: List[Tuple[RowRenderer, int]] = []
+        rows_with_y: list[tuple[RowRenderer, int]] = []
         y = 20
         # Logo
         logo_renderer = LogoRenderer(

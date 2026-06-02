@@ -5,8 +5,8 @@ All providers return the instance passed to __init__, ensuring singleton-like be
 No provider constructs or accepts dependencies as parameters; all are returned from instance variables.
 """
 
+from collections.abc import Callable
 import logging
-from typing import Callable, Optional
 
 from injector import Module, provider
 import pygame
@@ -75,11 +75,11 @@ class XBoingModule(Module):
         get_score_callback: Callable[[], int],
         font: pygame.font.Font,
         small_font: pygame.font.Font,
-        reset_game_callback: Optional[Callable[[], None]],
+        reset_game_callback: Callable[[], None] | None,
         instructions_font: pygame.font.Font,
         instructions_headline_font: pygame.font.Font,
         instructions_text_font: pygame.font.Font,
-        on_exit_callback: Optional[Callable[[], None]],
+        on_exit_callback: Callable[[], None] | None,
         input_manager: InputManager,
         bullet_manager: BulletManager,
         bullet_renderer: BulletRenderer,
@@ -165,7 +165,7 @@ class XBoingModule(Module):
         self,
         ammo_renderer: AmmoRenderer,
         lives_display_component: LivesDisplayComponent,
-        game_state: "GameState",
+        game_state: GameState,
     ) -> AmmoDisplayComponent:
         """Return an AmmoDisplayComponent for the UI."""
         lives_y, lives_height = lives_display_component.get_y_and_height()

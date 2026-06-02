@@ -3,7 +3,7 @@ XBoing.
 """
 
 import logging
-from typing import Any, List
+from typing import Any
 
 import pygame
 
@@ -120,7 +120,7 @@ class GameController(Controller):
             self.collision_handlers.handle_bullet_ball_collision,
         )
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle Pygame events for gameplay, delegating to input controllers."""
         # Check for game events
         for event in events:
@@ -182,7 +182,7 @@ class GameController(Controller):
     def update_balls_and_collisions(self, delta_ms: float) -> None:
         """Update balls and bullets, check for collisions, and handle block effects."""
         play_rect = self.layout.get_play_rect()
-        balls_to_remove: List[Any] = []
+        balls_to_remove: list[Any] = []
 
         # Update balls and collect events
         for ball in self.ball_manager.balls:
@@ -267,7 +267,7 @@ class GameController(Controller):
             self.handle_life_loss()
 
     @staticmethod
-    def post_game_state_events(changes: List[Any]) -> None:
+    def post_game_state_events(changes: list[Any]) -> None:
         """Post all events returned by GameState/model methods to the Pygame event queue.
 
         This implements the decoupled event firing pattern: models return events, controllers post them.

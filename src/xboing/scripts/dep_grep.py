@@ -12,7 +12,6 @@ import argparse
 import logging
 from pathlib import Path
 import re
-from typing import Dict, List, Set
 
 from xboing.scripts.utils import run_cli_conversion
 
@@ -30,7 +29,7 @@ PACKAGES = [
 logger = logging.getLogger("xboing.scripts.dep_grep")
 
 
-def find_package_dependencies() -> Dict[str, Set[str]]:
+def find_package_dependencies() -> dict[str, set[str]]:
     """Scan each package for imports of other packages and return a dependency map.
 
     Returns
@@ -38,7 +37,7 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
         Dict[str, Set[str]]: Mapping from package to set of dependent packages.
 
     """
-    deps: Dict[str, Set[str]] = {pkg: set() for pkg in PACKAGES}
+    deps: dict[str, set[str]] = {pkg: set() for pkg in PACKAGES}
     for pkg in PACKAGES:
         pkg_dir = SRC_DIR / pkg
         if not pkg_dir.exists():
@@ -56,7 +55,7 @@ def find_package_dependencies() -> Dict[str, Set[str]]:
     return deps
 
 
-def print_dependencies(deps: Dict[str, Set[str]]) -> None:
+def print_dependencies(deps: dict[str, set[str]]) -> None:
     """Print the package dependency summary.
 
     Args:
@@ -80,7 +79,7 @@ def main() -> int:
         input_path: Path,  # pylint: disable=unused-argument
         output_path: Path,  # pylint: disable=unused-argument
         dry_run: bool = False,  # pylint: disable=unused-argument
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         # Arguments are unused; required for run_cli_conversion signature
         deps = find_package_dependencies()
         print_dependencies(deps)

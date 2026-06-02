@@ -4,7 +4,7 @@ This module provides the RowRenderer protocol that defines the interface for all
 as well as the TextRowRenderer implementation for rendering text rows with optional icons.
 """
 
-from typing import Optional, Protocol, Tuple
+from typing import Protocol
 
 import pygame
 
@@ -39,8 +39,8 @@ class TextRowRenderer:
         self,
         text: str,
         font: pygame.font.Font,
-        color: Tuple[int, int, int],
-        icon: Optional[pygame.Surface] = None,
+        color: tuple[int, int, int],
+        icon: pygame.Surface | None = None,
         icon_offset: int = 0,
     ) -> None:
         """

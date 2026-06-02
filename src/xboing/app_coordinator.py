@@ -15,7 +15,7 @@ class AppCoordinator:
     """
 
     def __init__(
-        self, ui_manager: "UIManager", controller_manager: "ControllerManager"
+        self, ui_manager: UIManager, controller_manager: ControllerManager
     ) -> None:
         """Initialize the AppCoordinator and register the view change callback.
 

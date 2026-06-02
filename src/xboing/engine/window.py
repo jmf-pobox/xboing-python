@@ -4,7 +4,8 @@ This module provides window creation, management, and event handling,
 abstracting the underlying SDL2/pygame implementation.
 """
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import pygame
 

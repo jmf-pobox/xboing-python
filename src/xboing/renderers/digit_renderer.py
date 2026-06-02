@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import pygame
 
@@ -19,16 +19,16 @@ class DigitRenderer:
 
     logger = logging.getLogger("xboing.DigitRenderer")
 
-    digits: Dict[int, pygame.Surface]
-    _surface_cache: Dict[Any, pygame.Surface]
+    digits: dict[int, pygame.Surface]
+    _surface_cache: dict[Any, pygame.Surface]
     digit_width: int
     digit_height: int
 
     def __init__(self) -> None:
         """Initialize the DigitRenderer with loaded digit sprites."""
-        self.digits: Dict[int, pygame.Surface] = {}
+        self.digits: dict[int, pygame.Surface] = {}
         self._load_digits()
-        self._surface_cache: Dict[Any, pygame.Surface] = {}
+        self._surface_cache: dict[Any, pygame.Surface] = {}
         if self.digits:
             self.digit_width = self.digits[0].get_width()
             self.digit_height = self.digits[0].get_height()
@@ -55,7 +55,7 @@ class DigitRenderer:
         scaled_width: int,
         scaled_height: int,
         spacing: int,
-        color: Optional[Tuple[int, int, int]] = None,
+        color: tuple[int, int, int] | None = None,
     ) -> int:
         """Render a single-digit character to the surface.
 
@@ -94,8 +94,8 @@ class DigitRenderer:
     def render_number(
         self,
         number: int,
-        color: Optional[Tuple[int, int, int]] = None,
-        width: Optional[int] = None,
+        color: tuple[int, int, int] | None = None,
+        width: int | None = None,
         right_justified: bool = False,
     ) -> pygame.Surface:
         """Render a number as a surface using digit sprites.
@@ -154,7 +154,7 @@ class DigitRenderer:
         spacing: int = 2,
         scale: float = 1.0,
         colon_width: int = 8,
-        color: Optional[Tuple[int, int, int]] = None,
+        color: tuple[int, int, int] | None = None,
     ) -> pygame.Surface:
         """Render a time value as MM:SS using digit sprites and a colon.
 
@@ -181,7 +181,7 @@ class DigitRenderer:
         scaled_height = int(self.digit_height * scale)
         total_width = (scaled_width * 4) + (spacing * 3) + colon_width
         surface = pygame.Surface((total_width, scaled_height), pygame.SRCALPHA)
-        colon_color = color if color else (255, 255, 0)
+        colon_color = color or (255, 255, 0)
         x = 0
         for digit_char in f"{minutes:02d}":
             x = self._render_digit(

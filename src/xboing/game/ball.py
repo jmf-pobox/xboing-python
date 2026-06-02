@@ -4,7 +4,7 @@ import logging
 import math
 import os
 import random
-from typing import Any, ClassVar, List, Optional, Tuple, Union
+from typing import Any, ClassVar
 
 import pygame
 
@@ -20,7 +20,7 @@ from xboing.utils.asset_loader import load_image
 from xboing.utils.asset_paths import get_balls_dir, get_images_dir
 
 # Type alias for events used in this module
-Event = Union[BallLostEvent, PaddleHitEvent, WallHitEvent]
+Event = BallLostEvent | PaddleHitEvent | WallHitEvent
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +32,9 @@ class Ball(CircularGameShape, PhysicsMixin):
     """The main game object that bounces around the screen."""
 
     # Class variables for sprites
-    sprites: ClassVar[List[pygame.Surface]] = []
-    animation_frames: ClassVar[List[pygame.Surface]] = []
-    guide_images: ClassVar[List[pygame.Surface]] = []
+    sprites: ClassVar[list[pygame.Surface]] = []
+    animation_frames: ClassVar[list[pygame.Surface]] = []
+    guide_images: ClassVar[list[pygame.Surface]] = []
     logger: ClassVar[logging.Logger] = logging.getLogger("xboing.Ball")
     GUIDE_ANIM_FRAME_MS: ClassVar[float] = 80.0  # ms per guide animation frame
 
@@ -94,7 +94,7 @@ class Ball(CircularGameShape, PhysicsMixin):
         vx: float = 0.0,
         vy: float = 0.0,
         radius: int = 5,
-        color: Tuple[int, int, int] = (255, 255, 255),
+        color: tuple[int, int, int] = (255, 255, 255),
     ) -> None:
         """Initialize the ball.
 
@@ -179,7 +179,7 @@ class Ball(CircularGameShape, PhysicsMixin):
             tuple: (changed, events, (vx, vy))
 
         """
-        events: List[Event] = []
+        events: list[Event] = []
         changed = False
         vx, vy = self.physics.get_velocity()
 
@@ -219,10 +219,10 @@ class Ball(CircularGameShape, PhysicsMixin):
         delta_ms: float,
         screen_width: int = 0,
         screen_height: int = 0,
-        paddle: Optional[Any] = None,
+        paddle: Any | None = None,
         offset_x: int = 0,
         offset_y: int = 0,
-    ) -> List[Event]:
+    ) -> list[Event]:
         """Update ball position and handle collisions.
 
         Args:
@@ -239,7 +239,7 @@ class Ball(CircularGameShape, PhysicsMixin):
             List[Event]: List of events generated during the update
 
         """
-        events: List[Event] = []
+        events: list[Event] = []
 
         self._update_animation(delta_ms)
 
@@ -347,7 +347,7 @@ class Ball(CircularGameShape, PhysicsMixin):
 
         return True
 
-    def get_launch_velocity_from_guide_pos(self) -> Tuple[float, float]:
+    def get_launch_velocity_from_guide_pos(self) -> tuple[float, float]:
         """Get the launch velocity (vx, vy) for the current guide position."""
         # Default speed if no current velocity
         default_speed = 5.0
@@ -489,7 +489,7 @@ class Ball(CircularGameShape, PhysicsMixin):
         """Get the ball's collision rectangle."""
         return self.rect
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """Get the ball's current position."""
         return self.x, self.y
 

@@ -6,7 +6,6 @@ scattered across GameController.
 """
 
 import logging
-from typing import List
 
 from xboing.engine.events import (
     ApplauseEvent,
@@ -42,7 +41,7 @@ class GameStateManager:
         self.level_manager = level_manager
         self.logger = logging.getLogger("xboing.GameStateManager")
 
-    def handle_life_loss(self, has_active_balls: bool) -> List[object]:
+    def handle_life_loss(self, has_active_balls: bool) -> list[object]:
         """Handle life loss logic and return events to post.
 
         This method determines if a life should be lost based on whether
@@ -56,7 +55,7 @@ class GameStateManager:
             List of events to post (LifeLostEvent, GameOverEvent, etc.).
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         self.logger.debug(
             f"handle_life_loss called. Lives: {self.game_state.lives}, "
@@ -86,7 +85,7 @@ class GameStateManager:
 
         return events
 
-    def check_level_complete(self, blocks_remaining: int) -> List[object]:
+    def check_level_complete(self, blocks_remaining: int) -> list[object]:
         """Check if level is complete based on block count.
 
         Args:
@@ -96,7 +95,7 @@ class GameStateManager:
             List of events to post (LevelCompleteEvent, ApplauseEvent) if complete.
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         # Check if level is already marked complete to avoid duplicate events
         if self.game_state.level_state.is_level_complete():
@@ -111,7 +110,7 @@ class GameStateManager:
 
         return events
 
-    def update_timer(self, delta_ms: float, is_active: bool) -> List[object]:
+    def update_timer(self, delta_ms: float, is_active: bool) -> list[object]:
         """Update bonus timer if game is active.
 
         Args:
@@ -122,7 +121,7 @@ class GameStateManager:
             List of events to post (TimerUpdatedEvent with current time).
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         if is_active:
             # Decrement bonus time

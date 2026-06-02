@@ -3,8 +3,6 @@
 Subscribes to ScoreChangedEvent and renders itself in the score window region.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.engine.events import ScoreChangedEvent
@@ -50,7 +48,7 @@ class ScoreDisplay:
         self.x = x
         self.width = width
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle score update events and update the displayed score.
 
         Args:

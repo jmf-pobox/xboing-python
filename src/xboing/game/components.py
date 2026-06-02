@@ -17,17 +17,15 @@ This is intentional layering, not duplication:
 - PhysicsMixin: Convenience wrapper for game objects (mixin pattern)
 """
 
-from typing import Tuple
-
 
 class PhysicsComponent:
     """Component for handling physics behavior of game objects."""
 
     def __init__(
         self,
-        position: Tuple[float, float],
-        velocity: Tuple[float, float] = (0, 0),
-        acceleration: Tuple[float, float] = (0, 0),
+        position: tuple[float, float],
+        velocity: tuple[float, float] = (0, 0),
+        acceleration: tuple[float, float] = (0, 0),
         mass: float = 1.0,
     ) -> None:
         """
@@ -45,7 +43,7 @@ class PhysicsComponent:
         self.acceleration = acceleration
         self.mass = mass
 
-    def update(self, delta_ms: float) -> Tuple[float, float]:
+    def update(self, delta_ms: float) -> tuple[float, float]:
         """
         Update the physics state based on the time delta.
 
@@ -76,7 +74,7 @@ class PhysicsComponent:
 
         return self.position
 
-    def apply_force(self, force: Tuple[float, float]) -> None:
+    def apply_force(self, force: tuple[float, float]) -> None:
         """
         Apply a force to the object, changing its acceleration based on mass.
 
@@ -89,7 +87,7 @@ class PhysicsComponent:
             self.acceleration[1] + force[1] / self.mass,
         )
 
-    def set_velocity(self, velocity: Tuple[float, float]) -> None:
+    def set_velocity(self, velocity: tuple[float, float]) -> None:
         """
         Set the object's velocity.
 
@@ -99,7 +97,7 @@ class PhysicsComponent:
         """
         self.velocity = velocity
 
-    def get_velocity(self) -> Tuple[float, float]:
+    def get_velocity(self) -> tuple[float, float]:
         """
         Get the object's current velocity.
 
@@ -109,7 +107,7 @@ class PhysicsComponent:
         """
         return self.velocity
 
-    def set_position(self, position: Tuple[float, float]) -> None:
+    def set_position(self, position: tuple[float, float]) -> None:
         """
         Set the object's position.
 
@@ -119,7 +117,7 @@ class PhysicsComponent:
         """
         self.position = position
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """
         Get the object's current position.
 
@@ -129,7 +127,7 @@ class PhysicsComponent:
         """
         return self.position
 
-    def set_acceleration(self, acceleration: Tuple[float, float]) -> None:
+    def set_acceleration(self, acceleration: tuple[float, float]) -> None:
         """
         Set the object's acceleration.
 
@@ -139,7 +137,7 @@ class PhysicsComponent:
         """
         self.acceleration = acceleration
 
-    def get_acceleration(self) -> Tuple[float, float]:
+    def get_acceleration(self) -> tuple[float, float]:
         """
         Get the object's current acceleration.
 

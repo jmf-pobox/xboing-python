@@ -1,7 +1,7 @@
 """Manages controller registration and switching for XBoing."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from xboing.utils.logging_decorators import log_entry_exit
 
@@ -11,8 +11,8 @@ class ControllerManager:
 
     def __init__(self) -> None:
         """Initialize the ControllerManager."""
-        self.controllers: Dict[str, Any] = {}
-        self._active_name: Optional[str] = None
+        self.controllers: dict[str, Any] = {}
+        self._active_name: str | None = None
         self.logger = logging.getLogger("xboing.ControllerManager")
 
     @log_entry_exit()
@@ -49,7 +49,7 @@ class ControllerManager:
             raise ValueError(f"Controller '{name}' not registered.")
 
     @property
-    def active_controller(self) -> Optional[Any]:
+    def active_controller(self) -> Any | None:
         """Get the currently active controller.
 
         Returns

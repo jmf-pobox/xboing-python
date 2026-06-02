@@ -2,7 +2,7 @@
 
 import logging
 import random
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 import pygame
 
@@ -46,11 +46,11 @@ class Block(GameShape):
 
         # --- Animation and Explosion Frames ---
         explosion_frames_val = config.get("explosion_frames", [])
-        self.explosion_frames: List[str] = [
+        self.explosion_frames: list[str] = [
             str(f).replace(".xpm", ".png") for f in explosion_frames_val
         ]
         anim = config.get("animation_frames")
-        self.animation_frames: Optional[List[str]] = (
+        self.animation_frames: list[str] | None = (
             [str(f).replace(".xpm", ".png") for f in anim] if anim else None
         )
 
@@ -64,13 +64,13 @@ class Block(GameShape):
         self.hit_this_frame: bool = False  # Track if block was hit in current frame
 
         # --- Special Block Animation/Image Setup ---
-        image_override: Optional[pygame.Surface] = None
-        self.direction: Optional[str] = None
+        image_override: pygame.Surface | None = None
+        self.direction: str | None = None
         self.move_timer: float = 0.0
         self.move_interval: int = 1000  # ms between movements
         if self.type == ROAMER_BLK:
             self.direction = "idle"
-        self.image: Optional[pygame.Surface] = None
+        self.image: pygame.Surface | None = None
         if image_override is not None:
             self.image = image_override
         # If the image is not available, log an error and use a placeholder
@@ -100,7 +100,7 @@ class Block(GameShape):
         """Check if the block is broken."""
         return self.health <= 0
 
-    def update(self, delta_ms: float) -> List[pygame.event.Event]:
+    def update(self, delta_ms: float) -> list[pygame.event.Event]:
         """Update the block's state.
 
         Args:
@@ -110,7 +110,7 @@ class Block(GameShape):
             List[pygame.event.Event]: List of events generated during the update
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
         # --- Hit Animation Section ---
         if self.is_hit:
             self.hit_timer -= delta_ms
@@ -148,7 +148,7 @@ class Block(GameShape):
         directions = ["idle", "up", "down", "left", "right"]
         self.direction = random.choice(directions)
 
-    def hit(self) -> Tuple[bool, int, Optional[Any]]:
+    def hit(self) -> tuple[bool, int, Any | None]:
         """Handle the block being hit by a ball.
 
         Returns
@@ -285,7 +285,7 @@ class CounterBlock(Block):
             f"CounterBlock initialized at ({x}, {y}) with {self.hits_remaining} hits"
         )
 
-    def hit(self) -> Tuple[bool, int, Optional[Any]]:
+    def hit(self) -> tuple[bool, int, Any | None]:
         """Handle CounterBlock being hit."""
         broken = False
         points = 0
@@ -352,5 +352,5 @@ def _safe_int(val: Any, default: int = 0) -> int:
         if val is None:
             return default
         return int(val)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return default

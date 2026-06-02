@@ -7,7 +7,7 @@ better maintainability, type safety, and testability, while also
 supporting the development of other similar games.
 """
 
-from typing import Any, List, Protocol, Tuple, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import pygame
 
@@ -16,7 +16,7 @@ import pygame
 class Updateable(Protocol):
     """Protocol for objects that update with the game clock."""
 
-    def update(self, delta_ms: float) -> List[pygame.event.Event]:
+    def update(self, delta_ms: float) -> list[pygame.event.Event]:
         """
         Update the object state based on the time delta.
 
@@ -93,7 +93,7 @@ class Collidable(Protocol):
 class Positionable(Protocol):
     """Protocol for objects with a position in the game world."""
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """
         Get the object's current position as (x, y).
 

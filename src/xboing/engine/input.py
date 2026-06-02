@@ -4,8 +4,8 @@ This module provides keyboard and mouse input management,
 abstracting the underlying pygame implementation.
 """
 
+from collections.abc import Sequence
 import logging
-from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import pygame
 
@@ -19,22 +19,22 @@ class InputManager:
     def __init__(self) -> None:
         """Initialize the input manager."""
         # Keyboard state
-        self.keys_pressed: Dict[int, bool] = {}
-        self.keys_down: Set[int] = set()
-        self.keys_up: Set[int] = set()
+        self.keys_pressed: dict[int, bool] = {}
+        self.keys_down: set[int] = set()
+        self.keys_up: set[int] = set()
 
         # Mouse state
-        self.mouse_pos: Tuple[int, int] = (0, 0)
-        self.mouse_buttons_pressed: List[bool] = [
+        self.mouse_pos: tuple[int, int] = (0, 0)
+        self.mouse_buttons_pressed: list[bool] = [
             False,
             False,
             False,
         ]  # Left, middle, right
-        self.mouse_buttons_down: List[bool] = [False, False, False]
-        self.mouse_buttons_up: List[bool] = [False, False, False]
-        self.mouse_motion: Tuple[int, int] = (0, 0)
+        self.mouse_buttons_down: list[bool] = [False, False, False]
+        self.mouse_buttons_up: list[bool] = [False, False, False]
+        self.mouse_motion: tuple[int, int] = (0, 0)
 
-    def update(self, events: Optional[Sequence[pygame.event.Event]] = None) -> bool:
+    def update(self, events: Sequence[pygame.event.Event] | None = None) -> bool:
         """Update the input state for the current frame."""
         if events is None:
             events = pygame.event.get()
@@ -94,11 +94,11 @@ class InputManager:
         """Check if a key was released."""
         return key in self.keys_up
 
-    def get_mouse_position(self) -> Tuple[int, int]:
+    def get_mouse_position(self) -> tuple[int, int]:
         """Get the current mouse position."""
         return self.mouse_pos
 
-    def get_mouse_motion(self) -> Tuple[int, int]:
+    def get_mouse_motion(self) -> tuple[int, int]:
         """Get the mouse movement delta."""
         return self.mouse_motion
 

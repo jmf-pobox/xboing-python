@@ -1,6 +1,7 @@
 """Controller for handling instructions view and related events in XBoing."""
 
-from typing import Any, Callable, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 from injector import inject
 import pygame
@@ -19,10 +20,10 @@ class InstructionsController(Controller):
     @inject
     def __init__(
         self,
-        on_exit_callback: Optional[Callable[[], None]] = None,
-        audio_manager: Optional[AudioManager] = None,
-        quit_callback: Optional[Callable[[], None]] = None,
-        ui_manager: Optional[UIManager] = None,
+        on_exit_callback: Callable[[], None] | None = None,
+        audio_manager: AudioManager | None = None,
+        quit_callback: Callable[[], None] | None = None,
+        ui_manager: UIManager | None = None,
     ) -> None:
         """Initialize the InstructionsController.
 
@@ -39,7 +40,7 @@ class InstructionsController(Controller):
         self.quit_callback = quit_callback
         self.ui_manager = ui_manager
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle input/events for instructions view and global controls.
 
         Args:

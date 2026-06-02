@@ -5,8 +5,6 @@ handling game-level input such as quit, pause, debug keys, ammo firing, and
 ball launching.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.engine.events import (
@@ -67,15 +65,17 @@ class GameInputController:
         self.stuck_ball_timer = 0.0
         self.ball_auto_active_delay_ms = 3000.0  # 3 seconds
 
-    def _fire_ammo(self) -> List[pygame.event.Event]:
+    def _fire_ammo(self) -> list[pygame.event.Event]:
         """Fire ammo if available."""
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
         if self.game_state.ammo <= 0:
             return events
 
         changes = self.game_state.fire_ammo()
-        for change in changes:
-            events.append(pygame.event.Event(pygame.USEREVENT, {"event": change}))
+        events.extend(
+            pygame.event.Event(pygame.USEREVENT, {"event": change})
+            for change in changes
+        )
         events.append(
             pygame.event.Event(
                 pygame.USEREVENT,
@@ -89,9 +89,9 @@ class GameInputController:
         self.bullet_manager.add_bullet(bullet)
         return events
 
-    def _launch_balls(self) -> List[pygame.event.Event]:
+    def _launch_balls(self) -> list[pygame.event.Event]:
         """Launch all stuck balls."""
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
         balls = self.ball_manager.balls
         for ball in balls:
             ball.release_from_paddle()
@@ -99,15 +99,17 @@ class GameInputController:
         changes = self.game_state.set_timer(
             self.game_state.level_state.get_bonus_time()
         )
-        for change in changes:
-            events.append(pygame.event.Event(pygame.USEREVENT, {"event": change}))
+        events.extend(
+            pygame.event.Event(pygame.USEREVENT, {"event": change})
+            for change in changes
+        )
         events.append(pygame.event.Event(pygame.USEREVENT, {"event": BallShotEvent()}))
         level_info = self.level_manager.get_level_info()
         level_title = str(level_info["title"])
         post_level_title_message(level_title)
         return events
 
-    def _handle_fire_or_launch(self) -> List[pygame.event.Event]:
+    def _handle_fire_or_launch(self) -> list[pygame.event.Event]:
         """Handle K key or mouse button: fire ammo or launch balls."""
         if self.ball_manager.has_ball_in_play():
             return self._fire_ammo()
@@ -115,8 +117,8 @@ class GameInputController:
             return self._launch_balls()
 
     def handle_events(
-        self, events: List[pygame.event.Event]
-    ) -> List[pygame.event.Event]:
+        self, events: list[pygame.event.Event]
+    ) -> list[pygame.event.Event]:
         """Handle game events.
 
         Args:
@@ -126,7 +128,7 @@ class GameInputController:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post: List[pygame.event.Event] = []
+        events_to_post: list[pygame.event.Event] = []
 
         for event in events:
             # Handle quit event
@@ -156,14 +158,14 @@ class GameInputController:
 
         return events_to_post
 
-    def handle_debug_keys(self) -> List[pygame.event.Event]:
+    def handle_debug_keys(self) -> list[pygame.event.Event]:
         """Handle debug keys.
 
         Returns:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post: List[pygame.event.Event] = []
+        events_to_post: list[pygame.event.Event] = []
 
         # Handle debug X key (destroy all blocks)
         if self.input_manager.is_key_pressed(pygame.K_x):
@@ -180,7 +182,7 @@ class GameInputController:
 
         return events_to_post
 
-    def update_stuck_ball_timer(self, delta_ms: float) -> List[pygame.event.Event]:
+    def update_stuck_ball_timer(self, delta_ms: float) -> list[pygame.event.Event]:
         """Update the stuck ball timer and auto-launch balls if needed.
 
         Args:
@@ -190,7 +192,7 @@ class GameInputController:
             List of events to post to the Pygame event queue.
 
         """
-        events_to_post: List[pygame.event.Event] = []
+        events_to_post: list[pygame.event.Event] = []
         stuck_balls = [ball for ball in self.ball_manager.balls if ball.stuck_to_paddle]
 
         if stuck_balls:

@@ -4,7 +4,6 @@ Defines the GameShape ABC for rectangular and derived shapes.
 """
 
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 import pygame
 
@@ -30,7 +29,7 @@ class GameShape(ABC):
         """Get the shape's rectangle for collision detection."""
         return self.rect
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """Get the shape's current position as (x, y)."""
         return self.x, self.y
 

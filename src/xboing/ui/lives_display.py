@@ -3,8 +3,6 @@
 Subscribes to LivesChangedEvent and renders itself in the lives window region.
 """
 
-from typing import List, Tuple
-
 import pygame
 
 from xboing.engine.events import LivesChangedEvent
@@ -44,7 +42,7 @@ class LivesDisplayComponent:
         self.max_lives: int = max_lives
         self.x: int = x
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle lives update events and update the displayed lives.
 
         Args:
@@ -58,7 +56,7 @@ class LivesDisplayComponent:
             ):
                 self.lives = event.event.lives
 
-    def get_y_and_height(self) -> Tuple[int, int]:
+    def get_y_and_height(self) -> tuple[int, int]:
         """Return the y position and height of the lives display for alignment."""
         lives_surf = self.lives_display_util.render(
             self.lives, spacing=10, scale=1.0, max_lives=self.max_lives

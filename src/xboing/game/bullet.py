@@ -1,7 +1,6 @@
 """Bullet: A projectile that can be fired from the paddle."""
 
 import logging
-from typing import List, Tuple
 
 import pygame
 
@@ -29,7 +28,7 @@ class Bullet(CircularGameShape, PhysicsMixin):
         vx: float = 0.0,
         vy: float = DEFAULT_VELOCITY_Y,
         radius: int = DEFAULT_RADIUS,
-        color: Tuple[int, int, int] = (255, 255, 0),
+        color: tuple[int, int, int] = (255, 255, 0),
     ) -> None:
         """Initialize the bullet.
 
@@ -50,7 +49,7 @@ class Bullet(CircularGameShape, PhysicsMixin):
         self.active = True
         self.update_rect()
 
-    def update(self, delta_ms: float) -> List[pygame.event.Event]:
+    def update(self, delta_ms: float) -> list[pygame.event.Event]:
         """Update the bullet's position based on its velocity and the elapsed time.
 
         Args:
@@ -60,7 +59,7 @@ class Bullet(CircularGameShape, PhysicsMixin):
             List[pygame.event.Event]: List of events generated during the update.
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
 
         old_x, old_y = self.x, self.y
 

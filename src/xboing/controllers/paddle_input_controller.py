@@ -5,8 +5,6 @@ handling paddle movement input via keyboard and mouse, including support for
 reverse controls.
 """
 
-from typing import Optional
-
 import pygame
 
 from xboing.engine.input import InputManager
@@ -32,7 +30,7 @@ class PaddleInputController:
         self.input_manager = input_manager
         self.layout = layout
         self.reverse = False
-        self._last_mouse_x: Optional[int] = None
+        self._last_mouse_x: int | None = None
 
     def handle_keyboard_movement(self, delta_ms: float) -> None:
         """Handle paddle movement via keyboard.
@@ -98,7 +96,7 @@ class PaddleInputController:
         """
         self.reverse = value
 
-    def get_last_mouse_x(self) -> Optional[int]:
+    def get_last_mouse_x(self) -> int | None:
         """Get the last mouse x position.
 
         Returns:
@@ -107,7 +105,7 @@ class PaddleInputController:
         """
         return self._last_mouse_x
 
-    def set_last_mouse_x(self, value: Optional[int]) -> None:
+    def set_last_mouse_x(self, value: int | None) -> None:
         """Set the last mouse x position.
 
         Args:

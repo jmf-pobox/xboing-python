@@ -1,8 +1,9 @@
 """Utility functions for argument parsing, path validation, and summary logging for XBoing scripts."""
 
 import argparse
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 
 def parse_input_output_args(
@@ -31,7 +32,7 @@ def parse_input_output_args(
 
 def resolve_and_validate_paths(
     input_path: Path, output_path: Path, logger: Any
-) -> Tuple[Path, Path, bool]:
+) -> tuple[Path, Path, bool]:
     """Resolve and validate input/output paths. Returns (input_path, output_path, valid)."""
     input_path = input_path.resolve()
     output_path = output_path.resolve()
@@ -43,7 +44,7 @@ def resolve_and_validate_paths(
     return input_path, output_path, True
 
 
-def print_conversion_summary(logger: Any, results: Dict[str, List[str]]) -> None:
+def print_conversion_summary(logger: Any, results: dict[str, list[str]]) -> None:
     """Log a summary of converted, skipped, and failed files."""
     logger.info("\nSummary:")
     logger.info(f"  Converted: {len(results['converted'])}")
@@ -60,8 +61,8 @@ def run_cli_conversion(
     default_input: str,
     default_output: str,
     logger: Any,
-    conversion_func: Callable[[Path, Path, bool], Dict[str, List[str]]],
-    summary_func: Optional[Callable[[Any, Dict[str, List[str]]], None]] = None,
+    conversion_func: Callable[[Path, Path, bool], dict[str, list[str]]],
+    summary_func: Callable[[Any, dict[str, list[str]]], None] | None = None,
 ) -> int:
     """Standardized CLI entrypoint for conversion scripts: parses args, validates paths, runs conversion, prints summary."""
     parse_input_output_args(parser, default_input, default_output)

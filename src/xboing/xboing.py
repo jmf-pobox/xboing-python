@@ -8,7 +8,7 @@ import logging
 import sys
 import time
 import typing
-from typing import Dict, cast
+from typing import cast
 
 from injector import Injector
 import pygame
@@ -95,7 +95,7 @@ class XBoingApp:
     bullet_manager: BulletManager
     bullet_renderer: BulletRenderer
     ui_manager: UIManager
-    nonlocal_vars: Dict[str, bool]
+    nonlocal_vars: dict[str, bool]
     font: pygame.font.Font
     small_font: pygame.font.Font
     instructions_headline_font: pygame.font.Font
@@ -105,7 +105,7 @@ class XBoingApp:
     injector: Injector
     controller_manager: ControllerManager
     level_complete_controller: LevelCompleteController
-    views: Dict[str, View]
+    views: dict[str, View]
     top_bar_view: TopBarView
     bottom_bar_view: BottomBarView
     game_over_view: GameOverView

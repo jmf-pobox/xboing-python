@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pygame
 
@@ -74,7 +74,7 @@ class Paddle(GameShape):
                 logger.error(f"Large paddle sprite not found: {large_path}")
 
             # Load the paddle images
-            self.paddle_images: Optional[Dict[int, pygame.Surface]] = {
+            self.paddle_images: dict[int, pygame.Surface] | None = {
                 self.SIZE_SMALL: pygame.image.load(small_path).convert_alpha(),
                 self.SIZE_MEDIUM: pygame.image.load(medium_path).convert_alpha(),
                 self.SIZE_LARGE: pygame.image.load(large_path).convert_alpha(),
@@ -119,7 +119,7 @@ class Paddle(GameShape):
 
     def update(
         self, delta_ms: float, play_width: int = 0, offset_x: int = 0
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Update paddle position.
 
         Args:
@@ -132,7 +132,7 @@ class Paddle(GameShape):
             List[pygame.event.Event]: List of events generated during the update.
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
         if self.direction != 0:
             self.moving = True
 

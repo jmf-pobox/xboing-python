@@ -7,7 +7,6 @@ CollisionHandlers and GameController.
 """
 
 import logging
-from typing import List
 
 from xboing.engine.events import (
     BombExplodedEvent,
@@ -58,7 +57,7 @@ class PowerUpManager:
         self.reverse = False
         self.logger = logging.getLogger("xboing.PowerUpManager")
 
-    def handle_power_up_effect(self, effect: str, block: Block) -> List[object]:
+    def handle_power_up_effect(self, effect: str, block: Block) -> list[object]:
         """Handle a power-up effect and return events to post.
 
         Args:
@@ -69,7 +68,7 @@ class PowerUpManager:
             List of events to post (BombExplodedEvent, PaddleGrowEvent, etc.).
 
         """
-        events: List[object] = []
+        events: list[object] = []
         del block  # Remove unused argument warning
 
         if effect == BOMB_BLK:
@@ -96,14 +95,14 @@ class PowerUpManager:
 
         return events
 
-    def _handle_paddle_grow(self) -> List[object]:
+    def _handle_paddle_grow(self) -> list[object]:
         """Handle paddle grow power-up.
 
         Returns:
             List containing PaddleGrowEvent.
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         if self.paddle.size < Paddle.SIZE_LARGE:
             self.paddle.set_size(self.paddle.size + 1)
@@ -116,14 +115,14 @@ class PowerUpManager:
 
         return events
 
-    def _handle_paddle_shrink(self) -> List[object]:
+    def _handle_paddle_shrink(self) -> list[object]:
         """Handle paddle shrink power-up.
 
         Returns:
             List containing PaddleShrinkEvent.
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         if self.paddle.size > Paddle.SIZE_SMALL:
             self.paddle.set_size(self.paddle.size - 1)
@@ -138,14 +137,14 @@ class PowerUpManager:
 
         return events
 
-    def _handle_reverse_toggle(self) -> List[object]:
+    def _handle_reverse_toggle(self) -> list[object]:
         """Handle reverse controls toggle power-up.
 
         Returns:
             List containing SpecialReverseChangedEvent.
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         self.reverse = not self.reverse
         events.append(SpecialReverseChangedEvent(active=self.reverse))
@@ -153,14 +152,14 @@ class PowerUpManager:
 
         return events
 
-    def _handle_sticky_activate(self) -> List[object]:
+    def _handle_sticky_activate(self) -> list[object]:
         """Handle sticky paddle activation power-up.
 
         Returns:
             List containing SpecialStickyChangedEvent.
 
         """
-        events: List[object] = []
+        events: list[object] = []
 
         self.sticky = True
         self.paddle.sticky = True

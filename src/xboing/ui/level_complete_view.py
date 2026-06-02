@@ -1,8 +1,9 @@
 """UI view for displaying the level complete screen in XBoing."""
 
+from collections.abc import Callable
 from enum import Enum, auto
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 import pygame
 
@@ -64,7 +65,7 @@ class LevelCompleteView(View):
         small_font: pygame.font.Font,
         game_state: GameState,
         level_manager: LevelManager,
-        on_advance_callback: Optional[Callable[[], None]] = None,
+        on_advance_callback: Callable[[], None] | None = None,
     ) -> None:
         """Initialize the LevelCompleteView.
 
@@ -85,7 +86,7 @@ class LevelCompleteView(View):
         self.small_font: pygame.font.Font = small_font
         self.game_state: GameState = game_state
         self.level_manager: LevelManager = level_manager
-        self.on_advance_callback: Optional[Callable[[], None]] = on_advance_callback
+        self.on_advance_callback: Callable[[], None] | None = on_advance_callback
         self.active: bool = False
         self.level_num: int
         self.level_title: str
@@ -133,13 +134,13 @@ class LevelCompleteView(View):
         self.icon_spacing = 16
 
         # Renderer list and composite renderer
-        self.row_renderers_with_y: List[Tuple[RowRenderer, int]] = []
-        self.composite_renderer: Optional[CompositeRenderer] = None
-        self._row_events: List[Optional[Any]] = []
-        self._row_delays: List[int] = []
+        self.row_renderers_with_y: list[tuple[RowRenderer, int]] = []
+        self.composite_renderer: CompositeRenderer | None = None
+        self._row_events: list[Any | None] = []
+        self._row_delays: list[int] = []
 
     @staticmethod
-    def _initialize_fonts() -> Dict[str, pygame.font.Font]:
+    def _initialize_fonts() -> dict[str, pygame.font.Font]:
         """Initialize and return fonts used for rendering text."""
         return {
             "title": pygame.font.SysFont("Arial", 24),

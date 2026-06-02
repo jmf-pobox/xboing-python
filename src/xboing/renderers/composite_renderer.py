@@ -1,7 +1,5 @@
 """Composite renderer for orchestrating a sequence of row renderers."""
 
-from typing import List, Tuple
-
 import pygame
 
 from .row_renderer import RowRenderer
@@ -12,7 +10,7 @@ class CompositeRenderer:
 
     def __init__(
         self,
-        row_renderers_with_y: List[Tuple[RowRenderer, int]],
+        row_renderers_with_y: list[tuple[RowRenderer, int]],
     ) -> None:
         """
         Initialize the CompositeRenderer.

@@ -1,8 +1,9 @@
 """BlockManager: manages all block objects in the game, including creation, updates, and removal."""
 
+from collections.abc import Callable
 import functools
 import logging
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any
 
 import pygame
 
@@ -44,7 +45,7 @@ class BlockManager:
 
         self.offset_x = offset_x
         self.offset_y = offset_y
-        self.blocks: List[Block] = []
+        self.blocks: list[Block] = []
 
         # Get blocks directory using the asset path utility
         blocks_dir = get_blocks_dir()
@@ -63,12 +64,12 @@ class BlockManager:
         self.blocks = [b for b in self.blocks if b.state != "destroyed"]
 
     @functools.singledispatchmethod
-    def check_collisions(self, obj: object) -> Tuple[int, int, List[Any]]:
+    def check_collisions(self, obj: object) -> tuple[int, int, list[Any]]:
         """Dispatch collision checking based on the object type."""
         raise NotImplementedError(f"Unsupported collision object type: {type(obj)}")
 
     @check_collisions.register(Ball)
-    def _(self, ball: Ball) -> Tuple[int, int, List[Any]]:
+    def _(self, ball: Ball) -> tuple[int, int, list[Any]]:
         """Check for collisions between a ball and all blocks."""
         return self._check_block_collision(
             obj=ball,
@@ -79,7 +80,7 @@ class BlockManager:
         )
 
     @check_collisions.register(Bullet)
-    def _(self, bullet: Bullet) -> Tuple[int, int, List[Any]]:
+    def _(self, bullet: Bullet) -> tuple[int, int, list[Any]]:
         """Check for collisions between a bullet and all blocks."""
 
         def remove_bullet() -> None:
@@ -126,7 +127,7 @@ class BlockManager:
 
     @staticmethod
     def _reflect_ball(
-        obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
+        obj: Ball | Bullet, obj_x: float, obj_y: float, block: Block
     ) -> None:
         """Reflect the ball's velocity and move it out of collision with the block."""
         # Find the closest point on the block to the object
@@ -217,7 +218,7 @@ class BlockManager:
             obj.vx *= scale
             obj.vy *= scale
 
-    def _handle_block_hit(self, block: Block) -> Tuple[bool, int, Any]:
+    def _handle_block_hit(self, block: Block) -> tuple[bool, int, Any]:
         """Handle the result of hitting a block."""
         self.logger.debug(f"Block hit: [{block}]")
         broken, points, effect = block.hit()
@@ -237,15 +238,15 @@ class BlockManager:
 
     def _process_ball_collision(
         self,
-        obj: Union[Ball, Bullet],
+        obj: Ball | Bullet,
         obj_x: float,
         obj_y: float,
         obj_radius: float,
-    ) -> Tuple[int, int, List[Any]]:
+    ) -> tuple[int, int, list[Any]]:
         """Process ball collision with blocks (finds closest and reflects)."""
         points = 0
         broken_blocks = 0
-        effects: List[Any] = []
+        effects: list[Any] = []
 
         # Find the closest block for reflection
         closest_block = None
@@ -288,12 +289,12 @@ class BlockManager:
         obj_x: float,
         obj_y: float,
         obj_radius: float,
-        remove_callback: Optional[Callable[[], None]],
-    ) -> Tuple[int, int, List[Any]]:
+        remove_callback: Callable[[], None] | None,
+    ) -> tuple[int, int, list[Any]]:
         """Process bullet collision with blocks (hits first block encountered)."""
         points = 0
         broken_blocks = 0
-        effects: List[Any] = []
+        effects: list[Any] = []
 
         for block in self.blocks[:]:
             if self._should_skip_block(block):
@@ -318,12 +319,12 @@ class BlockManager:
 
     def _check_block_collision(
         self,
-        obj: Union[Ball, Bullet],
-        get_position: Callable[[], Tuple[float, float]],
+        obj: Ball | Bullet,
+        get_position: Callable[[], tuple[float, float]],
         radius: float,
         is_bullet: bool,
-        remove_callback: Optional[Callable[[], None]] = None,
-    ) -> Tuple[int, int, List[Any]]:
+        remove_callback: Callable[[], None] | None = None,
+    ) -> tuple[int, int, list[Any]]:
         """Shared collision logic for balls and bullets."""
         obj_x, obj_y = get_position()
         obj_radius = radius
@@ -360,7 +361,7 @@ class BlockManager:
         return count
 
     def reflect_ball(
-        self, obj: Union[Ball, Bullet], obj_x: float, obj_y: float, block: Block
+        self, obj: Ball | Bullet, obj_x: float, obj_y: float, block: Block
     ) -> None:
         """Reflect the ball's velocity and move it out of collision with the block.
 
@@ -375,7 +376,7 @@ class BlockManager:
 
     def create_block(
         self, x: int, y: int, width: int, height: int, block_type: str = "normal"
-    ) -> Union[Block, CounterBlock]:
+    ) -> Block | CounterBlock:
         """Create a block at the specified position."""
         config = self.block_type_data.get(block_type, {})
         config["width"] = width
@@ -383,7 +384,7 @@ class BlockManager:
 
         # Create the appropriate block type
         if block_type == COUNTER_BLK:
-            block: Union[Block, CounterBlock] = CounterBlock(x, y, config)
+            block: Block | CounterBlock = CounterBlock(x, y, config)
         else:
             block = Block(x, y, config)
         return block

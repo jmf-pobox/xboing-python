@@ -144,8 +144,8 @@ hatch run cov-game-html  # Run game with coverage, generate HTML
    - Used for clean separation of concerns
    - Enables testability
 
-3. **Python**: Python 3.10+
-   - Modern Python features (protocols, type hints)
+3. **Python**: Python 3.14+
+   - Modern Python features (protocols, type hints, PEP 604 union syntax, PEP 585 builtin generics)
 
 ### Test Organization
 

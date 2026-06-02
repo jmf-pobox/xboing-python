@@ -3,7 +3,8 @@
 Handles view switching, event routing, and drawing of the UI.
 """
 
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 import pygame
 
@@ -37,7 +38,7 @@ class UIManager:
     def __init__(
         self,
         window_controller: Any = None,
-        view_controller_map: Optional[Dict[str, Any]] = None,
+        view_controller_map: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the UIManager.
 
@@ -49,13 +50,13 @@ class UIManager:
         """
         self.top_bar: Any = None
         self.bottom_bar: Any = None
-        self.views: Dict[str, Any] = {}
+        self.views: dict[str, Any] = {}
         self.current_view: Any = None
-        self.current_name: Optional[str] = None
-        self.previous_view: Optional[str] = None  # Track the previous view
-        self._view_change_callbacks: List[Callable[[str], None]] = []
+        self.current_name: str | None = None
+        self.previous_view: str | None = None  # Track the previous view
+        self._view_change_callbacks: list[Callable[[str], None]] = []
         self.window_controller: Any = window_controller
-        self.view_controller_map: Dict[str, Any] = view_controller_map or {}
+        self.view_controller_map: dict[str, Any] = view_controller_map or {}
 
     def register_top_bar(self, top_bar: Any) -> None:
         """Register the top UI bar component.
@@ -144,10 +145,10 @@ class UIManager:
     def setup_ui(
         self,
         *,
-        views: Optional[Dict[str, Any]] = None,
+        views: dict[str, Any] | None = None,
         top_bar: Any = None,
         bottom_bar: Any = None,
-        initial_view: Optional[str] = None,
+        initial_view: str | None = None,
     ) -> None:
         """Register all UI components in one place. Accepts dict of views, top/bottom bars, and initial view name.
 
@@ -169,7 +170,7 @@ class UIManager:
         if initial_view:
             self.set_view(initial_view)
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle and dispatch events to the window controller, active view's controller, and UI bars.
 
         Args:

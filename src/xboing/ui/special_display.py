@@ -3,7 +3,7 @@
 Subscribes to special events and renders their state as colored labels.
 """
 
-from typing import Any, ClassVar, Dict, List, Tuple
+from typing import Any, ClassVar
 
 import pygame
 
@@ -21,7 +21,7 @@ class SpecialDisplay:
     # Font sizes
     DEFAULT_FONT_SIZE = 16  # Default font size for special display (smaller text)
 
-    LABELS: ClassVar[List[Tuple[str, str]]] = [
+    LABELS: ClassVar[list[tuple[str, str]]] = [
         ("Reverse", "reverse"),
         ("Save", "save"),
         ("NoWall", "nowall"),
@@ -31,7 +31,7 @@ class SpecialDisplay:
         ("Killer", "killer"),
         ("x4", "x4"),
     ]
-    EVENT_MAP: ClassVar[Dict[str, Any]] = SPECIAL_EVENT_MAP
+    EVENT_MAP: ClassVar[dict[str, Any]] = SPECIAL_EVENT_MAP
 
     def __init__(
         self,
@@ -52,9 +52,9 @@ class SpecialDisplay:
         self.renderer: Renderer = renderer
         self.font: pygame.font.Font = font
         # State for each special (all off by default)
-        self.state: Dict[str, bool] = {key: False for _, key in self.LABELS}
+        self.state: dict[str, bool] = {key: False for _, key in self.LABELS}
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle special power-up events and update the state.
 
         Args:

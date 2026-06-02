@@ -3,8 +3,6 @@
 Displays score, lives, level, timer, message, and special status.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.ui.ammo_display import AmmoDisplayComponent
@@ -41,7 +39,7 @@ class TopBarView:
         self.level_display_component = level_display_component
         self.ammo_display_component = ammo_display_component
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Forward events to all top bar components.
 
         Args:
