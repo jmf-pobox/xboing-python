@@ -11,8 +11,11 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
-        
+        python-version: "3.14"
+
+    - name: Install SDL2 dev libraries
+      run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+
     - name: Install Hatch
       run: pip install hatch
 

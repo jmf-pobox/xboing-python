@@ -1,5 +1,7 @@
 """Application coordinator for XBoing, managing high-level app flow and orchestration."""
 
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 

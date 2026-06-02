@@ -1,5 +1,7 @@
 """Manages ball objects and their state in XBoing."""
 
+from __future__ import annotations
+
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
