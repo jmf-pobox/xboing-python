@@ -31,7 +31,7 @@ hatch run lint           # 1. ZERO Ruff violations (src/ only)
 hatch run format         # 2. Perfect formatting (src/ only)
 hatch run type           # 3. ZERO MyPy errors (src/ only, strict mode)
 hatch run type-pyright   # 4. ZERO Pyright errors (src/ only, strict mode)
-hatch run test           # 5. ALL tests pass (currently 170 tests)
+hatch run test           # 5. ALL tests pass
 ```
 
 **Test Code (tests/) - Fix Gradually:**
@@ -153,7 +153,6 @@ hatch run cov-game-html  # Run game with coverage, generate HTML
 - Test individual components in isolation
 - Mock dependencies
 - Fast execution
-- Currently: 170 tests
 
 **Integration tests**: `tests/integration/`
 - Test interactions between components
@@ -217,7 +216,7 @@ See [PLAN.md](PLAN.md) for detailed roadmap.
 
 From conversation and codebase:
 1. ✅ Clean, maintainable architecture over quick hacks
-2. ✅ Comprehensive testing (170 tests and growing)
+2. ✅ Comprehensive testing (target: 90% coverage)
 3. ✅ Protocol-based design for flexibility
 4. ✅ Micro-commits with quality gates
 5. ✅ Zero tolerance for type errors or lint violations
@@ -311,10 +310,10 @@ hatch run count-lines
 
 ### After Each Phase:
 
-1. **Phase completed**: e.g., "Phase 3: GameStateManager extraction"
-2. **Test count**: e.g., "170 tests passing"
-3. **Code metrics**: e.g., "GameController reduced from 479 to 473 lines"
-4. **Coverage**: e.g., "60% coverage (target: 90%)"
+1. **Phase completed**: name and scope
+2. **Tests**: all passing (`hatch run test`)
+3. **Quality gates**: all clean (`hatch run check`)
+4. **Coverage**: report via `hatch run test-cov`
 
 ## Session Management
 
@@ -353,7 +352,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 > **"If it doesn't pass all quality gates, it doesn't get committed."**
 
 Every commit must pass:
-1. All tests (170+ passing)
+1. All tests passing
 2. Type checking (mypy + pyright strict)
 3. Linting (ruff)
 4. Formatting (black)
