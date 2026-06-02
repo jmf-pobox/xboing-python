@@ -60,9 +60,9 @@ dependencies = [
     "pytest-cov",
     "pytest-timeout",
     # Code quality
-    "mypy>=1.18.1",
-    "pyright>=1.1.0",
-    "ruff>=0.13.0",
+    "mypy>=2.1.0",
+    "pyright>=1.1.410",
+    "ruff>=0.15.0",
     "black",
     "pylint",
     # Complexity metrics
