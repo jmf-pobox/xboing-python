@@ -27,7 +27,7 @@ from xboing.utils.asset_paths import get_asset_path
 from .view import View
 
 # Frame-based timing constants (assuming 60 FPS)
-REVEAL_DELAY_FRAMES = 180  # Default delay (3000ms / 16.67ms ≈ 180 frames)
+
 BULLET_ANIM_DELAY_FRAMES = 18  # Frames per bullet (300ms / 16.67ms ≈ 18 frames)
 
 # Layout constants (from original bonus.c)
@@ -38,9 +38,9 @@ Y_START = 135  # Starting Y position for bonus screen content
 class BonusState(Enum):
     """Enum representing the states of the bonus screen animation."""
 
-    BONUS_TEXT = auto()  # Display level title and congratulations
-    BONUS_SCORE = auto()  # Display score (currently not used, but reserved for future)
-    BONUS_DELAY = auto()  # Delay between elements
+    BONUS_TEXT = auto()  # Display level title
+    BONUS_SCORE = auto()  # Display congratulations message
+    BONUS_DELAY = auto()  # Delay before bonus breakdown
     BONUS_COINS = auto()  # Display bonus coins (skip if zero)
     BONUS_LEVEL = auto()  # Display level bonus
     BONUS_BULLETS = auto()  # Display bullet bonus (skip if zero)
@@ -103,10 +103,7 @@ class LevelCompleteView(View):
         self.current_state: BonusState = BonusState.BONUS_TEXT
         self.state_frame_counter: int = 0
 
-        # Legacy reveal system (kept for now for compatibility)
         self.reveal_step: int = 0
-        self.frame_counter: int = 0
-        self.reveal_frame_threshold: int = REVEAL_DELAY_FRAMES
 
         # Bullet animation variables
         self.bullet_bonus_animating: bool = False
@@ -342,13 +339,8 @@ class LevelCompleteView(View):
         self.current_state = BonusState.BONUS_TEXT
         self.state_frame_counter = 0
 
-        # Initialize legacy reveal system
         self.reveal_step = 0
-        self.frame_counter = 0
         self._prepare_renderers()
-        self.reveal_frame_threshold = (
-            self._row_delays[0] if self._row_delays else REVEAL_DELAY_FRAMES
-        )
 
         # Initialize bullet animation
         self.bullet_bonus_animating = False
@@ -398,45 +390,18 @@ class LevelCompleteView(View):
             BonusState: The next state, potentially skipping states with zero bonuses.
 
         """
-        # State transition map
-        if current == BonusState.BONUS_TEXT:
-            return BonusState.BONUS_SCORE
-        elif current == BonusState.BONUS_SCORE:
-            return BonusState.BONUS_DELAY
-        elif current == BonusState.BONUS_DELAY:
-            # Skip to BONUS_COINS, or skip if no coins
-            if self.coin_bonus > 0:
-                return BonusState.BONUS_COINS
-            else:
-                # Skip coins, go directly to level
-                return BonusState.BONUS_LEVEL
-        elif current == BonusState.BONUS_COINS:
-            return BonusState.BONUS_LEVEL
-        elif current == BonusState.BONUS_LEVEL:
-            # Skip to BONUS_BULLETS, or skip if no bullets
-            if self.bullet_bonus_total > 0:
-                return BonusState.BONUS_BULLETS
-            # Skip bullets, check time
-            elif self.time_bonus > 0:
-                return BonusState.BONUS_TIME
-            else:
-                # Skip time too, go to rank
-                return BonusState.BONUS_RANK
-        elif current == BonusState.BONUS_BULLETS:
-            # Check if we should skip time bonus
-            if self.time_bonus > 0:
-                return BonusState.BONUS_TIME
-            else:
-                # Skip time, go to rank
-                return BonusState.BONUS_RANK
-        elif current == BonusState.BONUS_TIME:
-            return BonusState.BONUS_RANK
-        elif current == BonusState.BONUS_RANK:
-            return BonusState.BONUS_PREPARE
-        elif current == BonusState.BONUS_PREPARE:
-            return BonusState.BONUS_FINISH
-        else:  # BONUS_FINISH or unknown
-            return BonusState.BONUS_FINISH
+        transitions: dict[BonusState, BonusState] = {
+            BonusState.BONUS_TEXT: BonusState.BONUS_SCORE,
+            BonusState.BONUS_SCORE: BonusState.BONUS_DELAY,
+            BonusState.BONUS_DELAY: BonusState.BONUS_COINS,
+            BonusState.BONUS_COINS: BonusState.BONUS_LEVEL,
+            BonusState.BONUS_LEVEL: BonusState.BONUS_BULLETS,
+            BonusState.BONUS_BULLETS: BonusState.BONUS_TIME,
+            BonusState.BONUS_TIME: BonusState.BONUS_RANK,
+            BonusState.BONUS_RANK: BonusState.BONUS_PREPARE,
+            BonusState.BONUS_PREPARE: BonusState.BONUS_FINISH,
+        }
+        return transitions.get(current, BonusState.BONUS_FINISH)
 
     def _get_state_duration_frames(self, state: BonusState) -> int:
         """Get the frame duration for a given bonus state.
@@ -485,27 +450,27 @@ class LevelCompleteView(View):
             int: The reveal_step index (how many rows to show).
 
         """
-        # Map states to reveal_step indices
+        # Map states to reveal_step indices (0-based: reveal_step=N renders rows 0..N)
         if state == BonusState.BONUS_TEXT:
-            return 1  # Show title row
+            return 0  # Show title row
         elif state == BonusState.BONUS_SCORE:
-            return 2  # Show title + congratulations
+            return 1  # Show title + congratulations
         elif state == BonusState.BONUS_DELAY:
-            return 2  # Keep showing title + congratulations
+            return 1  # Keep showing title + congratulations
         elif state == BonusState.BONUS_COINS:
-            return 3  # Show up to coin row
+            return 2  # Show up to coin row
         elif state == BonusState.BONUS_LEVEL:
-            return 4  # Show up to level bonus row
+            return 3  # Show up to level bonus row
         elif state == BonusState.BONUS_BULLETS:
-            return 5  # Show up to bullet row
+            return 4  # Show up to bullet row
         elif state == BonusState.BONUS_TIME:
-            return 6  # Show up to time bonus row
+            return 5  # Show up to time bonus row
         elif state == BonusState.BONUS_RANK:
-            return 7  # Show up to rank row
+            return 6  # Show up to rank row
         elif state == BonusState.BONUS_PREPARE:
-            return 8  # Show up to prepare row
+            return 7  # Show up to prepare row
         else:  # BONUS_FINISH
-            return 9  # Show all rows
+            return 8  # Show all rows
 
     def _start_score_animation(self, bonus_amount: int, duration_frames: int) -> None:
         """Start animating score increase for a bonus.

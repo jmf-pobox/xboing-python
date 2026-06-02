@@ -1,6 +1,8 @@
 import os
 from unittest.mock import Mock
 
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+
 import pygame
 import pytest
 
@@ -17,11 +19,9 @@ from xboing.game.paddle import Paddle
 
 @pytest.fixture(autouse=True)
 def pygame_setup():
-    """Initialize pygame for all tests."""
-    # Use dummy video driver for headless testing to prevent hanging
-    os.environ["SDL_VIDEODRIVER"] = "dummy"
+    """Initialize pygame for all tests with dummy video driver for headless CI."""
     pygame.init()
-    pygame.display.set_mode((800, 600))  # Create a display surface
+    pygame.display.set_mode((800, 600))
     yield
     pygame.quit()
 
