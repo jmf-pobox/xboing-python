@@ -1,14 +1,15 @@
 """Provides logging decorators for the application."""
 
+from collections.abc import Callable
 import functools
 import logging
 import time
-from typing import Any, Callable, Optional, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
+def log_entry_exit(logger: logging.Logger | None = None) -> Callable[[F], F]:
     """Log entry and exit of a function, including arguments and result.
 
     Args:
@@ -39,7 +40,7 @@ def log_entry_exit(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
     return decorator
 
 
-def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
+def log_exceptions(logger: logging.Logger | None = None) -> Callable[[F], F]:
     """Log exceptions raised by a function.
 
     Args:
@@ -71,7 +72,7 @@ def log_exceptions(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
     return decorator
 
 
-def log_timing(logger: Optional[logging.Logger] = None) -> Callable[[F], F]:
+def log_timing(logger: logging.Logger | None = None) -> Callable[[F], F]:
     """Log the execution time of a function.
 
     Args:

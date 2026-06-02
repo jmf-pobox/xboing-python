@@ -21,7 +21,6 @@ import os
 from pathlib import Path
 import re
 import sys
-from typing import Dict, List, Optional, Tuple
 
 from PIL import Image, UnidentifiedImageError
 
@@ -90,7 +89,7 @@ X11_COLORS = {
 logger = logging.getLogger("xboing.scripts.convert_xpm_to_png")
 
 
-def _extract_xpm_lines(content: str) -> List[str]:
+def _extract_xpm_lines(content: str) -> list[str]:
     """Extract quoted XPM data lines from the file content."""
     match = re.search(
         r"static\s+char\s+\*\s*\w+\s*\[\s*]\s*=\s*{(.*?)};", content, re.DOTALL
@@ -108,7 +107,7 @@ def _extract_xpm_lines(content: str) -> List[str]:
     return lines
 
 
-def _parse_xpm_header(lines: List[str]) -> Optional[Tuple[int, int, int, int, int]]:
+def _parse_xpm_header(lines: list[str]) -> tuple[int, int, int, int, int] | None:
     """Parse the XPM header and return (header_index, width, height, num_colors, chars_per_pixel)."""
     header_index = 0
     while header_index < len(lines) and (
@@ -124,13 +123,13 @@ def _parse_xpm_header(lines: List[str]) -> Optional[Tuple[int, int, int, int, in
         num_colors = int(header[2])
         chars_per_pixel = int(header[3])
         return header_index, width, height, num_colors, chars_per_pixel
-    except (ValueError, IndexError):
+    except ValueError, IndexError:
         return None
 
 
 def _parse_xpm_color_table(
-    lines: List[str], header_index: int, num_colors: int, chars_per_pixel: int
-) -> Optional[Dict[str, Tuple[int, int, int, int]]]:
+    lines: list[str], header_index: int, num_colors: int, chars_per_pixel: int
+) -> dict[str, tuple[int, int, int, int]] | None:
     """Parse the color table from XPM lines."""
     color_table = {}
     for i in range(header_index + 1, header_index + num_colors + 1):
@@ -181,12 +180,12 @@ def _parse_xpm_color_table(
 
 
 def _parse_xpm_pixels(
-    lines: List[str],
+    lines: list[str],
     pixel_start_index: int,
     height: int,
     chars_per_pixel: int,
-    color_table: Dict[str, Tuple[int, int, int, int]],
-) -> List[List[Tuple[int, int, int, int]]]:
+    color_table: dict[str, tuple[int, int, int, int]],
+) -> list[list[tuple[int, int, int, int]]]:
     """Parse the pixel data from XPM lines."""
     pixels = []
     for i in range(pixel_start_index, pixel_start_index + height):
@@ -203,7 +202,7 @@ def _parse_xpm_pixels(
 
 
 def _validate_xpm_pixels(
-    pixels: List[List[Tuple[int, int, int, int]]],
+    pixels: list[list[tuple[int, int, int, int]]],
     width: int,
     height: int,
     xpm_file: str,
@@ -221,7 +220,7 @@ def _validate_xpm_pixels(
 
 def parse_xpm(
     xpm_file: str,
-) -> Optional[Tuple[int, int, List[List[Tuple[int, int, int, int]]]]]:
+) -> tuple[int, int, list[list[tuple[int, int, int, int]]]] | None:
     """Parse an XPM file and extract image data.
 
     Args:
@@ -325,7 +324,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
         )
         base_name = os.path.basename(xpm_path)
 
-        def get_placeholder_color(name: str) -> Tuple[int, int, int, int]:
+        def get_placeholder_color(name: str) -> tuple[int, int, int, int]:
             name = name.lower()
             color_map = [
                 ("blue", (60, 120, 255, 255)),
@@ -392,7 +391,7 @@ def convert_xpm_to_png(xpm_path: str, png_path: str) -> bool:
 
 def convert_directory(
     input_dir: Path, output_dir: Path, dry_run: bool = False
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Convert all XPM files in a directory tree to PNG.
 
     Args:
@@ -404,7 +403,7 @@ def convert_directory(
         dict: {'converted': [...], 'skipped': [...], 'failed': [...]}
 
     """
-    results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
+    results: dict[str, list[str]] = {"converted": [], "skipped": [], "failed": []}
     for root, _, files in os.walk(input_dir):
         for file in files:
             if file.endswith(".xpm"):

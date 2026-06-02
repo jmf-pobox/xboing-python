@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pygame
 
@@ -16,23 +16,23 @@ class AmmoRenderer:
 
     logger = logging.getLogger("xboing.AmmoRenderer")
 
-    bullet_image: Optional[pygame.Surface]
+    bullet_image: pygame.Surface | None
     bullet_width: int
     bullet_height: int
-    _surface_cache: Dict[Any, pygame.Surface]
+    _surface_cache: dict[Any, pygame.Surface]
 
     def __init__(self) -> None:
         """Initialize the AmmoRenderer with a loaded bullet image."""
-        self.bullet_image: Optional[pygame.Surface] = self._load_bullet_image()
+        self.bullet_image: pygame.Surface | None = self._load_bullet_image()
         if self.bullet_image:
             self.bullet_width = self.bullet_image.get_width()
             self.bullet_height = self.bullet_image.get_height()
         else:
             self.bullet_width = 16
             self.bullet_height = 16
-        self._surface_cache: Dict[Any, pygame.Surface] = {}
+        self._surface_cache: dict[Any, pygame.Surface] = {}
 
-    def _load_bullet_image(self) -> Optional[pygame.Surface]:
+    def _load_bullet_image(self) -> pygame.Surface | None:
         """Load the bullet image for displaying ammo."""
         bullet_path = os.path.join(get_images_dir(), "guns", "bullet.png")
         if os.path.exists(bullet_path):

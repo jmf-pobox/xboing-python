@@ -1,6 +1,6 @@
 """Game setup utilities for initializing core game objects in XBoing."""
 
-from typing import Any, Dict
+from typing import Any
 
 from xboing.game.ball_manager import BallManager
 from xboing.game.block_manager import BlockManager
@@ -14,7 +14,7 @@ PADDLE_WIDTH = 70
 PADDLE_HEIGHT = 15
 
 
-def create_game_objects(layout: Any, starting_level: int = 1) -> Dict[str, Any]:
+def create_game_objects(layout: Any, starting_level: int = 1) -> dict[str, Any]:
     """Create and initialize core game objects (paddle, ball manager, block manager, level manager).
 
     Args:

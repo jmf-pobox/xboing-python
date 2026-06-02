@@ -3,8 +3,6 @@
 Displays message, special status, and timer.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.ui.message_display import MessageDisplay
@@ -37,7 +35,7 @@ class BottomBarView:
         self.special_display_component = special_display_component
         self.timer_display_component = timer_display_component
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Forward events to all bottom bar components.
 
         Args:

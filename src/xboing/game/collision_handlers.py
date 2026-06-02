@@ -5,7 +5,7 @@ It encapsulates the collision response logic, separating it from the game contro
 """
 
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 import pygame
 
@@ -34,7 +34,7 @@ class CollisionHandlers:
         ball_manager: BallManager,
         bullet_manager: BulletManager,
         power_up_manager: PowerUpManager,
-        block_manager: Optional[BlockManager] = None,
+        block_manager: BlockManager | None = None,
     ) -> None:
         """Initialize the collision handlers.
 
@@ -57,7 +57,7 @@ class CollisionHandlers:
 
     def handle_ball_block_collision(
         self, ball: Any, block: Any
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Handle collision between a ball and a block.
 
         Args:
@@ -68,7 +68,7 @@ class CollisionHandlers:
             List of events to be posted by the caller.
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
 
         if not ball.is_active() or not block.is_active():
             return events
@@ -110,7 +110,7 @@ class CollisionHandlers:
 
     def handle_ball_paddle_collision(
         self, ball: Any, paddle: Any
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Handle collision between a ball and the paddle.
 
         Args:
@@ -121,7 +121,7 @@ class CollisionHandlers:
             List of events to be posted by the caller.
 
         """
-        events: List[pygame.event.Event] = [
+        events: list[pygame.event.Event] = [
             pygame.event.Event(pygame.USEREVENT, {"event": PaddleHitEvent()})
         ]
 
@@ -133,7 +133,7 @@ class CollisionHandlers:
 
     def handle_bullet_block_collision(
         self, bullet: Any, block: Any
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Handle collision between a bullet and a block.
 
         Args:
@@ -144,7 +144,7 @@ class CollisionHandlers:
             List of events to be posted by the caller.
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
 
         if not bullet.is_active() or not block.is_active() or not self.block_manager:
             return events
@@ -173,7 +173,7 @@ class CollisionHandlers:
 
     def handle_bullet_ball_collision(
         self, bullet: Any, ball: Any
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Handle collision between a bullet and a ball.
 
         Args:
@@ -184,7 +184,7 @@ class CollisionHandlers:
             List of events to be posted by the caller.
 
         """
-        events: List[pygame.event.Event] = []
+        events: list[pygame.event.Event] = []
 
         if bullet.is_active() and ball.is_active():
             bullet.set_active(False)
@@ -199,7 +199,7 @@ class CollisionHandlers:
 
     def handle_block_effects(
         self, effect: str, block: Block
-    ) -> List[pygame.event.Event]:
+    ) -> list[pygame.event.Event]:
         """Handle special block effects and return appropriate events.
 
         Args:
@@ -235,7 +235,7 @@ class CollisionHandlers:
         return self.power_up_manager.is_reverse_active()
 
     @staticmethod
-    def _create_events_from_changes(changes: List[Any]) -> List[pygame.event.Event]:
+    def _create_events_from_changes(changes: list[Any]) -> list[pygame.event.Event]:
         """Convert GameState/model event objects into pygame events.
 
         This implements the decoupled event firing pattern: models return event objects,

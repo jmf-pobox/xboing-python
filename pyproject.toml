@@ -6,8 +6,8 @@ build-backend = "hatchling.build"
 name = "xboing"
 description = "XBoing - A classic breakout-style game modernized with Python and Pygame"
 readme = "README.md"
-requires-python = ">=3.10"
-license = {text = "X Consortium License"}
+requires-python = ">=3.14"
+license = "MIT"
 authors = [
     {name = "Original: Justin C. Kibell"},
     {name = "Python port: XBoing-py Team"}
@@ -15,16 +15,12 @@ authors = [
 dependencies = [
     "pygame",
     "injector>=0.21.0",
-    "typing_extensions",
 ]
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
     "Topic :: Games/Entertainment :: Arcade",
     "Intended Audience :: End Users/Desktop",
@@ -70,8 +66,8 @@ dependencies = [
     "xenon>=0.9.1",
     # Dev tools
     "pillow",
-    "aiohttp",  # Required by black language server
 ]
+python = "3.14"
 path = ".venv"
 
 [tool.hatch.envs.default.scripts]
@@ -132,9 +128,8 @@ timeout_method = "thread"
 
 # Black configuration
 [tool.black]
-# Aligned with pylint and ruff: 88 chars, Python 3.8
 line-length = 88
-target-version = ["py38"]
+target-version = ["py314"]
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -152,9 +147,8 @@ exclude = '''
 
 # Ruff configuration
 [tool.ruff]
-# Aligned with pylint and black: 88 chars, Python 3.8
 line-length = 88
-target-version = "py38"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = [
@@ -167,7 +161,10 @@ select = [
     "UP",  # pyupgrade
     "N",   # pep8-naming
     "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking
+    "TC",  # flake8-type-checking
+    "FURB", # modern Python idioms
+    "PERF", # performance anti-patterns
+    "PIE", # misc improvements
     "TID", # flake8-tidy-imports
     "RUF", # Ruff-specific rules
     "PL",  # pylint
@@ -183,6 +180,7 @@ ignore = [
     "PLR2004", "C408",
     "PLR0913", "PLR0912", "PLR0915", "C901", "PLR0911", "D417",
     "TC001",  # Move import into TYPE_CHECKING - too aggressive for runtime imports
+    "TC002",  # Move third-party import into TYPE_CHECKING - pygame is used at runtime
     "TC003",  # Move standard lib import into TYPE_CHECKING - unnecessary overhead
 ]
 per-file-ignores = { "__init__.py" = ["F401"] }
@@ -194,7 +192,7 @@ force-sort-within-sections = true
 
 # MyPy configuration
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.14"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

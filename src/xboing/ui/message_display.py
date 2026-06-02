@@ -3,8 +3,6 @@
 Subscribes to MessageChangedEvent and renders itself using the renderer.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.engine.events import MessageChangedEvent
@@ -43,7 +41,7 @@ class MessageDisplay:
         self.message: str = ""
         self.alignment: str = "left"
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle message update events and update the displayed message.
 
         Args:

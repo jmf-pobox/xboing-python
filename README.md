@@ -202,7 +202,7 @@ See the `docs/` directory for detailed information:
 
 ## License
 
-This project is licensed under the same terms as the original XBoing - see the LICENSE file for details.
+This Python port is licensed under the MIT License. The original XBoing C source by Justin C. Kibell is licensed under the X Consortium License. See the LICENSE file for details.
 
 ## Original Source
 

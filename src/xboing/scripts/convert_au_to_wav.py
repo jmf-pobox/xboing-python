@@ -17,7 +17,6 @@ import logging
 from pathlib import Path
 import subprocess
 import sys
-from typing import Dict, List, Optional
 
 from xboing.scripts.utils import (
     print_conversion_summary,
@@ -36,13 +35,13 @@ def check_ffmpeg() -> bool:
             capture_output=True,
         )
         return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
+    except subprocess.CalledProcessError, FileNotFoundError:
         return False
 
 
 def convert_au_to_wav(
-    input_file: Path, output_file: Optional[Path] = None, dry_run: bool = False
-) -> Optional[bool]:
+    input_file: Path, output_file: Path | None = None, dry_run: bool = False
+) -> bool | None:
     """Convert an .au file to .wav format using ffmpeg.
 
     Args:
@@ -86,7 +85,7 @@ def convert_au_to_wav(
 
 def convert_directory(
     input_dir: Path, output_dir: Path, dry_run: bool = False
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Convert all .au files in a directory to .wav format.
 
     Args:
@@ -100,7 +99,7 @@ def convert_directory(
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     au_files = sorted(input_dir.glob("*.au"))
-    results: Dict[str, List[str]] = {"converted": [], "skipped": [], "failed": []}
+    results: dict[str, list[str]] = {"converted": [], "skipped": [], "failed": []}
     for au_file in au_files:
         wav_file = output_dir / (au_file.stem + ".wav")
         result = convert_au_to_wav(au_file, wav_file, dry_run=dry_run)
@@ -127,7 +126,7 @@ def main() -> int:
 
     def conversion_func(
         input_path: Path, output_path: Path, dry_run: bool = False
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         if not check_ffmpeg():
             logger.error(
                 "[ERROR] ffmpeg is not installed or not in PATH. Please install ffmpeg to use this script."

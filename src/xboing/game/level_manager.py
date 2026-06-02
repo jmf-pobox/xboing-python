@@ -4,9 +4,11 @@ This module handles loading, parsing, and managing XBoing level files.
 It interfaces with the BlockManager to create the appropriate block layout.
 """
 
+from __future__ import annotations
+
 import logging
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
     from xboing.game.block_manager import BlockManager
@@ -64,7 +66,7 @@ class LevelManager:
     BACKGROUND_5 = 9
 
     # Map level file characters to canonical block type keys
-    CHAR_TO_BLOCK_TYPE: ClassVar[Dict[str, Optional[str]]] = {
+    CHAR_TO_BLOCK_TYPE: ClassVar[dict[str, str | None]] = {
         ".": None,  # Empty space (don't create a block)
         " ": None,  # Also empty space
         "\n": None,  # Newline character (don't create a block)
@@ -102,8 +104,8 @@ class LevelManager:
 
     def __init__(
         self,
-        levels_dir: Optional[str] = None,
-        layout: Optional[Any] = None,
+        levels_dir: str | None = None,
+        layout: Any | None = None,
         starting_level: int = 1,
     ) -> None:
         """Initialize the level manager.
@@ -121,7 +123,7 @@ class LevelManager:
         )
         self.level_title: str = ""
         self.time_bonus: int = 0
-        self.block_manager: Optional["BlockManager"] = None  # noqa: UP037
+        self.block_manager: BlockManager | None = None
         self.layout = layout
         self.current_background: int = self.BACKGROUND_2
         self.levels_dir: str = (
@@ -129,7 +131,7 @@ class LevelManager:
         )
         self.logger.info(f"Using levels directory: {self.levels_dir}")
 
-    def set_block_manager(self, block_manager: "BlockManager") -> None:
+    def set_block_manager(self, block_manager: BlockManager) -> None:
         """Set the block manager to use for creating blocks.
 
         Args:
@@ -149,7 +151,7 @@ class LevelManager:
         """
         self.layout = layout
 
-    def load_level(self, level_num: Optional[int] = None) -> bool:
+    def load_level(self, level_num: int | None = None) -> bool:
         """Load a specific level.
 
         Args:
@@ -195,7 +197,7 @@ class LevelManager:
     def _level_file_exists(level_file: str) -> bool:
         return os.path.exists(level_file)
 
-    def _safe_parse_level_file(self, level_file: str) -> Optional[Dict[str, Any]]:
+    def _safe_parse_level_file(self, level_file: str) -> dict[str, Any] | None:
         try:
             return self._parse_level_file(level_file)
         except (OSError, ValueError) as e:
@@ -232,7 +234,7 @@ class LevelManager:
             return self.block_manager.get_breakable_count() == 0
         return False
 
-    def get_level_info(self) -> Dict[str, Any]:
+    def get_level_info(self) -> dict[str, Any]:
         """Get current level information.
 
         Returns
@@ -246,7 +248,7 @@ class LevelManager:
             "time_bonus": self.time_bonus,
         }
 
-    def _create_blocks_from_layout(self, layout: List[str]) -> None:
+    def _create_blocks_from_layout(self, layout: list[str]) -> None:
         """Create blocks from the level layout."""
         self.logger.debug("Creating blocks from layout")
         if not self.block_manager:
@@ -384,7 +386,7 @@ class LevelManager:
         level_file = f"level{level_num:02d}.data"
         return os.path.join(self.levels_dir, level_file)
 
-    def _parse_level_file(self, file_path: str) -> Optional[Dict[str, Any]]:
+    def _parse_level_file(self, file_path: str) -> dict[str, Any] | None:
         """Parse an XBoing level file.
 
         Args:
@@ -410,7 +412,7 @@ class LevelManager:
                     time_bonus = self.DEFAULT_TIME_BONUS
 
                 # Read block layout (remaining lines)
-                layout: List[str] = []
+                layout: list[str] = []
                 for line in f:
                     row = line.strip()
                     if row:  # Skip empty lines

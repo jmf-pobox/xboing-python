@@ -1,7 +1,5 @@
 """Events module for XBoing."""
 
-from typing import Tuple
-
 import pygame
 
 from xboing.game.bullet import DEFAULT_AMMO_QUANTITY
@@ -147,12 +145,12 @@ class MessageChangedEvent(XBoingEvent):
     def __init__(
         self,
         message: str,
-        color: Tuple[int, int, int] = GREEN,  # Default green color for messages
+        color: tuple[int, int, int] = GREEN,  # Default green color for messages
         alignment: str = "left",
     ) -> None:
         """Initialize with the message, color, and alignment."""
         self.message: str = message
-        self.color: Tuple[int, int, int] = color
+        self.color: tuple[int, int, int] = color
         self.alignment: str = alignment
 
 

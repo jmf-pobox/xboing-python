@@ -1,5 +1,7 @@
 """Application coordinator for XBoing, managing high-level app flow and orchestration."""
 
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -15,7 +17,7 @@ class AppCoordinator:
     """
 
     def __init__(
-        self, ui_manager: "UIManager", controller_manager: "ControllerManager"
+        self, ui_manager: UIManager, controller_manager: ControllerManager
     ) -> None:
         """Initialize the AppCoordinator and register the view change callback.
 

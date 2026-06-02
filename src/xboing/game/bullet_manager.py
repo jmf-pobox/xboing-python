@@ -1,7 +1,7 @@
 """Manages bullet objects and their state in XBoing."""
 
+from collections.abc import Iterator
 import logging
-from typing import Iterator, List
 
 from .bullet import Bullet
 
@@ -13,10 +13,10 @@ class BulletManager:
 
     def __init__(self) -> None:
         """Initialize the BulletManager with an empty list of bullets."""
-        self._bullets: List[Bullet] = []
+        self._bullets: list[Bullet] = []
 
     @property
-    def bullets(self) -> List[Bullet]:
+    def bullets(self) -> list[Bullet]:
         """Return the list of bullets (read/write for legacy compatibility)."""
         return self._bullets
 

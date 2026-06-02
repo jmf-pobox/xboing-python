@@ -1,7 +1,7 @@
 """Controller for handling window events and UI management in XBoing."""
 
+from collections.abc import Callable
 import logging
-from typing import Callable, List, Optional
 
 import pygame
 
@@ -18,9 +18,9 @@ class WindowController(Controller):
 
     def __init__(
         self,
-        audio_manager: Optional[AudioManager] = None,
-        quit_callback: Optional[Callable[[], None]] = None,
-        ui_manager: Optional[UIManager] = None,
+        audio_manager: AudioManager | None = None,
+        quit_callback: Callable[[], None] | None = None,
+        ui_manager: UIManager | None = None,
     ) -> None:
         """Initialize the WindowController.
 
@@ -95,7 +95,7 @@ class WindowController(Controller):
         elif self._is_instructions_key(event):
             self.ui_manager.set_view("instructions")  # type: ignore[union-attr]
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle input/events for this controller, including global controls.
 
         Processes global controls:

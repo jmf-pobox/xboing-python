@@ -1,8 +1,8 @@
 """Audio manager module for XBoing."""
 
+from collections.abc import Sequence
 import logging
 import os
-from typing import Dict, Sequence, Set
 
 import pygame
 
@@ -32,7 +32,7 @@ class AudioManager:
         """
         self.logger = logging.getLogger("xboing.AudioManager")
         self.sound_dir = sound_dir
-        self.sounds: Dict[str, pygame.mixer.Sound] = {}
+        self.sounds: dict[str, pygame.mixer.Sound] = {}
         self.volume: float = DEFAULT_VOLUME
         self.muted: bool = False
 
@@ -109,7 +109,7 @@ class AudioManager:
 
     def load_sounds_from_events(self) -> None:
         """Load all sounds referenced by XBoingEvent subclasses."""
-        sound_names: Set[str] = set()
+        sound_names: set[str] = set()
         for cls in XBoingEvent.__subclasses__():
             sound = getattr(cls, "sound_effect", None)
             if sound:

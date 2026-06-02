@@ -1,7 +1,8 @@
 """Controller for handling the game over state in XBoing."""
 
+from collections.abc import Callable
 import logging
-from typing import Any, Callable, List, Optional
+from typing import Any
 
 from injector import inject
 import pygame
@@ -60,11 +61,11 @@ class GameOverController(Controller):
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
         self.ui_manager = ui_manager
-        self.controller_manager: Optional[ControllerManager] = (
+        self.controller_manager: ControllerManager | None = (
             None  # Set after construction
         )
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle Pygame events for the game over screen.
 
         Args:

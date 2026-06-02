@@ -3,8 +3,6 @@
 Subscribes to TimerUpdatedEvent and renders itself using the renderer.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.engine.events import TimerUpdatedEvent
@@ -38,7 +36,7 @@ class TimerDisplay:
         self.font = font
         self.time_remaining = 0
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle timer update events and update the displayed time.
 
         Args:

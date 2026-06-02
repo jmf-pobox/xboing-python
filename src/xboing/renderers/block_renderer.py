@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 
 import pygame
 
@@ -16,7 +16,7 @@ class BlockRenderer:
     logger = logging.getLogger("xboing.BlockRenderer")
 
     # Internal image cache
-    _image_cache: ClassVar[Dict[str, pygame.Surface]] = {}
+    _image_cache: ClassVar[dict[str, pygame.Surface]] = {}
 
     @classmethod
     def clear_cache(cls) -> None:
@@ -49,8 +49,8 @@ class BlockRenderer:
     @classmethod
     def preload_images(
         cls,
-        block_type_data: Dict[str, Any],
-        blocks_dir: Optional[str] = None,
+        block_type_data: dict[str, Any],
+        blocks_dir: str | None = None,
         clear_cache: bool = False,
     ) -> None:
         """Preload all block images and animation frames to the cache from block_type_data.
@@ -77,7 +77,7 @@ class BlockRenderer:
                 failed_count += 1
 
             # Preload explosion frames
-            explosion_frames: List[str] = block_info.get("explosion_frames") or []
+            explosion_frames: list[str] = block_info.get("explosion_frames") or []
             for frame in explosion_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1
@@ -85,7 +85,7 @@ class BlockRenderer:
                     failed_count += 1
 
             # Preload animation frames
-            animation_frames: List[str] = block_info.get("animation_frames") or []
+            animation_frames: list[str] = block_info.get("animation_frames") or []
             for frame in animation_frames:
                 if cls._load_image(frame, blocks_dir):
                     loaded_count += 1
@@ -104,9 +104,9 @@ class BlockRenderer:
         block_type: str,
         image_file: str,
         is_hit: bool = False,
-        animation_frame: Optional[int] = None,
-        animation_frames: Optional[List[str]] = None,
-        counter_value: Optional[int] = None,
+        animation_frame: int | None = None,
+        animation_frames: list[str] | None = None,
+        counter_value: int | None = None,
     ) -> None:
         """Render a block at the given position on the surface.
 
@@ -126,7 +126,7 @@ class BlockRenderer:
             counter_value: For CounterBlocks, the current hit count (0-5).
 
         """
-        img: Optional[pygame.Surface] = None
+        img: pygame.Surface | None = None
         # Special handling for CounterBlocks (block_type == COUNTER_BLK)
         if block_type == COUNTER_BLK and counter_value is not None:
             # For counter blocks, use the main image file if no animation frames

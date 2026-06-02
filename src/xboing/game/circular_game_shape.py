@@ -4,7 +4,6 @@ Defines CircularGameShape as a subclass of GameShape.
 """
 
 from abc import abstractmethod
-from typing import Tuple
 
 import pygame
 
@@ -30,7 +29,7 @@ class CircularGameShape(GameShape):
         self.rect.width = self.radius * 2
         self.rect.height = self.radius * 2
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """Get the center position of the shape as (x, y)."""
         return self.x, self.y
 

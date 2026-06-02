@@ -14,7 +14,7 @@ The two-layer design allows PhysicsComponent to remain pure and reusable while
 PhysicsMixin provides game-specific convenience features.
 """
 
-from typing import Any, Tuple
+from typing import Any
 
 import pygame
 
@@ -51,7 +51,7 @@ class PhysicsMixin:
         """
         self.physics.update(delta_ms)
 
-    def get_position(self) -> Tuple[float, float]:
+    def get_position(self) -> tuple[float, float]:
         """Get the current position.
 
         Returns:
@@ -70,7 +70,7 @@ class PhysicsMixin:
         """
         self.physics.set_position((x, y))
 
-    def get_velocity(self) -> Tuple[float, float]:
+    def get_velocity(self) -> tuple[float, float]:
         """Get the current velocity.
 
         Returns:

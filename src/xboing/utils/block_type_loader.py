@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, TypedDict, cast
+from typing import Any, TypedDict, cast
 
 from .asset_paths import get_asset_path
 
@@ -20,16 +20,16 @@ class BlockTypeData(TypedDict, total=False):
     height: int
     slide: int
     main_sprite: str
-    explosion_frames: List[str]
+    explosion_frames: list[str]
     points: int
     has_explosion: bool
-    special_behavior: Optional[str]
-    animation_frames: Optional[List[str]]
-    draw_size: List[int]
-    notes: Optional[str]
+    special_behavior: str | None
+    animation_frames: list[str] | None
+    draw_size: list[int]
+    notes: str | None
 
 
-def get_block_types() -> Dict[str, BlockTypeData]:
+def get_block_types() -> dict[str, BlockTypeData]:
     """Load and validate block types from block_types.json.
 
     Returns
@@ -48,8 +48,8 @@ def get_block_types() -> Dict[str, BlockTypeData]:
         data = json.load(f)
     if not isinstance(data, list):
         raise ValueError("block_types.json must be a list of block type objects")
-    data_list = cast("List[Dict[str, Any]]", data)
-    block_types: Dict[str, BlockTypeData] = {}
+    data_list = cast("list[dict[str, Any]]", data)
+    block_types: dict[str, BlockTypeData] = {}
     for entry in data_list:
         # Validate required fields
         missing = [

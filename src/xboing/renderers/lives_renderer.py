@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 import pygame
 
@@ -19,23 +19,23 @@ class LivesRenderer:
     DEFAULT_SPACING = 10  # Default spacing between life icons in pixels
     DEFAULT_SCALE = 1.0  # Default scale factor for life icons
 
-    ball_image: Optional[pygame.Surface]
+    ball_image: pygame.Surface | None
     ball_width: int
     ball_height: int
-    _surface_cache: Dict[Any, pygame.Surface]
+    _surface_cache: dict[Any, pygame.Surface]
 
     def __init__(self) -> None:
         """Initialize the LivesRenderer with a loaded ball image."""
-        self.ball_image: Optional[pygame.Surface] = self._load_ball_image()
+        self.ball_image: pygame.Surface | None = self._load_ball_image()
         if self.ball_image:
             self.ball_width = self.ball_image.get_width()
             self.ball_height = self.ball_image.get_height()
         else:
             self.ball_width = 16
             self.ball_height = 16
-        self._surface_cache: Dict[Any, pygame.Surface] = {}
+        self._surface_cache: dict[Any, pygame.Surface] = {}
 
-    def _load_ball_image(self) -> Optional[pygame.Surface]:
+    def _load_ball_image(self) -> pygame.Surface | None:
         """Load the ball image for displaying lives."""
         images_dir = get_images_dir()
         life_path = os.path.join(images_dir, "balls", "life.png")

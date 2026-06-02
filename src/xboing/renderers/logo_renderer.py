@@ -1,7 +1,5 @@
 """Stateless renderer for a logo image centered at a given y."""
 
-from typing import Optional, Tuple
-
 import pygame
 
 
@@ -10,12 +8,12 @@ class LogoRenderer:
 
     def __init__(
         self,
-        logo_image: Optional[pygame.Surface],
+        logo_image: pygame.Surface | None,
         max_width: int = 320,
         max_height: int = 100,
         fallback_text: str = "XBoing",
-        font: Optional[pygame.font.Font] = None,
-        color: Tuple[int, int, int] = (255, 255, 255),
+        font: pygame.font.Font | None = None,
+        color: tuple[int, int, int] = (255, 255, 255),
     ) -> None:
         """
         Initialize the LogoRenderer.

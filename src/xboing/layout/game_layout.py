@@ -25,10 +25,11 @@ Background images are loaded from the assets directory with fallback to solid co
 if image loading fails.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 import logging
 import os
-from typing import List, Optional, Tuple, Union
 
 import pygame
 
@@ -52,7 +53,7 @@ class Rect:
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
     @property
-    def center(self) -> Tuple[int, int]:
+    def center(self) -> tuple[int, int]:
         """Return the center (x, y) of the rectangle."""
         return self.x + self.width // 2, self.y + self.height // 2
 
@@ -72,10 +73,10 @@ class GameWindow:
 
     rect: Rect
     name: str
-    parent: Optional["GameWindow"]
-    bg_color: Optional[Tuple[int, int, int]]
-    bg_surface: Optional[pygame.Surface]
-    children: List["GameWindow"]
+    parent: GameWindow | None
+    bg_color: tuple[int, int, int] | None
+    bg_surface: pygame.Surface | None
+    children: list[GameWindow]
     visible: bool
     MIN_COLOR_TUPLE_LEN = 3  # Minimum length for an RGB color tuple
 
@@ -83,8 +84,8 @@ class GameWindow:
         self,
         rect: Rect,
         name: str = "",
-        parent: Optional["GameWindow"] = None,
-        bg_color: Optional[Tuple[int, int, int]] = None,
+        parent: GameWindow | None = None,
+        bg_color: tuple[int, int, int] | None = None,
     ) -> None:
         """Initialize a GameWindow.
 
@@ -106,13 +107,11 @@ class GameWindow:
         if parent:
             parent.add_child(self)
 
-    def add_child(self, child: "GameWindow") -> None:
+    def add_child(self, child: GameWindow) -> None:
         """Add a child GameWindow to this window."""
         self.children.append(child)
 
-    def set_background(
-        self, bg: Union[Tuple[int, int, int], pygame.Surface, None]
-    ) -> None:
+    def set_background(self, bg: tuple[int, int, int] | pygame.Surface | None) -> None:
         """Set the background color or surface for this window.
 
         Args:
@@ -129,7 +128,7 @@ class GameWindow:
             self.bg_color = None
             self.bg_surface = None
 
-    def set_background_pixmap(self, pixmap: Optional[pygame.Surface]) -> None:
+    def set_background_pixmap(self, pixmap: pygame.Surface | None) -> None:
         """Set a tiled background pixmap for this window."""
         if not pixmap:
             return
@@ -256,7 +255,7 @@ class GameLayout:
             bg_color=None,
         )
 
-    def load_backgrounds(self, background_dir: Optional[str] = None) -> None:
+    def load_backgrounds(self, background_dir: str | None = None) -> None:
         """Load background images for the main and play windows."""
         if background_dir is None:
             background_dir = get_backgrounds_dir()

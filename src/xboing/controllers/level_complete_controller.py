@@ -1,7 +1,8 @@
 """Controller for handling level completion logic and transitions in XBoing."""
 
+from collections.abc import Callable
 import logging
-from typing import Any, Callable, List, Optional, cast
+from typing import Any, cast
 
 import pygame
 
@@ -31,16 +32,16 @@ class LevelCompleteController(Controller):
 
     def __init__(
         self,
-        balls: List[Ball],
+        balls: list[Ball],
         ui_manager: UIManager,
         game_view: GameView,
         layout: GameLayout,
         game_state: GameState,
         game_controller: GameController,
         level_manager: LevelManager,
-        audio_manager: Optional[AudioManager] = None,
-        quit_callback: Optional[Callable[[], None]] = None,
-        on_advance_callback: Optional[Callable[[], None]] = None,
+        audio_manager: AudioManager | None = None,
+        quit_callback: Callable[[], None] | None = None,
+        on_advance_callback: Callable[[], None] | None = None,
     ) -> None:
         """Initialize the LevelCompleteController.
 
@@ -69,7 +70,7 @@ class LevelCompleteController(Controller):
         self.audio_manager = audio_manager
         self.quit_callback = quit_callback
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle input/events for level complete view and global controls.
 
         Args:
@@ -151,7 +152,7 @@ class LevelCompleteController(Controller):
         # No-op for now
 
     @staticmethod
-    def post_game_state_events(changes: List[Any]) -> None:
+    def post_game_state_events(changes: list[Any]) -> None:
         """Post all events returned by GameState/model methods to the Pygame event queue.
 
         This implements the decoupled event firing pattern: models return events, controllers post them.

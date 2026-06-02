@@ -21,7 +21,7 @@
   "reportUnknownMemberType": "information",
   "reportUnknownVariableType": "information",
   "reportMissingTypeStubs": "none",
-  "pythonVersion": "3.10",
+  "pythonVersion": "3.14",
   "pythonPlatform": "Darwin",
   "strict": [
     "src/xboing"

@@ -1,7 +1,6 @@
 """AmmoDisplayComponent: UI component for displaying the player's current ammo (bullets) as bullet images, right-aligned with the lives display."""
 
 import logging
-from typing import List
 
 import pygame
 
@@ -50,7 +49,7 @@ class AmmoDisplayComponent:
         self.lives_height: int = lives_height
         self.logger = logging.getLogger("xboing.AmmoDisplayComponent")
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle events and update ammo display when AmmoFiredEvent is received."""
         for event in events:
             if event.type == pygame.USEREVENT and (

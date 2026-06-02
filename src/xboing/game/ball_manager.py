@@ -1,6 +1,9 @@
 """Manages ball objects and their state in XBoing."""
 
-from typing import TYPE_CHECKING, Iterator, List, Optional
+from __future__ import annotations
+
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 from .ball import BALL_RADIUS, Ball
 
@@ -21,10 +24,10 @@ class BallManager:
 
     def __init__(self) -> None:
         """Initialize the BallManager with an empty list of balls."""
-        self._balls: List[Ball] = []
+        self._balls: list[Ball] = []
 
     @property
-    def balls(self) -> List[Ball]:
+    def balls(self) -> list[Ball]:
         """Return the list of balls (read/write for legacy compatibility)."""
         return self._balls
 
@@ -44,7 +47,7 @@ class BallManager:
         """Remove all balls from the manager."""
         self._balls.clear()
 
-    def create_new_ball(self, paddle: "Paddle") -> Ball:
+    def create_new_ball(self, paddle: Paddle) -> Ball:
         """Create a new ball at the paddle position.
 
         Args:
@@ -64,7 +67,7 @@ class BallManager:
         ball.paddle_offset = 0.0
         return ball
 
-    def reset(self, initial_ball: Optional[Ball] = None) -> None:
+    def reset(self, initial_ball: Ball | None = None) -> None:
         """Clear all balls and optionally add a new one."""
         self._balls.clear()
         if initial_ball is not None:

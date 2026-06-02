@@ -1,7 +1,5 @@
 """Canonical block type constants and groupings for XBoing."""
 
-from typing import Tuple
-
 # Block type string constants (match block_types.json)
 RED_BLK: str = "RED_BLK"
 BLUE_BLK: str = "BLUE_BLK"
@@ -34,7 +32,7 @@ BONUSX4_BLK: str = "BONUSX4_BLK"
 BONUS_BLK: str = "BONUS_BLK"
 BLACKHIT_BLK: str = "BLACKHIT_BLK"
 
-SPECIAL_BLOCK_TYPES: Tuple[str, ...] = (
+SPECIAL_BLOCK_TYPES: tuple[str, ...] = (
     BOMB_BLK,
     MULTIBALL_BLK,
     BONUSX2_BLK,
@@ -60,7 +58,7 @@ SPECIAL_BLOCK_TYPES: Tuple[str, ...] = (
 )
 """Block types that trigger special effects when broken."""
 
-NORMAL_BLOCK_TYPES: Tuple[str, ...] = (
+NORMAL_BLOCK_TYPES: tuple[str, ...] = (
     RED_BLK,
     BLUE_BLK,
     GREEN_BLK,
@@ -70,5 +68,5 @@ NORMAL_BLOCK_TYPES: Tuple[str, ...] = (
 )
 """Standard destructible block types."""
 
-UNBREAKABLE_BLOCK_TYPES: Tuple[str, ...] = (BLACK_BLK,)
+UNBREAKABLE_BLOCK_TYPES: tuple[str, ...] = (BLACK_BLK,)
 """Block types that are indestructible."""

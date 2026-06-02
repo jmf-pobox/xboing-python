@@ -3,8 +3,6 @@
 Subscribes to LevelChangedEvent and renders itself in the level window region.
 """
 
-from typing import List
-
 import pygame
 
 from xboing.engine.events import LevelChangedEvent
@@ -42,7 +40,7 @@ class LevelDisplay:
         self.level: int = 1
         self.x: int = x
 
-    def handle_events(self, events: List[pygame.event.Event]) -> None:
+    def handle_events(self, events: list[pygame.event.Event]) -> None:
         """Handle level update events and update the displayed level.
 
         Args:

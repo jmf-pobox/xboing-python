@@ -5,7 +5,6 @@ and other graphical operations, abstracting the underlying pygame implementation
 """
 
 import logging
-from typing import List, Optional, Tuple
 
 import pygame
 
@@ -102,7 +101,7 @@ class AnimatedSprite(Sprite):
 
     def __init__(
         self,
-        frames: List[pygame.Surface],
+        frames: list[pygame.Surface],
         frame_duration: int,
         x: int = 0,
         y: int = 0,
@@ -128,7 +127,7 @@ class AnimatedSprite(Sprite):
         super().__init__(frames[0], x, y, scale, angle)
 
         # Animation properties
-        self.frames: List[pygame.Surface] = frames
+        self.frames: list[pygame.Surface] = frames
         self.frame_duration: int = frame_duration
         self.current_frame: int = 0
         self.elapsed_time: int = 0
@@ -197,12 +196,12 @@ class Renderer:
         self.surface: pygame.Surface = window_surface
         self.width: int = window_surface.get_width()
         self.height: int = window_surface.get_height()
-        self.background_color: Tuple[int, int, int] = (
+        self.background_color: tuple[int, int, int] = (
             BLACK  # Default black background color
         )
         self.logger.info(f"Renderer initialized: {self.width}x{self.height}")
 
-    def clear(self, color: Optional[Tuple[int, int, int]] = None) -> None:
+    def clear(self, color: tuple[int, int, int] | None = None) -> None:
         """Clear the renderer with the specified color."""
         self.surface.fill(color if color is not None else self.background_color)
 
@@ -213,7 +212,7 @@ class Renderer:
     def draw_rect(
         self,
         rect: pygame.Rect,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         filled: bool = True,
         width: int = DEFAULT_LINE_WIDTH,
     ) -> None:
@@ -225,9 +224,9 @@ class Renderer:
 
     def draw_line(
         self,
-        start_pos: Tuple[int, int],
-        end_pos: Tuple[int, int],
-        color: Tuple[int, int, int],
+        start_pos: tuple[int, int],
+        end_pos: tuple[int, int],
+        color: tuple[int, int, int],
         width: int = DEFAULT_LINE_WIDTH,
     ) -> None:
         """Draw a line."""
@@ -237,7 +236,7 @@ class Renderer:
         self,
         text: str,
         font: pygame.font.Font,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         x: int,
         y: int,
         centered: bool = False,

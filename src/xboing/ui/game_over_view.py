@@ -1,7 +1,7 @@
 """UI view for displaying the game over screen in XBoing."""
 
+from collections.abc import Callable
 import logging
-from typing import Callable, List, Optional, Tuple
 
 from injector import inject
 import pygame
@@ -47,8 +47,8 @@ class GameOverView(ViewWithBackground):
         self.get_score: Callable[[], int] = get_score_callback
         self.active: bool = False
         self.logger = logging.getLogger("xboing.GameOverView")
-        self._row_renderers_with_y: List[Tuple[RowRenderer, int]] = []
-        self._composite_renderer: Optional[CompositeRenderer] = None
+        self._row_renderers_with_y: list[tuple[RowRenderer, int]] = []
+        self._composite_renderer: CompositeRenderer | None = None
 
     def activate(self) -> None:
         """Activate the view and prepare renderers."""
