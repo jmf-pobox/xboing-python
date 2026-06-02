@@ -759,7 +759,6 @@ dependencies = [
 
 ### Missing Dependencies?
 Potential future need for:
-- `typing_extensions` for Python <3.10 protocol support (currently requires 3.10+)
 - `pytest-asyncio` if async tests added
 
 ---

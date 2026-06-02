@@ -39,6 +39,11 @@ To be added:
 
 Originally developed for X11 in C, XBoing was designed for speed and fun, with a focus on colorful visuals and responsive controls. This Python port faithfully recreates the original experience while adding modern compatibility.
 
+### Requirements
+
+- Python 3.14+
+- pygame
+
 ### Installation & Playing
 
 #### 1. Install from PyPI (Recommended)
