@@ -30,12 +30,12 @@ class CompositeRenderer:
         **kwargs: object,
     ) -> None:
         """
-        Render up to reveal_step rows. Passes **kwargs to each renderer.
+        Render rows at indices 0 through reveal_step inclusive.
 
         Args:
             surface (pygame.Surface): The surface to draw on.
             center_x (int): The x-coordinate to center rows.
-            reveal_step (int): The number of rows to reveal.
+            reveal_step (int): Index of the last row to render (0-based, inclusive).
             **kwargs: Extra arguments for row renderers (e.g., bullet_count).
 
         """
