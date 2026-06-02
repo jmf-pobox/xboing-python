@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 import logging
-from typing import Any, cast
+from typing import Any
 
 import pygame
 
@@ -15,7 +15,6 @@ from xboing.game.game_state import GameState
 from xboing.game.level_manager import LevelManager
 from xboing.layout.game_layout import GameLayout
 from xboing.ui.game_view import GameView
-from xboing.ui.level_complete_view import LevelCompleteView
 from xboing.ui.ui_manager import UIManager
 
 
@@ -131,21 +130,6 @@ class LevelCompleteController(Controller):
 
         # Change the view
         self.ui_manager.set_view("game")
-
-    def add_bonus_to_score(self) -> None:
-        """Add bonuses to the score and post the events to trigger a UI update."""
-        level_complete_view: LevelCompleteView = cast(
-            "LevelCompleteView", self.ui_manager.views["level_complete"]
-        )
-        bonus = (
-            level_complete_view.coin_bonus
-            + level_complete_view.super_bonus
-            + level_complete_view.level_bonus
-            + level_complete_view.bullet_bonus
-            + level_complete_view.time_bonus
-        )
-        score_events = self.game_state.add_score(bonus)
-        self.post_game_state_events(score_events)
 
     def update(self, delta_ms: float) -> None:
         """Update logic for level complete view (usually minimal).

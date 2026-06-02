@@ -545,7 +545,8 @@ class LevelCompleteView(View):
                     )
                 )
                 self._start_score_animation(
-                    self.coin_bonus, self._get_state_duration_frames(next_state)
+                    self.coin_bonus + self.super_bonus,
+                    self._get_state_duration_frames(next_state),
                 )
             else:
                 pygame.event.post(
