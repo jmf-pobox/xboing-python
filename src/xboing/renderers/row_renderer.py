@@ -79,14 +79,27 @@ class TextRowRenderer:
         """
         # kwargs is unused but required for interface compatibility
         _ = kwargs
+
+        # Render main text
         text_surf = self.font.render(self.text, True, self.color)
         text_rect = text_surf.get_rect(
             center=(center_x, y + text_surf.get_height() // 2)
         )
+
+        # Render shadow text first (offset by 2,2 in black)
+        shadow_surf = self.font.render(self.text, True, (0, 0, 0))
+        shadow_rect = shadow_surf.get_rect(
+            center=(center_x + 2, y + shadow_surf.get_height() // 2 + 2)
+        )
+        surface.blit(shadow_surf, shadow_rect)
+
+        # Render icon if present
         if self.icon:
             icon_rect = self.icon.get_rect()
             icon_rect.right = text_rect.left - self.icon_offset
             icon_rect.centery = text_rect.centery
             surface.blit(self.icon, icon_rect)
+
+        # Render main text on top of shadow
         surface.blit(text_surf, text_rect)
         return y + text_surf.get_height()
