@@ -216,7 +216,7 @@ See [PLAN.md](PLAN.md) for detailed roadmap.
 
 From conversation and codebase:
 1. ✅ Clean, maintainable architecture over quick hacks
-2. ✅ Comprehensive testing with full coverage targets
+2. ✅ Comprehensive testing (target: 90% coverage)
 3. ✅ Protocol-based design for flexibility
 4. ✅ Micro-commits with quality gates
 5. ✅ Zero tolerance for type errors or lint violations
